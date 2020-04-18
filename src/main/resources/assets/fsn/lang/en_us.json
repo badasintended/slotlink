@@ -1,0 +1,11 @@
+{
+    "itemGroup.fsn.item_group"             : "Storage Networks",
+    "block.fsn.controller"                 : "Controller",
+    "block.fsn.controller.tooltip"         : "§7Heart of the storage connection. §5One per connection.",
+    "block.fsn.crafting_terminal"          : "Crafting Terminal",
+    "block.fsn.crafting_terminal.tooltip"  : "§7nice",
+    "block.fsn.processing_terminal"        : "Processing Terminal",
+    "block.fsn.processing_terminal.tooltip": "§7Loading tooltip text...",
+    "block.fsn.cable"                      : "Cable",
+    "block.fsn.cable.tooltip"              : "§7dont call me a pipe, im not a pipe"
+}

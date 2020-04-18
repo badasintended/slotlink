@@ -1,0 +1,19 @@
+{
+    "multipart": [
+        {"when": {"OR": [
+            {"north": false, "south": false, "east": false, "west": false, "up": false, "down": false},
+            {"north": true, "south": false, "east": false, "west": false, "up": false, "down": false},
+            {"north": false, "south": true, "east": false, "west": false, "up": false, "down": false},
+            {"north": false, "south": false, "east": true, "west": false, "up": false, "down": false},
+            {"north": false, "south": false, "east": false, "west": true, "up": false, "down": false},
+            {"north": false, "south": false, "east": false, "west": false, "up": true, "down": false},
+            {"north": false, "south": false, "east": false, "west": false, "up": false, "down": true}
+        ]}, "apply": {"model": "fsn:block/cable_end"}},
+        {"when": {"north": true}, "apply": {"model": "fsn:block/cable_side"}},
+        {"when": {"south": true}, "apply": {"model": "fsn:block/cable_side", "y": 180}},
+        {"when": {"east" : true}, "apply": {"model": "fsn:block/cable_side", "y":  90}},
+        {"when": {"west" : true}, "apply": {"model": "fsn:block/cable_side", "y": -90}},
+        {"when": {"up"   : true}, "apply": {"model": "fsn:block/cable_side", "x":  90}},
+        {"when": {"down" : true}, "apply": {"model": "fsn:block/cable_side", "x": -90}}
+    ]
+}
