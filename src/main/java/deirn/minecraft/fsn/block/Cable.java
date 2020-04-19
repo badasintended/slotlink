@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 
 import java.util.Map;
 
-public class CableBase extends FSNBlock {
+public class Cable extends FSNBlock {
 
     private static final Settings SETTINGS = FabricBlockSettings
             .of(Material.GLASS)
@@ -36,12 +36,18 @@ public class CableBase extends FSNBlock {
     public static final BooleanProperty UP = BooleanProperty.of("up");
     public static final BooleanProperty DOWN = BooleanProperty.of("down");
 
-    public CableBase(String id) {
+    public Cable(String id) {
         super(id, SETTINGS);
     }
 
-    private boolean canConnect(BlockState state) {
-        return state.getBlock() instanceof CableBase;
+    private boolean canConnect(World world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        return canConnect(world, pos, state);
+    }
+
+    protected boolean canConnect(World world, BlockPos pos, BlockState state) {
+        Block block = state.getBlock();
+        return block instanceof FSNBlock;
     }
 
     @Override
@@ -54,20 +60,13 @@ public class CableBase extends FSNBlock {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
 
-        BlockState north = world.getBlockState(pos.north());
-        BlockState south = world.getBlockState(pos.south());
-        BlockState east = world.getBlockState(pos.east());
-        BlockState west = world.getBlockState(pos.west());
-        BlockState up = world.getBlockState(pos.up());
-        BlockState down = world.getBlockState(pos.down());
-
         return this.getDefaultState()
-                .with(NORTH, canConnect(north))
-                .with(SOUTH, canConnect(south))
-                .with(EAST, canConnect(east))
-                .with(WEST, canConnect(west))
-                .with(UP, canConnect(up))
-                .with(DOWN, canConnect(down));
+                .with(NORTH, canConnect(world, pos.north()))
+                .with(SOUTH, canConnect(world, pos.south()))
+                .with(EAST, canConnect(world, pos.east()))
+                .with(WEST, canConnect(world, pos.west()))
+                .with(UP, canConnect(world, pos.up()))
+                .with(DOWN, canConnect(world, pos.down()));
     }
 
     @Override
@@ -81,12 +80,11 @@ public class CableBase extends FSNBlock {
                 .put(Direction.DOWN, DOWN)
                 .build();
 
-        return state.with(propertyMap.get(facing), canConnect(neighborState));
+        return state.with(propertyMap.get(facing), canConnect(world.getWorld(), neighborPos, neighborState));
     }
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context) {
-        VoxelShape end = BlockUtils.cuboid(5, 5, 5, 6, 6, 6);
         VoxelShape north = BlockUtils.cuboid(6, 6, 0, 4, 4, 10);
         VoxelShape south = BlockUtils.cuboid(6, 6, 6, 4, 4, 10);
         VoxelShape east = BlockUtils.cuboid(6, 6, 6, 10, 4, 4);
@@ -101,36 +99,14 @@ public class CableBase extends FSNBlock {
         boolean u = state.get(UP);
         boolean d = state.get(DOWN);
 
-        VoxelShape result = VoxelShapes.empty();
+        VoxelShape result = BlockUtils.cuboid(6, 6, 6, 4, 4, 4);
 
-        int totalCombinedShape = 0;
-
-        if (n) {
-            result = VoxelShapes.union(result, north);
-            totalCombinedShape++;
-        }
-        if (s) {
-            result = VoxelShapes.union(result, south);
-            totalCombinedShape++;
-        }
-        if (e) {
-            result = VoxelShapes.union(result, east);
-            totalCombinedShape++;
-        }
-        if (w) {
-            result = VoxelShapes.union(result, west);
-            totalCombinedShape++;
-        }
-        if (u) {
-            result = VoxelShapes.union(result, up);
-            totalCombinedShape++;
-        }
-        if (d) {
-            result = VoxelShapes.union(result, down);
-            totalCombinedShape++;
-        }
-
-        result = (totalCombinedShape <= 1) ? VoxelShapes.union(result, end) : result;
+        if (n) result = VoxelShapes.union(result, north);
+        if (s) result = VoxelShapes.union(result, south);
+        if (e) result = VoxelShapes.union(result, east);
+        if (w) result = VoxelShapes.union(result, west);
+        if (u) result = VoxelShapes.union(result, up);
+        if (d) result = VoxelShapes.union(result, down);
 
         return result;
     }

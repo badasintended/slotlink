@@ -1,6 +1,6 @@
 {
     "multipart": [
-        {"apply": {"model": "fsn:block/cable_center"}},
+        {"apply": {"model": "fsn:block/cable_end_export"}},
         {"when": {"north": true}, "apply": {"model": "fsn:block/cable_side"}},
         {"when": {"south": true}, "apply": {"model": "fsn:block/cable_side", "y": 180}},
         {"when": {"east" : true}, "apply": {"model": "fsn:block/cable_side", "y":  90}},

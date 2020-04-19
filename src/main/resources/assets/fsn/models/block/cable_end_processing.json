@@ -1,0 +1,22 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"0": "fsn:block/cable",
+		"particle": "fsn:block/cable"
+	},
+	"elements": [
+		{
+			"from": [5, 5, 5],
+			"to": [11, 11, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [13, 13, 13]},
+			"faces": {
+				"north": {"uv": [6, 10, 12, 16], "texture": "#0"},
+				"east": {"uv": [6, 10, 12, 16], "texture": "#0"},
+				"south": {"uv": [6, 10, 12, 16], "texture": "#0"},
+				"west": {"uv": [6, 10, 12, 16], "texture": "#0"},
+				"up": {"uv": [6, 10, 12, 16], "texture": "#0"},
+				"down": {"uv": [6, 10, 12, 16], "texture": "#0"}
+			}
+		}
+	]
+}
