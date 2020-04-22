@@ -1,7 +1,7 @@
-package deirn.minecraft.fsn.item;
+package bai.deirn.fsn.item;
 
-import deirn.minecraft.fsn.FSN;
-import deirn.minecraft.fsn.block.FSNBlocks;
+import bai.deirn.fsn.FSN;
+import bai.deirn.fsn.block.FSNBlocks;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;

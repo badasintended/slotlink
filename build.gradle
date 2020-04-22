@@ -6,6 +6,8 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+version = "${minecraft}-${mod}"
+
 repositories {
 	maven {
 		name = "CottonMC"
@@ -22,7 +24,10 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric}"
 
-	modImplementation "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
+	modCompile "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
+	include "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
+
+	modRuntime "io.github.prospector:modmenu:1.10.2+build.32"
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 }

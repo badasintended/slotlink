@@ -1,5 +1,6 @@
-package deirn.minecraft.fsn.block;
+package bai.deirn.fsn.block;
 
+import bai.deirn.fsn.util.Utils;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.tools.FabricToolTags;
@@ -20,9 +21,9 @@ import net.minecraft.world.World;
 
 import java.util.Map;
 
-public class Cable extends FSNBlock {
+public class CableBlock extends FSNBlock {
 
-    private static final Settings SETTINGS = FabricBlockSettings
+    public static final Settings SETTINGS = FabricBlockSettings
             .of(Material.GLASS)
             .breakByHand(true)
             .breakByTool(FabricToolTags.PICKAXES)
@@ -36,8 +37,8 @@ public class Cable extends FSNBlock {
     public static final BooleanProperty UP = BooleanProperty.of("up");
     public static final BooleanProperty DOWN = BooleanProperty.of("down");
 
-    public Cable(String id) {
-        super(id, SETTINGS);
+    public CableBlock(Settings settings) {
+        super(settings);
     }
 
     private boolean canConnect(World world, BlockPos pos) {
@@ -61,12 +62,12 @@ public class Cable extends FSNBlock {
         BlockPos pos = ctx.getBlockPos();
 
         return this.getDefaultState()
-                .with(NORTH, canConnect(world, pos.north()))
-                .with(SOUTH, canConnect(world, pos.south()))
-                .with(EAST, canConnect(world, pos.east()))
-                .with(WEST, canConnect(world, pos.west()))
-                .with(UP, canConnect(world, pos.up()))
-                .with(DOWN, canConnect(world, pos.down()));
+                .with(NORTH, this.canConnect(world, pos.north()))
+                .with(SOUTH, this.canConnect(world, pos.south()))
+                .with(EAST, this.canConnect(world, pos.east()))
+                .with(WEST, this.canConnect(world, pos.west()))
+                .with(UP, this.canConnect(world, pos.up()))
+                .with(DOWN, this.canConnect(world, pos.down()));
     }
 
     @Override
@@ -80,17 +81,17 @@ public class Cable extends FSNBlock {
                 .put(Direction.DOWN, DOWN)
                 .build();
 
-        return state.with(propertyMap.get(facing), canConnect(world.getWorld(), neighborPos, neighborState));
+        return state.with(propertyMap.get(facing), this.canConnect(world.getWorld(), neighborPos, neighborState));
     }
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context) {
-        VoxelShape north = BlockUtils.cuboid(6, 6, 0, 4, 4, 10);
-        VoxelShape south = BlockUtils.cuboid(6, 6, 6, 4, 4, 10);
-        VoxelShape east = BlockUtils.cuboid(6, 6, 6, 10, 4, 4);
-        VoxelShape west = BlockUtils.cuboid(0, 6, 6, 10, 4, 4);
-        VoxelShape up = BlockUtils.cuboid(6, 6, 6, 4, 10, 4);
-        VoxelShape down = BlockUtils.cuboid(6, 0, 6, 4, 10, 4);
+        VoxelShape north = Utils.cuboid(6, 6, 0, 4, 4, 10);
+        VoxelShape south = Utils.cuboid(6, 6, 6, 4, 4, 10);
+        VoxelShape east = Utils.cuboid(6, 6, 6, 10, 4, 4);
+        VoxelShape west = Utils.cuboid(0, 6, 6, 10, 4, 4);
+        VoxelShape up = Utils.cuboid(6, 6, 6, 4, 10, 4);
+        VoxelShape down = Utils.cuboid(6, 0, 6, 4, 10, 4);
 
         boolean n = state.get(NORTH);
         boolean s = state.get(SOUTH);
@@ -99,7 +100,7 @@ public class Cable extends FSNBlock {
         boolean u = state.get(UP);
         boolean d = state.get(DOWN);
 
-        VoxelShape result = BlockUtils.cuboid(6, 6, 6, 4, 4, 4);
+        VoxelShape result = Utils.cuboid(6, 6, 6, 4, 4, 4);
 
         if (n) result = VoxelShapes.union(result, north);
         if (s) result = VoxelShapes.union(result, south);

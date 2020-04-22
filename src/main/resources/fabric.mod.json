@@ -18,10 +18,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "deirn.minecraft.fsn.FSN"
+      "bai.deirn.fsn.FSN"
     ]
   },
-  "mixins": [],
+  "mixins": [
+  ],
 
   "depends": {
     "fabricloader": ">=0.7.4",

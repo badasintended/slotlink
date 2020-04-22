@@ -1,9 +1,3 @@
-# Fabric Example Mod
-
-## Setup
-
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+# Fabric Storage Networks
+Probably a bad clone of [Simple Storage Network](https://github.com/Lothrazar/Storage-Network) for [Fabric](https://fabricmc.net/).   
+Written from scratch because i can't read other people's code (it's my fault). 

@@ -1,6 +1,7 @@
-package deirn.minecraft.fsn;
+package bai.deirn.fsn;
 
-import deirn.minecraft.fsn.block.FSNBlocks;
+import bai.deirn.fsn.block.FSNBlocks;
+import bai.deirn.fsn.block.entity.FSNBlockEntities;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
@@ -18,6 +19,7 @@ public class FSN implements ModInitializer {
     @Override
     public void onInitialize() {
         FSNBlocks.init();
+        FSNBlockEntities.init();
     }
 
 }

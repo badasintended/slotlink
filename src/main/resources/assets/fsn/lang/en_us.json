@@ -15,5 +15,5 @@
     "block.fsn.export_cable"               : "Export Cable",
     "block.fsn.export_cable.tooltip"       : "§7from network to block",
     "block.fsn.processing_cable"           : "Processing Cable",
-    "block.fsn.processing_cable.tooltip"   : "§7Ok §kGoogle§r§k, cook me some steak. Well done steak."
+    "block.fsn.processing_cable.tooltip"   : "§7Ok §kGoogle§r§7, cook me some steak. Well done steak."
 }

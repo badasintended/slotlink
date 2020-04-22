@@ -1,5 +1,6 @@
-package deirn.minecraft.fsn.block;
+package bai.deirn.fsn.block;
 
+import bai.deirn.fsn.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -11,9 +12,10 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class ConnectorCable extends Cable {
-    public ConnectorCable(String id) {
-        super(id);
+public class ConnectorCableBlock extends CableBlock {
+
+    public ConnectorCableBlock(Settings settings) {
+        super(settings);
     }
 
     @Override
@@ -29,8 +31,9 @@ public class ConnectorCable extends Cable {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context) {
-        VoxelShape end = BlockUtils.cuboid(5, 5, 5, 6, 6, 6);
+        VoxelShape end = Utils.cuboid(5, 5, 5, 6, 6, 6);
         VoxelShape result = super.getOutlineShape(state, view, pos, context);
         return VoxelShapes.union(result, end);
     }
+
 }
