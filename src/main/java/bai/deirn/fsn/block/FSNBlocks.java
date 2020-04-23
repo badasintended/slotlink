@@ -1,22 +1,22 @@
 package bai.deirn.fsn.block;
 
-import bai.deirn.fsn.util.Utils;
+import bai.deirn.fsn.Utils;
 import net.minecraft.block.Block;
 
-public class FSNBlocks {
+public abstract class FSNBlocks {
 
-    public static final Block CONTROLLER = new FSNBlock(FSNBlock.SETTINGS);
-    public static final Block CRAFTING_TERMINAL = new FSNBlock(FSNBlock.SETTINGS);
-    public static final Block PROCESSING_TERMINAL = new FSNBlock(FSNBlock.SETTINGS);
+    public static final Block MASTER = new MasterBlock(FSNBlock.SETTINGS);
+    public static final Block CRAFTING_TERMINAL = new CraftingTerminalBlock(FSNBlock.SETTINGS);
+    public static final Block PROCESSING_TERMINAL = new ProcessingTerminalBlock(FSNBlock.SETTINGS);
 
     public static final Block CABLE = new CableBlock(CableBlock.SETTINGS);
-    public static final Block STORAGE_CABLE = new ConnectorCableBlock(CableBlock.SETTINGS);
-    public static final Block IMPORT_CABLE = new ConnectorCableBlock(CableBlock.SETTINGS);
-    public static final Block EXPORT_CABLE = new ConnectorCableBlock(CableBlock.SETTINGS);
-    public static final Block PROCESSING_CABLE = new ConnectorCableBlock(CableBlock.SETTINGS);
+    public static final Block STORAGE_CABLE = new StorageCableBlock(CableBlock.SETTINGS);
+    public static final Block IMPORT_CABLE = new ImportCableBlock(CableBlock.SETTINGS);
+    public static final Block EXPORT_CABLE = new ExportCableBlock(CableBlock.SETTINGS);
+    public static final Block PROCESSING_CABLE = new ProcessingCableBlock(CableBlock.SETTINGS);
 
     public static void init() {
-        Utils.register("controller", CONTROLLER);
+        Utils.register("master", MASTER);
         Utils.register("crafting_terminal", CRAFTING_TERMINAL);
         Utils.register("processing_terminal", PROCESSING_TERMINAL);
         Utils.register("cable", CABLE);

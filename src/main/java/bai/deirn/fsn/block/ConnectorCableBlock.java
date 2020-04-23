@@ -1,9 +1,8 @@
 package bai.deirn.fsn.block;
 
-import bai.deirn.fsn.util.Utils;
+import bai.deirn.fsn.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +11,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class ConnectorCableBlock extends CableBlock {
+public abstract class ConnectorCableBlock extends CableBlock {
 
     public ConnectorCableBlock(Settings settings) {
         super(settings);
@@ -21,12 +20,11 @@ public class ConnectorCableBlock extends CableBlock {
     @Override
     protected boolean canConnect(World world, BlockPos pos, BlockState state) {
         Block block = state.getBlock();
-        if (block.hasBlockEntity()) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            return blockEntity != null && Inventory.class.isAssignableFrom(blockEntity.getClass());
-        } else {
-            return block instanceof FSNBlock;
+        boolean result = block instanceof FSNBlock;
+        if (!result && block.hasBlockEntity()) {
+            result = Inventory.class.isAssignableFrom(world.getBlockEntity(pos).getClass());
         }
+        return result;
     }
 
     @Override

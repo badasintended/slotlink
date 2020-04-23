@@ -4,10 +4,11 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.CompoundTag;
 
-public class ChildBlockEntity extends BlockEntity {
+public abstract class ChildBlockEntity extends BlockEntity {
 
-    protected boolean hasController = false;
-    protected int[] controllerPos = {4, 2, 0};
+    protected boolean hasMaster = false;
+    protected CompoundTag masterPos = new CompoundTag();
+    protected int[] masterPosArray = new int[3];
 
     public ChildBlockEntity(BlockEntityType<?> type) {
         super(type);
@@ -17,8 +18,11 @@ public class ChildBlockEntity extends BlockEntity {
     public CompoundTag toTag(CompoundTag tag) {
         super.toTag(tag);
 
-        tag.putBoolean("hasController", this.hasController);
-        tag.putIntArray("controllerPos", this.controllerPos);
+        tag.putBoolean("hasMaster", hasMaster);
+        this.masterPos.putInt("x", masterPosArray[0]);
+        this.masterPos.putInt("y", masterPosArray[1]);
+        this.masterPos.putInt("z", masterPosArray[2]);
+        tag.put("masterPos", this.masterPos);
 
         return tag;
     }
@@ -27,7 +31,10 @@ public class ChildBlockEntity extends BlockEntity {
     public void fromTag(CompoundTag tag) {
         super.fromTag(tag);
 
-        this.hasController = tag.getBoolean("hasController");
-        this.controllerPos = tag.getIntArray("controllerPos");
+        this.hasMaster = tag.getBoolean("hasMaster");
+        this.masterPos = tag.getCompound("masterPos");
+        this.masterPosArray[0] = this.masterPos.getInt("x");
+        this.masterPosArray[1] = this.masterPos.getInt("y");
+        this.masterPosArray[2] = this.masterPos.getInt("z");
     }
 }

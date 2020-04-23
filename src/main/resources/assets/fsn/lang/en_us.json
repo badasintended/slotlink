@@ -1,7 +1,8 @@
 {
     "itemGroup.fsn.item_group"             : "Storage Networks",
-    "block.fsn.controller"                 : "Controller",
-    "block.fsn.controller.tooltip"         : "§7Heart of the storage connection. §5One per connection.",
+    "block.fsn.master"                     : "Network Master",
+    "block.fsn.master.tooltip"             : "§7Heart of the storage connection. §5One per connection.",
+    "block.fsn.master.tooltip2"            : "§7ふらふらふらふら",
     "block.fsn.crafting_terminal"          : "Crafting Terminal",
     "block.fsn.crafting_terminal.tooltip"  : "§7nice",
     "block.fsn.processing_terminal"        : "Processing Terminal",

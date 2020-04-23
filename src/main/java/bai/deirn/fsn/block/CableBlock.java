@@ -1,12 +1,14 @@
 package bai.deirn.fsn.block;
 
-import bai.deirn.fsn.util.Utils;
+import bai.deirn.fsn.Utils;
+import bai.deirn.fsn.block.entity.CableBlockEntity;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.tools.FabricToolTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
@@ -21,7 +23,7 @@ import net.minecraft.world.World;
 
 import java.util.Map;
 
-public class CableBlock extends FSNBlock {
+public class CableBlock extends ChildBlock {
 
     public static final Settings SETTINGS = FabricBlockSettings
             .of(Material.GLASS)
@@ -39,6 +41,11 @@ public class CableBlock extends FSNBlock {
 
     public CableBlock(Settings settings) {
         super(settings);
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockView view) {
+        return new CableBlockEntity();
     }
 
     private boolean canConnect(World world, BlockPos pos) {
@@ -72,6 +79,7 @@ public class CableBlock extends FSNBlock {
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction facing, BlockState neighborState, IWorld world, BlockPos pos, BlockPos neighborPos) {
+        super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos);
         Map<Direction, BooleanProperty> propertyMap = ImmutableMap.<Direction, BooleanProperty>builder()
                 .put(Direction.NORTH, NORTH)
                 .put(Direction.SOUTH, SOUTH)
