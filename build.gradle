@@ -13,6 +13,7 @@ repositories {
 		name = "CottonMC"
 		url = "http://server.bbkr.space:8081/artifactory/libs-release"
 	}
+	jcenter()
 }
 
 dependencies {
@@ -26,6 +27,12 @@ dependencies {
 
 	modCompile "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
 	include "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
+
+	modApi "me.shedaniel.cloth:config-2:${cloth_config}"
+	include "me.shedaniel.cloth:config-2:${cloth_config}"
+
+	modCompile "me.sargunvohra.mcmods:autoconfig1u:${autoconfig}"
+	include "me.sargunvohra.mcmods:autoconfig1u:${autoconfig}"
 
 	modRuntime "io.github.prospector:modmenu:1.10.2+build.32"
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.

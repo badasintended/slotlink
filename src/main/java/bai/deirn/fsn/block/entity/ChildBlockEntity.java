@@ -37,4 +37,6 @@ public abstract class ChildBlockEntity extends BlockEntity {
         this.masterPosArray[1] = this.masterPos.getInt("y");
         this.masterPosArray[2] = this.masterPos.getInt("z");
     }
+
+
 }
