@@ -1,9 +1,11 @@
 package bai.deirn.fsn.block.entity;
 
+import bai.deirn.fsn.registry.BlockEntityTypeRegistry;
+
 public class StorageCableBlockEntity extends ChildBlockEntity {
 
     public StorageCableBlockEntity() {
-        super(FSNBlockEntities.STORAGE_CABLE);
+        super(BlockEntityTypeRegistry.STORAGE_CABLE);
     }
 
 }

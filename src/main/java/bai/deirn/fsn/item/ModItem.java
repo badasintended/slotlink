@@ -9,9 +9,9 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class FSNItem extends Item {
+public class ModItem extends Item {
 
-    public FSNItem(Settings settings) {
+    public ModItem(Settings settings) {
         super(settings);
     }
 

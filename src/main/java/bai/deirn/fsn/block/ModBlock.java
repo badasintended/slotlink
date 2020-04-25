@@ -12,7 +12,7 @@ import net.minecraft.world.BlockView;
 
 import java.util.List;
 
-public class FSNBlock extends Block {
+public class ModBlock extends Block {
 
     public static final Settings SETTINGS = FabricBlockSettings
             .of(Material.STONE)
@@ -21,7 +21,7 @@ public class FSNBlock extends Block {
             .hardness(5F)
             .build();
 
-    public FSNBlock(Settings settings) {
+    public ModBlock(Settings settings) {
         super(settings);
     }
 

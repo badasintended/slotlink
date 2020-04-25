@@ -1,13 +1,14 @@
-package bai.deirn.fsn.block;
+package bai.deirn.fsn.registry;
 
 import bai.deirn.fsn.Utils;
+import bai.deirn.fsn.block.*;
 import net.minecraft.block.Block;
 
-public abstract class FSNBlocks {
+public abstract class BlockRegistry {
 
-    public static final Block MASTER = new MasterBlock(FSNBlock.SETTINGS);
-    public static final Block CRAFTING_TERMINAL = new CraftingTerminalBlock(FSNBlock.SETTINGS);
-    public static final Block PROCESSING_TERMINAL = new ProcessingTerminalBlock(FSNBlock.SETTINGS);
+    public static final Block MASTER = new MasterBlock(ModBlock.SETTINGS);
+    public static final Block CRAFTING_TERMINAL = new CraftingTerminalBlock(ModBlock.SETTINGS);
+    public static final Block PROCESSING_TERMINAL = new ProcessingTerminalBlock(ModBlock.SETTINGS);
 
     public static final Block CABLE = new CableBlock(CableBlock.SETTINGS);
     public static final Block STORAGE_CABLE = new StorageCableBlock(CableBlock.SETTINGS);

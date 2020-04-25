@@ -20,7 +20,7 @@ public abstract class ConnectorCableBlock extends CableBlock {
     @Override
     protected boolean canConnect(World world, BlockPos pos, BlockState state) {
         Block block = state.getBlock();
-        boolean result = block instanceof FSNBlock;
+        boolean result = block instanceof ModBlock;
         if (!result && block.hasBlockEntity()) {
             result = Inventory.class.isAssignableFrom(world.getBlockEntity(pos).getClass());
         }

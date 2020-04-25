@@ -19,6 +19,9 @@
   "entrypoints": {
     "main": [
       "bai.deirn.fsn.FSN"
+    ],
+    "modmenu": [
+      "bai.deirn.fsn.config.ModMenuIntegration"
     ]
   },
   "mixins": [

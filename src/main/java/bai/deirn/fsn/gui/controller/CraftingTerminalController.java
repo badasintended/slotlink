@@ -1,4 +1,4 @@
-package bai.deirn.fsn.gui;
+package bai.deirn.fsn.gui.controller;
 
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
 import net.minecraft.entity.player.PlayerInventory;

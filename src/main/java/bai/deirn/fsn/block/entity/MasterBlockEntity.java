@@ -1,5 +1,6 @@
 package bai.deirn.fsn.block.entity;
 
+import bai.deirn.fsn.registry.BlockEntityTypeRegistry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -14,7 +15,7 @@ public class MasterBlockEntity extends BlockEntity {
     private List<int[]> storagePosArray = new ArrayList<>();
 
     public MasterBlockEntity() {
-        super(FSNBlockEntities.MASTER);
+        super(BlockEntityTypeRegistry.MASTER);
     }
 
     @Override

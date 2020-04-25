@@ -1,15 +1,19 @@
 package bai.deirn.fsn;
 
-import bai.deirn.fsn.block.FSNBlocks;
+import bai.deirn.fsn.config.ModConfig;
+import bai.deirn.fsn.registry.BlockRegistry;
 import com.google.common.collect.ImmutableList;
+import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -26,7 +30,7 @@ public abstract class Utils {
     public static final Logger LOGGER = Logger.getLogger(MOD_ID);
 
     private static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
-            id("item_group"), () -> new ItemStack(FSNBlocks.MASTER)
+            id("item_group"), () -> new ItemStack(BlockRegistry.MASTER)
     );
 
     // Just so i could make shape with the values blockbench shows.
@@ -78,6 +82,18 @@ public abstract class Utils {
 
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
+    }
+
+    public static ModConfig config() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+    }
+
+    public static TranslatableText text(String key) {
+        return new TranslatableText("text."+MOD_ID+"."+key);
+    }
+
+    public static void selfText(PlayerEntity player, String key) {
+        player.addChatMessage(text(key), false);
     }
 
 }

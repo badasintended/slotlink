@@ -1,9 +1,11 @@
 package bai.deirn.fsn.block.entity;
 
+import bai.deirn.fsn.registry.BlockEntityTypeRegistry;
+
 public class CraftingTerminalBlockEntity extends ChildBlockEntity {
 
     public CraftingTerminalBlockEntity() {
-        super(FSNBlockEntities.CRAFTING_TERMINAL);
+        super(BlockEntityTypeRegistry.CRAFTING_TERMINAL);
     }
 
 }

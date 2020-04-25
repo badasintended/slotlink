@@ -1,5 +1,6 @@
 package bai.deirn.fsn.block;
 
+import bai.deirn.fsn.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -9,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public abstract class ChildBlock extends FSNBlock implements BlockEntityProvider {
+public abstract class ChildBlock extends ModBlock implements BlockEntityProvider {
 
     public ChildBlock(Settings settings) {
         super(settings);
@@ -101,6 +102,8 @@ public abstract class ChildBlock extends FSNBlock implements BlockEntityProvider
     }
      */
 
+    private int updateCount = 0;
+
     @Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos neighborPos, boolean moved) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -140,6 +143,7 @@ public abstract class ChildBlock extends FSNBlock implements BlockEntityProvider
                 masterPos.putInt("y", neighborPos.getY());
                 masterPos.putInt("z", neighborPos.getZ());
                 currentNbt.put("masterPos", masterPos);
+                currentNbt.putBoolean("hasMaster", true);
                 blockEntity.fromTag(currentNbt);
                 blockEntity.markDirty();
                 world.updateNeighbors(pos, block);
@@ -147,13 +151,17 @@ public abstract class ChildBlock extends FSNBlock implements BlockEntityProvider
         } else if (currentlyHasMaster) {
             CompoundTag master = currentNbt.getCompound("masterPos");
             BlockPos masterPos = new BlockPos(master.getInt("x"), master.getInt("y"), master.getInt("z"));
-            if (!(world.getBlockState(masterPos).getBlock() instanceof MasterBlock)) {
-                currentNbt.putBoolean("hasMaster", false);
-                blockEntity.fromTag(currentNbt);
-                blockEntity.markDirty();
-                world.updateNeighbors(pos, world.getBlockState(pos).getBlock());
-            }
+            currentNbt.putBoolean("hasMaster", false);
+            blockEntity.fromTag(currentNbt);
+            blockEntity.markDirty();
+            world.updateNeighbors(pos, block);
+            world.updateNeighbors(masterPos, world.getBlockState(masterPos).getBlock());
+        } else {
+            updateCount = 0;
         }
+
+        updateCount++;
+        Utils.LOGGER.warning("updateCount: " + updateCount);
     }
 
 }

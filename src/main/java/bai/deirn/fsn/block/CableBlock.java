@@ -55,7 +55,7 @@ public class CableBlock extends ChildBlock {
 
     protected boolean canConnect(World world, BlockPos pos, BlockState state) {
         Block block = state.getBlock();
-        return block instanceof FSNBlock;
+        return block instanceof ModBlock;
     }
 
     @Override
