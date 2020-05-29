@@ -6,37 +6,44 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-version = "${minecraft}-${mod}"
+archivesBaseName = project.archives_base_name
+version = "${project.mod_version}+minecraft-${project.minecraft_version}"
+group = project.maven_group
 
 repositories {
 	maven {
-		name = "CottonMC"
-		url = "http://server.bbkr.space:8081/artifactory/libs-release"
+		name = "Spinnery"
+		url "https://dl.bintray.com/spinnery/Spinnery"
 	}
-	jcenter()
+	maven {
+		url = "https://jitpack.io"
+	}
+	maven {
+		name = "NerdHubMC"
+		url = "https://maven.abusedmaster.xyz/"
+	}
 }
 
 dependencies {
 	//to change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${minecraft}"
-	mappings "net.fabricmc:yarn:${minecraft}+build.${yarn}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${loader}"
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	modCompile "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
-	include "io.github.cottonmc:LibGui:${libgui}+${minecraft}"
+	modApi "me.shedaniel.cloth:config-2:${project.cloth_config}"
+	include "me.shedaniel.cloth:config-2:${project.cloth_config}"
 
-	modApi "me.shedaniel.cloth:config-2:${cloth_config}"
-	include "me.shedaniel.cloth:config-2:${cloth_config}"
+	modCompile "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
+	include "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
 
-	modCompile "me.sargunvohra.mcmods:autoconfig1u:${autoconfig}"
-	include "me.sargunvohra.mcmods:autoconfig1u:${autoconfig}"
+	modCompile "com.github.vini2003:spinnery:${project.spinnery}"
+	include "com.github.vini2003:spinnery:${project.spinnery}"
 
-	modImplementation "io.github.prospector:modmenu:1.10.2+build.32"
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
+	modImplementation "com.github.emilyploszaj:trinkets:${project.trinkets}"
+
+	modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 }
 
 processResources {
@@ -76,7 +83,10 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
+			artifact(jar) {
+				builtBy remapJar
+			}
+			artifact("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar"){
 				builtBy remapJar
 			}
 			artifact(sourcesJar) {

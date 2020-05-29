@@ -1,38 +1,36 @@
 {
   "schemaVersion": 1,
-  "id": "fsn",
+  "id": "storagenetworks",
   "version": "${version}",
-
   "name": "Fabric Storage Networks",
-  "description": "Storage Networks for Fabric, 100% original idea.",
+  "description": "Clone of Storage Networks for Fabric Loader",
   "authors": [
     "deirn"
   ],
+  "contributors": [],
   "contact": {
-    "sources": "https://github.com/badasintended/fsn"
+    "homepage": "https://gitlab.com/intended/fabric/fsn",
+    "sources": "https://gitlab.com/intended/fabric/fsn"
   },
-
   "license": "MIT",
-  "icon": "assets/fsn/icon.png",
-
+  "icon": "assets/storagenetworks/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "bai.deirn.fsn.FSN"
+      "io.gitlab.intended.storagenetworks.StorageNetworks"
+    ],
+    "client": [
+      "io.gitlab.intended.storagenetworks.client.StorageNetworksClient"
     ],
     "modmenu": [
-      "bai.deirn.fsn.config.ModMenuIntegration"
+      "io.gitlab.intended.storagenetworks.client.modmenu.ModMenuIntegration"
     ]
   },
   "mixins": [
+    "storagenetworks.mixins.json"
   ],
-
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "fabric": "*",
-    "minecraft": "1.15.x"
-  },
-  "suggests": {
-    "flamingo": "*"
+    "fabricloader": ">=0.4.0",
+    "fabric": "*"
   }
 }
