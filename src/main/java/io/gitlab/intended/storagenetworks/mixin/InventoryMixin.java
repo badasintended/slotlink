@@ -4,5 +4,5 @@ import net.minecraft.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Inventory.class)
-public class MixinInventory {
+public class InventoryMixin {
 }

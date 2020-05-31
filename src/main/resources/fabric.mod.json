@@ -17,13 +17,22 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.gitlab.intended.storagenetworks.StorageNetworks"
+      {
+        "adapter": "kotlin",
+        "value": "io.gitlab.intended.storagenetworks.StorageNetworks"
+      }
     ],
     "client": [
-      "io.gitlab.intended.storagenetworks.client.StorageNetworksClient"
+      {
+        "adapter": "kotlin",
+        "value": "io.gitlab.intended.storagenetworks.client.StorageNetworksClient"
+      }
     ],
     "modmenu": [
-      "io.gitlab.intended.storagenetworks.client.modmenu.ModMenuIntegration"
+      {
+        "adapter": "kotlin",
+        "value": "io.gitlab.intended.storagenetworks.client.ModMenuIntegration"
+      }
     ]
   },
   "mixins": [
@@ -31,6 +40,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.4.0",
-    "fabric": "*"
+    "fabric": "*",
+    "fabric-language-kotlin": "*"
   }
 }
