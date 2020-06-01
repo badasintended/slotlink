@@ -22,7 +22,12 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         return result
     }
 
-    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, context: EntityContext): VoxelShape {
+    override fun getOutlineShape(
+        state: BlockState,
+        view: BlockView,
+        pos: BlockPos,
+        context: EntityContext
+    ): VoxelShape {
         val end = cuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, context)
         return VoxelShapes.union(result, end)

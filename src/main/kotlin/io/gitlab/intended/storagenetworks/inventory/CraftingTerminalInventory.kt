@@ -9,21 +9,21 @@ class CraftingTerminalInventory(
     syncId: Int,
     player: PlayerEntity,
     name: Text
-) : ModInventory(syncId, player, name){
+) : ModInventory(syncId, player, name) {
 
     companion object {
-        const val INVENTORY = 1
+        const val INV = 1
     }
 
     init {
-        val mainInterface = `interface`
+        val root = `interface`
         val inventory = BaseInventory(27)
 
-        inventories[INVENTORY] = inventory
+        inventories[INV] = inventory
 
-        mainInterface.createChild { WSlot() }
-        WSlot.addHeadlessArray(mainInterface, 0, INVENTORY, 9, 3)
-        WSlot.addHeadlessPlayerInventory(mainInterface)
+        root.createChild { WSlot() }
+        WSlot.addHeadlessArray(root, 0, INV, 9, 3)
+        WSlot.addHeadlessPlayerInventory(root)
     }
 
 }

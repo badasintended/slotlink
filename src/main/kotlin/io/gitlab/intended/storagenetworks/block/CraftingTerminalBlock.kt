@@ -23,6 +23,6 @@ class CraftingTerminalBlock(id: String) : ChildBlock(id) {
         player: PlayerEntity,
         hand: Hand,
         hit: BlockHitResult
-    ): ActionResult = ModInventory.open(this, player)
+    ): ActionResult = ModInventory.open(world, this, player)
 
 }

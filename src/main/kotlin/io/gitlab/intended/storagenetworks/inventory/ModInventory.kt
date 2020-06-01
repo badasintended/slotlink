@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
+import net.minecraft.world.World
 import spinnery.common.BaseContainer
 
 abstract class ModInventory(
@@ -16,8 +17,8 @@ abstract class ModInventory(
 ) : BaseContainer(syncId, player.inventory) {
 
     companion object {
-        fun open(modBlock: ModBlock, player: PlayerEntity): ActionResult {
-            return if (!player.world.isClient) {
+        fun open(world: World, modBlock: ModBlock, player: PlayerEntity): ActionResult {
+            return if (!world.isClient) {
                 player as ServerPlayerEntity
                 ContainerProviderRegistry.INSTANCE.openContainer(modBlock.id, player) { buf ->
                     buf.writeText(TranslatableText(modBlock.translationKey))

@@ -19,19 +19,19 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.StorageNetworks"
+        "value": "io.gitlab.intended.storagenetworks.Mod::init"
       }
     ],
     "client": [
       {
         "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.client.StorageNetworksClient"
+        "value": "io.gitlab.intended.storagenetworks.Mod::client"
       }
     ],
     "modmenu": [
       {
         "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.client.ModMenuIntegration"
+        "value": "io.gitlab.intended.storagenetworks.ModMenu"
       }
     ]
   },

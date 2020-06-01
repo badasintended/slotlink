@@ -18,24 +18,24 @@ class CraftingTerminalScreen(
 ) {
 
     init {
-        val mainInterface = `interface`
+        val root = `interface`
 
         var position: Position = Position.of(0, 0, 0)
         var size: Size = Size.of(9 * 18 + 8, 3 * 18 + 108)
 
-        val mainPanel = mainInterface.createChild({ WPanel() }, position, size)
+        val panel = root.createChild({ WPanel() }, position, size)
 
-        mainPanel.setParent<WAbstractWidget>(mainInterface)
-        mainPanel.setOnAlign(WAbstractWidget::center)
-        mainPanel.center()
-        mainInterface.add(mainPanel)
+        panel.setParent<WAbstractWidget>(root)
+        panel.setOnAlign(WAbstractWidget::center)
+        panel.center()
+        root.add(panel)
 
-        position = Position.of(mainPanel, mainPanel.width / 2 - (18 * 4.5f).toInt(), 3 * 18 + 24, 1)
+        position = Position.of(panel, panel.width / 2 - (18 * 4.5f).toInt(), 3 * 18 + 24, 1)
         size = Size.of(18)
-        WSlot.addPlayerInventory(position, size, mainInterface)
+        WSlot.addPlayerInventory(position, size, root)
 
-        position = Position.of(mainPanel, 4, 19, 1)
-        WSlot.addArray(position, size, mainInterface, 0, CraftingTerminalInventory.INVENTORY, 9, 3)
+        position = Position.of(panel, 4, 19, 1)
+        WSlot.addArray(position, size, root, 0, CraftingTerminalInventory.INV, 9, 3)
     }
 
 }

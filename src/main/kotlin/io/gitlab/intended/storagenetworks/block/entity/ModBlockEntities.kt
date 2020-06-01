@@ -22,7 +22,10 @@ object ModBlockEntities {
         register(ModBlocks.CABLE, CABLE)
     }
 
-    private fun register(modBlock: io.gitlab.intended.storagenetworks.block.ModBlock, blockEntityType: BlockEntityType<out BlockEntity>) {
+    private fun register(
+        modBlock: io.gitlab.intended.storagenetworks.block.ModBlock,
+        blockEntityType: BlockEntityType<out BlockEntity>
+    ) {
         Registry.register(Registry.BLOCK_ENTITY_TYPE, modBlock.id, blockEntityType)
     }
 

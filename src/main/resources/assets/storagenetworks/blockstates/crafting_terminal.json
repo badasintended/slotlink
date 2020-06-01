@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "storagenetworks:block/crafting_terminal" }
+  "variants": {
+    "": {
+      "model": "storagenetworks:block/crafting_terminal"
     }
+  }
 }

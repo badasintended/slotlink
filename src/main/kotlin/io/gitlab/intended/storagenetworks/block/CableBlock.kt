@@ -61,7 +61,14 @@ open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
             .with(DOWN, canConnect(world, pos.down()))
     }
 
-    override fun getStateForNeighborUpdate(state: BlockState, facing: Direction, neighborState: BlockState, world: IWorld, pos: BlockPos, neighborPos: BlockPos): BlockState {
+    override fun getStateForNeighborUpdate(
+        state: BlockState,
+        facing: Direction,
+        neighborState: BlockState,
+        world: IWorld,
+        pos: BlockPos,
+        neighborPos: BlockPos
+    ): BlockState {
         super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
 
         val propertyMap = ImmutableMap.builder<Direction, BooleanProperty>()
@@ -76,7 +83,12 @@ open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
         return state.with(propertyMap[facing], canConnect(world.world, neighborPos, neighborState))
     }
 
-    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, context: EntityContext): VoxelShape {
+    override fun getOutlineShape(
+        state: BlockState,
+        view: BlockView,
+        pos: BlockPos,
+        context: EntityContext
+    ): VoxelShape {
         val north = cuboid(6, 6, 0, 4, 4, 10)
         val south = cuboid(6, 6, 6, 4, 4, 10)
         val east = cuboid(6, 6, 6, 10, 4, 4)

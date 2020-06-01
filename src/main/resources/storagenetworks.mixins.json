@@ -2,9 +2,7 @@
   "required": true,
   "package": "io.gitlab.intended.storagenetworks.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "InventoryMixin"
-  ],
+  "mixins": [],
   "client": [],
   "server": [],
   "injectors": {

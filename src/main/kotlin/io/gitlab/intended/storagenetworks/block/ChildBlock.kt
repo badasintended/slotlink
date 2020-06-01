@@ -9,7 +9,14 @@ import net.minecraft.world.World
 
 abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(id, settings), BlockEntityProvider {
 
-    override fun neighborUpdate(state: BlockState, world: World, pos: BlockPos, block: Block, neighborPos: BlockPos, moved: Boolean) {
+    override fun neighborUpdate(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        block: Block,
+        neighborPos: BlockPos,
+        moved: Boolean
+    ) {
         val blockEntity = world.getBlockEntity(pos)
         val neighborState = world.getBlockState(neighborPos)
         val neighborBlock = neighborState.block

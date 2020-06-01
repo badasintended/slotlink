@@ -20,4 +20,4 @@ bin/
 #fabric
 run/
 
-javaOld
+/javaOld/*

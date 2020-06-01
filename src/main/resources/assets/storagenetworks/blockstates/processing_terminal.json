@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "storagenetworks:block/processing_terminal" }
+  "variants": {
+    "": {
+      "model": "storagenetworks:block/processing_terminal"
     }
+  }
 }

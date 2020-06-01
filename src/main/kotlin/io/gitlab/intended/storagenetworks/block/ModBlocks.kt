@@ -13,10 +13,10 @@ object ModBlocks {
     val STORAGE_CABLE = StorageCableBlock("storage_cable")
 
     fun init() {
-        register(MASTER, CRAFTING_TERMINAL, CABLE, STORAGE_CABLE)
+        reg(MASTER, CRAFTING_TERMINAL, CABLE, STORAGE_CABLE)
     }
 
-    private fun register(vararg modBlocks: ModBlock) {
+    private fun reg(vararg modBlocks: ModBlock) {
         for (block in modBlocks) {
             Registry.register(Registry.BLOCK, block.id, block)
             Registry.register(Registry.ITEM, block.id, BlockItem(block, ModItem.settings))

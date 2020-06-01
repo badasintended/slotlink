@@ -3,16 +3,21 @@ package io.gitlab.intended.storagenetworks.client.gui.screen
 import io.gitlab.intended.storagenetworks.block.ModBlock
 import io.gitlab.intended.storagenetworks.block.ModBlocks
 import io.gitlab.intended.storagenetworks.inventory.CraftingTerminalInventory
+import io.gitlab.intended.storagenetworks.inventory.MasterInventory
+import net.fabricmc.fabric.api.client.screen.ContainerScreenFactory
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
+import net.minecraft.client.gui.screen.ingame.ContainerScreen
 import net.minecraft.container.Container
-import net.fabricmc.fabric.api.client.screen.ContainerScreenFactory as Factory
 
 object ModScreens {
 
     fun init() {
-        register(ModBlocks.CRAFTING_TERMINAL, Factory<CraftingTerminalInventory> { c -> CraftingTerminalScreen(c) })
+        reg(ModBlocks.CRAFTING_TERMINAL) { i: CraftingTerminalInventory -> CraftingTerminalScreen(i) }
+        reg(ModBlocks.MASTER) { i: MasterInventory -> MasterScreen(i) }
     }
 
-    private fun <C : Container> register(modBlock: ModBlock, factory: Factory<C>) = ScreenProviderRegistry.INSTANCE.registerFactory(modBlock.id, factory)
+    private fun <C : Container, S : ContainerScreen<C>> reg(modBlock: ModBlock, function: (C) -> S) {
+        ScreenProviderRegistry.INSTANCE.registerFactory(modBlock.id, ContainerScreenFactory(function))
+    }
 
 }
