@@ -1,6 +1,1 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "storagenetworks:block/master"
-  }
-}
+{"parent": "block/cube_all", "textures": {"all": "storagenetworks:block/master"}}

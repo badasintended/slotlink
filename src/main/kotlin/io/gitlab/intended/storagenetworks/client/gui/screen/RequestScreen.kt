@@ -1,6 +1,6 @@
 package io.gitlab.intended.storagenetworks.client.gui.screen
 
-import io.gitlab.intended.storagenetworks.inventory.CraftingTerminalInventory
+import io.gitlab.intended.storagenetworks.inventory.RequestInventory
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.common.BaseContainerScreen
@@ -11,9 +11,9 @@ import spinnery.widget.api.Position
 import spinnery.widget.api.Size
 
 @Environment(EnvType.CLIENT)
-class CraftingTerminalScreen(
-    container: CraftingTerminalInventory
-) : BaseContainerScreen<CraftingTerminalInventory>(
+class RequestScreen(
+    container: RequestInventory
+) : BaseContainerScreen<RequestInventory>(
     container.name, container, container.player
 ) {
 
@@ -35,7 +35,7 @@ class CraftingTerminalScreen(
         WSlot.addPlayerInventory(position, size, root)
 
         position = Position.of(panel, 4, 19, 1)
-        WSlot.addArray(position, size, root, 0, CraftingTerminalInventory.INV, 9, 3)
+        WSlot.addArray(position, size, root, 0, RequestInventory.INV, 9, 3)
     }
 
 }

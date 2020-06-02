@@ -12,11 +12,11 @@ import net.minecraft.util.PacketByteBuf
 object ModInventories {
 
     fun init() {
-        reg(ModBlocks.CRAFTING_TERMINAL) { id, _, player, buf -> CraftingTerminalInventory(id, player, buf.readText()) }
-        reg(ModBlocks.MASTER) { id, _, player, buf -> MasterInventory(id, player, buf.readText()) }
+        r(ModBlocks.REQUEST) { id, _, player, buf -> RequestInventory(id, player, buf.readText()) }
+        r(ModBlocks.MASTER) { id, _, player, buf -> MasterInventory(id, player, buf.readText()) }
     }
 
-    private fun <C : Container> reg(modBlock: ModBlock, function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> C) {
+    private fun <C : Container> r(modBlock: ModBlock, function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> C) {
         ContainerProviderRegistry.INSTANCE.registerFactory(modBlock.id, ContainerFactory(function))
     }
 

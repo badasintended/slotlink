@@ -3,7 +3,7 @@
   "pools": [
     {
       "rolls"     : 1,
-      "entries"   : [{"type": "minecraft:item", "name": "storagenetworks:import_cable"}],
+      "entries"   : [{"type": "minecraft:item", "name": "storagenetworks:link_cable"}],
       "conditions": [{"condition": "minecraft:survives_explosion"}]
     }
   ]

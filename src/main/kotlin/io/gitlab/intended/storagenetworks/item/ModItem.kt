@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack
 abstract class ModItem(settings: Settings) : Item(settings) {
 
     companion object {
-        private val GROUP: ItemGroup = FabricItemGroupBuilder.build(Mod.id("gang")) { ItemStack(ModBlocks.MASTER) }
+        private val GROUP: ItemGroup = FabricItemGroupBuilder.build(Mod.id("group")) { ItemStack(ModBlocks.MASTER) }
 
         val settings: Settings get() = Settings().group(GROUP)
     }

@@ -7,16 +7,16 @@ import net.minecraft.util.registry.Registry
 object ModBlocks {
 
     val MASTER = MasterBlock("master")
-    val CRAFTING_TERMINAL = CraftingTerminalBlock("crafting_terminal")
+    val REQUEST = RequestBlock("request")
 
     val CABLE = CableBlock("cable")
-    val STORAGE_CABLE = StorageCableBlock("storage_cable")
+    val LINK_CABLE = StorageCableBlock("link_cable")
 
     fun init() {
-        reg(MASTER, CRAFTING_TERMINAL, CABLE, STORAGE_CABLE)
+        r(MASTER, REQUEST, CABLE, LINK_CABLE)
     }
 
-    private fun reg(vararg modBlocks: ModBlock) {
+    private fun r(vararg modBlocks: ModBlock) {
         for (block in modBlocks) {
             Registry.register(Registry.BLOCK, block.id, block)
             Registry.register(Registry.ITEM, block.id, BlockItem(block, ModItem.settings))

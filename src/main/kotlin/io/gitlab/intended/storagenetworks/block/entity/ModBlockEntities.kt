@@ -1,5 +1,6 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
+import io.gitlab.intended.storagenetworks.block.ModBlock
 import io.gitlab.intended.storagenetworks.block.ModBlocks
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
@@ -9,28 +10,26 @@ import java.util.function.Supplier
 
 object ModBlockEntities {
 
-    val MASTER = create(Supplier { MasterBlockEntity() }, ModBlocks.MASTER)
-    val CRAFTING_TERMINAL = create(Supplier { CraftingTerminalBlockEntity() }, ModBlocks.CRAFTING_TERMINAL)
+    val MASTER = c(ModBlocks.MASTER) { MasterBlockEntity() }
+    val REQUEST = c(ModBlocks.REQUEST) { RequestBlockEntity() }
 
-    val CABLE = create(Supplier { CableBlockEntity() }, ModBlocks.CABLE)
-    val STORAGE_CABLE = create(Supplier { StorageCableBlockEntity() }, ModBlocks.STORAGE_CABLE)
+    val CABLE = c(ModBlocks.CABLE) { CableBlockEntity() }
+    val LINK_CABLE = c(ModBlocks.LINK_CABLE) { StorageCableBlockEntity() }
 
     fun init() {
-        register(ModBlocks.MASTER, MASTER)
-        register(ModBlocks.CRAFTING_TERMINAL, CRAFTING_TERMINAL)
+        r(ModBlocks.MASTER, MASTER)
+        r(ModBlocks.REQUEST, REQUEST)
 
-        register(ModBlocks.CABLE, CABLE)
+        r(ModBlocks.CABLE, CABLE)
+        r(ModBlocks.LINK_CABLE, LINK_CABLE)
     }
 
-    private fun register(
-        modBlock: io.gitlab.intended.storagenetworks.block.ModBlock,
-        blockEntityType: BlockEntityType<out BlockEntity>
-    ) {
+    private fun r(modBlock: ModBlock, blockEntityType: BlockEntityType<out BlockEntity>) {
         Registry.register(Registry.BLOCK_ENTITY_TYPE, modBlock.id, blockEntityType)
     }
 
-    private fun <T : BlockEntity> create(supplier: Supplier<T>, block: Block): BlockEntityType<T> {
-        return BlockEntityType.Builder.create(supplier, block).build(null)
+    private fun <T : BlockEntity> c(block: Block, function: () -> T): BlockEntityType<T> {
+        return BlockEntityType.Builder.create(Supplier(function), block).build(null)
     }
 
 }

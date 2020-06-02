@@ -37,7 +37,7 @@ open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
     override fun createBlockEntity(view: BlockView): BlockEntity = CableBlockEntity()
 
     protected open fun canConnect(world: World, pos: BlockPos, state: BlockState): Boolean {
-        return state.block is io.gitlab.intended.storagenetworks.block.ModBlock
+        return state.block is ModBlock
     }
 
     private fun canConnect(world: World, pos: BlockPos): Boolean {

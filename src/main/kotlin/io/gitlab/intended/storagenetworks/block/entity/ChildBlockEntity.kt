@@ -27,7 +27,7 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
 
 }
 
-class CraftingTerminalBlockEntity : ChildBlockEntity(ModBlockEntities.CRAFTING_TERMINAL)
+class RequestBlockEntity : ChildBlockEntity(ModBlockEntities.REQUEST)
 
 class CableBlockEntity : ChildBlockEntity(ModBlockEntities.CABLE)
-class StorageCableBlockEntity : ChildBlockEntity(ModBlockEntities.STORAGE_CABLE)
+class StorageCableBlockEntity : ChildBlockEntity(ModBlockEntities.LINK_CABLE)
