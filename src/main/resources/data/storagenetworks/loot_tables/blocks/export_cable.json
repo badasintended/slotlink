@@ -1,19 +1,10 @@
 {
-  "type": "minecraft:block",
+  "type" : "minecraft:block",
   "pools": [
     {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "storagenetworks:export_cable"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "rolls"     : 1,
+      "entries"   : [{"type": "minecraft:item", "name": "storagenetworks:export_cable"}],
+      "conditions": [{"condition": "minecraft:survives_explosion"}]
     }
   ]
 }

@@ -1,46 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "storagenetworks",
-  "version": "${version}",
-  "name": "Fabric Storage Networks",
-  "description": "Clone of Storage Networks for Fabric Loader",
-  "authors": [
-    "deirn"
-  ],
-  "contributors": [],
-  "contact": {
+  "id"           : "storagenetworks",
+  "version"      : "${version}",
+  "name"         : "Storage Networks",
+  "description"  : "Clone of Storage Networks for Fabric Loader, for lazy people who doesn't want to sort chests!",
+  "authors"      : ["deirn"],
+  "contributors" : [],
+  "contact"      : {
     "homepage": "https://gitlab.com/intended/fabric/fsn",
-    "sources": "https://gitlab.com/intended/fabric/fsn"
+    "sources" : "https://gitlab.com/intended/fabric/fsn",
+    "issues"  : "https://gitlab.com/intended/fabric/fsn/-/issues"
   },
-  "license": "MIT",
-  "icon": "assets/storagenetworks/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      {
-        "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.Mod::init"
-      }
-    ],
-    "client": [
-      {
-        "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.Mod::client"
-      }
-    ],
-    "modmenu": [
-      {
-        "adapter": "kotlin",
-        "value": "io.gitlab.intended.storagenetworks.ModMenu"
-      }
-    ]
+  "license"      : "MIT",
+  "icon"         : "assets/storagenetworks/icon.png",
+  "environment"  : "*",
+  "entrypoints"  : {
+    "main"   : ["io.gitlab.intended.storagenetworks.Mod::main"],
+    "client" : ["io.gitlab.intended.storagenetworks.Mod::client"],
+    "modmenu": ["io.gitlab.intended.storagenetworks.ModMenu"]
   },
-  "mixins": [
-    "storagenetworks.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.4.0",
-    "fabric": "*",
-    "fabric-language-kotlin": "*"
+  "mixins"       : ["storagenetworks.mixins.json"],
+  "depends"      : {
+    "fabricloader"          : ">=0.4.0",
+    "fabric"                : "*",
+    "fabric-language-kotlin": "*",
+    "minecraft"             : "1.15.x"
   }
 }

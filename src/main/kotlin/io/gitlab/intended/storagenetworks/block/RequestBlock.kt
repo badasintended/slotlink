@@ -1,6 +1,6 @@
 package io.gitlab.intended.storagenetworks.block
 
-import io.gitlab.intended.storagenetworks.block.entity.CraftingTerminalBlockEntity
+import io.gitlab.intended.storagenetworks.block.entity.RequestBlockEntity
 import io.gitlab.intended.storagenetworks.inventory.ModInventory
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -12,9 +12,9 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class CraftingTerminalBlock(id: String) : ChildBlock(id) {
+class RequestBlock(id: String) : ChildBlock(id) {
 
-    override fun createBlockEntity(view: BlockView): BlockEntity = CraftingTerminalBlockEntity()
+    override fun createBlockEntity(view: BlockView): BlockEntity = RequestBlockEntity()
 
     override fun onUse(
         state: BlockState,

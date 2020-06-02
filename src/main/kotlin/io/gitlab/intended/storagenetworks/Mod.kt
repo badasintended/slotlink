@@ -31,7 +31,7 @@ object Mod {
     fun log(level: Level, msg: String) = LOGGER.log(level, "[$NAME] $msg")
 
     @Suppress("unused")
-    fun init() {
+    fun main() {
         AutoConfig.register(ModConfig::class.java) { def, clazz -> JanksonConfigSerializer(def, clazz) }
 
         ModBlocks.init()
@@ -62,7 +62,6 @@ object ModMenu : ModMenuApi {
 
 
 @Config(name = Mod.ID)
-@Config.Gui.Background("${Mod.ID}:textures/gui/config.png")
 class ModConfig : ConfigData {
 
     @ConfigEntry.Gui.Tooltip

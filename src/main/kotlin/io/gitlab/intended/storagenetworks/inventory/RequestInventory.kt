@@ -5,7 +5,7 @@ import net.minecraft.text.Text
 import spinnery.common.BaseInventory
 import spinnery.widget.WSlot
 
-class CraftingTerminalInventory(
+class RequestInventory(
     syncId: Int,
     player: PlayerEntity,
     name: Text
