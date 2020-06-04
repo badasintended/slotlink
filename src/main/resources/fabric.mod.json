@@ -7,9 +7,9 @@
   "authors"      : ["deirn"],
   "contributors" : [],
   "contact"      : {
-    "homepage": "https://gitlab.com/intended/fabric/fsn",
-    "sources" : "https://gitlab.com/intended/fabric/fsn",
-    "issues"  : "https://gitlab.com/intended/fabric/fsn/-/issues"
+    "homepage": "https://gitlab.com/intended/fabric/storagenetworks",
+    "sources" : "https://gitlab.com/intended/fabric/storagenetworks",
+    "issues"  : "https://gitlab.com/intended/fabric/storagenetworks/-/issues"
   },
   "license"      : "MIT",
   "icon"         : "assets/storagenetworks/icon.png",
@@ -22,8 +22,8 @@
   "mixins"       : ["storagenetworks.mixins.json"],
   "depends"      : {
     "fabricloader"          : ">=0.4.0",
+    "minecraft"             : "1.15.x",
     "fabric"                : "*",
-    "fabric-language-kotlin": "*",
-    "minecraft"             : "1.15.x"
+    "fabric-language-kotlin": "*"
   }
 }

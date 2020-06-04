@@ -1,5 +1,6 @@
 package io.gitlab.intended.storagenetworks.block
 
+import com.google.common.collect.ImmutableSet
 import io.gitlab.intended.storagenetworks.item.ModItem
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry
@@ -11,6 +12,8 @@ object ModBlocks {
 
     val CABLE = CableBlock("cable")
     val LINK_CABLE = StorageCableBlock("link_cable")
+
+    val BLOCKS = ImmutableSet.of<ModBlock>(MASTER, REQUEST, CABLE, LINK_CABLE)
 
     fun init() {
         r(MASTER, REQUEST, CABLE, LINK_CABLE)

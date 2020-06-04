@@ -1,19 +1,19 @@
 package io.gitlab.intended.storagenetworks.client.gui.screen
 
-import io.gitlab.intended.storagenetworks.inventory.RequestInventory
+import io.gitlab.intended.storagenetworks.container.RequestContainer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.common.BaseContainerScreen
-import spinnery.widget.WAbstractWidget
 import spinnery.widget.WPanel
 import spinnery.widget.WSlot
 import spinnery.widget.api.Position
 import spinnery.widget.api.Size
+import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
 class RequestScreen(
-    container: RequestInventory
-) : BaseContainerScreen<RequestInventory>(
+    container: RequestContainer
+) : BaseContainerScreen<RequestContainer>(
     container.name, container, container.player
 ) {
 
@@ -25,8 +25,9 @@ class RequestScreen(
 
         val panel = root.createChild({ WPanel() }, position, size)
 
-        panel.setParent<WAbstractWidget>(root)
-        panel.setOnAlign(WAbstractWidget::center)
+        panel.setLabel<W>(container.name)
+        panel.setParent<W>(root)
+        panel.setOnAlign(W::center)
         panel.center()
         root.add(panel)
 
@@ -35,7 +36,7 @@ class RequestScreen(
         WSlot.addPlayerInventory(position, size, root)
 
         position = Position.of(panel, 4, 19, 1)
-        WSlot.addArray(position, size, root, 0, RequestInventory.INV, 9, 3)
+        WSlot.addArray(position, size, root, 0, RequestContainer.INV, 9, 3)
     }
 
 }

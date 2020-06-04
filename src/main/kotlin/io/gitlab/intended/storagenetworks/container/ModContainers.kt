@@ -1,4 +1,4 @@
-package io.gitlab.intended.storagenetworks.inventory
+package io.gitlab.intended.storagenetworks.container
 
 import io.gitlab.intended.storagenetworks.block.ModBlock
 import io.gitlab.intended.storagenetworks.block.ModBlocks
@@ -9,11 +9,11 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 
-object ModInventories {
+object ModContainers {
 
     fun init() {
-        r(ModBlocks.REQUEST) { id, _, player, buf -> RequestInventory(id, player, buf.readText()) }
-        r(ModBlocks.MASTER) { id, _, player, buf -> MasterInventory(id, player, buf.readText()) }
+        r(ModBlocks.REQUEST) { id, _, player, _ -> RequestContainer(id, player) }
+        r(ModBlocks.MASTER) { id, _, player, _ -> MasterContainer(id, player) }
     }
 
     private fun <C : Container> r(modBlock: ModBlock, function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> C) {

@@ -72,12 +72,12 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             val masterPos = BlockPos(master.getInt("x"), master.getInt("y"), master.getInt("z"))
             val masterBlock = world.getBlockState(masterPos).block
 
-            if (masterBlock !is MasterBlock) {
-                currentNbt.putBoolean("hasMaster", false)
-                blockEntity.fromTag(currentNbt)
-                blockEntity.markDirty()
-                world.updateNeighbors(pos, block)
-            }
+            currentNbt.putBoolean("hasMaster", false)
+            blockEntity.fromTag(currentNbt)
+            blockEntity.markDirty()
+            world.updateNeighbors(pos, block)
+
+            if (masterBlock is MasterBlock) world.updateNeighbors(masterPos, masterBlock)
         }
     }
 

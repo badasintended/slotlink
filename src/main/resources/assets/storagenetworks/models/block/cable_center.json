@@ -2,10 +2,10 @@
   "textures": {"0": "storagenetworks:block/cable", "particle": "storagenetworks:block/cable"},
   "elements": [
     {
-      "from": [6, 6, 6],
-      "to": [10, 10, 10],
+      "from"    : [6, 6, 6],
+      "to"      : [10, 10, 10],
       "rotation": {"angle": 0, "axis": "y", "origin": [14, 14, 8]},
-      "faces": {
+      "faces"   : {
         "north": {"uv": [10, 0, 14, 4], "texture": "#0"},
         "east" : {"uv": [6, 0, 10, 4], "texture": "#0"},
         "south": {"uv": [10, 0, 14, 4], "texture": "#0"},

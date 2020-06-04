@@ -5,7 +5,7 @@ import io.github.prospector.modmenu.api.ModMenuApi
 import io.gitlab.intended.storagenetworks.block.ModBlocks
 import io.gitlab.intended.storagenetworks.block.entity.ModBlockEntities
 import io.gitlab.intended.storagenetworks.client.gui.screen.ModScreens
-import io.gitlab.intended.storagenetworks.inventory.ModInventories
+import io.gitlab.intended.storagenetworks.container.ModContainers
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig
 import me.sargunvohra.mcmods.autoconfig1u.ConfigData
 import me.sargunvohra.mcmods.autoconfig1u.annotation.Config
@@ -36,7 +36,7 @@ object Mod {
 
         ModBlocks.init()
         ModBlockEntities.init()
-        ModInventories.init()
+        ModContainers.init()
     }
 
     @Suppress("unused")

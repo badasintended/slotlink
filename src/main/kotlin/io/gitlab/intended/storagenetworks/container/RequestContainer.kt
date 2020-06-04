@@ -1,19 +1,21 @@
-package io.gitlab.intended.storagenetworks.inventory
+package io.gitlab.intended.storagenetworks.container
 
+import io.gitlab.intended.storagenetworks.block.ModBlocks
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
 import spinnery.common.BaseInventory
 import spinnery.widget.WSlot
 
-class RequestInventory(
+class RequestContainer(
     syncId: Int,
-    player: PlayerEntity,
-    name: Text
-) : ModInventory(syncId, player, name) {
+    player: PlayerEntity
+) : ModContainer(syncId, player) {
 
     companion object {
         const val INV = 1
     }
+
+    val name = TranslatableText(ModBlocks.REQUEST.translationKey)
 
     init {
         val root = `interface`

@@ -1,7 +1,7 @@
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.block.entity.RequestBlockEntity
-import io.gitlab.intended.storagenetworks.inventory.ModInventory
+import io.gitlab.intended.storagenetworks.container.ModContainer
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -23,6 +23,9 @@ class RequestBlock(id: String) : ChildBlock(id) {
         player: PlayerEntity,
         hand: Hand,
         hit: BlockHitResult
-    ): ActionResult = ModInventory.open(world, this, player)
+    ): ActionResult {
+        if (!world.isClient) ModContainer.open(this, player)
+        return ActionResult.SUCCESS
+    }
 
 }

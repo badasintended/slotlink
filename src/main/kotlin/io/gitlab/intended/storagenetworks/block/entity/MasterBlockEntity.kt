@@ -19,7 +19,7 @@ class MasterBlockEntity : BlockEntity(ModBlockEntities.MASTER) {
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
 
-        storagePos = tag["storagePos"] as ListTag
+        storagePos = tag["storagePos"]!! as ListTag
     }
 
 }

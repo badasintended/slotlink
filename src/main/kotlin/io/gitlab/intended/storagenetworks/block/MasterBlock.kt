@@ -1,7 +1,7 @@
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.block.entity.MasterBlockEntity
-import io.gitlab.intended.storagenetworks.inventory.ModInventory
+import io.gitlab.intended.storagenetworks.container.ModContainer
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
@@ -57,6 +57,9 @@ class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
         player: PlayerEntity,
         hand: Hand,
         hit: BlockHitResult
-    ): ActionResult = ModInventory.open(world, this, player)
+    ): ActionResult {
+        if (!world.isClient) ModContainer.open(this, player)
+        return ActionResult.SUCCESS
+    }
 
 }

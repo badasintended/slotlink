@@ -1,18 +1,18 @@
 package io.gitlab.intended.storagenetworks.client.gui.screen
 
-import io.gitlab.intended.storagenetworks.inventory.MasterInventory
+import io.gitlab.intended.storagenetworks.container.MasterContainer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.common.BaseContainerScreen
-import spinnery.widget.WAbstractWidget
 import spinnery.widget.WPanel
 import spinnery.widget.api.Position
 import spinnery.widget.api.Size
+import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
 class MasterScreen(
-    container: MasterInventory
-) : BaseContainerScreen<MasterInventory>(
+    container: MasterContainer
+) : BaseContainerScreen<MasterContainer>(
     container.name, container, container.player
 ) {
 
@@ -24,8 +24,9 @@ class MasterScreen(
 
         val panel = root.createChild({ WPanel() }, position, size)
 
-        panel.setParent<WAbstractWidget>(root)
-        panel.setOnAlign(WAbstractWidget::center)
+        panel.setLabel<W>(container.name)
+        panel.setParent<W>(root)
+        panel.setOnAlign(W::center)
         panel.center()
 
         root.add(panel)
