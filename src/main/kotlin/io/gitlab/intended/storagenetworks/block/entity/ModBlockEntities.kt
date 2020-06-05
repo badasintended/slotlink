@@ -14,7 +14,7 @@ object ModBlockEntities {
     val REQUEST = c(ModBlocks.REQUEST) { RequestBlockEntity() }
 
     val CABLE = c(ModBlocks.CABLE) { CableBlockEntity() }
-    val LINK_CABLE = c(ModBlocks.LINK_CABLE) { StorageCableBlockEntity() }
+    val LINK_CABLE = c(ModBlocks.LINK_CABLE) { LinkCableBlockEntity() }
 
     fun init() {
         r(ModBlocks.MASTER, MASTER)

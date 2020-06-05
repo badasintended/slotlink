@@ -1,10 +1,6 @@
-<div align="center">
+<img src="src/main/resources/assets/storagenetworks/icon.png" align="right"/>
 
-![7]    
-Fabric Storage Networks    
-[![1][1]][6]  [![2][2]][4]  [![3][3]][5]
------
-</div>
+# Fabric Storage Networks [![1][1]][6]  [![2][2]][4]  [![3][3]][5]
 
 Probably a bad clone of [Simple Storage Network](https://github.com/Lothrazar/Storage-Network) for [Fabric](https://fabricmc.net/).   
 Written from scratch because i can't read other people's code (it's my fault). 

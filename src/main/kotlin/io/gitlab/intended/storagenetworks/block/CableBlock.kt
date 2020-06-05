@@ -18,31 +18,42 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
-import net.minecraft.world.World
 
 open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
 
     companion object {
-        val SETTINGS: Settings =
-            FabricBlockSettings.of(Material.GLASS).breakByHand(true).breakByTool(FabricToolTags.PICKAXES).hardness(3f)
+        val SETTINGS: Settings = FabricBlockSettings
+            .of(Material.GLASS)
+            .breakByHand(true)
+            .breakByTool(FabricToolTags.PICKAXES)
+            .hardness(3f)
 
-        val NORTH = BooleanProperty.of("north")
-        val SOUTH = BooleanProperty.of("south")
-        val EAST = BooleanProperty.of("east")
-        val WEST = BooleanProperty.of("west")
-        val UP = BooleanProperty.of("up")
-        val DOWN = BooleanProperty.of("down")
+        val NORTH: BooleanProperty = BooleanProperty.of("north")
+        val SOUTH: BooleanProperty = BooleanProperty.of("south")
+        val EAST: BooleanProperty = BooleanProperty.of("east")
+        val WEST: BooleanProperty = BooleanProperty.of("west")
+        val UP: BooleanProperty = BooleanProperty.of("up")
+        val DOWN: BooleanProperty = BooleanProperty.of("down")
+
+        val propertyMap: ImmutableMap<Direction, BooleanProperty> = ImmutableMap.builder<Direction, BooleanProperty>()
+            .put(Direction.NORTH, NORTH)
+            .put(Direction.SOUTH, SOUTH)
+            .put(Direction.EAST, EAST)
+            .put(Direction.WEST, WEST)
+            .put(Direction.UP, UP)
+            .put(Direction.DOWN, DOWN)
+            .build()
+    }
+
+    /**
+     * @return whether block in pos is an instance of [ModBlock]
+     */
+    private fun canConnect(world: IWorld, pos: BlockPos): Boolean {
+        val block = world.getBlockState(pos).block
+        return block is ModBlock
     }
 
     override fun createBlockEntity(view: BlockView): BlockEntity = CableBlockEntity()
-
-    protected open fun canConnect(world: World, pos: BlockPos, state: BlockState): Boolean {
-        return state.block is ModBlock
-    }
-
-    private fun canConnect(world: World, pos: BlockPos): Boolean {
-        return canConnect(world, pos, world.getBlockState(pos))
-    }
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
         builder.add(NORTH, SOUTH, EAST, WEST, UP, DOWN)
@@ -71,24 +82,10 @@ open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
     ): BlockState {
         super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
 
-        val propertyMap = ImmutableMap.builder<Direction, BooleanProperty>()
-            .put(Direction.NORTH, NORTH)
-            .put(Direction.SOUTH, SOUTH)
-            .put(Direction.EAST, EAST)
-            .put(Direction.WEST, WEST)
-            .put(Direction.UP, UP)
-            .put(Direction.DOWN, DOWN)
-            .build()
-
-        return state.with(propertyMap[facing], canConnect(world.world, neighborPos, neighborState))
+        return state.with(propertyMap[facing], canConnect(world, neighborPos))
     }
 
-    override fun getOutlineShape(
-        state: BlockState,
-        view: BlockView,
-        pos: BlockPos,
-        context: EntityContext
-    ): VoxelShape {
+    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
         val north = cuboid(6, 6, 0, 4, 4, 10)
         val south = cuboid(6, 6, 6, 4, 4, 10)
         val east = cuboid(6, 6, 6, 10, 4, 4)

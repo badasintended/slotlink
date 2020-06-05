@@ -6,8 +6,11 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -18,6 +21,17 @@ import net.minecraft.world.World
 class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
 
     override fun createBlockEntity(view: BlockView): BlockEntity = MasterBlockEntity()
+
+    override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {
+        super.onPlaced(world, pos, state, placer, itemStack)
+
+        val blockEntity = world.getBlockEntity(pos)
+        val nbt = blockEntity!!.toTag(CompoundTag())
+
+        nbt.put("storagePos", ListTag())
+        blockEntity.fromTag(nbt)
+        blockEntity.markDirty()
+    }
 
     override fun neighborUpdate(
         state: BlockState,
@@ -37,10 +51,7 @@ class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
             val neighborNbt = neighborBlockEntity!!.toTag(CompoundTag())
             val neighborHasMaster = neighborNbt.getBoolean("hasMaster")
             if (!neighborHasMaster) {
-                val masterPos = CompoundTag()
-                masterPos.putInt("x", pos.x)
-                masterPos.putInt("y", pos.y)
-                masterPos.putInt("z", pos.z)
+                val masterPos = pos2Tag(pos)
                 neighborNbt.put("masterPos", masterPos)
                 neighborNbt.putBoolean("hasMaster", true)
                 neighborBlockEntity.fromTag(neighborNbt)

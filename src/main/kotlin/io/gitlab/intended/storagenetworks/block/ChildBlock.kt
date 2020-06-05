@@ -9,6 +9,7 @@ import net.minecraft.world.World
 
 abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(id, settings), BlockEntityProvider {
 
+    // TODO: Optimize this part
     override fun neighborUpdate(
         state: BlockState,
         world: World,
@@ -54,10 +55,7 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             }
         } else if (neighborBlock is MasterBlock) {
             if (!currentlyHasMaster) {
-                val masterPos = CompoundTag()
-                masterPos.putInt("x", neighborPos.x)
-                masterPos.putInt("y", neighborPos.y)
-                masterPos.putInt("z", neighborPos.z)
+                val masterPos = pos2Tag(neighborPos)
 
                 currentNbt.put("masterPos", masterPos)
                 currentNbt.putBoolean("hasMaster", true)
@@ -69,7 +67,7 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             }
         } else if (currentlyHasMaster) {
             val master = currentNbt.getCompound("masterPos")
-            val masterPos = BlockPos(master.getInt("x"), master.getInt("y"), master.getInt("z"))
+            val masterPos = tag2Pos(master)
             val masterBlock = world.getBlockState(masterPos).block
 
             currentNbt.putBoolean("hasMaster", false)

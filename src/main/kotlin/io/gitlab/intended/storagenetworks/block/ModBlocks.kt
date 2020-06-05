@@ -11,9 +11,9 @@ object ModBlocks {
     val REQUEST = RequestBlock("request")
 
     val CABLE = CableBlock("cable")
-    val LINK_CABLE = StorageCableBlock("link_cable")
+    val LINK_CABLE = LinkCableBlock("link_cable")
 
-    val BLOCKS = ImmutableSet.of<ModBlock>(MASTER, REQUEST, CABLE, LINK_CABLE)
+    val BLOCKS: ImmutableSet<ModBlock> = ImmutableSet.of(MASTER, REQUEST, CABLE, LINK_CABLE)
 
     fun init() {
         r(MASTER, REQUEST, CABLE, LINK_CABLE)

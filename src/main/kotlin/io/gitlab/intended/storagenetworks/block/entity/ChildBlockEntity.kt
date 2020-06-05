@@ -30,4 +30,3 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
 class RequestBlockEntity : ChildBlockEntity(ModBlockEntities.REQUEST)
 
 class CableBlockEntity : ChildBlockEntity(ModBlockEntities.CABLE)
-class StorageCableBlockEntity : ChildBlockEntity(ModBlockEntities.LINK_CABLE)
