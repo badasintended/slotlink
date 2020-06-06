@@ -1,0 +1,14 @@
+{
+  "type"   : "minecraft:crafting_shaped",
+  "pattern": [
+    "TCT",
+    "CGC",
+    "TCT"
+  ],
+  "key"    : {
+    "T": {"item": "minecraft:crafting_table"},
+    "C": {"item": "storagenetworks:link_cable"},
+    "G": {"item": "minecraft:gold_ingot"}
+  },
+  "result" : {"item": "storagenetworks:master"}
+}

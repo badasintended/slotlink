@@ -6,6 +6,7 @@ plugins {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 archivesBaseName = project.archives_base_name
 version = "${project.mod_version}+minecraft-${project.minecraft_version}"
@@ -22,6 +23,10 @@ repositories {
 	maven {
 		name = "NerdHubMC"
 		url = "https://maven.abusedmaster.xyz/"
+	}
+	maven {
+		name = "CottonMC"
+		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
 }
 
@@ -40,8 +45,8 @@ dependencies {
 	modCompile "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
 	include "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
 
-	modCompile "com.github.vini2003:spinnery:${project.spinnery}"
-	include "com.github.vini2003:spinnery:${project.spinnery}"
+	modCompile "io.github.cottonmc:LibGui:${project.libgui}"
+	include "io.github.cottonmc:LibGui:${project.libgui}"
 
 	modImplementation "com.github.emilyploszaj:trinkets:${project.trinkets}"
 

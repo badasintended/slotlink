@@ -2,10 +2,10 @@ package io.gitlab.intended.storagenetworks
 
 import io.github.prospector.modmenu.api.ConfigScreenFactory
 import io.github.prospector.modmenu.api.ModMenuApi
-import io.gitlab.intended.storagenetworks.block.ModBlocks
-import io.gitlab.intended.storagenetworks.block.entity.ModBlockEntities
-import io.gitlab.intended.storagenetworks.client.gui.screen.ModScreens
-import io.gitlab.intended.storagenetworks.container.ModContainers
+import io.gitlab.intended.storagenetworks.block.BlockRegistry
+import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
+import io.gitlab.intended.storagenetworks.client.gui.screen.ScreenRegistry
+import io.gitlab.intended.storagenetworks.container.ContainerRegistry
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig
 import me.sargunvohra.mcmods.autoconfig1u.ConfigData
 import me.sargunvohra.mcmods.autoconfig1u.annotation.Config
@@ -34,15 +34,15 @@ object Mod {
     fun main() {
         AutoConfig.register(ModConfig::class.java) { def, clazz -> JanksonConfigSerializer(def, clazz) }
 
-        ModBlocks.init()
-        ModBlockEntities.init()
-        ModContainers.init()
+        BlockRegistry.init()
+        BlockEntityTypeRegistry.init()
+        ContainerRegistry.init()
     }
 
     @Suppress("unused")
     @Environment(EnvType.CLIENT)
     fun client() {
-        ModScreens.init()
+        ScreenRegistry.init()
     }
 
 }

@@ -1,7 +1,7 @@
 package io.gitlab.intended.storagenetworks.container
 
+import io.gitlab.intended.storagenetworks.block.BlockRegistry
 import io.gitlab.intended.storagenetworks.block.ModBlock
-import io.gitlab.intended.storagenetworks.block.ModBlocks
 import net.fabricmc.fabric.api.container.ContainerFactory
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.minecraft.container.Container
@@ -9,11 +9,11 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 
-object ModContainers {
+object ContainerRegistry {
 
     fun init() {
-        r(ModBlocks.REQUEST) { id, _, player, _ -> RequestContainer(id, player) }
-        r(ModBlocks.MASTER) { id, _, player, _ -> MasterContainer(id, player) }
+        r(BlockRegistry.REQUEST) { id, _, player, buf -> RequestContainer(id, player, buf) }
+        r(BlockRegistry.MASTER) { id, _, player, buf -> MasterContainer(id, player, buf) }
     }
 
     private fun <C : Container> r(modBlock: ModBlock, function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> C) {

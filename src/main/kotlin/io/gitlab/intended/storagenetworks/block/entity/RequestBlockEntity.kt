@@ -1,18 +1,18 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
 import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
 
-class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
+class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST) {
 
-    private var storagePos = ListTag()
+    private var craftingInv = CompoundTag()
+    private var outputInv = CompoundTag()
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
-        tag.put("storagePos", storagePos)
+        tag.put("craftingInv", craftingInv)
+        tag.put("outputInv", outputInv)
 
         return tag
     }
@@ -20,7 +20,8 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
 
-        storagePos = tag["storagePos"]!! as ListTag
+        craftingInv = tag.getCompound("craftingInv")
+        outputInv = tag.getCompound("outputInv")
     }
 
 }

@@ -24,7 +24,7 @@ class RequestBlock(id: String) : ChildBlock(id) {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) ModContainer.open(this, player)
+        if (!world.isClient) ModContainer.open(this, pos, player)
         return ActionResult.SUCCESS
     }
 

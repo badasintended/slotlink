@@ -5,7 +5,7 @@ import io.gitlab.intended.storagenetworks.item.ModItem
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry
 
-object ModBlocks {
+object BlockRegistry {
 
     val MASTER = MasterBlock("master")
     val REQUEST = RequestBlock("request")

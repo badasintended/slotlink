@@ -1,6 +1,7 @@
 package io.gitlab.intended.storagenetworks.block
 
 import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.Inventory
@@ -23,7 +24,7 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
      *
      * Dominant direction (from most to least):
      * NORTH, SOUTH, EAST, WEST, UP, DOWN.
-     * (Specified in [CableBlock.propertyMap])
+     * (Based on [CableBlock.propertyMap])
      *
      * It will connect to the most dominant first, and remains connected
      * even when more dominant is placed after.
@@ -37,12 +38,11 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         pos: BlockPos,
         facing: Direction,
         state: BlockState,
-        neighborPos: BlockPos,
-        ignoreAirBlock: Boolean = false
+        neighborPos: BlockPos
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (neighbor.hasBlockEntity()) {
-            if (Inventory::class.java.isAssignableFrom(world.getBlockEntity(neighborPos)!!.javaClass)) {
+            if (hasInventory(world.getBlockEntity(neighborPos))) {
                 val blockEntity = world.getBlockEntity(pos)!!
                 val nbt = blockEntity.toTag(CompoundTag())
                 val linkedPosTag = nbt.getCompound("linkedPos")
@@ -53,12 +53,10 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
                     changeLink = true
                 } else {
                     val linkedPos = tag2Pos(linkedPosTag)
-                    // Mod.log(Level.WARNING, "${linkedPos.x} ${linkedPos.y} ${linkedPos.z}")
                     val linked = world.getBlockState(linkedPos).block
-                    // Mod.log(Level.WARNING, linked.translationKey)
                     if (!linked.hasBlockEntity()) {
                         changeLink = true
-                    } else if (!Inventory::class.java.isAssignableFrom(world.getBlockEntity(linkedPos)!!.javaClass)) {
+                    } else if (!hasInventory(world.getBlockEntity(linkedPos))) {
                         changeLink = true
                     } else if (neighborPos == linkedPos) {
                         changeLink = true
@@ -76,6 +74,13 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         return state
     }
 
+    /**
+     * @return whether a [BlockEntity] has [Inventory] in it.
+     */
+    private fun hasInventory(blockEntity: BlockEntity?): Boolean {
+        return Inventory::class.java.isAssignableFrom(blockEntity!!.javaClass)
+    }
+
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
         val end = cuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, ctx)
@@ -85,13 +90,13 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
     override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {
         super.onPlaced(world, pos, state, placer, itemStack)
 
-        var stateUpdated = state
+        var updatedState = state
 
         posFacingAround(pos).forEach { (facing, neighborPos) ->
-            stateUpdated = checkLink(world, pos, facing, stateUpdated, neighborPos)
+            updatedState = checkLink(world, pos, facing, updatedState, neighborPos)
         }
 
-        world.setBlockState(pos, stateUpdated)
+        world.setBlockState(pos, updatedState)
     }
 
     override fun getStateForNeighborUpdate(
@@ -103,7 +108,21 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         neighborPos: BlockPos
     ): BlockState {
         val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
-        return checkLink(world, pos, facing, fromSuper, neighborPos)
+        var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
+        if (neighborPos == tag2Pos(world.getBlockEntity(pos)!!.toTag(CompoundTag()).getCompound("linkedPos"))) {
+            var checkAround = false
+            if (neighborState.block.hasBlockEntity()) {
+                if (!hasInventory(world.getBlockEntity(neighborPos))) {
+                    checkAround = true
+                }
+            } else checkAround = true
+            if (checkAround) {
+                posFacingAround(pos).forEach { (facingAround, posAround) ->
+                    updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
+                }
+            }
+        }
+        return updatedState
     }
 
 }

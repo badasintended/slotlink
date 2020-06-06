@@ -1,5 +1,6 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
+import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
@@ -27,6 +28,4 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
 
 }
 
-class RequestBlockEntity : ChildBlockEntity(ModBlockEntities.REQUEST)
-
-class CableBlockEntity : ChildBlockEntity(ModBlockEntities.CABLE)
+class CableBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.CABLE)

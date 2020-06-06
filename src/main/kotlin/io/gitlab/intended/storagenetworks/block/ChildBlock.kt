@@ -66,16 +66,10 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
                 world.updateNeighbors(pos, block)
             }
         } else if (currentlyHasMaster) {
-            val master = currentNbt.getCompound("masterPos")
-            val masterPos = tag2Pos(master)
-            val masterBlock = world.getBlockState(masterPos).block
-
             currentNbt.putBoolean("hasMaster", false)
             blockEntity.fromTag(currentNbt)
             blockEntity.markDirty()
             world.updateNeighbors(pos, block)
-
-            if (masterBlock is MasterBlock) world.updateNeighbors(masterPos, masterBlock)
         }
     }
 
