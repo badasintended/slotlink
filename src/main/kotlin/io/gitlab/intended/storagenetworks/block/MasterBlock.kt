@@ -1,7 +1,8 @@
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.block.entity.MasterBlockEntity
-import io.gitlab.intended.storagenetworks.container.ModContainer
+import io.gitlab.intended.storagenetworks.openContainer
+import io.gitlab.intended.storagenetworks.pos2Tag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
@@ -69,7 +70,7 @@ class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) ModContainer.open(this, pos, player)
+        if (!world.isClient) openContainer(this, player) { it.writeBlockPos(pos) }
         return ActionResult.SUCCESS
     }
 

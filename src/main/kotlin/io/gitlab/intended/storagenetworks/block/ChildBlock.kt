@@ -1,5 +1,6 @@
 package io.gitlab.intended.storagenetworks.block
 
+import io.gitlab.intended.storagenetworks.pos2Tag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState

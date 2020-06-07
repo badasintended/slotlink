@@ -1,7 +1,7 @@
 package io.gitlab.intended.storagenetworks.block
 
+import io.gitlab.intended.storagenetworks.*
 import net.minecraft.block.BlockState
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.Inventory
@@ -74,15 +74,8 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         return state
     }
 
-    /**
-     * @return whether a [BlockEntity] has [Inventory] in it.
-     */
-    private fun hasInventory(blockEntity: BlockEntity?): Boolean {
-        return Inventory::class.java.isAssignableFrom(blockEntity!!.javaClass)
-    }
-
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
-        val end = cuboid(5, 5, 5, 6, 6, 6)
+        val end = bbCuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, ctx)
         return VoxelShapes.union(result, end)
     }

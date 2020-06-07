@@ -15,9 +15,8 @@
   "icon"         : "assets/storagenetworks/icon.png",
   "environment"  : "*",
   "entrypoints"  : {
-    "main"   : [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::main"}],
-    "client" : [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::client"}],
-    "modmenu": [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.ModMenu"}]
+    "main"  : [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::main"}],
+    "client": [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::client"}]
   },
   "mixins"       : ["storagenetworks.mixins.json"],
   "depends"      : {

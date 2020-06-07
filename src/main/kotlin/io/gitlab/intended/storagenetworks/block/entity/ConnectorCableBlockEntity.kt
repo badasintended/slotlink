@@ -1,13 +1,33 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
 import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
+import io.gitlab.intended.storagenetworks.pos2Tag
+import io.gitlab.intended.storagenetworks.tag2Pos
+import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.World
 
 abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type) {
 
+    abstract val masterConnectorListKey: String
+
     private var linkedPos = CompoundTag()
+
+    private fun addToMasterConnectorList(world: World) {
+        if (hasMaster) {
+            val masterBlockEntity = world.getBlockEntity(tag2Pos(masterPos))!!
+            val masterNbt = masterBlockEntity.toTag(CompoundTag())
+
+            val masterList = masterNbt.getList(masterConnectorListKey, NbtType.COMPOUND)
+            masterList.add(pos2Tag(pos))
+
+            masterNbt.put(masterConnectorListKey, masterList)
+            masterBlockEntity.fromTag(masterNbt)
+            masterBlockEntity.markDirty()
+        }
+    }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
@@ -23,6 +43,13 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         linkedPos = tag.getCompound("linkedPos")
     }
 
+    override fun markDirty() {
+        if (world != null) addToMasterConnectorList(world!!)
+        super.markDirty()
+    }
+
 }
 
-class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE)
+class LinkCableBlockEntity(
+    override val masterConnectorListKey: String = "linkCables"
+) : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE)

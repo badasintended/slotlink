@@ -1,10 +1,14 @@
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.block.entity.RequestBlockEntity
-import io.gitlab.intended.storagenetworks.container.ModContainer
+import io.gitlab.intended.storagenetworks.hasInventory
+import io.gitlab.intended.storagenetworks.openContainer
+import io.gitlab.intended.storagenetworks.tag2Pos
+import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -24,7 +28,47 @@ class RequestBlock(id: String) : ChildBlock(id) {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) ModContainer.open(this, pos, player)
+        if (!world.isClient) {
+            val blockEntity = world.getBlockEntity(pos)!!
+            val nbt = blockEntity.toTag(CompoundTag())
+
+            openContainer(this, player) { buf ->
+                val hasMaster = nbt.getBoolean("hasMaster")
+                buf.writeBlockPos(pos)
+                buf.writeBoolean(hasMaster)
+                if (hasMaster) {
+                    val masterPos = tag2Pos(nbt.getCompound("masterPos"))
+
+                    var totalInventory = 0
+                    val inventoryPos = HashSet<BlockPos>()
+
+                    val masterNbt = world.getBlockEntity(masterPos)!!.toTag(CompoundTag())
+                    val linkCables = masterNbt.getList("linkCables", NbtType.COMPOUND)
+                    linkCables.forEach { linkCablePosTag ->
+                        linkCablePosTag as CompoundTag
+                        val linkCablePos = tag2Pos(linkCablePosTag)
+                        val linkCableBlock = world.getBlockState(linkCablePos).block
+
+                        if (linkCableBlock is LinkCableBlock) {
+                            val linkCableNbt = world.getBlockEntity(linkCablePos)!!.toTag(CompoundTag())
+                            val linkedPos = tag2Pos(linkCableNbt.getCompound("linkedPos"))
+                            val linkedBlock = world.getBlockState(linkedPos).block
+
+                            if (linkedBlock.hasBlockEntity()) {
+                                val linkedBlockEntity = world.getBlockEntity(linkedPos)
+                                if (hasInventory(linkedBlockEntity)) {
+                                    totalInventory++
+                                    inventoryPos.add(linkedPos)
+                                }
+                            }
+                        }
+                    }
+
+                    buf.writeInt(totalInventory)
+                    inventoryPos.forEach { buf.writeBlockPos(it) }
+                }
+            }
+        }
         return ActionResult.SUCCESS
     }
 

@@ -7,8 +7,8 @@ import net.minecraft.nbt.CompoundTag
 
 abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockEntity(type) {
 
-    private var hasMaster = false
-    private var masterPos = CompoundTag()
+    protected var hasMaster = false
+    protected var masterPos = CompoundTag()
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)

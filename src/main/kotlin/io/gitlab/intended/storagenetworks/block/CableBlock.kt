@@ -1,6 +1,7 @@
 package io.gitlab.intended.storagenetworks.block
 
 import com.google.common.collect.ImmutableMap
+import io.gitlab.intended.storagenetworks.bbCuboid
 import io.gitlab.intended.storagenetworks.block.entity.CableBlockEntity
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
@@ -86,14 +87,14 @@ open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
     }
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
-        val north = cuboid(6, 6, 0, 4, 4, 10)
-        val south = cuboid(6, 6, 6, 4, 4, 10)
-        val east = cuboid(6, 6, 6, 10, 4, 4)
-        val west = cuboid(0, 6, 6, 10, 4, 4)
-        val up = cuboid(6, 6, 6, 4, 10, 4)
-        val down = cuboid(6, 0, 6, 4, 10, 4)
+        val north = bbCuboid(6, 6, 0, 4, 4, 10)
+        val south = bbCuboid(6, 6, 6, 4, 4, 10)
+        val east = bbCuboid(6, 6, 6, 10, 4, 4)
+        val west = bbCuboid(0, 6, 6, 10, 4, 4)
+        val up = bbCuboid(6, 6, 6, 4, 10, 4)
+        val down = bbCuboid(6, 0, 6, 4, 10, 4)
 
-        var result = cuboid(6, 6, 6, 4, 4, 4)
+        var result = bbCuboid(6, 6, 6, 4, 4, 4)
 
         if (state[NORTH]) result = VoxelShapes.union(result, north)
         if (state[SOUTH]) result = VoxelShapes.union(result, south)
