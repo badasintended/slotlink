@@ -9,9 +9,10 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.World
 
-abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type) {
-
-    abstract val masterConnectorListKey: String
+abstract class ConnectorCableBlockEntity(
+    type: BlockEntityType<out BlockEntity>,
+    private val listKey: String
+) : ChildBlockEntity(type) {
 
     private var linkedPos = CompoundTag()
 
@@ -20,10 +21,10 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
             val masterBlockEntity = world.getBlockEntity(tag2Pos(masterPos))!!
             val masterNbt = masterBlockEntity.toTag(CompoundTag())
 
-            val masterList = masterNbt.getList(masterConnectorListKey, NbtType.COMPOUND)
+            val masterList = masterNbt.getList(listKey, NbtType.COMPOUND)
             masterList.add(pos2Tag(pos))
 
-            masterNbt.put(masterConnectorListKey, masterList)
+            masterNbt.put(listKey, masterList)
             masterBlockEntity.fromTag(masterNbt)
             masterBlockEntity.markDirty()
         }
@@ -50,6 +51,4 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
 }
 
-class LinkCableBlockEntity(
-    override val masterConnectorListKey: String = "linkCables"
-) : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE)
+class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE, "linkCables")

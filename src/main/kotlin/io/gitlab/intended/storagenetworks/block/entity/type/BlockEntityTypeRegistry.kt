@@ -29,11 +29,7 @@ object BlockEntityTypeRegistry {
     }
 
     private fun r(modBlock: ModBlock, blockEntityType: BlockEntityType<out BlockEntity>) {
-        Registry.register(
-            Registry.BLOCK_ENTITY_TYPE,
-            modBlock.id,
-            blockEntityType
-        )
+        Registry.register(Registry.BLOCK_ENTITY_TYPE, modBlock.id, blockEntityType)
     }
 
     private fun <T : BlockEntity> c(block: Block, function: () -> T): BlockEntityType<T> {

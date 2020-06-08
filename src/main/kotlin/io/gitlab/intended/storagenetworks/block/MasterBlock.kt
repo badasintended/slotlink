@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.block.entity.MasterBlockEntity

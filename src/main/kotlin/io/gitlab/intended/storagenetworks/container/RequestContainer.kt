@@ -1,12 +1,9 @@
 package io.gitlab.intended.storagenetworks.container
 
-import io.github.cottonmc.cotton.gui.widget.WClippedPanel
 import io.github.cottonmc.cotton.gui.widget.WGridPanel
 import io.github.cottonmc.cotton.gui.widget.WItemSlot
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel
 import io.gitlab.intended.storagenetworks.gui.widget.WCraftingResultSlot
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.container.BlockContext
 import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
@@ -15,8 +12,6 @@ import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.ContainerSlotUpdateS2CPacket
-import net.minecraft.recipe.Recipe
-import net.minecraft.recipe.RecipeFinder
 import net.minecraft.recipe.RecipeType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.PacketByteBuf
@@ -98,19 +93,5 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
             context.run { world, _ -> craftItem(world) }
         } else super.onContentChanged(inventory)
     }
-
-    override fun populateRecipeFinder(recipeFinder: RecipeFinder) = craftingInv.provideRecipeInputs(recipeFinder)
-    override fun getCraftingWidth() = craftingInv.width
-    override fun getCraftingHeight() = craftingInv.height
-    override fun getCraftingResultSlotIndex() = 36
-    override fun matches(recipe: Recipe<in Inventory>) = recipe.matches(craftingInv, player.world)
-
-    override fun clearCraftingSlots() {
-        craftingInv.clear()
-        resultInv.clear()
-    }
-
-    @Environment(EnvType.CLIENT)
-    override fun getCraftingSlotCount() = 10
 
 }

@@ -10,5 +10,5 @@
     "C": {"item": "storagenetworks:link_cable"},
     "G": {"item": "minecraft:gold_ingot"}
   },
-  "result" : {"item": "storagenetworks:master"}
+  "result" : {"item": "storagenetworks:request"}
 }

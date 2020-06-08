@@ -1,7 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package io.gitlab.intended.storagenetworks.block
 
 import io.gitlab.intended.storagenetworks.*
+import io.gitlab.intended.storagenetworks.block.entity.LinkCableBlockEntity
 import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.Inventory
@@ -14,8 +18,13 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
-abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
+abstract class ConnectorCableBlock(
+    id: String,
+    val blockEntity: KClass<out BlockEntity>
+) : CableBlock(id) {
 
     /**
      * Checks linked block (e.g. chest) and update block state accordingly.
@@ -74,6 +83,8 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
         return state
     }
 
+    override fun createBlockEntity(view: BlockView) = blockEntity.createInstance()
+
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, ctx)
@@ -119,3 +130,5 @@ abstract class ConnectorCableBlock(id: String) : CableBlock(id) {
     }
 
 }
+
+class LinkCableBlock(id: String) : ConnectorCableBlock(id, LinkCableBlockEntity::class)

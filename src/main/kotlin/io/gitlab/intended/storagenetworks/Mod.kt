@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+
 package io.gitlab.intended.storagenetworks
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
@@ -20,14 +22,12 @@ object Mod {
     fun id(path: String) = Identifier(ID, path)
     fun log(level: Level, msg: String) = LOGGER.log(level, "[$NAME] $msg")
 
-    @Suppress("unused")
     fun main() {
         BlockRegistry.init()
         BlockEntityTypeRegistry.init()
         ContainerRegistry.init()
     }
 
-    @Suppress("unused")
     @Environment(EnvType.CLIENT)
     fun client() {
         ScreenRegistry.init()
