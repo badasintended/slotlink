@@ -2,10 +2,8 @@ package io.gitlab.intended.storagenetworks.client.gui.screen
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
 import io.gitlab.intended.storagenetworks.block.ModBlock
-import io.gitlab.intended.storagenetworks.client.gui.screen.ingame.MasterScreen
-import io.gitlab.intended.storagenetworks.client.gui.screen.ingame.RequestScreen
-import io.gitlab.intended.storagenetworks.container.MasterContainer
-import io.gitlab.intended.storagenetworks.container.RequestContainer
+import io.gitlab.intended.storagenetworks.gui.container.MasterContainer
+import io.gitlab.intended.storagenetworks.gui.container.RequestContainer
 import net.fabricmc.fabric.api.client.screen.ContainerScreenFactory
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
 import net.minecraft.client.gui.screen.ingame.ContainerScreen

@@ -17,6 +17,8 @@ repositories {
 		name = "CottonMC"
 		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
+	// spinnery
+	mavenLocal()
 }
 
 dependencies {
@@ -30,6 +32,9 @@ dependencies {
 
 	modCompile "io.github.cottonmc:LibGui:${project.libgui}"
 	include "io.github.cottonmc:LibGui:${project.libgui}"
+
+	modCompile "com.github.vini2003:spinnery:${project.spinnery}"
+	include "com.github.vini2003:spinnery:${project.spinnery}"
 
 	modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
