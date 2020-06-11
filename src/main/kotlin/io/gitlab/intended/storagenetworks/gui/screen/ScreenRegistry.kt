@@ -1,4 +1,4 @@
-package io.gitlab.intended.storagenetworks.client.gui.screen
+package io.gitlab.intended.storagenetworks.gui.screen
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
 import io.gitlab.intended.storagenetworks.block.ModBlock

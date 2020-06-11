@@ -1,11 +1,7 @@
-package io.gitlab.intended.storagenetworks.block.entity.type
+package io.gitlab.intended.storagenetworks.block.entity
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
 import io.gitlab.intended.storagenetworks.block.ModBlock
-import io.gitlab.intended.storagenetworks.block.entity.CableBlockEntity
-import io.gitlab.intended.storagenetworks.block.entity.LinkCableBlockEntity
-import io.gitlab.intended.storagenetworks.block.entity.MasterBlockEntity
-import io.gitlab.intended.storagenetworks.block.entity.RequestBlockEntity
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType

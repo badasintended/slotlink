@@ -23,7 +23,7 @@ import kotlin.reflect.full.createInstance
 
 abstract class ConnectorCableBlock(
     id: String,
-    val blockEntity: KClass<out BlockEntity>
+    private val blockEntity: KClass<out BlockEntity>
 ) : CableBlock(id) {
 
     /**

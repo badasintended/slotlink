@@ -1,7 +1,6 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
 import io.gitlab.intended.storagenetworks.block.LinkCableBlock
-import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
 import io.gitlab.intended.storagenetworks.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.entity.BlockEntity

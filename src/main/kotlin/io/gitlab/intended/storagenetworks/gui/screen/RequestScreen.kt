@@ -1,4 +1,4 @@
-package io.gitlab.intended.storagenetworks.client.gui.screen
+package io.gitlab.intended.storagenetworks.gui.screen
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
 import io.gitlab.intended.storagenetworks.gui.container.RequestContainer
@@ -60,15 +60,13 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         resultSlot.setInventoryNumber<WSlot>(2)
         resultSlot.setSlotNumber<WSlot>(0)
 
-
-
         val invPanel = main.createChild(
-            { WInventoryPanel(container.invMap) },
-            Position.of(main, b, b),
-            Size.of((9f * g), (6f * g))
+            { WInventoryPanel(container.slotList) },
+            Position.of(main, b, b)
         )
 
         invPanel.init()
+        root.recalculateCache()
     }
 
 }

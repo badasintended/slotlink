@@ -1,6 +1,5 @@
 package io.gitlab.intended.storagenetworks.block.entity
 
-import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
 import io.gitlab.intended.storagenetworks.pos2Tag
 import io.gitlab.intended.storagenetworks.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType

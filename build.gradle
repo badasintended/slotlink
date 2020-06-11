@@ -30,9 +30,6 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
-	modCompile "io.github.cottonmc:LibGui:${project.libgui}"
-	include "io.github.cottonmc:LibGui:${project.libgui}"
-
 	modCompile "com.github.vini2003:spinnery:${project.spinnery}"
 	include "com.github.vini2003:spinnery:${project.spinnery}"
 

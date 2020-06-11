@@ -3,9 +3,9 @@
 package io.gitlab.intended.storagenetworks
 
 import io.gitlab.intended.storagenetworks.block.BlockRegistry
-import io.gitlab.intended.storagenetworks.block.entity.type.BlockEntityTypeRegistry
-import io.gitlab.intended.storagenetworks.client.gui.screen.ScreenRegistry
+import io.gitlab.intended.storagenetworks.block.entity.BlockEntityTypeRegistry
 import io.gitlab.intended.storagenetworks.gui.container.ContainerRegistry
+import io.gitlab.intended.storagenetworks.gui.screen.ScreenRegistry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.util.Identifier
