@@ -36,6 +36,8 @@ class WInventorySearchBar : WTextField() {
         }
 
         val glScale = MinecraftClient.getInstance().window.scaleFactor
+        val rawHeight = MinecraftClient.getInstance().window.height
+
     }
 
 }

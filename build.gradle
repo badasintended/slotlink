@@ -17,8 +17,10 @@ repositories {
 		name = "CottonMC"
 		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
-	// spinnery
-	mavenLocal()
+	maven {
+		name = "Spinnery"
+		url  "https://dl.bintray.com/spinnery/Spinnery"
+	}
 }
 
 dependencies {

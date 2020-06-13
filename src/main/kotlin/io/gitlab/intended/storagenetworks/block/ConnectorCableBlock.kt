@@ -27,18 +27,18 @@ abstract class ConnectorCableBlock(
 ) : CableBlock(id) {
 
     /**
-     * Checks linked block (e.g. chest) and update block state accordingly.
-     * If the current linked block doesn't have [Inventory], update it.
-     * Otherwise, keep it and don't "connect (visually)" to checked block.
+     * - Checks linked block (e.g. chest) and update block state accordingly.
+     *   If the current linked block doesn't have [Inventory], update it.
+     *   Otherwise, keep it and ignore other block.
      *
-     * Dominant direction (from most to least):
-     * NORTH, SOUTH, EAST, WEST, UP, DOWN.
-     * (Based on [CableBlock.propertyMap])
+     * - Dominant direction (from most to least):
+     *   NORTH, SOUTH, EAST, WEST, UP, DOWN.
+     *   (Based on [CableBlock.propertyMap].)
      *
-     * It will connect to the most dominant first, and remains connected
-     * even when more dominant is placed after.
-     * Example: when cable already connected to WEST, it will remains
-     * connected to WEST even when we place SOUTH later on.
+     * - It will connect to the most dominant direction first, and remains connected
+     *   even when more dominant direction is placed after.
+     *   **Example**: when cable already connected to WEST, it will remains
+     *   connected to WEST even when we place on SOUTH later on.
      *
      * TODO: Optimize, maybe.
      */

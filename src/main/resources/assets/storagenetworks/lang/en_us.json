@@ -17,6 +17,7 @@
   "block.storagenetworks.export_cable.tooltip"             : "§7from network to block",
   "block.storagenetworks.processing_cable"                 : "Processing Cable",
   "block.storagenetworks.processing_cable.tooltip"         : "§7Only for thinkerer",
+  "container.storagenetworks.request"                      : "Storage Request",
   "sort.name"                                              : "Sort by Name",
   "sort.identifier"                                        : "Sort by Identifier",
   "sort.count"                                             : "Sort by count",

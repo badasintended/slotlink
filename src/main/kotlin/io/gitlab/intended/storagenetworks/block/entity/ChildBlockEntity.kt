@@ -28,5 +28,3 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
 }
 
 class CableBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.CABLE)
-
-class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST)

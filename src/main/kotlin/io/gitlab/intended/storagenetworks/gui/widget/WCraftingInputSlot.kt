@@ -2,7 +2,6 @@ package io.gitlab.intended.storagenetworks.gui.widget
 
 import net.minecraft.item.ItemStack
 import spinnery.widget.WSlot
-import spinnery.widget.api.Action
 import java.util.function.Supplier
 
 class WCraftingInputSlot(
@@ -13,11 +12,6 @@ class WCraftingInputSlot(
         val result = super.setStack<W>(stack)
         Supplier(function).get()
         return result
-    }
-
-    override fun consume(action: Action, subtype: Action.Subtype) {
-        //setLocked<WSlot>(action != Action.PICKUP)
-        super.consume(action, subtype)
     }
 
 }

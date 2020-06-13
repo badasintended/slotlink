@@ -1,14 +1,23 @@
 package io.gitlab.intended.storagenetworks.gui.widget
 
 import io.gitlab.intended.storagenetworks.Mod
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.minecraft.util.registry.Registry
-import spinnery.widget.*
+import spinnery.widget.WPanel
+import spinnery.widget.WSlot
+import spinnery.widget.WStaticImage
+import spinnery.widget.WVerticalSlider
 import spinnery.widget.api.Position
 import spinnery.widget.api.Size
 import kotlin.math.sign
 
 class WInventoryPanel(
-    private val serverSlot: ArrayList<WSlot>
+    private val serverSlots: ArrayList<WSlot>,
+    private var lastSort: SortBy,
+    private val setLastSortFunction: (SortBy) -> Unit,
+    private val isDeleted: (Int) -> Boolean
 ) : WPanel() {
 
     enum class SortBy {
@@ -18,6 +27,7 @@ class WInventoryPanel(
 
         companion object {
             val values = values()
+            fun of(i: Int) = values[i.coerceIn(0, 2)]
         }
 
         fun next(): SortBy {
@@ -25,72 +35,107 @@ class WInventoryPanel(
         }
     }
 
-    private val slots = arrayListOf<WSlot>()
-
-    private val sortButton = createChild(
-        { WButton() },
-        Position.of(this, (7 * 18f), ((6 * 18f) + 5f)),
-        Size.of(18f)
-    )
+    private val sortedSlots = serverSlots
+    private val viewedSlots = arrayListOf<WSlot>()
 
     private val sortImage = createChild(
         { WStaticImage() },
-        Position.of(this, ((7 * 18f) + 1f), ((6 * 18f) + 6f), 4f),
+        Position.of(this, ((7 * 18f) + 1f), ((6 * 18f) + 5f), 4f),
         Size.of(16f)
     )
 
-    private var prevScroll = 0
-    private var prevSort = SortBy.COUNT
+    private val scrollBar = createChild(
+        { WFakeScrollBar { scroll(it) } },
+        Position.of(this, ((8 * 18f) + 4f), 0f),
+        Size.of(14f, (6 * 18f))
+    )
+
+    private var lastScroll = 0
+
+    init {
+        sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/count.png"))
+    }
 
     fun init() {
-        setSize<WPanel>(Size.of((9 * 18f), (7 * 18f)))
+        setSize<WPanel>(Size.of((9 * 18f), (7 * 18f) + 4f))
 
-        val bg = createChild({ WStaticImage() }, Position.of(this), Size.of((8 * 18f), (6 * 18f)))
-        bg.setTexture<WStaticImage>(Mod.id("textures/gui/bg.png"))
+        val scrollArea = createChild(
+            { WMouseArea() },
+            Position.of(this),
+            Size.of((9 * 18f), (6 * 18f))
+        )
+        scrollArea.onMouseScrolled = { scroll(lastScroll - sign(it).toInt()) }
 
-        for (i in 0..47) {
-            val slot = createChild({ WSlot() }, Position.of(this, ((i % 8) * 18f), ((i / 8) * 18f), 2f), Size.of(18f))
-            slots.add(slot)
+        if (serverSlots.size == 0) {
+            val warning = createChild({ WStaticImage() }, Position.of(this, 56f, 38f, 4f), Size.of(32f))
+            warning.setTexture<WStaticImage>(Mod.id("textures/gui/warning.png"))
         }
 
-        val scrollBar = createChild(
-            { WVerticalSlider() },
-            Position.of(this, ((8 * 18f) + 5f), 0f),
-            Size.of(12f, (6 * 18f))
+        for (i in 0..47) {
+            val slot = createChild(
+                { WViewedSlot(isDeleted) },
+                Position.of(this, ((i % 8) * 18f), ((i / 8) * 18f), 2f),
+                Size.of(18f)
+            )
+            slot.setWhitelist<WSlot>()
+            slot.setHidden<WSlot>(true)
+            viewedSlots.add(slot)
+        }
+
+        val slotArea = createChild(
+            { WMouseArea() },
+            Position.of(this),
+            Size.of((8 * 18f), (6 * 18f))
         )
+        slotArea.onMouseReleased = {
+            GlobalScope.launch {
+                delay(250)
+                sort()
+            }
+        }
+
         scrollBar.setMin<WVerticalSlider>(0f)
-        scrollBar.setMax<WVerticalSlider>(((serverSlot.size / 8f) - 5f).coerceAtLeast(0f))
+        scrollBar.setMax<WVerticalSlider>(((serverSlots.size / 8) - 5f).coerceAtLeast(0f))
 
         val searchBar = createChild(
             { WInventorySearchBar() },
-            Position.of(this, 0f, ((6 * 18f) + 5f)),
-            Size.of(((7 * 18f) + 1f), 18f)
+            Position.of(this, 0f, ((6 * 18f) + 4f)),
+            Size.of(((7 * 18f) - 4f), 18f)
         )
 
-        sortButton.setOnMouseClicked<WButton> { _, _, _, _ -> sort(prevSort.next()) }
+        val sortButton = createChild(
+            { WInventorySortButton { sort(lastSort.next()) } },
+            Position.of(this, (7 * 18f), ((6 * 18f) + 4f)),
+            Size.of(18f)
+        )
 
-        sort(SortBy.COUNT)
+        GlobalScope.launch {
+            delay(50)
+            sort()
+        }
     }
 
     private fun scroll(v: Int) {
-        prevScroll = v.coerceIn(0, ((serverSlot.size / 8) - 5).coerceAtLeast(0))
-        val offset = prevScroll * 8
+        val max = ((sortedSlots.size / 8) - 5).coerceAtLeast(0)
+        lastScroll = v.coerceIn(0, max)
+        scrollBar.setProgress<WVerticalSlider>((max - lastScroll).toFloat())
+        val offset = lastScroll * 8
 
         var i = 0
         for (j in 0..47) {
-            if (j < (serverSlot.size - offset)) {
-                slots[j].setInventoryNumber<WSlot>(serverSlot[j + offset].inventoryNumber)
-                slots[j].setSlotNumber<WSlot>(serverSlot[j + offset].slotNumber)
-                slots[j].setBlacklist<WSlot>()
-                slots[j].setHidden<WSlot>(false)
+            if (j < (sortedSlots.size - offset)) {
+                viewedSlots[j].setInventoryNumber<WSlot>(sortedSlots[j + offset].inventoryNumber)
+                viewedSlots[j].setSlotNumber<WSlot>(sortedSlots[j + offset].slotNumber)
+                viewedSlots[j].setBlacklist<WSlot>()
+                viewedSlots[j].setHidden<WSlot>(false)
                 i++
             }
         }
         if (i < 48) for (j in i..47) {
-            slots[j].setInventoryNumber<WSlot>(3)
-            slots[j].setSlotNumber<WSlot>(0)
-            slots[j].setWhitelist<WSlot>()
-            slots[j].setHidden<WSlot>(true)
+            viewedSlots[j].setInventoryNumber<WSlot>(3)
+            viewedSlots[j].setSlotNumber<WSlot>(0)
+            viewedSlots[j].setWhitelist<WSlot>()
+            viewedSlots[j].setHidden<WSlot>(true)
         }
     }
 
@@ -99,37 +144,37 @@ class WInventoryPanel(
             SortBy.NAME -> {
                 val filled = arrayListOf<WSlot>()
                 val empty = arrayListOf<WSlot>()
-                serverSlot.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
+                serverSlots.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
                 filled.sortBy { it.stack.name.asString() }
-                serverSlot.clear()
-                serverSlot.addAll(filled)
-                serverSlot.addAll(empty)
+                sortedSlots.clear()
+                sortedSlots.addAll(filled)
+                sortedSlots.addAll(empty)
                 sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/name.png"))
             }
             SortBy.IDENTIFIER -> {
                 val filled = arrayListOf<WSlot>()
                 val empty = arrayListOf<WSlot>()
-                serverSlot.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
+                serverSlots.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
                 filled.sortBy { Registry.ITEM.getId(it.stack.item).toString() }
-                serverSlot.clear()
-                serverSlot.addAll(filled)
-                serverSlot.addAll(empty)
+                sortedSlots.clear()
+                sortedSlots.addAll(filled)
+                sortedSlots.addAll(empty)
                 sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/identifier.png"))
             }
             SortBy.COUNT -> {
-                serverSlot.sortByDescending { it.stack.count }
+                val sorted = serverSlots.sortedByDescending { it.stack.count }
+                sortedSlots.clear()
+                sortedSlots.addAll(sorted)
                 sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/count.png"))
             }
         }
-        prevSort = sortBy
-        scroll(prevScroll)
+        if (lastSort != sortBy) scroll(0) else scroll(lastScroll)
+        lastSort = sortBy
+        setLastSortFunction.invoke(sortBy)
     }
+
+    fun sort() = sort(lastSort)
 
     override fun draw() = orderedWidgets.forEach { it.draw() }
-
-    override fun onMouseScrolled(mouseX: Float, mouseY: Float, deltaY: Double) {
-        if (this.isWithinBounds(mouseX, mouseY)) scroll(prevScroll - sign(deltaY).toInt())
-        super.onMouseScrolled(mouseX, mouseY, deltaY)
-    }
 
 }

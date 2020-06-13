@@ -3,12 +3,14 @@ package io.gitlab.intended.storagenetworks
 import com.google.common.collect.ImmutableMap
 import io.gitlab.intended.storagenetworks.block.ModBlock
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
+import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.NbtHelper
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -31,7 +33,7 @@ fun bbCuboid(xPos: Int, yPos: Int, zPos: Int, xSize: Int, ySize: Int, zSize: Int
 }
 
 /**
- * @return a list containing [BlockPos] around parameter
+ * @return a map containing [Direction]s with corresponding [BlockPos] around parameter
  */
 fun posFacingAround(pos: BlockPos): ImmutableMap<Direction, BlockPos> {
     return ImmutableMap.builder<Direction, BlockPos>()
@@ -74,8 +76,13 @@ fun openContainer(block: ModBlock, player: PlayerEntity, function: (PacketByteBu
 }
 
 /**
+ * @param blockEntity must already checked with [Block.hasBlockEntity]
  * @return whether a [BlockEntity] has [Inventory] in it.
  */
 fun hasInventory(blockEntity: BlockEntity?): Boolean {
     return Inventory::class.java.isAssignableFrom(blockEntity!!.javaClass)
+}
+
+fun guiTex(name: String): Identifier {
+    return Mod.id("textures/gui/${name}.png")
 }
