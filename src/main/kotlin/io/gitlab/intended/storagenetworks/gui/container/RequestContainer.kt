@@ -14,7 +14,9 @@ import net.minecraft.recipe.RecipeType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
+import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
+import spinnery.widget.api.Action
 
 class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : ModContainer(syncId, player, buf) {
 
@@ -47,12 +49,11 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         for (i in 0 until totalInventory) inventoryPosSet.add(buf.readBlockPos())
 
         inventoryPosSet.forEachIndexed { index, blockPos ->
-            invMap[index + 4] = world.getBlockEntity(blockPos)!! as Inventory
+            invMap[index + 3] = world.getBlockEntity(blockPos)!! as Inventory
         }
 
         inventories[1] = craftingInv
         inventories[2] = resultInv
-        inventories[3] = CraftingResultInventory()
         inventories.putAll(invMap)
 
         val root = `interface`
@@ -92,15 +93,10 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         }
     }
 
-    fun inputSlots(enable: Boolean) {
-        if (enable) inputSlots.forEach { it.setWhitelist<WSlot>() }
-        else inputSlots.forEach { it.setBlacklist<WSlot>() }
-    }
-
     fun isDeleted(invNumber: Int): Boolean {
         var deleted = false
         context.run { world, _ ->
-            val state = world.getBlockState(inventoryPosSet[invNumber - 4])
+            val state = world.getBlockState(inventoryPosSet[invNumber - 3])
             deleted = state.isAir
         }
         if (deleted) slotList.forEach { if (it.inventoryNumber == invNumber) it.setWhitelist<WSlot>() }
@@ -133,6 +129,64 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         if ((inventory == craftingInv) or (inventory == resultInv)) {
             craftItem()
         } else super.onContentChanged(inventory)
+    }
+
+    /**
+     * Make [Action.QUICK_MOVE] does not target crafting slots also
+     * makes it target player inventory if the slot is one
+     * of the [slotList] and vice versa.
+     */
+    override fun onSlotAction(
+        slotNumber: Int,
+        inventoryNumber: Int,
+        button: Int,
+        action: Action,
+        player: PlayerEntity
+    ) {
+        val source: WSlot = `interface`.getSlot(inventoryNumber, slotNumber) ?: return
+        if (source.isLocked) return
+
+        if (action == Action.QUICK_MOVE) {
+            val playerInvSlot = arrayListOf<WSlot>()
+            val containerSlot = arrayListOf<WSlot>()
+            val craftingSlot = arrayListOf<WSlot>()
+            for (widget in serverInterface.allWidgets) {
+                if (widget is WSlot) when (widget.inventoryNumber) {
+                    0 -> playerInvSlot.add(widget)
+                    1, 2 -> craftingSlot.add(widget)
+                    else -> containerSlot.add(widget)
+                }
+            }
+
+            val targets = arrayListOf<WSlot>()
+            when (source.inventoryNumber) {
+                0 -> {
+                    targets.addAll(containerSlot)
+                    targets.addAll(playerInvSlot)
+                }
+                1, 2 -> {
+                    targets.addAll(playerInvSlot)
+                    targets.addAll(containerSlot)
+                }
+                else -> targets.addAll(playerInvSlot)
+            }
+
+            for (target in targets) {
+                if ((target.inventoryNumber == inventoryNumber) and (target.slotNumber == slotNumber)) continue
+                if (target.refuses(source.stack) or target.isLocked) continue
+
+                if ((!source.stack.isEmpty and target.stack.isEmpty) or (StackUtilities.equalItemAndTag(
+                        source.stack, target.stack
+                    ) and (target.stack.count < target.maxCount))
+                ) {
+                    val max = if (target.stack.isEmpty) source.maxCount else target.maxCount
+                    source.consume(action, Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
+                    StackUtilities.merge(source::getStack, target::getStack, source::getMaxCount) { max }
+                        .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
+                    break
+                }
+            }
+        } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
     }
 
 }

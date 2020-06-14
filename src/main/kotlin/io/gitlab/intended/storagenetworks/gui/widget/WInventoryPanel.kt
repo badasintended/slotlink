@@ -1,6 +1,6 @@
 package io.gitlab.intended.storagenetworks.gui.widget
 
-import io.gitlab.intended.storagenetworks.Mod
+import io.gitlab.intended.storagenetworks.texture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,7 +53,7 @@ class WInventoryPanel(
     private var lastScroll = 0
 
     init {
-        sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/count.png"))
+        sortImage.setTexture<WStaticImage>(texture("gui/count"))
     }
 
     fun init() {
@@ -68,7 +68,7 @@ class WInventoryPanel(
 
         if (serverSlots.size == 0) {
             val warning = createChild({ WStaticImage() }, Position.of(this, 56f, 38f, 4f), Size.of(32f))
-            warning.setTexture<WStaticImage>(Mod.id("textures/gui/warning.png"))
+            warning.setTexture<WStaticImage>(texture("gui/warning"))
         }
 
         for (i in 0..47) {
@@ -149,7 +149,7 @@ class WInventoryPanel(
                 sortedSlots.clear()
                 sortedSlots.addAll(filled)
                 sortedSlots.addAll(empty)
-                sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/name.png"))
+                sortImage.setTexture<WStaticImage>(texture("gui/name"))
             }
             SortBy.IDENTIFIER -> {
                 val filled = arrayListOf<WSlot>()
@@ -159,13 +159,13 @@ class WInventoryPanel(
                 sortedSlots.clear()
                 sortedSlots.addAll(filled)
                 sortedSlots.addAll(empty)
-                sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/identifier.png"))
+                sortImage.setTexture<WStaticImage>(texture("gui/identifier"))
             }
             SortBy.COUNT -> {
                 val sorted = serverSlots.sortedByDescending { it.stack.count }
                 sortedSlots.clear()
                 sortedSlots.addAll(sorted)
-                sortImage.setTexture<WStaticImage>(Mod.id("textures/gui/count.png"))
+                sortImage.setTexture<WStaticImage>(texture("gui/count"))
             }
         }
         if (lastSort != sortBy) scroll(0) else scroll(lastScroll)

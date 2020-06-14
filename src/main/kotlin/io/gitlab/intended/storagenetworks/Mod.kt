@@ -20,7 +20,7 @@ object Mod {
     val LOGGER: Logger = Logger.getLogger(ID)
 
     fun id(path: String) = Identifier(ID, path)
-    fun log(level: Level, msg: String) = LOGGER.log(level, "[$NAME] $msg")
+    fun log(level: Level = Level.INFO, msg: String) = LOGGER.log(level, "[$NAME] $msg")
 
     fun main() {
         BlockRegistry.init()

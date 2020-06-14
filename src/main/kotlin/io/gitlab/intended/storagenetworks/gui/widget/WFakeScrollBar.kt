@@ -1,6 +1,6 @@
 package io.gitlab.intended.storagenetworks.gui.widget
 
-import io.gitlab.intended.storagenetworks.guiTex
+import io.gitlab.intended.storagenetworks.texture
 import spinnery.client.render.BaseRenderer
 import spinnery.widget.WVerticalSlider
 
@@ -25,16 +25,13 @@ class WFakeScrollBar(
         val h = height.toDouble()
 
         if (max == 0f) {
-            BaseRenderer.drawImage((x + 1), (y + 1), (z + 2), 12.0, 15.0, guiTex("knob_off"))
+            BaseRenderer.drawImage((x + 1), (y + 1), (z + 2), 12.0, 15.0, texture("gui/knob_off"))
             return
         }
 
         val knobY = y + 1 + ((h - 17) / (max) * (max - progress))
 
-        BaseRenderer.drawImage(
-            (x + 1), knobY, (z + 2), 12.0, 15.0,
-            guiTex("knob")
-        )
+        BaseRenderer.drawImage((x + 1), knobY, (z + 2), 12.0, 15.0, texture("gui/knob"))
     }
 
     override fun updatePosition(mouseX: Float, mouseY: Float) {

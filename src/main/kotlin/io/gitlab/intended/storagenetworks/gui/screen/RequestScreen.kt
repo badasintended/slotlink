@@ -6,7 +6,7 @@ import io.gitlab.intended.storagenetworks.gui.widget.WInventoryPanel
 import io.gitlab.intended.storagenetworks.gui.widget.WMouseArea
 import io.gitlab.intended.storagenetworks.gui.widget.WTexturedPanel
 import io.gitlab.intended.storagenetworks.gui.widget.WTranslatableLabel
-import io.gitlab.intended.storagenetworks.guiTex
+import io.gitlab.intended.storagenetworks.texture
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.client.screen.BaseContainerScreen
@@ -27,7 +27,7 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
     init {
 
         val main = root.createChild(
-            { WTexturedPanel(guiTex("request")) },
+            { WTexturedPanel(texture("gui/request")) },
             Position.of(0f, 0f, 0f),
             Size.of(176f, 310f)
         )
@@ -63,13 +63,6 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         )
         resultSlot.setInventoryNumber<WSlot>(2)
         resultSlot.setSlotNumber<WSlot>(0)
-
-        val craftingArea = main.createChild(
-            { WMouseArea() },
-            Position.of(craftingLabel),
-            Size.of(118f, 65f)
-        )
-        craftingArea.onMouseMoved = { container.inputSlots(it) }
 
         // Player Inventory label
         val playerInvLabel = main.createChild(

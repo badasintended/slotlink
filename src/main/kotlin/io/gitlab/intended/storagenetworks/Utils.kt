@@ -83,6 +83,6 @@ fun hasInventory(blockEntity: BlockEntity?): Boolean {
     return Inventory::class.java.isAssignableFrom(blockEntity!!.javaClass)
 }
 
-fun guiTex(name: String): Identifier {
-    return Mod.id("textures/gui/${name}.png")
+fun texture(path: String): Identifier {
+    return Mod.id("textures/${path}.png")
 }
