@@ -1,7 +1,5 @@
 package io.gitlab.intended.storagenetworks.gui.container
 
-import io.gitlab.intended.storagenetworks.gui.widget.WCraftingInputSlot
-import io.gitlab.intended.storagenetworks.gui.widget.WCraftingOutputSlot
 import io.gitlab.intended.storagenetworks.gui.widget.WInventoryPanel
 import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
@@ -28,8 +26,8 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
     private val craftingInv = CraftingInventory(this, 3, 3)
     private val resultInv = CraftingResultInventory()
 
-    private val inputSlots = HashSet<WCraftingInputSlot>()
-    private val outputSlot: WCraftingOutputSlot
+    private val inputSlots = HashSet<WSlot>()
+    private val outputSlot: WSlot
 
     private val invMap = HashMap<Int, Inventory>()
 
@@ -49,7 +47,9 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         for (i in 0 until totalInventory) inventoryPosSet.add(buf.readBlockPos())
 
         inventoryPosSet.forEachIndexed { index, blockPos ->
-            invMap[index + 3] = world.getBlockEntity(blockPos)!! as Inventory
+            context.run { world, _ ->
+                invMap[index + 3] = world.getBlockEntity(blockPos)!! as Inventory
+            }
         }
 
         inventories[1] = craftingInv
@@ -59,7 +59,7 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         val root = `interface`
 
         for (i in 0..8) {
-            val slot = root.createChild { WCraftingInputSlot { craftItem() } }
+            val slot = root.createChild { WSlot() }
             slot.setInventoryNumber<WSlot>(1)
             slot.setSlotNumber<WSlot>(i)
             inputSlots.add(slot)
@@ -74,7 +74,7 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
             }
         }
 
-        outputSlot = root.createChild { WCraftingOutputSlot(inputSlots) }
+        outputSlot = root.createChild { WSlot() }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
@@ -99,7 +99,6 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
             val state = world.getBlockState(inventoryPosSet[invNumber - 3])
             deleted = state.isAir
         }
-        if (deleted) slotList.forEach { if (it.inventoryNumber == invNumber) it.setWhitelist<WSlot>() }
         return deleted
     }
 
@@ -143,31 +142,38 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         action: Action,
         player: PlayerEntity
     ) {
-        val source: WSlot = `interface`.getSlot(inventoryNumber, slotNumber) ?: return
+        val root = `interface`
+        val source: WSlot = root.getSlot(inventoryNumber, slotNumber) ?: return
         if (source.isLocked) return
 
         if (action == Action.QUICK_MOVE) {
             val playerInvSlot = arrayListOf<WSlot>()
             val containerSlot = arrayListOf<WSlot>()
-            val craftingSlot = arrayListOf<WSlot>()
-            for (widget in serverInterface.allWidgets) {
+            for (widget in root.allWidgets) {
                 if (widget is WSlot) when (widget.inventoryNumber) {
                     0 -> playerInvSlot.add(widget)
-                    1, 2 -> craftingSlot.add(widget)
-                    else -> containerSlot.add(widget)
+                    1, 2 -> Unit
+                    else -> {
+                        if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
+                    }
                 }
             }
 
             val targets = arrayListOf<WSlot>()
-            when (source.inventoryNumber) {
+            when (inventoryNumber) {
+                // when in player inventory, target container slots first
                 0 -> {
                     targets.addAll(containerSlot)
                     targets.addAll(playerInvSlot)
                 }
+
+                // when in crafting slots, target player inventory first
                 1, 2 -> {
                     targets.addAll(playerInvSlot)
                     targets.addAll(containerSlot)
                 }
+
+                // when in container slots, only target player inventory
                 else -> targets.addAll(playerInvSlot)
             }
 
@@ -187,6 +193,16 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
                 }
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
+
+        if ((inventoryNumber == 2) and outputSlot.stack.isEmpty) inputSlots.forEach {
+            it.setStack<WSlot>(ItemStack(it.stack.item, (it.stack.count - 1)))
+            craftItem()
+        }
+    }
+
+    override fun close(player: PlayerEntity) {
+        super.close(player)
+        dropInventory(player, world, craftingInv)
     }
 
 }

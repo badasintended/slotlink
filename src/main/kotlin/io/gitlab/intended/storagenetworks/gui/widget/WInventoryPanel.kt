@@ -73,7 +73,7 @@ class WInventoryPanel(
 
         for (i in 0..47) {
             val slot = createChild(
-                { WViewedSlot(isDeleted) },
+                { WSlot() },
                 Position.of(this, ((i % 8) * 18f), ((i / 8) * 18f), 2f),
                 Size.of(18f)
             )
@@ -124,17 +124,17 @@ class WInventoryPanel(
         var i = 0
         for (j in 0..47) {
             if (j < (sortedSlots.size - offset)) {
-                viewedSlots[j].setInventoryNumber<WSlot>(sortedSlots[j + offset].inventoryNumber)
-                viewedSlots[j].setSlotNumber<WSlot>(sortedSlots[j + offset].slotNumber)
-                viewedSlots[j].setBlacklist<WSlot>()
-                viewedSlots[j].setHidden<WSlot>(false)
+                val viewedSlot = viewedSlots[j]
+                val sortedSlot = sortedSlots[j + offset]
+                viewedSlot.setInventoryNumber<WSlot>(sortedSlot.inventoryNumber)
+                viewedSlot.setSlotNumber<WSlot>(sortedSlot.slotNumber)
+                viewedSlot.setPreviewStack<WSlot>(sortedSlot.stack)
+                viewedSlot.setBlacklist<WSlot>()
+                viewedSlot.setHidden<WSlot>(isDeleted.invoke(sortedSlot.inventoryNumber))
                 i++
             }
         }
         if (i < 48) for (j in i..47) {
-            viewedSlots[j].setInventoryNumber<WSlot>(3)
-            viewedSlots[j].setSlotNumber<WSlot>(0)
-            viewedSlots[j].setWhitelist<WSlot>()
             viewedSlots[j].setHidden<WSlot>(true)
         }
     }
