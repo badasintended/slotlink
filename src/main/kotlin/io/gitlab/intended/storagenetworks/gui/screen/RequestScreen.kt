@@ -29,11 +29,14 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
 ) {
     private val c = container
     private val root: WInterface = `interface`
-    private val sortedSlots = container.slotList
+
+    private val sortedSlots = arrayListOf<WSlot>()
     private val viewedSlots = arrayListOf<WSlot>()
 
     private var lastScroll = 0
+    private var lastFilter = ""
 
+    private val searchBar: WSearchBar
     private val scrollBar: WFakeScrollBar
     private val sortImage: WStaticImage
 
@@ -62,7 +65,7 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         )
 
         // Crafting Input slots
-        val craftingSlots = WSlot.addArray(
+        WSlot.addArray(
             Position.of(craftingLabel, 1f, 10f),
             Size.of(18f),
             main, 0, 1, 3, 3
@@ -95,22 +98,12 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
             Position.of(playerInvLabel, -1f, 11f),
             Size.of(162f, 76f)
         )
-        playerInvArea.onMouseReleased = { sort(c.lastSort) }
-
-        // Inventory Panel (slot, scrollbar, searchbar, etc.)
-        /*
-        val invPanel = main.createChild(
-            {
-                WInventoryPanel(
-                    c.slotList,
-                    c.lastSort,
-                    { c.saveLastSort(it) },
-                    { c.isDeleted(it) })
-            },
-            Position.of(title, -1f, 11f)
-        )
-        invPanel.init()
-         */
+        playerInvArea.onMouseReleased = {
+            GlobalScope.launch {
+                delay(250)
+                sort(c.lastSort, lastFilter)
+            }
+        }
 
         val scrollArea = main.createChild(
             { WMouseArea() },
@@ -144,18 +137,18 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         slotArea.onMouseReleased = {
             GlobalScope.launch {
                 delay(250)
-                sort(c.lastSort)
+                sort(c.lastSort, lastFilter)
             }
         }
 
-        val searchBar = main.createChild(
-            { WSearchBar() },
+        searchBar = main.createChild(
+            { WSearchBar { sort(c.lastSort, it) } },
             Position.of(scrollArea, 0f, 111f, 1f),
             Size.of(146f, 18f)
         )
 
         val sortButton = main.createChild(
-            { WInventorySortButton { sort(c.lastSort.next()) } },
+            { WSortButton { sort(c.lastSort.next(), lastFilter) } },
             Position.of(searchBar, 148f, 1f),
             Size.of(14f)
         )
@@ -168,11 +161,10 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         sortImage.setTexture<WStaticImage>(texture("gui/name"))
 
         GlobalScope.launch {
-            delay(50)
-            sort(c.lastSort)
+            delay(100)
+            sort(c.lastSort, lastFilter)
         }
 
-        // root.recalculateCache()
     }
 
     private fun scroll(v: Int) {
@@ -199,39 +191,43 @@ class RequestScreen(container: RequestContainer) : BaseContainerScreen<RequestCo
         }
     }
 
-    private fun sort(sortBy: SortBy) {
+    private fun sort(sortBy: SortBy, filter: String) {
+        val filled = arrayListOf<WSlot>()
+        val empty = arrayListOf<WSlot>()
+        c.slotList.forEach { slot ->
+            if (slot.stack.isEmpty) empty.add(slot) else filled.add(slot)
+        }
+
         when (sortBy) {
             SortBy.NAME -> {
-                val filled = arrayListOf<WSlot>()
-                val empty = arrayListOf<WSlot>()
-                c.slotList.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
                 filled.sortBy { it.stack.name.asString() }
-                sortedSlots.clear()
-                sortedSlots.addAll(filled)
-                sortedSlots.addAll(empty)
                 sortImage.setTexture<WStaticImage>(texture("gui/name"))
             }
             SortBy.IDENTIFIER -> {
-                val filled = arrayListOf<WSlot>()
-                val empty = arrayListOf<WSlot>()
-                c.slotList.forEach { if (it.stack.isEmpty) empty.add(it) else filled.add(it) }
                 filled.sortBy { Registry.ITEM.getId(it.stack.item).toString() }
-                sortedSlots.clear()
-                sortedSlots.addAll(filled)
-                sortedSlots.addAll(empty)
                 sortImage.setTexture<WStaticImage>(texture("gui/identifier"))
             }
             SortBy.COUNT -> {
-                val sorted = c.slotList.sortedByDescending { it.stack.count }
-                sortedSlots.clear()
-                sortedSlots.addAll(sorted)
+                filled.sortByDescending { it.stack.count }
                 sortImage.setTexture<WStaticImage>(texture("gui/count"))
             }
         }
+
+        if (filter.isNotBlank()) {
+            if (filter.startsWith("@")) {
+                filled.removeIf { !Registry.ITEM.getId(it.stack.item).toString().contains(filter.drop(1), true) }
+            } else filled.removeIf { !it.stack.item.name.asString().contains(filter, true) }
+        }
+
+        sortedSlots.clear()
+        sortedSlots.addAll(filled)
+        sortedSlots.addAll(empty)
+
         scrollBar.setMax<WFakeScrollBar>(((sortedSlots.size / 8) - 5f).coerceAtLeast(0f))
         if (c.lastSort != sortBy) scroll(0) else scroll(lastScroll)
         c.lastSort = sortBy
-        //c.saveLastSort(sortBy)
+
+        lastFilter = filter
     }
 
 }

@@ -2,8 +2,11 @@
 
 package io.gitlab.intended.storagenetworks.gui.widget
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import spinnery.widget.WAbstractWidget
 
+@Environment(EnvType.CLIENT)
 class WMouseArea : WAbstractWidget() {
 
     var onMouseClicked: (mouseButton: Int) -> Unit = {}

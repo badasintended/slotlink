@@ -1,6 +1,8 @@
 package io.gitlab.intended.storagenetworks.gui.widget
 
 import io.gitlab.intended.storagenetworks.texture
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import spinnery.client.render.BaseRenderer
 import spinnery.widget.WVerticalSlider
 
@@ -11,6 +13,7 @@ import spinnery.widget.WVerticalSlider
  * Her journey seems too hard and even she thought of giving up
  * until she met the prince of the Scrollbar Kingdom...
  */
+@Environment(EnvType.CLIENT)
 class WFakeScrollBar(
     private val scrollFunction: (Int) -> Unit
 ) : WVerticalSlider() {

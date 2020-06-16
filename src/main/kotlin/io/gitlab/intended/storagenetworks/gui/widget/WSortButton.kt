@@ -1,10 +1,13 @@
 package io.gitlab.intended.storagenetworks.gui.widget
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import spinnery.widget.WAbstractButton
 import spinnery.widget.WButton
 import java.util.function.Supplier
 
-class WInventorySortButton(
+@Environment(EnvType.CLIENT)
+class WSortButton(
     private val sortFunction: () -> Unit
 ) : WButton() {
 

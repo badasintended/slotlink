@@ -117,9 +117,9 @@ abstract class ConnectorCableBlock(
             var checkAround = false
             if ((neighborState.block !is ModBlock) and neighborState.block.hasBlockEntity()) {
                 if (!hasInventory(world.getBlockEntity(neighborPos))) {
-                    checkAround = false
+                    checkAround = true
                 }
-            } else checkAround = true
+            } //else checkAround = true
             if (checkAround) {
                 posFacingAround(pos).forEach { (facingAround, posAround) ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
