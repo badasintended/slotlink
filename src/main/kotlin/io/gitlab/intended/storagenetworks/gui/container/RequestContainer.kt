@@ -1,6 +1,6 @@
 package io.gitlab.intended.storagenetworks.gui.container
 
-import io.gitlab.intended.storagenetworks.gui.widget.WInventoryPanel
+import io.gitlab.intended.storagenetworks.common.SortBy
 import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
@@ -31,16 +31,17 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
 
     private val invMap = HashMap<Int, Inventory>()
 
+    private val playerSlots = arrayListOf<WSlot>()
     val slotList = arrayListOf<WSlot>()
 
-    var lastSort: WInventoryPanel.SortBy
+    var lastSort: SortBy
 
     init {
-        var lastSort = WInventoryPanel.SortBy.COUNT
+        var lastSort = SortBy.COUNT
         context.run { world, pos ->
             val blockEntity = world.getBlockEntity(pos)!!
             val nbt = blockEntity.toTag(CompoundTag())
-            lastSort = WInventoryPanel.SortBy.of(nbt.getInt("lastSort"))
+            lastSort = SortBy.of(nbt.getInt("lastSort"))
         }
         this.lastSort = lastSort
 
@@ -79,11 +80,11 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
 
-        WSlot.addHeadlessPlayerInventory(root)
+        playerSlots.addAll(WSlot.addHeadlessPlayerInventory(root))
         root.recalculateCache()
     }
 
-    fun saveLastSort(value: WInventoryPanel.SortBy) {
+    fun saveLastSort(value: SortBy) {
         context.run { world, pos ->
             val blockEntity = world.getBlockEntity(pos)!!
             val nbt = blockEntity.toTag(CompoundTag())
@@ -94,12 +95,12 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
     }
 
     fun isDeleted(invNumber: Int): Boolean {
-        var deleted = false
+        var result = false
         context.run { world, _ ->
             val state = world.getBlockState(inventoryPosSet[invNumber - 3])
-            deleted = state.isAir
+            result = state.isAir
         }
-        return deleted
+        return result
     }
 
     /**
