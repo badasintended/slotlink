@@ -1,5 +1,7 @@
 # slotlink [![1][1]][6]  [![2][2]][4]  [![3][3]][5] <img src="src/main/resources/assets/slotlink/icon.png" align="right"/>
 
+[![Fabric API](https://images2.imgbox.com/8e/38/bfInI5qv_o.png)][8] [![Fabric Language Kotlin](https://images2.imgbox.com/e6/72/9pHQB5ZC_o.png)][9]
+
 A bad<sup><sup><sub>asintended</sub></sup></sup> clone of [Storage Network](https://github.com/Lothrazar/Storage-Network) for [Fabric](https://fabricmc.net/).   
 Written from scratch because i can't read other people's code (serysly, how).   
 Other project is probably better than this.
@@ -25,3 +27,6 @@ cool yea me neither
 [5]: https://git.io/code-quality
 [6]: https://minecraft.net
 [7]: src/main/resources/assets/storagenetworks/icon.png
+[8]: https://www.curseforge.com/minecraft/mc-mods/fabric-api
+[9]: https://www.curseforge.com/minecraft/mc-mods/fabric-language-kotlin
+ 
