@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "id"           : "storagenetworks",
+  "id"           : "slotlink",
   "version"      : "${version}",
-  "name"         : "Storage Networks",
+  "name"         : "slotlink",
   "description"  : "Clone of Storage Networks for Fabric Loader, for lazy people who doesn't want to sort chests!",
   "authors"      : ["deirn"],
   "contributors" : [],
   "contact"      : {
-    "homepage": "https://gitlab.com/intended/fabric/storagenetworks",
-    "sources" : "https://gitlab.com/intended/fabric/storagenetworks",
-    "issues"  : "https://gitlab.com/intended/fabric/storagenetworks/-/issues"
+    "homepage": "https://github.com/badasintended/slotlink",
+    "sources" : "https://github.com/badasintended/slotlink",
+    "issues"  : "https://github.com/badasintended/slotlink/issues"
   },
   "license"      : "MIT",
-  "icon"         : "assets/storagenetworks/icon.png",
+  "icon"         : "assets/slotlink/icon.png",
   "environment"  : "*",
   "entrypoints"  : {
-    "main"  : [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::main"}],
-    "client": [{"adapter": "kotlin", "value": "io.gitlab.intended.storagenetworks.Mod::client"}]
+    "main"  : [{"adapter": "kotlin", "value": "badasintended.slotlink.Mod::main"}],
+    "client": [{"adapter": "kotlin", "value": "badasintended.slotlink.Mod::client"}]
   },
-  "mixins"       : ["storagenetworks.mixins.json"],
+  "mixins"       : [],
   "depends"      : {
     "fabricloader"          : ">=0.4.0",
     "minecraft"             : "1.15.x",

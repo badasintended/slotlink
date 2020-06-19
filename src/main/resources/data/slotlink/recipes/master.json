@@ -1,0 +1,14 @@
+{
+  "type"   : "minecraft:crafting_shaped",
+  "pattern": [
+    "QCQ",
+    "CDC",
+    "QCQ"
+  ],
+  "key"    : {
+    "Q": {"item": "minecraft:quartz_block"},
+    "C": {"item": "slotlink:cable"},
+    "D": {"item": "minecraft:diamond"}
+  },
+  "result" : {"item": "slotlink:master"}
+}
