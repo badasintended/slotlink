@@ -1,15 +1,17 @@
-package badasintended.slotlink.gui.screen
+package badasintended.slotlink.client.gui.screen
 
+import badasintended.slotlink.client.gui.widget.*
 import badasintended.slotlink.common.SortBy
-import badasintended.slotlink.gui.container.RequestContainer
-import badasintended.slotlink.gui.widget.*
-import badasintended.slotlink.texture
+import badasintended.slotlink.common.texture
+import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.MinecraftClient
 import net.minecraft.util.registry.Registry
+import spinnery.widget.WPanel
 import spinnery.widget.WSlot
 import spinnery.widget.WStaticImage
 import spinnery.widget.WVerticalSlider
@@ -19,25 +21,39 @@ import kotlin.math.sign
 import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
-class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
+abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : ModScreen<H>(c) {
 
     private val sortedSlots = arrayListOf<WSlot>()
-    private val viewedSlots = arrayListOf<WSlot>()
 
-    private val searchBar: WSearchBar
-    private val scrollBar: WFakeScrollBar
-    private val sortImage: WStaticImage
+    private var viewedSlotHeight = if (MinecraftClient.getInstance().window.scaledHeight < 300) 3 else 6
 
     private var lastScroll = 0
     private var lastFilter = ""
 
     private var lastSlotClick: Long = 0
 
+    protected var lastSort = c.lastSort
+
+    // lol wtf is this
+    private val main: WPanel
+    private val titleLabel: WTranslatableLabel
+    private val craftingLabel: WTranslatableLabel
+    private val playerInvLabel: WTranslatableLabel
+    private val scrollArea: WMouseArea
+    private val scrollBar: WFakeScrollBar
+    private val viewedSlots = arrayListOf<WSlot>()
+    private val slotArea: WMouseArea
+    private val searchBar: WSearchBar
+    private val sortImage: WStaticImage
+
     init {
-        val main = root.createChild(
-            { WTexturedPanel("request") },
+        val small = viewedSlotHeight == 3
+        val slotSize = viewedSlotHeight * 18f
+
+        main = root.createChild(
+            { WPanel() },
             Position.of(0f, 0f, 0f),
-            Size.of(176f, 310f)
+            Size.of(176f, 197f + (slotSize - (if (small) 17 else 0)))
         )
         main.setParent<W>(root)
         main.setOnAlign(W::center)
@@ -45,16 +61,17 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
         root.add(main)
 
         // Storage Request title
-        val title = main.createChild(
+        titleLabel = main.createChild(
             { WTranslatableLabel("container.slotlink.request") },
             Position.of(main, 8f, 6f)
         )
 
         // Crafting label
-        val craftingLabel = main.createChild(
+        craftingLabel = main.createChild(
             { WTranslatableLabel("container.crafting") },
-            Position.of(title, 19f, 144f)
+            Position.of(titleLabel, 19f, slotSize + 31f - (if (small) 8 else 0))
         )
+        craftingLabel.setHidden<W>(small)
 
         // Crafting Input slots
         WSlot.addArray(
@@ -73,10 +90,11 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
         resultSlot.setSlotNumber<WSlot>(0)
 
         // Player Inventory label
-        val playerInvLabel = main.createChild(
+        playerInvLabel = main.createChild(
             { WTranslatableLabel("container.inventory") },
-            Position.of(craftingLabel, -19f, 66f)
+            Position.of(craftingLabel, -19f, 66f - (if (small) 9 else 0))
         )
+        playerInvLabel.setHidden<W>(small)
 
         // Player Inventory slots
         WSlot.addPlayerInventory(
@@ -92,17 +110,17 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
         )
         playerInvArea.onMouseReleased = { onSlotClick() }
 
-        val scrollArea = main.createChild(
+        scrollArea = main.createChild(
             { WMouseArea() },
-            Position.of(title, -1f, 11f),
-            Size.of(162f, 108f)
+            Position.of(titleLabel, -1f, 11f),
+            Size.of(162f, slotSize)
         )
         scrollArea.onMouseScrolled = { scroll(lastScroll - sign(it).toInt()) }
 
         scrollBar = main.createChild(
             { WFakeScrollBar { scroll(it) } },
             Position.of(scrollArea, 148f, 0f),
-            Size.of(14f, 108f)
+            Size.of(14f, slotSize)
         )
         scrollBar.setMin<WFakeScrollBar>(0f)
 
@@ -116,21 +134,21 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
             viewedSlots.add(slot)
         }
 
-        val slotArea = main.createChild(
+        slotArea = main.createChild(
             { WMouseArea() },
             Position.of(scrollArea),
-            Size.of(144f, 108f)
+            Size.of(144f, slotSize)
         )
         slotArea.onMouseReleased = { onSlotClick() }
 
         searchBar = main.createChild(
-            { WSearchBar { sort(c.lastSort, it) } },
-            Position.of(scrollArea, 0f, 111f, 1f),
+            { WSearchBar { sort(lastSort, it) } },
+            Position.of(scrollArea, 0f, slotSize + 3f, 1f),
             Size.of(146f, 18f)
         )
 
         val sortButton = main.createChild(
-            { WSortButton { sort(c.lastSort.next(), lastFilter) } },
+            { WSortButton { sort(lastSort.next(), lastFilter) } },
             Position.of(searchBar, 148f, 1f),
             Size.of(14f)
         )
@@ -144,7 +162,7 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
 
         GlobalScope.launch {
             delay(100)
-            sort(c.lastSort, lastFilter)
+            sort(lastSort, lastFilter)
         }
 
     }
@@ -153,18 +171,20 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
         GlobalScope.launch {
             lastSlotClick = System.currentTimeMillis()
             delay(250)
-            if (System.currentTimeMillis() - lastSlotClick >= 250.toLong()) sort(c.lastSort, lastFilter)
+            if (System.currentTimeMillis() - lastSlotClick >= 250.toLong()) sort(lastSort, lastFilter)
         }
     }
 
     private fun scroll(v: Int) {
-        val max = ((sortedSlots.size / 8) - 5).coerceAtLeast(0)
+        val max = ((sortedSlots.size / 8) - viewedSlotHeight + 1).coerceAtLeast(0)
         lastScroll = v.coerceIn(0, max)
         scrollBar.setProgress<WVerticalSlider>((max - lastScroll).toFloat())
         val offset = lastScroll * 8
 
+        viewedSlots.forEach { it.setHidden<W>(true) }
+
         var i = 0
-        for (j in 0 until 48) {
+        for (j in 0 until viewedSlotHeight * 8) {
             if (j < (sortedSlots.size - offset)) {
                 val viewedSlot = viewedSlots[j]
                 val sortedSlot = sortedSlots[j + offset]
@@ -175,7 +195,7 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
                 i++
             }
         }
-        if (i < 48) for (j in i until 48) {
+        if (i < viewedSlotHeight * 8) for (j in i until viewedSlotHeight * 8) {
             viewedSlots[j].setHidden<WSlot>(true)
         }
 
@@ -203,16 +223,20 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
             }
         }
 
-        if (filter.isNotBlank()) {
-            when (filter.first().toString()) {
-                "@" -> filled.removeIf { !Registry.ITEM.getId(it.stack.item).toString().contains(filter.drop(1), true) }
-                "#" -> filled.removeIf { slot ->
-                    val tag = filter.drop(1)
+        val trimmedFilter = filter.trim()
+
+        if (trimmedFilter.isNotBlank()) {
+            when (trimmedFilter.first()) {
+                '@' -> filled.removeIf {
+                    !Registry.ITEM.getId(it.stack.item).toString().contains(trimmedFilter.drop(1).trim(), true)
+                }
+                '#' -> filled.removeIf { slot ->
+                    val tag = trimmedFilter.drop(1).trim()
                     val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
                     if (tags.isEmpty() and tag.isEmpty()) return@removeIf false
                     else tags.none { it.toString().contains(tag, true) }
                 }
-                else -> filled.removeIf { !it.stack.item.name.asString().contains(filter, true) }
+                else -> filled.removeIf { !it.stack.item.name.asString().contains(trimmedFilter.trim(), true) }
             }
         }
 
@@ -220,11 +244,35 @@ class RequestScreen(c: RequestContainer) : ModScreen<RequestContainer>(c) {
         sortedSlots.addAll(filled)
         sortedSlots.addAll(empty)
 
-        scrollBar.setMax<WFakeScrollBar>(((sortedSlots.size / 8) - 5f).coerceAtLeast(0f))
-        if (c.lastSort != sortBy) scroll(0) else scroll(lastScroll)
-        c.lastSort = sortBy
+        scrollBar.setMax<WFakeScrollBar>(((sortedSlots.size / 8) - viewedSlotHeight + 1f).coerceAtLeast(0f))
+        if (lastSort != sortBy) scroll(0) else scroll(lastScroll)
+        lastSort = sortBy
+        saveSort()
 
         lastFilter = filter
+    }
+
+    abstract fun saveSort()
+
+    override fun resize(client: MinecraftClient, width: Int, height: Int) {
+        viewedSlotHeight = if (client.window.scaledHeight < 300) 3 else 6
+
+        val small = viewedSlotHeight == 3
+        val slotSize = viewedSlotHeight * 18f
+
+        main.setSize<W>(Size.of(176f, 197f + (slotSize - (if (small) 17 else 0))))
+        craftingLabel.setPosition<W>(Position.of(titleLabel, 19f, slotSize + 31f - (if (small) 8 else 0)))
+        craftingLabel.setHidden<W>(small)
+        playerInvLabel.setPosition<W>(Position.of(craftingLabel, -19f, 66f - (if (small) 9 else 0)))
+        playerInvLabel.setHidden<W>(small)
+        scrollArea.setSize<W>(Size.of(162f, slotSize))
+        scrollBar.setSize<W>(Size.of(14f, slotSize))
+        slotArea.setSize<W>(Size.of(144f, slotSize))
+        searchBar.setPosition<W>(Position.of(scrollArea, 0f, slotSize + 3f, 1f))
+
+        sort(lastSort, lastFilter)
+
+        super.resize(client, width, height)
     }
 
 }

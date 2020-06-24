@@ -1,4 +1,4 @@
-package badasintended.slotlink.gui.widget
+package badasintended.slotlink.client.gui.widget
 
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment

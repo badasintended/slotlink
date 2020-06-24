@@ -2,8 +2,8 @@
 
 package badasintended.slotlink.block
 
-import badasintended.slotlink.*
 import badasintended.slotlink.block.entity.LinkCableBlockEntity
+import badasintended.slotlink.common.*
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.EntityContext
@@ -133,4 +133,4 @@ abstract class ConnectorCableBlock(
 
 }
 
-class LinkCableBlock(id: String) : ConnectorCableBlock(id, LinkCableBlockEntity::class)
+class LinkCableBlock : ConnectorCableBlock("link_cable", LinkCableBlockEntity::class)

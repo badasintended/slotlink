@@ -1,7 +1,7 @@
-package badasintended.slotlink.gui.screen
+package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.gui.container.MasterContainer
-import badasintended.slotlink.gui.widget.WTranslatableLabel
+import badasintended.slotlink.client.gui.widget.WTranslatableLabel
+import badasintended.slotlink.screen.MasterScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.widget.WPanel
@@ -11,7 +11,7 @@ import spinnery.widget.api.Size
 import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
-class MasterScreen(c: MasterContainer) : ModScreen<MasterContainer>(c) {
+class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
 
     companion object {
         private fun tlkey(v: String) = "container.slotlink.master.$v"

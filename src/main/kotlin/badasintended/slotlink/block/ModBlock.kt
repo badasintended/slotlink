@@ -9,9 +9,9 @@ import net.minecraft.block.Material
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.BlockView
@@ -28,10 +28,10 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
             .hardness(5f)
     }
 
-    val id: Identifier = Mod.id(id)
+    val id = Mod.id(id)
 
     override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
-        tooltip.add(TranslatableText("${translationKey}.tooltip"))
+        tooltip.add(LiteralText("§7").append(TranslatableText("${translationKey}.tooltip")))
     }
 
     override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {

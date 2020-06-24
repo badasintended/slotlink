@@ -3,10 +3,10 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.hasInventory
-import badasintended.slotlink.openContainer
-import badasintended.slotlink.pos2Tag
-import badasintended.slotlink.tag2Pos
+import badasintended.slotlink.common.hasInventory
+import badasintended.slotlink.common.openScreen
+import badasintended.slotlink.common.pos2Tag
+import badasintended.slotlink.common.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
+class MasterBlock : ModBlock("master"), BlockEntityProvider {
 
     override fun createBlockEntity(view: BlockView): BlockEntity = MasterBlockEntity()
 
@@ -78,9 +78,7 @@ class MasterBlock(id: String) : ModBlock(id), BlockEntityProvider {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) openContainer(this, player) { buf ->
-            buf.writeBlockPos(pos)
-
+        if (!world.isClient) openScreen("master", player) { buf ->
             val nbt = world.getBlockEntity(pos)!!.toTag(CompoundTag())
             val linkCables = nbt.getList("linkCables", NbtType.COMPOUND)
 

@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.pos2Tag
-import badasintended.slotlink.tag2Pos
+import badasintended.slotlink.common.pos2Tag
+import badasintended.slotlink.common.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType

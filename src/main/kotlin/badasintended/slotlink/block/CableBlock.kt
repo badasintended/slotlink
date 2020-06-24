@@ -2,9 +2,9 @@
 
 package badasintended.slotlink.block
 
-import com.google.common.collect.ImmutableMap
-import badasintended.slotlink.bbCuboid
 import badasintended.slotlink.block.entity.CableBlockEntity
+import badasintended.slotlink.common.bbCuboid
+import com.google.common.collect.ImmutableMap
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
@@ -22,7 +22,7 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 
-open class CableBlock(id: String) : ChildBlock(id, SETTINGS) {
+open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
 
     companion object {
         val SETTINGS: Settings = FabricBlockSettings

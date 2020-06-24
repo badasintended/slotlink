@@ -1,6 +1,6 @@
 package badasintended.slotlink.block
 
-import badasintended.slotlink.pos2Tag
+import badasintended.slotlink.common.pos2Tag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState

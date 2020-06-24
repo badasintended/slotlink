@@ -6,6 +6,7 @@ import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.util.registry.Registry
+import net.minecraft.util.registry.Registry.BLOCK_ENTITY_TYPE
 import java.util.function.Supplier
 
 object BlockEntityTypeRegistry {
@@ -25,7 +26,7 @@ object BlockEntityTypeRegistry {
     }
 
     private fun r(modBlock: ModBlock, blockEntityType: BlockEntityType<out BlockEntity>) {
-        Registry.register(Registry.BLOCK_ENTITY_TYPE, modBlock.id, blockEntityType)
+        Registry.register(BLOCK_ENTITY_TYPE, modBlock.id, blockEntityType)
     }
 
     private fun <T : BlockEntity> c(block: Block, function: () -> T): BlockEntityType<T> {

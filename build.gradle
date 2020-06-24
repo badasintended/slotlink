@@ -14,10 +14,6 @@ group = project.maven_group
 
 repositories {
 	maven {
-		name = "CottonMC"
-		url = "https://server.bbkr.space/artifactory/libs-release"
-	}
-	maven {
 		name = "Spinnery"
 		url  "https://dl.bintray.com/spinnery/Spinnery"
 	}

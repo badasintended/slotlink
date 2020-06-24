@@ -4,14 +4,16 @@ import badasintended.slotlink.item.ModItem
 import com.google.common.collect.ImmutableSet
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry
+import net.minecraft.util.registry.Registry.BLOCK
+import net.minecraft.util.registry.Registry.ITEM
 
 object BlockRegistry {
 
-    val MASTER = MasterBlock("master")
-    val REQUEST = RequestBlock("request")
+    val MASTER = MasterBlock()
+    val REQUEST = RequestBlock()
 
-    val CABLE = CableBlock("cable")
-    val LINK_CABLE = LinkCableBlock("link_cable")
+    val CABLE = CableBlock()
+    val LINK_CABLE = LinkCableBlock()
 
     val BLOCKS: ImmutableSet<ModBlock> = ImmutableSet.of(MASTER, REQUEST, CABLE, LINK_CABLE)
 
@@ -21,8 +23,8 @@ object BlockRegistry {
 
     private fun r(vararg modBlocks: ModBlock) {
         for (block in modBlocks) {
-            Registry.register(Registry.BLOCK, block.id, block)
-            Registry.register(Registry.ITEM, block.id, BlockItem(block, ModItem.settings))
+            Registry.register(BLOCK, block.id, block)
+            Registry.register(ITEM, block.id, BlockItem(block, ModItem.SETTINGS))
         }
     }
 

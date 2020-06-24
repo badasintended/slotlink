@@ -1,14 +1,14 @@
-package badasintended.slotlink.gui.container
+package badasintended.slotlink.screen
 
-import badasintended.slotlink.block.BlockRegistry.REQUEST
 import badasintended.slotlink.common.SortBy
+import badasintended.slotlink.inventory.DummyInventory
+import net.minecraft.container.BlockContext
 import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.RecipeType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.PacketByteBuf
@@ -17,9 +17,14 @@ import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
 
-class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : ModContainer(REQUEST, syncId, player, buf) {
+abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
+    ModScreenHandler(syncId, player) {
+
+    val blockPos: BlockPos = buf.readBlockPos()
+    var lastSort = SortBy.of(buf.readInt())
 
     private val hasMaster = buf.readBoolean()
+
     private val totalInventory = if (hasMaster) buf.readInt() else 0
 
     private val inventoryPos = arrayListOf<BlockPos>()
@@ -35,17 +40,9 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
     private val playerSlots = arrayListOf<WSlot>()
     val slotList = arrayListOf<WSlot>()
 
-    var lastSort: SortBy
+    private val context: BlockContext = BlockContext.create(player.world, blockPos)
 
     init {
-        var lastSort = SortBy.COUNT
-        context.run { world, pos ->
-            val blockEntity = world.getBlockEntity(pos)!!
-            val nbt = blockEntity.toTag(CompoundTag())
-            lastSort = SortBy.of(nbt.getInt("lastSort"))
-        }
-        this.lastSort = lastSort
-
         for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
 
         inventoryPos.forEachIndexed { index, blockPos ->
@@ -54,6 +51,7 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
             }
         }
 
+        inventories[-1] = DummyInventory(8, 6)
         inventories[1] = craftingInv
         inventories[2] = resultInv
         inventories.putAll(invMap)
@@ -190,15 +188,8 @@ class RequestContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : 
     }
 
     override fun close(player: PlayerEntity) {
-        super.close(player)
         dropInventory(player, world, craftingInv)
-        context.run { world, pos ->
-            val blockEntity = world.getBlockEntity(pos)!!
-            val nbt = blockEntity.toTag(CompoundTag())
-            nbt.putInt("lastSort", lastSort.ordinal)
-            blockEntity.fromTag(nbt)
-            blockEntity.markDirty()
-        }
+        super.close(player)
     }
 
 }

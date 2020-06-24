@@ -1,6 +1,6 @@
-package badasintended.slotlink.gui.widget
+package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.texture
+import badasintended.slotlink.common.texture
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.client.render.BaseRenderer

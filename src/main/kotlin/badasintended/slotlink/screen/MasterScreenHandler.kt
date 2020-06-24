@@ -1,14 +1,13 @@
-package badasintended.slotlink.gui.container
+package badasintended.slotlink.screen
 
-import badasintended.slotlink.block.BlockRegistry.MASTER
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.util.PacketByteBuf
 import spinnery.widget.WSlot
 
-class MasterContainer(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
-    ModContainer(MASTER, syncId, player, buf) {
+class MasterScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
+    ModScreenHandler(syncId, player) {
 
     val linkCableCount = buf.readInt()
     val totalSlot = buf.readInt()

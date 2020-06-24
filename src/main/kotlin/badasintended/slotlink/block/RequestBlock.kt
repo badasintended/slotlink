@@ -1,10 +1,9 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.hasInventory
-import badasintended.slotlink.openContainer
-import badasintended.slotlink.tag2Pos
-import net.fabricmc.fabric.api.util.NbtType
+import badasintended.slotlink.common.openScreen
+import badasintended.slotlink.common.tag2Pos
+import badasintended.slotlink.common.writeRequestData
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -16,7 +15,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-class RequestBlock(id: String) : ChildBlock(id) {
+class RequestBlock : ChildBlock("request") {
 
     override fun createBlockEntity(view: BlockView): BlockEntity = RequestBlockEntity()
 
@@ -32,13 +31,14 @@ class RequestBlock(id: String) : ChildBlock(id) {
             val blockEntity = world.getBlockEntity(pos)!!
             val nbt = blockEntity.toTag(CompoundTag())
 
-            openContainer(this, player) { buf ->
+            openScreen("request", player) { buf ->
                 val hasMaster = nbt.getBoolean("hasMaster")
                 buf.writeBlockPos(pos)
-                buf.writeBoolean(hasMaster)
+                buf.writeInt(nbt.getInt("lastSort"))
                 if (hasMaster) {
                     val masterPos = tag2Pos(nbt.getCompound("masterPos"))
-
+                    writeRequestData(buf, world.server, world.dimension.type, masterPos)
+                    /*
                     var totalInventory = 0
                     val inventoryPos = HashSet<BlockPos>()
 
@@ -66,6 +66,8 @@ class RequestBlock(id: String) : ChildBlock(id) {
 
                     buf.writeInt(totalInventory)
                     inventoryPos.forEach { buf.writeBlockPos(it) }
+
+                     */
                 }
             }
         }
