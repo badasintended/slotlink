@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.network.PacketConsumer
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 
 object NetworkRegistry {
 
@@ -30,13 +30,14 @@ object NetworkRegistry {
 
         context.taskQueue.execute {
             val world = context.player.world
-            val block = world.getBlockState(pos).block
+            val blockState = world.getBlockState(pos)
+            val block = blockState.block
 
             if (block is RequestBlock) {
                 val blockEntity = world.getBlockEntity(pos)!!
                 val nbt = blockEntity.toTag(CompoundTag())
                 nbt.putInt("lastSort", sort)
-                blockEntity.fromTag(nbt)
+                blockEntity.fromTag(blockState, nbt)
                 blockEntity.markDirty()
             }
         }

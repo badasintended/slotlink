@@ -10,8 +10,8 @@ import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Material
+import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
-import net.minecraft.entity.EntityContext
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
@@ -20,7 +20,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
-import net.minecraft.world.IWorld
+import net.minecraft.world.WorldAccess
 
 open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
 
@@ -51,7 +51,7 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
     /**
      * @return whether block in pos is an instance of [ModBlock]
      */
-    private fun canConnect(world: IWorld, pos: BlockPos): Boolean {
+    private fun canConnect(world: WorldAccess, pos: BlockPos): Boolean {
         val block = world.getBlockState(pos).block
         return block is ModBlock
     }
@@ -79,7 +79,7 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
         state: BlockState,
         facing: Direction,
         neighborState: BlockState,
-        world: IWorld,
+        world: WorldAccess,
         pos: BlockPos,
         neighborPos: BlockPos
     ): BlockState {
@@ -88,7 +88,7 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
         return state.with(propertyMap[facing], canConnect(world, neighborPos))
     }
 
-    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: EntityContext): VoxelShape {
+    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
         val north = bbCuboid(6, 6, 0, 4, 4, 10)
         val south = bbCuboid(6, 6, 6, 4, 4, 10)
         val east = bbCuboid(6, 6, 6, 10, 4, 4)

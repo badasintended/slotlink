@@ -38,7 +38,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
         val nbt = blockEntity!!.toTag(CompoundTag())
 
         nbt.put("storagePos", ListTag())
-        blockEntity.fromTag(nbt)
+        blockEntity.fromTag(state, nbt)
         blockEntity.markDirty()
     }
 
@@ -63,7 +63,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
                 val masterPos = pos2Tag(pos)
                 neighborNbt.put("masterPos", masterPos)
                 neighborNbt.putBoolean("hasMaster", true)
-                neighborBlockEntity.fromTag(neighborNbt)
+                neighborBlockEntity.fromTag(neighborState, neighborNbt)
                 neighborBlockEntity.markDirty()
                 world.updateNeighbors(neighborPos, neighborBlock)
             }
@@ -102,8 +102,8 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
                         } else {
                             inventories[linkedBlockId] = 1
                         }
-                        totalSlot += linkedBlockEntity.invSize
-                        maxCount += linkedBlockEntity.invMaxStackAmount * linkedBlockEntity.invSize
+                        totalSlot += linkedBlockEntity.size()
+                        maxCount += linkedBlockEntity.maxCountPerStack * linkedBlockEntity.size()
                     }
                 }
             }

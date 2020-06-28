@@ -3,23 +3,19 @@ package badasintended.slotlink.common
 import badasintended.slotlink.Mod
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.block.MasterBlock
-import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.util.NbtType
-import net.minecraft.client.render.VertexFormats
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import org.lwjgl.opengl.GL11
 import spinnery.Spinnery
-import spinnery.client.render.BaseRenderer
 import spinnery.common.container.BaseContainer
 import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
@@ -95,27 +91,6 @@ fun sizeOf(x: Int, y: Int): Size = Size.of(x.toFloat(), y.toFloat())
 
 @Environment(EnvType.CLIENT)
 fun sizeOf(s: Int): Size = Size.of(s.toFloat())
-
-@Environment(EnvType.CLIENT)
-fun drawTintedImage(texture: Identifier, tint: Int, x: Double, y: Double, z: Double, w: Double, h: Double) {
-    val r = 1f / 255 * ((tint shr 16) and 0xFF).toFloat()
-    val g = 1f / 255 * ((tint shr 8) and 0xFF).toFloat()
-    val b = 1f / 255 * (tint and 0xFF).toFloat()
-
-    BaseRenderer.getTextureManager().bindTexture(texture)
-    RenderSystem.enableBlend()
-    RenderSystem.color3f(r, g, b)
-
-    BaseRenderer.getBufferBuilder().begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE)
-    BaseRenderer.getBufferBuilder().vertex(x, (y + h), z).texture(0f, 1f).next()
-    BaseRenderer.getBufferBuilder().vertex((x + w), (y + h), z).texture(1f, 1f).next()
-    BaseRenderer.getBufferBuilder().vertex((x + w), y, z).texture(1f, 0f).next()
-    BaseRenderer.getBufferBuilder().vertex(x, y, z).texture(0f, 0f).next()
-
-    BaseRenderer.getTesselator().draw()
-
-    RenderSystem.disableBlend()
-}
 
 @Environment(EnvType.CLIENT)
 fun slotAction(container: BaseContainer, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
