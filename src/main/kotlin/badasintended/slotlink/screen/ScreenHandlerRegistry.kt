@@ -4,8 +4,8 @@ import badasintended.slotlink.Mod
 import net.fabricmc.fabric.api.container.ContainerFactory
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 
 object ScreenHandlerRegistry {
 
