@@ -1,5 +1,6 @@
 package badasintended.slotlink.block.entity
 
+import net.minecraft.block.BlockState
 import net.minecraft.nbt.CompoundTag
 
 class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST) {
@@ -14,8 +15,8 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST) {
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state: BlockState, tag: CompoundTag) {
+        super.fromTag(state, tag)
 
         lastSort = tag.getInt("lastSort")
     }

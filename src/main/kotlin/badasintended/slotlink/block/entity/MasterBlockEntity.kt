@@ -3,6 +3,7 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.common.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType
+import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -41,8 +42,8 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state: BlockState, tag: CompoundTag) {
+        super.fromTag(state, tag)
 
         linkCables = tag.getList("linkCables", NbtType.COMPOUND)
     }

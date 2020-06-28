@@ -3,6 +3,8 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.util.math.MatrixStack
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.api.Style
@@ -11,17 +13,18 @@ import kotlin.math.floor
 @Environment(EnvType.CLIENT)
 class WSlotArea : WMouseArea() {
 
-    override fun draw() {
-        val x = floor(x).toDouble()
-        val y = floor(y).toDouble()
-        val z = floor(z).toDouble()
-        val w = floor(width).toDouble()
-        val h = floor(height).toDouble()
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+        val x = floor(x)
+        val y = floor(y)
+        val z = floor(z)
+        val w = floor(width)
+        val h = floor(height)
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
         BaseRenderer.drawBeveledPanel(
+            matrices, provider,
             x, y, z, w, h,
             slotStyle.asColor("top_left"),
             panelStyle.asColor("shadow"),
