@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
+import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 import net.minecraft.world.dimension.DimensionType
 
@@ -19,10 +20,10 @@ class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
         stack: ItemStack,
         hand: Hand,
         masterPos: BlockPos,
-        masterDim: DimensionType?
+        masterDim: RegistryKey<DimensionType>?
     ) {
-        addChat(world, player,"${player.pos.distanceTo(Vec3d(masterPos))}")
-        if (player.pos.distanceTo(Vec3d(masterPos)) > 512) {
+        addChat(world, player,"${player.pos.distanceTo(Vec3d.of(masterPos))}")
+        if (player.pos.distanceTo(Vec3d.of(masterPos)) > 512) {
             addChat(world, player, "${baseTlKey}.tooFarFromMaster")
         } else super.use(world, player, stack, hand, masterPos, masterDim)
     }

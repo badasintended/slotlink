@@ -37,20 +37,20 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             if (currentlyHasMaster and !neighborHasMaster) {
                 if (masterPos == neighborMasterPos) {
                     currentNbt.putBoolean("hasMaster", false)
-                    blockEntity.fromTag(currentNbt)
+                    blockEntity.fromTag(state, currentNbt)
                     blockEntity.markDirty()
                     world.updateNeighbors(pos, block)
                 } else {
                     neighborNbt.putBoolean("hasMaster", true)
                     neighborNbt.put("masterPos", masterPos)
-                    neighborBlockEntity.fromTag(neighborNbt)
+                    neighborBlockEntity.fromTag(neighborState, neighborNbt)
                     neighborBlockEntity.markDirty()
                     world.updateNeighbors(neighborPos, neighborBlock)
                 }
             } else if (!currentlyHasMaster and neighborHasMaster) {
                 currentNbt.putBoolean("hasMaster", true)
                 currentNbt.put("masterPos", neighborMasterPos)
-                blockEntity.fromTag(currentNbt)
+                blockEntity.fromTag(state, currentNbt)
                 blockEntity.markDirty()
                 world.updateNeighbors(pos, block)
             }
@@ -61,14 +61,14 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
                 currentNbt.put("masterPos", masterPos)
                 currentNbt.putBoolean("hasMaster", true)
 
-                blockEntity.fromTag(currentNbt)
+                blockEntity.fromTag(state, currentNbt)
                 blockEntity.markDirty()
 
                 world.updateNeighbors(pos, block)
             }
         } else if (currentlyHasMaster) {
             currentNbt.putBoolean("hasMaster", false)
-            blockEntity.fromTag(currentNbt)
+            blockEntity.fromTag(state, currentNbt)
             blockEntity.markDirty()
             world.updateNeighbors(pos, block)
         }

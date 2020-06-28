@@ -17,6 +17,8 @@ import net.minecraft.util.Hand.OFF_HAND
 import net.minecraft.util.Identifier
 import net.minecraft.util.TypedActionResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.registry.Registry
+import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 import net.minecraft.world.dimension.DimensionType
 
@@ -30,11 +32,11 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         stack: ItemStack,
         hand: Hand,
         masterPos: BlockPos,
-        masterDim: DimensionType?
+        masterDim: RegistryKey<DimensionType>?
     ) {
         if (masterDim == null) {
             addChat(world, player, "${baseTlKey}.invalidDimension")
-        } else if (masterDim != world.dimension.type) {
+        } else if (masterDim != world.dimensionRegistryKey) {
             // multi dimension remote is not really possible with my knowledge
             addChat(world, player, "${baseTlKey}.differentDimension")
         } else {
@@ -56,7 +58,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         }
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        val masterDim = DimensionType.byId(Identifier(stack.orCreateTag.getString("masterDim")))
+        val masterDim = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
 
         if (masterPosTag == CompoundTag()) {
             addChat(world, player, "${baseTlKey}.hasNoMaster")
@@ -70,7 +72,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         val stack = context.stack
         val world = context.world
         val pos = context.blockPos
-        val dimId = DimensionType.getId(world.dimension.type).toString()
+        val dimId = world.dimensionRegistryKey.value.toString()
 
         val block = world.getBlockState(pos).block
         if (block is MasterBlock) {
