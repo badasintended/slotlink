@@ -1,11 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.text.TranslatableText
 import spinnery.client.render.TextRenderer
+import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WStaticText
-import spinnery.widget.api.Color
+import spinnery.widget.api.Style
 
 @Environment(EnvType.CLIENT)
 class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
@@ -17,11 +19,13 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
     override fun draw() {
         if (isHidden) return
 
+        val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
+
         TextRenderer.pass()
             .text(text).font(font)
             .at(x, y, z).scale(scale).maxWidth(maxWidth)
             .shadow(false)
-            .color(Color.of(0x404040))
+            .color(panelStyle.asColor("label.color"))
             .render()
     }
 

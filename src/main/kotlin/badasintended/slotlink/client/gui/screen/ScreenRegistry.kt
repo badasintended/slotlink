@@ -5,9 +5,12 @@ import badasintended.slotlink.screen.MasterScreenHandler
 import badasintended.slotlink.screen.ModScreenHandler
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.screen.ContainerScreenFactory
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
 
+@Environment(EnvType.CLIENT)
 object ScreenRegistry {
 
     fun init() {

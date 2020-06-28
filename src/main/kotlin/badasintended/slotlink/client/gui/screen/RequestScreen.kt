@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.network.ServerSideNetworkRegistry.REMOTE_SAVE
-import badasintended.slotlink.network.ServerSideNetworkRegistry.REQUEST_SAVE
+import badasintended.slotlink.network.NetworkRegistry.REMOTE_SAVE
+import badasintended.slotlink.network.NetworkRegistry.REQUEST_SAVE
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
 import io.netty.buffer.Unpooled

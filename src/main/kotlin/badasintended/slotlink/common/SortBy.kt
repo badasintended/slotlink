@@ -2,10 +2,13 @@
 
 package badasintended.slotlink.common
 
-enum class SortBy {
-    NAME,
-    IDENTIFIER,
-    COUNT;
+import badasintended.slotlink.Mod
+import net.minecraft.util.Identifier
+
+enum class SortBy(val texture: Identifier) {
+    NAME(Mod.id("textures/gui/name.png")),
+    IDENTIFIER(Mod.id("textures/gui/identifier.png")),
+    COUNT(Mod.id("textures/gui/count.png"));
 
     companion object {
         val values = values()

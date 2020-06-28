@@ -4,19 +4,13 @@ import badasintended.slotlink.Mod
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
-import net.minecraft.block.BlockState
 import net.minecraft.block.Material
 import net.minecraft.client.item.TooltipContext
-import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.BlockView
-import net.minecraft.world.IWorld
-import net.minecraft.world.World
 
 abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(settings) {
 
@@ -32,16 +26,6 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
 
     override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
         tooltip.add(LiteralText("§7").append(TranslatableText("${translationKey}.tooltip")))
-    }
-
-    override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack)
-        world.chunkManager.setChunkForced(ChunkPos(pos), true)
-    }
-
-    override fun onBroken(world: IWorld, pos: BlockPos, state: BlockState) {
-        super.onBroken(world, pos, state)
-        world.chunkManager.setChunkForced(ChunkPos(pos), false)
     }
 
 }

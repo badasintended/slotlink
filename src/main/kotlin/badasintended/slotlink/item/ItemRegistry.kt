@@ -7,10 +7,11 @@ import net.minecraft.util.registry.Registry.ITEM
 
 object ItemRegistry {
 
-    val REMOTE = RemoteItem()
+    val UNLIMITED_REMOTE = UnlimitedRemoteItem()
+    val LIMITED_REMOTE = LimitedRemoteItem()
 
     fun init() {
-        r(REMOTE)
+        r(UNLIMITED_REMOTE, LIMITED_REMOTE)
     }
 
     private fun r(vararg items: ModItem) {

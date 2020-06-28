@@ -1,13 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.common.spinneryId
-import badasintended.slotlink.common.texture
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WVerticalSlider
 import spinnery.widget.api.Style
+import kotlin.math.floor
 
 /**
  * Just a slider that wants to be a scrollbar.
@@ -17,7 +17,7 @@ import spinnery.widget.api.Style
  * until she met the prince of the Scrollbar Kingdom...
  */
 @Environment(EnvType.CLIENT)
-class WFakeScrollBar(
+class WFakeScrollbar(
     private val scrollFunction: (Int) -> Unit
 ) : WVerticalSlider() {
 
@@ -25,13 +25,14 @@ class WFakeScrollBar(
         if (isHidden) return
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
+        val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
         // why
-        val x = x.toDouble()
-        val y = y.toDouble()
-        val z = z.toDouble()
-        val w = width.toDouble()
-        val h = height.toDouble()
+        val x = floor(x.toDouble())
+        val y = floor(y.toDouble())
+        val z = floor(z.toDouble())
+        val w = floor(width.toDouble())
+        val h = floor(height.toDouble())
 
         BaseRenderer.drawBeveledPanel(
             x, y, z, w, h,
@@ -40,20 +41,21 @@ class WFakeScrollBar(
             slotStyle.asColor("bottom_right")
         )
 
-        if (max == 0f) {
-            BaseRenderer.drawImage(
-                (x + 1), (y + 1), (z + 2), 12.0, 15.0,
-                texture("gui/knob_off")
-            )
-            return
-        }
+        val knobY = floor(y + 1 + if (max > 0f) ((h - 17) / (max) * (max - progress)) else 0.0)
 
-        val knobY = y + 1 + ((h - 17) / (max) * (max - progress))
-
-        BaseRenderer.drawImage(
+        BaseRenderer.drawBeveledPanel(
             (x + 1), knobY, (z + 2), 12.0, 15.0,
-            texture("gui/knob")
+            panelStyle.asColor("highlight"),
+            if (max == 0f) slotStyle.asColor("background.unfocused") else panelStyle.asColor("background"),
+            panelStyle.asColor("shadow")
         )
+
+        for (i in 1..6) {
+            BaseRenderer.drawRectangle(
+                (x + 3), (knobY + (i * 2)), (z + 3), 8.0, 1.0,
+                if (max == 0f) panelStyle.asColor("shadow") else slotStyle.asColor("background.unfocused")
+            )
+        }
     }
 
     override fun updatePosition(mouseX: Float, mouseY: Float) {

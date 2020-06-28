@@ -5,8 +5,7 @@ package badasintended.slotlink
 import badasintended.slotlink.block.BlockRegistry
 import badasintended.slotlink.block.entity.BlockEntityTypeRegistry
 import badasintended.slotlink.client.gui.screen.ScreenRegistry
-import badasintended.slotlink.item.ItemRegistry
-import badasintended.slotlink.network.ServerSideNetworkRegistry
+import badasintended.slotlink.network.NetworkRegistry
 import badasintended.slotlink.screen.ScreenHandlerRegistry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -25,10 +24,10 @@ object Mod {
 
     fun main() {
         BlockRegistry.init()
-        ItemRegistry.init()
+        //ItemRegistry.init()
         BlockEntityTypeRegistry.init()
         ScreenHandlerRegistry.init()
-        ServerSideNetworkRegistry.init()
+        NetworkRegistry.initMain()
     }
 
     @Environment(EnvType.CLIENT)

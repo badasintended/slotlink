@@ -7,6 +7,7 @@ import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WTextField
 import spinnery.widget.api.Style
+import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSearchBar(
@@ -16,11 +17,11 @@ class WSearchBar(
     override fun draw() {
         if (isHidden) return
 
-        val x = x.toDouble()
-        val y = y.toDouble()
-        val z = z.toDouble()
-        val w = width.toDouble()
-        val h = height.toDouble()
+        val x = floor(x.toDouble())
+        val y = floor(y.toDouble())
+        val z = floor(z.toDouble())
+        val w = floor(width.toDouble())
+        val h = floor(height.toDouble())
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
 

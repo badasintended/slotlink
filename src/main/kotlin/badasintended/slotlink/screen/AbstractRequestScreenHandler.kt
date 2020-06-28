@@ -2,6 +2,7 @@ package badasintended.slotlink.screen
 
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.inventory.DummyInventory
+import net.minecraft.block.BlockState
 import net.minecraft.container.BlockContext
 import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
@@ -28,6 +29,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val totalInventory = if (hasMaster) buf.readInt() else 0
 
     private val inventoryPos = arrayListOf<BlockPos>()
+    private val inventoryBlockEntity = arrayListOf<BlockState>()
 
     private val craftingInv = CraftingInventory(this, 3, 3)
     private val resultInv = CraftingResultInventory()
@@ -47,14 +49,21 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
         inventoryPos.forEachIndexed { index, blockPos ->
             context.run { world, _ ->
-                invMap[index + 3] = world.getBlockEntity(blockPos)!! as Inventory
+                val chunk = world.getWorldChunk(blockPos)
+                val blockEntity = chunk.getBlockEntity(blockPos)!!
+                inventoryBlockEntity.add(chunk.getBlockState(blockPos))
+                invMap[index + 3] = blockEntity as Inventory
             }
         }
 
+        inventories[-2] = DummyInventory(1, 1)
         inventories[-1] = DummyInventory(8, 6)
         inventories[1] = craftingInv
         inventories[2] = resultInv
         inventories.putAll(invMap)
+
+        WSlot.addHeadlessArray(root, 0, -1, 8, 6)
+        WSlot.addHeadlessArray(root, 0, -2, 1, 1)
 
         for (i in 0..8) {
             val slot = root.createChild { WSlot() }
@@ -85,7 +94,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         var result = false
         context.run { world, _ ->
             val state = world.getBlockState(inventoryPos[invNumber - 3])
-            result = state.isAir
+            result = (state != (inventoryBlockEntity[invNumber - 3]))
         }
         return result
     }
@@ -139,7 +148,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             for (widget in root.allWidgets) {
                 if (widget is WSlot) when (widget.inventoryNumber) {
                     0 -> playerInvSlot.add(widget)
-                    1, 2 -> Unit
+                    -2, -1, 1, 2 -> Unit
                     else -> {
                         if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
                     }
@@ -160,6 +169,9 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                     targets.addAll(containerSlot)
                 }
 
+                // buffer
+                -2 -> targets.addAll(containerSlot)
+
                 // when in container slots, only target player inventory
                 else -> targets.addAll(playerInvSlot)
             }
@@ -178,6 +190,11 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                         .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
                     break
                 }
+            }
+            val buffer = root.getSlot<WSlot>(-2, 0)
+            if ((inventoryNumber == -2) and !buffer.stack.isEmpty) {
+                playerInventory.cursorStack = buffer.stack
+                buffer.setStack<WSlot>(ItemStack.EMPTY)
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
 

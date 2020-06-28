@@ -1,13 +1,13 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.WTranslatableLabel
+import badasintended.slotlink.common.positionOf
+import badasintended.slotlink.common.sizeOf
 import badasintended.slotlink.screen.MasterScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import spinnery.widget.WPanel
 import spinnery.widget.WSlot
-import spinnery.widget.api.Position
-import spinnery.widget.api.Size
 import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
@@ -20,8 +20,8 @@ class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
     init {
         val main = root.createChild(
             { WPanel() },
-            Position.of(0f, 0f, 0f),
-            Size.of(200f, 100f)
+            positionOf(0, 0, 0),
+            sizeOf(200, 100)
         )
         main.setParent<W>(root)
         main.setOnAlign(W::center)
@@ -30,19 +30,19 @@ class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
 
         val title = main.createChild(
             { WTranslatableLabel("container.slotlink.master") },
-            Position.of(main, 8f, 6f)
+            positionOf(main, 8, 6)
         )
 
         val connectedStorage = main.createChild(
             { WTranslatableLabel(tlkey("connected")) },
-            Position.of(title, 0f, 11f)
+            positionOf(title, 0, 11)
         )
 
         for (i in 0 until c.totalInv) {
             val slot = main.createChild(
                 { WSlot() },
-                Position.of(connectedStorage, -1 + ((i % 8) * 18f), 11 + ((i / 8) * 18f), 1f),
-                Size.of(18f)
+                positionOf(connectedStorage, -1 + ((i % 8) * 18), 11 + ((i / 8) * 18), 1),
+                sizeOf(18)
             )
             slot.setInventoryNumber<WSlot>(1)
             slot.setSlotNumber<WSlot>(i)
@@ -50,12 +50,12 @@ class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
 
         val totalSlot = main.createChild(
             { WTranslatableLabel(tlkey("total"), c.totalSlot) },
-            Position.of(connectedStorage, 0f, 32f)
+            positionOf(connectedStorage, 0, 32)
         )
 
         main.createChild(
             { WTranslatableLabel(tlkey("max"), c.maxCount) },
-            Position.of(totalSlot, 0f, 11f)
+            positionOf(totalSlot, 0, 11)
         )
     }
 

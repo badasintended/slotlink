@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment
 import spinnery.widget.WAbstractWidget
 
 @Environment(EnvType.CLIENT)
-class WMouseArea : WAbstractWidget() {
+open class WMouseArea : WAbstractWidget() {
 
     var onMouseClicked: (mouseButton: Int) -> Unit = {}
     var onMouseReleased: (mouseButton: Int) -> Unit = {}
@@ -16,7 +16,7 @@ class WMouseArea : WAbstractWidget() {
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int) {
         super.onMouseClicked(mouseX, mouseY, mouseButton)
-        if (isWithinBounds(mouseX, mouseY)) onMouseClicked.invoke(mouseButton)
+        if (isFocused) onMouseClicked.invoke(mouseButton)
     }
 
     override fun onMouseReleased(mouseX: Float, mouseY: Float, mouseButton: Int) {
