@@ -20,8 +20,8 @@
   },
   "mixins"       : [],
   "depends"      : {
-    "fabricloader"          : ">=0.4.0",
-    "minecraft"             : "1.15.x",
+    "fabricloader"          : ">=0.8",
+    "minecraft"             : "1.16.x",
     "fabric"                : "*",
     "fabric-language-kotlin": "*"
   }

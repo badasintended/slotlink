@@ -1,5 +1,6 @@
 package badasintended.slotlink.block.entity
 
+import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
@@ -18,8 +19,8 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state: BlockState, tag: CompoundTag) {
+        super.fromTag(state, tag)
 
         hasMaster = tag.getBoolean("hasMaster")
         masterPos = tag.getCompound("masterPos")

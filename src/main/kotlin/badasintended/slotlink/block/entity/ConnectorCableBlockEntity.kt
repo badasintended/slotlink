@@ -3,6 +3,7 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.common.pos2Tag
 import badasintended.slotlink.common.tag2Pos
 import net.fabricmc.fabric.api.util.NbtType
+import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
@@ -17,14 +18,16 @@ abstract class ConnectorCableBlockEntity(
 
     private fun addToMasterConnectorList(world: World) {
         if (hasMaster) {
-            val masterBlockEntity = world.getBlockEntity(tag2Pos(masterPos))!!
+            val masterPos = tag2Pos(masterPos)
+            val masterBlockState = world.getBlockState(masterPos)
+            val masterBlockEntity = world.getBlockEntity(masterPos)!!
             val masterNbt = masterBlockEntity.toTag(CompoundTag())
 
             val masterList = masterNbt.getList(listKey, NbtType.COMPOUND)
             masterList.add(pos2Tag(pos))
 
             masterNbt.put(listKey, masterList)
-            masterBlockEntity.fromTag(masterNbt)
+            masterBlockEntity.fromTag(masterBlockState, masterNbt)
             masterBlockEntity.markDirty()
         }
     }
@@ -37,8 +40,8 @@ abstract class ConnectorCableBlockEntity(
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state: BlockState, tag: CompoundTag) {
+        super.fromTag(state, tag)
 
         linkedPos = tag.getCompound("linkedPos")
     }

@@ -1,10 +1,11 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.common.SortBy
-import badasintended.slotlink.common.drawTintedImage
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
@@ -19,24 +20,26 @@ class WSortButton(
     private val sortFunction: () -> SortBy
 ) : WButton() {
 
-    override fun draw() {
-        val x = floor(x).toDouble()
-        val y = floor(y).toDouble()
-        val z = floor(z).toDouble()
-        val w = floor(width).toDouble()
-        val h = floor(height).toDouble()
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+        val x = floor(x)
+        val y = floor(y)
+        val z = floor(z)
+        val w = floor(width)
+        val h = floor(height)
 
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
         BaseRenderer.drawBeveledPanel(
+            matrices, provider,
             x, y, z, w, h,
             panelStyle.asColor("highlight"),
             panelStyle.asColor("background"),
             panelStyle.asColor("shadow")
         )
 
-        val tint = panelStyle.asColor("label.color").RGB
-        drawTintedImage(sortImage, tint, x, y, z, w, h)
+        val tint = panelStyle.asColor("label.color")
+        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, sortImage)
+        //drawTintedImage(sortImage, tint, x, y, z, w, h)
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {

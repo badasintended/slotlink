@@ -3,6 +3,8 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.TranslatableText
 import spinnery.client.render.TextRenderer
 import spinnery.common.registry.ThemeRegistry
@@ -16,7 +18,7 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
         setText<WStaticText>(TranslatableText(key, *args))
     }
 
-    override fun draw() {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         if (isHidden) return
 
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
@@ -26,7 +28,7 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
             .at(x, y, z).scale(scale).maxWidth(maxWidth)
             .shadow(false)
             .color(panelStyle.asColor("label.color"))
-            .render()
+            .render(matrices, provider)
     }
 
 }
