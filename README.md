@@ -1,4 +1,4 @@
-# slotlink [![1][1]][6]  [![2][2]][4]  [![3][3]][5] <img src="src/main/resources/assets/slotlink/icon.png" align="right"/>
+# slotlink [![1][1]][6]  [![2][2]][4]  [![3][3]][5] [![10][10]][11] <img src="src/main/resources/assets/slotlink/icon.png" align="right"/>
 
 [![Fabric API](https://images2.imgbox.com/8e/38/bfInI5qv_o.png)][8] [![Fabric Language Kotlin](https://images2.imgbox.com/e6/72/9pHQB5ZC_o.png)][9]
 
@@ -29,4 +29,5 @@ cool yea me neither
 [7]: src/main/resources/assets/storagenetworks/icon.png
 [8]: https://www.curseforge.com/minecraft/mc-mods/fabric-api
 [9]: https://www.curseforge.com/minecraft/mc-mods/fabric-language-kotlin
- 
+[10]: https://cf.way2muchnoise.eu/391014.svg
+[11]: https://www.curseforge.com/minecraft/mc-mods/slotlink
