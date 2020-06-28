@@ -8,7 +8,7 @@ import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
-import net.minecraft.util.PacketByteBuf
+import net.minecraft.network.PacketByteBuf
 
 @Environment(EnvType.CLIENT)
 class RequestScreen(c: RequestScreenHandler) : AbstractRequestScreen<RequestScreenHandler>(c) {

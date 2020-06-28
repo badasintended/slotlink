@@ -5,5 +5,5 @@ import net.minecraft.text.TranslatableText
 import net.minecraft.world.World
 
 fun addChat(world: World, player: PlayerEntity, key: String, vararg args: Any) {
-    if (!world.isClient) player.addChatMessage(TranslatableText(key, *args), false)
+    if (!world.isClient) player.sendMessage(TranslatableText(key, *args), true)
 }

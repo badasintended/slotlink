@@ -3,16 +3,16 @@ package badasintended.slotlink.screen
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.inventory.DummyInventory
 import net.minecraft.block.BlockState
-import net.minecraft.container.BlockContext
-import net.minecraft.container.CraftingTableContainer
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
+import net.minecraft.screen.CraftingScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
@@ -42,7 +42,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val playerSlots = arrayListOf<WSlot>()
     val slotList = arrayListOf<WSlot>()
 
-    private val context: BlockContext = BlockContext.create(player.world, blockPos)
+    private val context: ScreenHandlerContext = ScreenHandlerContext.create(player.world, blockPos)
 
     init {
         for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
@@ -73,7 +73,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
 
         invMap.forEach { (num, inv) ->
-            for (i in 0 until inv.invSize) {
+            for (i in 0 until inv.size()) {
                 val slot = root.createChild { WSlot() }
                 slot.setInventoryNumber<WSlot>(num)
                 slot.setSlotNumber<WSlot>(i)
@@ -100,7 +100,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     /**
-     * Taken from [CraftingTableContainer]
+     * Taken from [CraftingScreenHandler]
      */
     private fun craftItem() {
         context.run { world, _ ->
