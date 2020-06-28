@@ -11,7 +11,7 @@
     "sources" : "https://github.com/badasintended/slotlink",
     "issues"  : "https://github.com/badasintended/slotlink/issues"
   },
-  "license"      : "MIT",
+  "license"      : "GPL-3.0",
   "icon"         : "assets/slotlink/icon.png",
   "environment"  : "*",
   "entrypoints"  : {
