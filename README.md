@@ -29,5 +29,5 @@ cool yea me neither
 [7]: src/main/resources/assets/storagenetworks/icon.png
 [8]: https://www.curseforge.com/minecraft/mc-mods/fabric-api
 [9]: https://www.curseforge.com/minecraft/mc-mods/fabric-language-kotlin
-[10]: https://cf.way2muchnoise.eu/391014.svg
+[10]: http://cf.way2muchnoise.eu/full_slotlink_downloads.svg
 [11]: https://www.curseforge.com/minecraft/mc-mods/slotlink
