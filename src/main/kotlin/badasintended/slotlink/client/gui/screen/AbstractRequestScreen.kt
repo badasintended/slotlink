@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.registry.Registry
@@ -271,7 +272,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
                     if (tags.isEmpty() and tag.isEmpty()) return@r false
                     else tags.none { it.toString().contains(tag, true) }
                 }
-                else -> filledSlots.removeIf { !it.stack.item.name.asString().contains(trimmedFilter.trim(), true) }
+                else -> filledSlots.removeIf { !it.stack.item.name.string.contains(trimmedFilter.trim(), true) }
             }
         }
 
@@ -321,8 +322,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         val factor = client.window.scaleFactor
         val x = (mouse.x / factor).toInt()
         val y = (mouse.y / factor).toInt()
-        val text = translationKeys.asList().stream().map { TranslatableText(it).asString() }.toList()
-        renderTooltip(text, x, y)
+        val text = translationKeys.asList().stream().map { TranslatableText(it) }.toList()
+        renderTooltip(MatrixStack(), text, x, y)
     }
 
     private fun updateSlotSize() {
