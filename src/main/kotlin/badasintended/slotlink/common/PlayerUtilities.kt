@@ -4,6 +4,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.TranslatableText
 import net.minecraft.world.World
 
-fun addChat(world: World, player: PlayerEntity, key: String, vararg args: Any) {
-    if (!world.isClient) player.addChatMessage(TranslatableText(key, *args), false)
+fun sendActionBar(world: World, player: PlayerEntity, key: String, vararg args: Any) {
+    if (!world.isClient) player.addChatMessage(TranslatableText(key, *args), true)
 }

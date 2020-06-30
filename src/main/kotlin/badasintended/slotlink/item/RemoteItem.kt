@@ -1,6 +1,6 @@
 package badasintended.slotlink.item
 
-import badasintended.slotlink.common.addChat
+import badasintended.slotlink.common.sendActionBar
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Hand
@@ -21,9 +21,9 @@ class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
         masterPos: BlockPos,
         masterDim: DimensionType?
     ) {
-        addChat(world, player,"${player.pos.distanceTo(Vec3d(masterPos))}")
+        sendActionBar(world, player,"${player.pos.distanceTo(Vec3d(masterPos))}")
         if (player.pos.distanceTo(Vec3d(masterPos)) > 512) {
-            addChat(world, player, "${baseTlKey}.tooFarFromMaster")
+            sendActionBar(world, player, "${baseTlKey}.tooFarFromMaster")
         } else super.use(world, player, stack, hand, masterPos, masterDim)
     }
 

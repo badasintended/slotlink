@@ -13,6 +13,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.registry.Registry
 import spinnery.common.utility.StackUtilities.equalItemAndTag
 import spinnery.widget.WPanel
@@ -22,6 +23,7 @@ import spinnery.widget.api.Action.PICKUP
 import spinnery.widget.api.Action.QUICK_MOVE
 import spinnery.widget.api.Position
 import kotlin.math.sign
+import kotlin.streams.toList
 import spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
@@ -38,7 +40,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private var lastScroll = 0
     private var lastFilter = ""
 
-    private var lastSlotClick: Long = 0
+    private var notYetSorted = true
 
     protected var lastSort = c.lastSort
 
@@ -105,23 +107,38 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         // Player Inventory label
         playerInvLabel = main.createChild(
             { WTranslatableLabel("container.inventory") },
-            positionOf(craftingLabel, -19, 66 - (if (hideLabel) 9 else 0))
+            positionOf(craftingLabel, -19, (66 - (if (hideLabel) 9 else 0)))
         )
         playerInvLabel.setHidden<W>(hideLabel)
 
         // Player Inventory slots
-        WSlot.addPlayerInventory(
+        /*
+        val playerSlots = WSlot.addPlayerInventory(
             positionOf(playerInvLabel, -1, 11),
             sizeOf(18),
             main
         )
+         */
 
-        val playerInvArea = main.createChild(
-            { WMouseArea() },
-            positionOf(playerInvLabel, -1, 11),
-            sizeOf(162, 76)
-        )
-        playerInvArea.onMouseReleased = { onPlayerSlotClick() }
+        for (i in 0 until 27) {
+            val slot = main.createChild(
+                { WPlayerSlot { sort(lastSort, lastFilter) } },
+                positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)),
+                sizeOf(18)
+            )
+            slot.setInventoryNumber<WSlot>(0)
+            slot.setSlotNumber<WSlot>(i + 9)
+        }
+
+        for (i in 0 until 9) {
+            val slot = main.createChild(
+                { WPlayerSlot { sort(lastSort, lastFilter) } },
+                positionOf(playerInvLabel, (((i % 9) * 18) - 1), 70),
+                sizeOf(18)
+            )
+            slot.setInventoryNumber<WSlot>(0)
+            slot.setSlotNumber<WSlot>(i)
+        }
 
         scrollArea = main.createChild(
             { WMouseArea() },
@@ -140,7 +157,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         for (i in 0 until 48) {
             val slot = main.createChild(
                 { WMultiSlot { slotActionPerformed = it } },
-                positionOf(scrollArea, (i % 8) * 18, (i / 8) * 18, 2),
+                positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18)),
                 sizeOf(18)
             )
             slot.setInventoryNumber<WSlot>(-1)
@@ -157,32 +174,22 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         slotArea.onMouseReleased = { onSlotAreaClick() }
 
         searchBar = main.createChild(
-            { WSearchBar { sort(lastSort, it) } },
-            positionOf(scrollArea, 0, slotSize + 3, 1),
+            { WSearchBar({ sort(lastSort, it) }, { drawSearchTooltip() }) },
+            positionOf(scrollArea, 0, (slotSize + 3), 1),
             sizeOf(146, 18)
         )
 
         main.createChild(
-            { WSortButton(lastSort.texture) { sort(lastSort.next(), lastFilter) } },
+            { WSortButton(lastSort.texture, { sort(lastSort.next(), lastFilter) }, { drawSortTooltip() }) },
             positionOf(searchBar, 148, 1),
             sizeOf(14)
         )
 
         GlobalScope.launch {
             delay(100)
-            sort(lastSort, lastFilter)
+            if (notYetSorted) sort(lastSort, lastFilter)
         }
 
-    }
-
-    private fun onPlayerSlotClick() {
-        /*GlobalScope.launch {
-            lastSlotClick = System.currentTimeMillis()
-            delay(250)
-            if (System.currentTimeMillis() - lastSlotClick >= 250.toLong()) sort(lastSort, lastFilter)
-        }
-         */
-        sort(lastSort, lastFilter)
     }
 
     private fun onSlotAreaClick() {
@@ -235,6 +242,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     }
 
     private fun sort(sortBy: SortBy, filter: String): SortBy {
+        notYetSorted = false
+
         emptySlots.clear()
         filledSlots.clear()
 
@@ -255,10 +264,10 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
                 '@' -> filledSlots.removeIf {
                     !Registry.ITEM.getId(it.stack.item).toString().contains(trimmedFilter.drop(1).trim(), true)
                 }
-                '#' -> filledSlots.removeIf { slot ->
+                '#' -> filledSlots.removeIf r@{ slot ->
                     val tag = trimmedFilter.drop(1).trim()
                     val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
-                    if (tags.isEmpty() and tag.isEmpty()) return@removeIf false
+                    if (tags.isEmpty() and tag.isEmpty()) return@r false
                     else tags.none { it.toString().contains(tag, true) }
                 }
                 else -> filledSlots.removeIf { !it.stack.item.name.asString().contains(trimmedFilter.trim(), true) }
@@ -296,6 +305,23 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         lastFilter = filter
         return lastSort
+    }
+
+    private fun drawSearchTooltip() = drawTooltip(
+        "block.slotlink.request.search.tooltip1",
+        "block.slotlink.request.search.tooltip2"
+    )
+
+    private fun drawSortTooltip() = drawTooltip(lastSort.translationKey)
+
+    private fun drawTooltip(vararg translationKeys: String) {
+        val client = MinecraftClient.getInstance()
+        val mouse = client.mouse
+        val factor = client.window.scaleFactor
+        val x = (mouse.x / factor).toInt()
+        val y = (mouse.y / factor).toInt()
+        val text = translationKeys.asList().stream().map { TranslatableText(it).asString() }.toList()
+        renderTooltip(text, x, y)
     }
 
     private fun updateSlotSize() {

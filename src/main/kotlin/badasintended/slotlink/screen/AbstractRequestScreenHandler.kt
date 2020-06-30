@@ -2,6 +2,7 @@ package badasintended.slotlink.screen
 
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.inventory.DummyInventory
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.container.BlockContext
 import net.minecraft.container.CraftingTableContainer
@@ -14,6 +15,8 @@ import net.minecraft.recipe.RecipeType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
+import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
@@ -115,7 +118,10 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                     }
                 }
                 outputSlot.setStack<WSlot>(itemStack)
-                outputSlot.setPreviewStack<WSlot>(itemStack)
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                    player, SLOT_UPDATE_PACKET,
+                    createSlotUpdatePacket(syncId, outputSlot.slotNumber, outputSlot.inventoryNumber, itemStack)
+                )
                 resultInv.unlockLastRecipe(player)
             }
         }
@@ -188,7 +194,9 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                     source.consume(action, Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
                     StackUtilities.merge(source::getStack, target::getStack, source::getMaxCount) { max }
                         .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
-                    break
+                    if (((source.inventoryNumber == -2) or (source.inventoryNumber == 0)) and !source.stack.isEmpty) {
+                        continue
+                    } else break
                 }
             }
             val buffer = root.getSlot<WSlot>(-2, 0)

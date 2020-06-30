@@ -3,6 +3,7 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.text.TranslatableText
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WTextField
@@ -11,8 +12,13 @@ import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSearchBar(
-    private val setSearch: (String) -> Unit
+    private val setSearch: (String) -> Unit,
+    private val drawTooltip: () -> Unit
 ) : WTextField() {
+
+    init {
+        setLabel<WSearchBar>(TranslatableText("block.slotlink.request.search"))
+    }
 
     override fun draw() {
         if (isHidden) return
@@ -31,6 +37,8 @@ class WSearchBar(
             slotStyle.asColor("background.unfocused"),
             slotStyle.asColor("bottom_right")
         )
+
+        if (isFocused and !isActive) drawTooltip.invoke()
 
         renderField()
     }

@@ -33,10 +33,10 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         masterDim: DimensionType?
     ) {
         if (masterDim == null) {
-            addChat(world, player, "${baseTlKey}.invalidDimension")
+            sendActionBar(world, player, "${baseTlKey}.invalidDimension")
         } else if (masterDim != world.dimension.type) {
             // multi dimension remote is not really possible with my knowledge
-            addChat(world, player, "${baseTlKey}.differentDimension")
+            sendActionBar(world, player, "${baseTlKey}.differentDimension")
         } else {
             if (!world.isClient) {
                 openScreen("remote", player) { buf ->
@@ -59,7 +59,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         val masterDim = DimensionType.byId(Identifier(stack.orCreateTag.getString("masterDim")))
 
         if (masterPosTag == CompoundTag()) {
-            addChat(world, player, "${baseTlKey}.hasNoMaster")
+            sendActionBar(world, player, "${baseTlKey}.hasNoMaster")
         } else use(world, player, stack, hand, tag2Pos(masterPosTag), masterDim)
 
         return TypedActionResult.fail(stack)
@@ -77,7 +77,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
             if (player != null) if (player.isSneaking) {
                 stack.orCreateTag.put("masterPos", pos2Tag(pos))
                 stack.orCreateTag.putString("masterDim", dimId)
-                addChat(world, player, "${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
+                sendActionBar(world, player, "${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
                 return ActionResult.CONSUME
             }
         }

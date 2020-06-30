@@ -1,8 +1,8 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.common.addChat
 import badasintended.slotlink.common.openScreen
+import badasintended.slotlink.common.sendActionBar
 import badasintended.slotlink.common.tag2Pos
 import badasintended.slotlink.common.writeRequestData
 import net.minecraft.block.BlockState
@@ -31,7 +31,7 @@ class RequestBlock : ChildBlock("request") {
         val blockEntity = world.getBlockEntity(pos)!!
         val nbt = blockEntity.toTag(CompoundTag())
         val hasMaster = nbt.getBoolean("hasMaster")
-        if (!hasMaster) addChat(world, player, "${translationKey}.hasNoMaster")
+        if (!hasMaster) sendActionBar(world, player, "${translationKey}.hasNoMaster")
         else if (!world.isClient) {
             openScreen("request", player) { buf ->
                 buf.writeBlockPos(pos)

@@ -16,7 +16,8 @@ import kotlin.math.floor
 @Environment(EnvType.CLIENT)
 class WSortButton(
     private var sortImage: Identifier,
-    private val sortFunction: () -> SortBy
+    private val sortFunction: () -> SortBy,
+    private val drawTooltip: () -> Unit
 ) : WButton() {
 
     override fun draw() {
@@ -26,10 +27,16 @@ class WSortButton(
         val w = floor(width).toDouble()
         val h = floor(height).toDouble()
 
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
-        BaseRenderer.drawBeveledPanel(
+        if (isLowered) BaseRenderer.drawBeveledPanel(
             x, y, z, w, h,
+            panelStyle.asColor("shadow"),
+            slotStyle.asColor("background.unfocused"),
+            panelStyle.asColor("highlight")
+        ) else BaseRenderer.drawBeveledPanel(
+            x, y,z,w,h,
             panelStyle.asColor("highlight"),
             panelStyle.asColor("background"),
             panelStyle.asColor("shadow")
@@ -37,6 +44,8 @@ class WSortButton(
 
         val tint = panelStyle.asColor("label.color").RGB
         drawTintedImage(sortImage, tint, x, y, z, w, h)
+
+        if (isFocused) drawTooltip.invoke()
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {

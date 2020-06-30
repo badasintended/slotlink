@@ -5,6 +5,8 @@
   "block.slotlink.request"                    : "Storage Request",
   "block.slotlink.request.hasNoMaster"        : "You need to connect it to a master block",
   "block.slotlink.request.search"             : "Search...",
+  "block.slotlink.request.search.tooltip1"    : "@: Search via identifier",
+  "block.slotlink.request.search.tooltip2"    : "#: Search via datapack tag",
   "block.slotlink.request.tooltip"            : "Storage network's interface for taking & adding items.",
   "block.slotlink.cable"                      : "Cable",
   "block.slotlink.cable.tooltip"              : "Previously called as The Pipe.",
