@@ -11,7 +11,8 @@ import spinnery.widget.api.Action.PICKUP
 
 @Environment(EnvType.CLIENT)
 class WMultiSlot(
-    private val actionPerformed: (Boolean) -> Unit
+    private val actionPerformed: (Boolean) -> Unit,
+    private val sort: () -> Unit
 ) : WSlot() {
 
     private val linkedSlots = arrayListOf<WLinkedSlot>()
@@ -52,15 +53,18 @@ class WMultiSlot(
                     slotAction(container, it.slotNumber, it.invNumber, button, Action.QUICK_MOVE, player)
                 }
                 actionPerformed.invoke(true)
+                sort.invoke()
             }
         } else {
             if ((button == LEFT) or (button == RIGHT) and isCursorEmpty) {
                 skipRelease = true
                 slotAction(container, sSlotN, sSlotInvN, button, PICKUP, player)
                 actionPerformed.invoke(true)
+                sort.invoke()
             } else if (button == MIDDLE) {
                 slotAction(container, sSlotN, sSlotInvN, button, CLONE, player)
                 actionPerformed.invoke(true)
+                sort.invoke()
             }
         }
 
@@ -68,6 +72,7 @@ class WMultiSlot(
         if (isWithinBounds(mouseX, mouseY)) {
             isHeld = true
             heldSince = System.currentTimeMillis()
+            sort.invoke()
         }
     }
 

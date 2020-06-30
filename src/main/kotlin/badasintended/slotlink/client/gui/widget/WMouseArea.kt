@@ -24,11 +24,6 @@ open class WMouseArea : WAbstractWidget() {
         if (isWithinBounds(mouseX, mouseY)) onMouseReleased.invoke(mouseButton)
     }
 
-    override fun onMouseDragged(mouseX: Float, mouseY: Float, mouseButton: Int, deltaX: Double, deltaY: Double) {
-        super.onMouseDragged(mouseX, mouseY, mouseButton, deltaX, deltaY)
-        if (isWithinBounds(mouseX, mouseY)) onMouseReleased.invoke(mouseButton)
-    }
-
     override fun onMouseMoved(mouseX: Float, mouseY: Float) {
         super.onMouseMoved(mouseX, mouseY)
         onMouseMoved.invoke(isWithinBounds(mouseX, mouseY))

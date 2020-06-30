@@ -156,7 +156,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 48) {
             val slot = main.createChild(
-                { WMultiSlot { slotActionPerformed = it } },
+                { WMultiSlot({ slotActionPerformed = it }, { sort(lastSort, lastFilter) }) },
                 positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18)),
                 sizeOf(18)
             )
@@ -187,7 +187,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         GlobalScope.launch {
             delay(100)
-            if (notYetSorted) sort(lastSort, lastFilter)
+            notYetSorted = false
+            sort(lastSort, lastFilter)
         }
 
     }
@@ -196,9 +197,9 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         if (!slotActionPerformed) {
             slotAction(c, 0, -2, 0, PICKUP, c.player)
             slotAction(c, 0, -2, 0, QUICK_MOVE, c.player)
+            sort(lastSort, lastFilter)
         }
         slotActionPerformed = false
-        sort(lastSort, lastFilter)
     }
 
     private fun scroll(v: Int) {
@@ -242,7 +243,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     }
 
     private fun sort(sortBy: SortBy, filter: String): SortBy {
-        notYetSorted = false
+        if (notYetSorted) return lastSort
 
         emptySlots.clear()
         filledSlots.clear()
