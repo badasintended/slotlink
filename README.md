@@ -22,7 +22,7 @@ cool yea me neither
 
 [1]: https://img.shields.io/badge/minecraft-1.15+-brightgreen
 [2]: https://img.shields.io/badge/loader-Fabric-blue
-[3]: https://img.shields.io/badge/code_quality-F-red
+[3]: https://img.shields.io/badge/code_quality-bad%20as%20intended-red
 [4]: https://fabricmc.net
 [5]: https://git.io/code-quality
 [6]: https://minecraft.net
