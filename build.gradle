@@ -36,7 +36,7 @@ dependencies {
 	//modRuntime "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 }
 
-if (project.enable_databreaker) {
+if (project.enable_databreaker.toBoolean()) {
 	repositories {
 		maven { url = "https://jitpack.io" }
 	}
