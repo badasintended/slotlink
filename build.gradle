@@ -36,6 +36,18 @@ dependencies {
 	//modRuntime "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 }
 
+if (project.enable_databreaker) {
+	repositories {
+		maven { url = "https://jitpack.io" }
+	}
+
+	dependencies {
+		modRuntime ("com.github.SuperCoder7979:databreaker:${project.databreaker}") {
+			exclude module : "fabric-loader"
+		}
+	}
+}
+
 processResources {
 	inputs.property "version", project.version
 
