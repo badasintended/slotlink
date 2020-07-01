@@ -40,7 +40,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private var lastScroll = 0
     private var lastFilter = ""
 
-    private var notYetSorted = true
+    private var stillSorting = false
 
     protected var lastSort = c.lastSort
 
@@ -111,15 +111,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         playerInvLabel.setHidden<W>(hideLabel)
 
-        // Player Inventory slots
-        /*
-        val playerSlots = WSlot.addPlayerInventory(
-            positionOf(playerInvLabel, -1, 11),
-            sizeOf(18),
-            main
-        )
-         */
-
         for (i in 0 until 27) {
             val slot = main.createChild(
                 { WPlayerSlot { sort(lastSort, lastFilter) } },
@@ -187,7 +178,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         GlobalScope.launch {
             delay(100)
-            notYetSorted = false
             sort(lastSort, lastFilter)
         }
 
@@ -243,7 +233,9 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     }
 
     private fun sort(sortBy: SortBy, filter: String): SortBy {
-        if (notYetSorted) return lastSort
+        if (stillSorting) return lastSort
+
+        stillSorting = true
 
         emptySlots.clear()
         filledSlots.clear()
@@ -305,6 +297,9 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         saveSort()
 
         lastFilter = filter
+
+        stillSorting = false
+
         return lastSort
     }
 
