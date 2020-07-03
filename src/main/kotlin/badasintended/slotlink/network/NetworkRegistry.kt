@@ -2,6 +2,7 @@ package badasintended.slotlink.network
 
 import badasintended.slotlink.Mod
 import badasintended.slotlink.block.RequestBlock
+import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import net.fabricmc.fabric.api.network.PacketConsumer
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
@@ -13,11 +14,14 @@ object NetworkRegistry {
 
     val REQUEST_SAVE = Mod.id("request_save")
     val REMOTE_SAVE = Mod.id("remote_save")
-
+    val CRAFT_ONCE = Mod.id("craft_once")
+    val CRAFT_STACK = Mod.id("craft_stack")
 
     fun initMain() {
         rS(REQUEST_SAVE) { context, buf -> requestSave(context, buf) }
         rS(REMOTE_SAVE) { context, buf -> remoteSave(context, buf) }
+        rS(CRAFT_ONCE) { context, _ -> craftOnce(context) }
+        rS(CRAFT_STACK) { context, _ -> craftStack(context) }
     }
 
     private fun rS(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
@@ -50,6 +54,18 @@ object NetworkRegistry {
         context.taskQueue.execute {
             val stack = if (offHand) context.player.offHandStack else context.player.mainHandStack
             stack.orCreateTag.putInt("lastSort", sort)
+        }
+    }
+
+    private fun craftOnce(context: PacketContext) {
+        context.taskQueue.execute {
+            (context.player.currentScreenHandler as AbstractRequestScreenHandler).craftOnce()
+        }
+    }
+
+    private fun craftStack(context: PacketContext) {
+        context.taskQueue.execute {
+            (context.player.currentScreenHandler as AbstractRequestScreenHandler).craftStack()
         }
     }
 

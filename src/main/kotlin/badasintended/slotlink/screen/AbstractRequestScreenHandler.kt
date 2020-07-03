@@ -20,6 +20,10 @@ import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
+import spinnery.widget.api.Action.PICKUP_ALL
+import spinnery.widget.api.Action.QUICK_MOVE
+import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
+import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
 
 abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
     ModScreenHandler(syncId, player) {
@@ -37,7 +41,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val craftingInv = CraftingInventory(this, 3, 3)
     private val resultInv = CraftingResultInventory()
 
-    private val inputSlots = HashSet<WSlot>()
+    private val inputSlots = linkedSetOf<WSlot>()
     private val outputSlot: WSlot
 
     private val invMap = HashMap<Int, Inventory>()
@@ -102,6 +106,74 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         return result
     }
 
+    fun craftOnce() {
+        val containerSlot = arrayListOf<WSlot>()
+        for (widget in root.allWidgets) {
+            if (widget is WSlot) when (widget.inventoryNumber) {
+                0, -2, -1, 1, 2 -> Unit
+                else -> {
+                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
+                }
+            }
+        }
+
+        if (playerInventory.cursorStack.isEmpty) {
+            playerInventory.cursorStack = outputSlot.stack
+        } else {
+            playerInventory.cursorStack.increment(outputSlot.stack.count)
+        }
+        outputSlot.setStack<WSlot>(ItemStack.EMPTY)
+
+        val filledInput = inputSlots.filterNot { it.stack.isEmpty }
+        filledInput.forEach { slot ->
+            val first = containerSlot.firstOrNull { ItemStack.areItemsEqualIgnoreDamage(it.stack, slot.stack) }
+            if ((first == null) or (slot.stack.count > 1)) slot.stack.decrement(1)
+            else first!!.stack.decrement(1)
+        }
+        craftItem()
+    }
+
+    fun craftStack() {
+        val playerInvSlot = arrayListOf<WSlot>()
+        val containerSlot = arrayListOf<WSlot>()
+        for (widget in root.allWidgets) {
+            if (widget is WSlot) when (widget.inventoryNumber) {
+                0 -> playerInvSlot.add(widget)
+                -2, -1, 1, 2 -> Unit
+                else -> {
+                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
+                }
+            }
+        }
+
+        val outputStack = outputSlot.stack
+        val craftCount = outputStack.maxCount / outputStack.count
+
+        val filledInput = inputSlots.filterNot { it.stack.isEmpty }
+
+        var crafted = 1
+        for (i in 0 until craftCount) {
+            var prevSuccess = true
+            filledInput.forEach { slot ->
+                val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
+                prevSuccess = if (first == null) {
+                    slot.stack.decrement(1)
+                    prevSuccess and false
+                } else {
+                    if (slot.stack.count > 1) slot.stack.decrement(1)
+                    else first.stack.decrement(1)
+                    prevSuccess and true
+                }
+            }
+            if (!prevSuccess) break else crafted++
+        }
+
+        outputStack.count = outputStack.count * crafted
+
+        onSlotAction(0, 2, 0, QUICK_MOVE, player)
+        craftItem()
+    }
+
     /**
      * Taken from [CraftingScreenHandler]
      */
@@ -128,7 +200,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     override fun onContentChanged(inventory: Inventory) {
-        if ((inventory == craftingInv) or (inventory == resultInv)) {
+        if ((inventory == craftingInv)) {
             craftItem()
         } else super.onContentChanged(inventory)
     }
@@ -148,19 +220,24 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         val source: WSlot = root.getSlot(inventoryNumber, slotNumber) ?: return
         if (source.isLocked) return
 
-        if (action == Action.QUICK_MOVE) {
-            val playerInvSlot = arrayListOf<WSlot>()
-            val containerSlot = arrayListOf<WSlot>()
-            for (widget in root.allWidgets) {
-                if (widget is WSlot) when (widget.inventoryNumber) {
-                    0 -> playerInvSlot.add(widget)
-                    -2, -1, 1, 2 -> Unit
-                    else -> {
-                        if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
-                    }
+        val playerInvSlot = arrayListOf<WSlot>()
+        val containerSlot = arrayListOf<WSlot>()
+        for (widget in root.allWidgets) {
+            if (widget is WSlot) when (widget.inventoryNumber) {
+                0 -> playerInvSlot.add(widget)
+                -2, -1, 1, 2 -> Unit
+                else -> {
+                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
                 }
             }
+        }
 
+        val cursorStack = playerInventory.cursorStack
+
+        containerSlot.sortByDescending { it.stack.count }
+        playerInvSlot.sortByDescending { it.stack.count }
+
+        if (action == QUICK_MOVE) {
             val targets = arrayListOf<WSlot>()
             when (inventoryNumber) {
                 // when in player inventory, target container slots first
@@ -191,10 +268,10 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                     ) and (target.stack.count < target.maxCount))
                 ) {
                     val max = if (target.stack.isEmpty) source.maxCount else target.maxCount
-                    source.consume(action, Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
+                    source.consume(action, FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
                     StackUtilities.merge(source::getStack, target::getStack, source::getMaxCount) { max }
                         .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
-                    if (((source.inventoryNumber == -2) or (source.inventoryNumber == 0)) and !source.stack.isEmpty) {
+                    if ((source.inventoryNumber in arrayOf(2, 0, -2)) and !source.stack.isEmpty) {
                         continue
                     } else break
                 }
@@ -204,12 +281,15 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 playerInventory.cursorStack = buffer.stack
                 buffer.setStack<WSlot>(ItemStack.EMPTY)
             }
+        } else if (action == PICKUP_ALL) {
+            playerInvSlot.forEach { slot ->
+                if (StackUtilities.equalItemAndTag(slot.stack, cursorStack) and !slot.isLocked) {
+                    slot.consume(action, FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK)
+                    StackUtilities.merge(slot::getStack, { cursorStack }, slot::getMaxCount, { cursorStack.maxCount }
+                    ).apply({ slot.setStack<WSlot>(it) }, { playerInventory.cursorStack = it })
+                }
+            }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
-
-        if ((inventoryNumber == 2) and outputSlot.stack.isEmpty) inputSlots.forEach {
-            it.setStack<WSlot>(ItemStack(it.stack.item, (it.stack.count - 1)))
-            craftItem()
-        }
     }
 
     override fun close(player: PlayerEntity) {

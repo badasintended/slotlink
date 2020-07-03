@@ -92,7 +92,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         // Crafting Result slot
         val resultSlot = main.createChild(
-            { WSlot() },
+            { WCraftingResultSlot { sort(lastSort, lastFilter) } },
             positionOf(craftingLabel, 91, 24),
             sizeOf(26)
         )
