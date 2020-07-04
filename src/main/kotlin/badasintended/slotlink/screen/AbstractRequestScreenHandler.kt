@@ -147,12 +147,12 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
 
         val outputStack = outputSlot.stack
-        val craftCount = outputStack.maxCount / outputStack.count
+        val craftMax = outputStack.maxCount / outputStack.count
 
         val filledInput = inputSlots.filterNot { it.stack.isEmpty }
 
         var crafted = 1
-        for (i in 0 until craftCount) {
+        for (i in 0 until craftMax) {
             var prevSuccess = true
             filledInput.forEach { slot ->
                 val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
@@ -165,10 +165,11 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                     else first.stack.decrement(1)
                 }
             }
-            if (!prevSuccess) break else crafted++
+            if (!prevSuccess) break
+            crafted++
         }
 
-        outputStack.count *= crafted
+        outputStack.count *= crafted.coerceAtMost(craftMax)
 
         onSlotAction(0, 2, 0, QUICK_MOVE, player)
         craftItem()
