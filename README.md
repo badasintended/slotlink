@@ -16,6 +16,7 @@ Other project is probably better than this.
 yea im too lazy to explain it so figure it yourself
 
 ### really? this is your attutude? im not gonna use this mod then
+### attitude*
 cool yea me neither
 
 ### ...
