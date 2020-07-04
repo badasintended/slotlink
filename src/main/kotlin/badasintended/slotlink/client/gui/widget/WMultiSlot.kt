@@ -12,6 +12,7 @@ import spinnery.widget.api.Action
 import spinnery.widget.api.Action.CLONE
 import spinnery.widget.api.Action.PICKUP
 import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -32,11 +33,11 @@ class WMultiSlot(
     override fun draw() {
         if (isHidden) return
 
-        val x = x.toDouble()
-        val y = y.toDouble()
-        val z = z.toDouble()
-        val w = width.toDouble()
-        val h = height.toDouble()
+        val x = floor(x).toDouble()
+        val y = floor(y).toDouble()
+        val z = floor(z).toDouble()
+        val w = floor(width).toDouble()
+        val h = floor(height).toDouble()
 
         BaseRenderer.drawBeveledPanel(
             x, y, z, w, h,
