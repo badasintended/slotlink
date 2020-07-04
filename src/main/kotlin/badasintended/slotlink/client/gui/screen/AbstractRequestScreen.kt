@@ -62,7 +62,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         main = root.createChild(
             { WPanel() },
             positionOf(0, 0, 0),
-            sizeOf(176, 197 + (slotSize - (if (hideLabel) 17 else 0)))
+            sizeOf(176, 198 + (slotSize - (if (hideLabel) 17 else 0)))
         )
         main.setParent<W>(root)
         main.setOnAlign(W::center)
@@ -82,6 +82,13 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         craftingLabel.setHidden<W>(hideLabel)
 
+        // Crafting clear button
+        main.createChild(
+            { WCraftingClearButton({ drawClearTooltip() }, { sort(lastSort, lastFilter) }) },
+            positionOf(craftingLabel, -6, 10, 1),
+            sizeOf(6)
+        )
+
         // Crafting Input slots
         WSlot.addArray(
             positionOf(craftingLabel, 1, 10),
@@ -91,7 +98,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         // Crafting Result slot
         val resultSlot = main.createChild(
-            { WSlot() },
+            { WCraftingResultSlot { sort(lastSort, lastFilter) } },
             positionOf(craftingLabel, 91, 24),
             sizeOf(26)
         )
@@ -310,6 +317,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     private fun drawSortTooltip() = drawTooltip(lastSort.translationKey)
 
+    private fun drawClearTooltip() = drawTooltip("block.slotlink.request.craft.clearTooltip")
+
     private fun drawTooltip(vararg translationKeys: String) {
         val client = MinecraftClient.getInstance()
         val mouse = client.mouse
@@ -334,7 +343,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         updateSlotSize()
         val slotSize = slotHeight * 18
 
-        main.setSize<W>(sizeOf(176, 197 + (slotSize - (if (hideLabel) 17 else 0))))
+        main.setSize<W>(sizeOf(176, 198 + (slotSize - (if (hideLabel) 17 else 0))))
         craftingLabel.setPosition<W>(positionOf(titleLabel, 19, slotSize + 31 - (if (hideLabel) 8 else 0)))
         craftingLabel.setHidden<W>(hideLabel)
         playerInvLabel.setPosition<W>(positionOf(craftingLabel, -19, 66 - (if (hideLabel) 9 else 0)))
