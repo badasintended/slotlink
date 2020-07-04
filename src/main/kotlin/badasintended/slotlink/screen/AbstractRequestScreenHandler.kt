@@ -126,7 +126,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
         val filledInput = inputSlots.filterNot { it.stack.isEmpty }
         filledInput.forEach { slot ->
-            val first = containerSlot.firstOrNull { ItemStack.areItemsEqualIgnoreDamage(it.stack, slot.stack) }
+            val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
             if ((first == null) or (slot.stack.count > 1)) slot.stack.decrement(1)
             else first!!.stack.decrement(1)
         }
@@ -156,22 +156,55 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             var prevSuccess = true
             filledInput.forEach { slot ->
                 val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
-                prevSuccess = if (first == null) {
+                if (first == null) {
+                    prevSuccess = prevSuccess and (slot.stack.count >= 1)
                     slot.stack.decrement(1)
-                    prevSuccess and false
                 } else {
+                    prevSuccess = prevSuccess and true
                     if (slot.stack.count > 1) slot.stack.decrement(1)
                     else first.stack.decrement(1)
-                    prevSuccess and true
                 }
             }
             if (!prevSuccess) break else crafted++
         }
 
-        outputStack.count = outputStack.count * crafted
+        outputStack.count *= crafted
 
         onSlotAction(0, 2, 0, QUICK_MOVE, player)
         craftItem()
+    }
+
+    fun clearCraft() {
+        val containerSlot = arrayListOf<WSlot>()
+        for (widget in root.allWidgets) {
+            if (widget is WSlot) when (widget.inventoryNumber) {
+                0, -2, -1, 1, 2 -> Unit
+                else -> {
+                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
+                }
+            }
+        }
+
+        val filledInput = inputSlots.filterNot { it.stack.isEmpty }
+        filledInput.forEach { slot ->
+            for (i in 1..slot.stack.count) {
+                containerSlot.sortByDescending { it.stack.count }
+                val first = containerSlot.firstOrNull {
+                    StackUtilities.equalItemAndTag(it.stack, slot.stack) and (it.stack.count < it.stack.maxCount)
+                }
+                if (first != null) {
+                    first.stack.increment(1)
+                    slot.stack.decrement(1)
+                }
+            }
+            if (slot.stack.count > 0) {
+                val first = containerSlot.firstOrNull { it.stack.isEmpty }
+                if (first != null) {
+                    first.setStack<WSlot>(slot.stack)
+                    slot.setStack<WSlot>(ItemStack.EMPTY)
+                }
+            }
+        }
     }
 
     /**
@@ -293,7 +326,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     override fun close(player: PlayerEntity) {
-        dropInventory(player, world, craftingInv)
+        clearCraft()
         super.close(player)
     }
 

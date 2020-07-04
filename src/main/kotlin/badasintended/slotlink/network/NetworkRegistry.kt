@@ -16,12 +16,14 @@ object NetworkRegistry {
     val REMOTE_SAVE = Mod.id("remote_save")
     val CRAFT_ONCE = Mod.id("craft_once")
     val CRAFT_STACK = Mod.id("craft_stack")
+    val CRAFT_CLEAR =  Mod.id("craft_clear")
 
     fun initMain() {
-        rS(REQUEST_SAVE) { context, buf -> requestSave(context, buf) }
-        rS(REMOTE_SAVE) { context, buf -> remoteSave(context, buf) }
-        rS(CRAFT_ONCE) { context, _ -> craftOnce(context) }
-        rS(CRAFT_STACK) { context, _ -> craftStack(context) }
+        rS(REQUEST_SAVE, this::requestSave)
+        rS(REMOTE_SAVE, this::remoteSave)
+        rS(CRAFT_ONCE, this::craftOnce)
+        rS(CRAFT_STACK, this::craftStack)
+        rS(CRAFT_CLEAR, this::craftClear)
     }
 
     private fun rS(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
@@ -57,15 +59,21 @@ object NetworkRegistry {
         }
     }
 
-    private fun craftOnce(context: PacketContext) {
+    private fun craftOnce(context: PacketContext, buf: PacketByteBuf) {
         context.taskQueue.execute {
             (context.player.currentScreenHandler as AbstractRequestScreenHandler).craftOnce()
         }
     }
 
-    private fun craftStack(context: PacketContext) {
+    private fun craftStack(context: PacketContext, buf: PacketByteBuf) {
         context.taskQueue.execute {
             (context.player.currentScreenHandler as AbstractRequestScreenHandler).craftStack()
+        }
+    }
+
+    private fun craftClear(context: PacketContext, buf: PacketByteBuf) {
+        context.taskQueue.execute {
+            (context.player.currentScreenHandler as AbstractRequestScreenHandler).clearCraft()
         }
     }
 

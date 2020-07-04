@@ -83,6 +83,13 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         craftingLabel.setHidden<W>(hideLabel)
 
+        // Crafting clear button
+        main.createChild(
+            { WCraftingClearButton({ drawClearTooltip() }, { sort(lastSort, lastFilter) }) },
+            positionOf(craftingLabel, -6, 10),
+            sizeOf(6)
+        )
+
         // Crafting Input slots
         WSlot.addArray(
             positionOf(craftingLabel, 1, 10),
@@ -310,6 +317,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     )
 
     private fun drawSortTooltip() = drawTooltip(lastSort.translationKey)
+
+    private fun drawClearTooltip() = drawTooltip("block.slotlink.request.craft.clearTooltip")
 
     private fun drawTooltip(vararg translationKeys: String) {
         val client = MinecraftClient.getInstance()
