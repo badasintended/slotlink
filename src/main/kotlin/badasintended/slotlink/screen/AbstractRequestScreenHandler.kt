@@ -329,6 +329,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
     override fun close(player: PlayerEntity) {
         clearCraft()
+        dropInventory(player, world, craftingInv)
         super.close(player)
     }
 
