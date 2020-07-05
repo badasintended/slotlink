@@ -17,6 +17,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
 import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
+import spinnery.common.utility.MutablePair
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
@@ -24,6 +25,12 @@ import spinnery.widget.api.Action.PICKUP_ALL
 import spinnery.widget.api.Action.QUICK_MOVE
 import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
 import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
+
 
 abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
     ModScreenHandler(syncId, player) {
@@ -50,6 +57,9 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     val slotList = arrayListOf<WSlot>()
 
     private val context: ScreenHandlerContext = ScreenHandlerContext.create(player.world, blockPos)
+
+    private val fixedSplitSlots = linkedSetOf<WSlot>()
+    private val fixedSingleSlots = linkedSetOf<WSlot>()
 
     init {
         for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
@@ -231,6 +241,54 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 )
                 resultInv.unlockLastRecipe(player)
             }
+        }
+    }
+
+    /**
+     * Opened a PR to spinnery but i'm not patient
+     *
+     * TODO: delete if merged
+     */
+    override fun onSlotDrag(slotNumber: IntArray, inventoryNumber: IntArray, action: Action) {
+        val slots: MutableSet<WSlot> = LinkedHashSet()
+
+        for (i in slotNumber.indices) {
+            val slot = getInterface().getSlot<WSlot>(inventoryNumber[i], slotNumber[i])
+            if (slot != null) slots.add(slot)
+        }
+
+        if (slots.isEmpty()) return
+
+        val split = if (action.isSplit) (playerInventory.cursorStack.count / slots.size).coerceAtLeast(1) else 1
+        var stackA = if (action.isPreview) playerInventory.cursorStack.copy() else playerInventory.cursorStack
+
+        if (stackA.isEmpty) return
+
+        for (slotA in slots) {
+            if (slotA.refuses(stackA)) continue
+            val stackB: ItemStack = if (action.isPreview) slotA.stack.copy() else slotA.stack
+
+            val stacks: MutablePair<ItemStack, ItemStack> =
+                StackUtilities.merge(stackA, stackB, split, stackA.maxCount.coerceAtMost(split))
+            if (action.isPreview) {
+                previewCursorStack = stacks.first.copy()
+                slotA.setPreviewStack<WSlot>(stacks.second.copy())
+            } else {
+                stackA = stacks.first
+                previewCursorStack = ItemStack.EMPTY
+                slotA.setStack(stacks.second)
+            }
+        }
+    }
+
+    /**
+     * TODO: delete if merged
+     */
+    override fun getDragSlots(mouseButton: Int): MutableSet<WSlot>? {
+        return when (mouseButton) {
+            0 -> fixedSplitSlots
+            1 -> fixedSingleSlots
+            else -> null
         }
     }
 

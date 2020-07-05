@@ -2,15 +2,10 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.Mod
 import badasintended.slotlink.common.spinneryId
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_CLEAR
-import badasintended.slotlink.screen.AbstractRequestScreenHandler
-import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.network.PacketByteBuf
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WAbstractButton
@@ -19,9 +14,9 @@ import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
-class WCraftingClearButton(
+class WPutButton(
     private val tooltip: () -> Unit,
-    private val sort: () -> Unit
+    private val click: () -> Unit
 ) : WButton() {
 
     override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
@@ -34,18 +29,13 @@ class WCraftingClearButton(
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val tint = slotStyle.asColor("background.unfocused")
 
-        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Mod.id("textures/gui/clear.png"))
+        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Mod.id("textures/gui/put.png"))
 
         if (isFocused) tooltip.invoke()
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {
-        if (toggleState) {
-            (`interface`.container as AbstractRequestScreenHandler).clearCraft()
-            INSTANCE.sendToServer(CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
-            sort.invoke()
-        }
-
+        if (toggleState) click.invoke()
         return super.setLowered(toggleState)
     }
 

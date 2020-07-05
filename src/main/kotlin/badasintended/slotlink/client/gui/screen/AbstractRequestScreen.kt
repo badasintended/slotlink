@@ -5,15 +5,19 @@ import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.common.positionOf
 import badasintended.slotlink.common.sizeOf
 import badasintended.slotlink.common.slotAction
+import badasintended.slotlink.network.NetworkRegistry
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
+import io.netty.buffer.Unpooled
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.registry.Registry
 import spinnery.common.utility.StackUtilities.equalItemAndTag
@@ -50,6 +54,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private val titleLabel: WTranslatableLabel
     private val craftingLabel: WTranslatableLabel
     private val playerInvLabel: WTranslatableLabel
+    private val playerInvSlots = arrayListOf<WPlayerSlot>()
     private val scrollArea: WMouseArea
     private val scrollbar: WFakeScrollbar
     private val viewedSlots = arrayListOf<WMultiSlot>()
@@ -85,7 +90,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         // Crafting clear button
         main.createChild(
-            { WCraftingClearButton({ drawClearTooltip() }, { sort(lastSort, lastFilter) }) },
+            { WPutButton({ drawClearTooltip() }, { onClearButtonClick() }) },
             positionOf(craftingLabel, -6, 10),
             sizeOf(6)
         )
@@ -119,6 +124,13 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         playerInvLabel.setHidden<W>(hideLabel)
 
+        // that `move all to inventories` button
+        main.createChild(
+            { WPutButton({ drawPutAllTooltip() }, { onPutAllButtonClick() }) },
+            positionOf(playerInvLabel, 155, 4),
+            sizeOf(6)
+        )
+
         for (i in 0 until 27) {
             val slot = main.createChild(
                 { WPlayerSlot { sort(lastSort, lastFilter) } },
@@ -127,6 +139,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             )
             slot.setInventoryNumber<WSlot>(0)
             slot.setSlotNumber<WSlot>(i + 9)
+            playerInvSlots.add(slot)
         }
 
         for (i in 0 until 9) {
@@ -137,6 +150,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             )
             slot.setInventoryNumber<WSlot>(0)
             slot.setSlotNumber<WSlot>(i)
+            playerInvSlots.add(slot)
         }
 
         scrollArea = main.createChild(
@@ -174,7 +188,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         searchBar = main.createChild(
             { WSearchBar({ sort(lastSort, it) }, { drawSearchTooltip() }) },
-            positionOf(scrollArea, 0, (slotSize + 3), 1),
+            positionOf(scrollArea, 0, (slotSize + 3)),
             sizeOf(146, 18)
         )
 
@@ -189,6 +203,20 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             sort(lastSort, lastFilter)
         }
 
+    }
+
+    private fun onClearButtonClick() {
+        c.clearCraft()
+        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
+        sort(lastSort, lastFilter)
+    }
+
+    private fun onPutAllButtonClick() {
+        val filledSlots = playerInvSlots.filterNot { it.stack.isEmpty }
+        filledSlots.forEach { slot ->
+            slotAction(c, slot.slotNumber, slot.inventoryNumber, 0, QUICK_MOVE, c.player)
+        }
+        sort(lastSort, lastFilter)
     }
 
     private fun onSlotAreaClick() {
@@ -320,6 +348,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     private fun drawClearTooltip() = drawTooltip("block.slotlink.request.craft.clearTooltip")
 
+    private fun drawPutAllTooltip() = drawTooltip("block.slotlink.request.putAllTooltip")
+
     private fun drawTooltip(vararg translationKeys: String) {
         val client = MinecraftClient.getInstance()
         val mouse = client.mouse
@@ -352,7 +382,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         scrollArea.setSize<W>(sizeOf(162, slotSize))
         scrollbar.setSize<W>(sizeOf(14, slotSize))
         slotArea.setSize<W>(sizeOf(144, slotSize))
-        searchBar.setPosition<W>(positionOf(scrollArea, 0, slotSize + 3, 1))
+        searchBar.setPosition<W>(positionOf(scrollArea, 0, slotSize + 3))
 
         sort(lastSort, lastFilter)
 
