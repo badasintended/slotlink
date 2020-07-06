@@ -40,7 +40,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
             val display = context.recipe
 
             if (display !is DefaultCraftingDisplay) return@r Result.createNotApplicable()
-            if (display.optionalRecipe.isEmpty) return@r Result.createNotApplicable()
+            if (!display.optionalRecipe.isPresent) return@r Result.createNotApplicable()
 
             val recipe = display.optionalRecipe.get()
             if (recipe.type != RecipeType.CRAFTING) return@r Result.createNotApplicable()
