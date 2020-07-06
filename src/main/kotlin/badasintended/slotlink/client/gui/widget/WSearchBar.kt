@@ -27,7 +27,6 @@ class WSearchBar(
 
         val x = floor(x)
         val y = floor(y)
-        val z = floor(z)
         val w = floor(width)
         val h = floor(height)
 
@@ -49,6 +48,10 @@ class WSearchBar(
     override fun onKeyReleased(keyCode: Int, character: Int, keyModifier: Int) {
         super.onKeyReleased(keyCode, character, keyModifier)
         setSearch.invoke(text)
+    }
+
+    override fun onMouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int) {
+        active = isFocused
     }
 
 }

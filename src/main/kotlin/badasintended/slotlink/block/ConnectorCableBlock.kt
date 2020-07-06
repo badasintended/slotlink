@@ -50,7 +50,7 @@ abstract class ConnectorCableBlock(
         neighborPos: BlockPos
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
-        if ((neighbor !is ModBlock) and neighbor.hasBlockEntity()) {
+        if ((neighbor !is ModBlock) and neighbor.hasBlockEntity() and !isIgnored(neighbor, world)) {
             if (hasInventory(world.getBlockEntity(neighborPos))) {
                 val blockEntity = world.getBlockEntity(pos)!!
                 val nbt = blockEntity.toTag(CompoundTag())
@@ -117,7 +117,7 @@ abstract class ConnectorCableBlock(
             var checkAround = false
             if ((neighborState.block !is ModBlock)) {
                 if (neighborState.block.hasBlockEntity()) {
-                    if (!hasInventory(world.getBlockEntity(neighborPos))) {
+                    if (!hasInventory(world.getBlockEntity(neighborPos)) or isIgnored(neighborState.block, world)) {
                         checkAround = true
                     }
                 } else checkAround = true

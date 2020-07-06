@@ -33,7 +33,7 @@ dependencies {
 
 	modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
-	//modRuntime "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+	modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 }
 
 if (project.enable_databreaker.toBoolean()) {

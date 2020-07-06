@@ -8,7 +8,9 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
@@ -17,7 +19,6 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
 import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
-import spinnery.common.utility.MutablePair
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
@@ -43,18 +44,18 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val totalInventory = if (hasMaster) buf.readInt() else 0
 
     private val inventoryPos = arrayListOf<BlockPos>()
-    private val inventoryBlockEntity = arrayListOf<BlockState>()
+    private val inventoryStates = arrayListOf<BlockState>()
 
     private val craftingInv = CraftingInventory(this, 3, 3)
     private val resultInv = CraftingResultInventory()
 
-    private val inputSlots = linkedSetOf<WSlot>()
+    private val inputSlots = arrayListOf<WSlot>()
     private val outputSlot: WSlot
 
     private val invMap = HashMap<Int, Inventory>()
 
-    private val playerSlots = arrayListOf<WSlot>()
-    val slotList = arrayListOf<WSlot>()
+    val playerSlots = arrayListOf<WSlot>()
+    val linkedSlots = arrayListOf<WSlot>()
 
     private val context: ScreenHandlerContext = ScreenHandlerContext.create(player.world, blockPos)
 
@@ -68,7 +69,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             context.run { world, _ ->
                 val chunk = world.getWorldChunk(blockPos)
                 val blockEntity = chunk.getBlockEntity(blockPos)!!
-                inventoryBlockEntity.add(chunk.getBlockState(blockPos))
+                inventoryStates.add(chunk.getBlockState(blockPos))
                 invMap[index + 3] = blockEntity as Inventory
             }
         }
@@ -94,7 +95,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 val slot = root.createChild { WSlot() }
                 slot.setInventoryNumber<WSlot>(num)
                 slot.setSlotNumber<WSlot>(i)
-                slotList.add(slot)
+                linkedSlots.add(slot)
             }
         }
 
@@ -111,22 +112,12 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         var result = false
         context.run { world, _ ->
             val state = world.getBlockState(inventoryPos[invNumber - 3])
-            result = (state != (inventoryBlockEntity[invNumber - 3]))
+            result = (state != (inventoryStates[invNumber - 3]))
         }
         return result
     }
 
     fun craftOnce() {
-        val containerSlot = arrayListOf<WSlot>()
-        for (widget in root.allWidgets) {
-            if (widget is WSlot) when (widget.inventoryNumber) {
-                0, -2, -1, 1, 2 -> Unit
-                else -> {
-                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
-                }
-            }
-        }
-
         if (playerInventory.cursorStack.isEmpty) {
             playerInventory.cursorStack = outputSlot.stack
         } else {
@@ -136,7 +127,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
         val filledInput = inputSlots.filterNot { it.stack.isEmpty }
         filledInput.forEach { slot ->
-            val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
+            val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
             if ((first == null) or (slot.stack.count > 1)) slot.stack.decrement(1)
             else first!!.stack.decrement(1)
         }
@@ -144,18 +135,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     fun craftStack() {
-        val playerInvSlot = arrayListOf<WSlot>()
-        val containerSlot = arrayListOf<WSlot>()
-        for (widget in root.allWidgets) {
-            if (widget is WSlot) when (widget.inventoryNumber) {
-                0 -> playerInvSlot.add(widget)
-                -2, -1, 1, 2 -> Unit
-                else -> {
-                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
-                }
-            }
-        }
-
         val outputStack = outputSlot.stack
         val craftMax = outputStack.maxCount / outputStack.count
 
@@ -165,7 +144,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         for (i in 0 until craftMax) {
             var prevSuccess = true
             filledInput.forEach { slot ->
-                val first = containerSlot.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
+                val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
                 if (first == null) {
                     prevSuccess = prevSuccess and (slot.stack.count >= 1)
                     slot.stack.decrement(1)
@@ -219,6 +198,29 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         craftItem()
     }
 
+    fun pullInput(outside: ArrayList<ArrayList<Item>>) {
+        playerSlots.sortByDescending { it.stack.count }
+        linkedSlots.sortByDescending { it.stack.count }
+
+        outside.forEachIndexed { slotN, inside ->
+            for (item in inside) {
+                if (item == Items.AIR) continue
+                var first = playerSlots.firstOrNull { it.stack.item == item }
+                if (first == null) first = linkedSlots.firstOrNull { it.stack.item == item }
+                if (first != null) {
+                    val stack = first.stack.copy()
+                    stack.count = 1
+                    stack.tag = first.stack.tag
+                    first.stack.decrement(1)
+                    inputSlots[slotN].setStack<WSlot>(stack)
+                    break
+                }
+            }
+        }
+
+        craftItem()
+    }
+
     /**
      * Taken from [CraftingScreenHandler]
      */
@@ -245,9 +247,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     /**
-     * Opened a PR to spinnery but i'm not patient
-     *
-     * TODO: delete if merged
+     * nvm i like mine more :3
      */
     override fun onSlotDrag(slotNumber: IntArray, inventoryNumber: IntArray, action: Action) {
         val slots: MutableSet<WSlot> = LinkedHashSet()
@@ -268,10 +268,10 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             if (slotA.refuses(stackA)) continue
             val stackB: ItemStack = if (action.isPreview) slotA.stack.copy() else slotA.stack
 
-            val stacks: MutablePair<ItemStack, ItemStack> =
-                StackUtilities.merge(stackA, stackB, split, stackA.maxCount.coerceAtMost(split))
+            val stacks = StackUtilities.merge(stackA, stackB, split, stackA.maxCount.coerceAtMost(split + stackB.count))
             if (action.isPreview) {
                 previewCursorStack = stacks.first.copy()
+                previewCursorStack.count = stacks.first.count
                 slotA.setPreviewStack<WSlot>(stacks.second.copy())
             } else {
                 stackA = stacks.first
@@ -281,9 +281,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
     }
 
-    /**
-     * TODO: delete if merged
-     */
     override fun getDragSlots(mouseButton: Int): MutableSet<WSlot>? {
         return when (mouseButton) {
             0 -> fixedSplitSlots
@@ -301,7 +298,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     /**
      * Make [Action.QUICK_MOVE] does not target crafting slots also
      * makes it target player inventory if the slot is one
-     * of the [slotList] and vice versa.
+     * of the [linkedSlots] and vice versa.
      */
     override fun onSlotAction(
         slotNumber: Int,
@@ -313,43 +310,32 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         val source: WSlot = root.getSlot(inventoryNumber, slotNumber) ?: return
         if (source.isLocked) return
 
-        val playerInvSlot = arrayListOf<WSlot>()
-        val containerSlot = arrayListOf<WSlot>()
-        for (widget in root.allWidgets) {
-            if (widget is WSlot) when (widget.inventoryNumber) {
-                0 -> playerInvSlot.add(widget)
-                -2, -1, 1, 2 -> Unit
-                else -> {
-                    if (!isDeleted(widget.inventoryNumber)) containerSlot.add(widget)
-                }
-            }
-        }
-
         val cursorStack = playerInventory.cursorStack
 
-        containerSlot.sortByDescending { it.stack.count }
-        playerInvSlot.sortByDescending { it.stack.count }
+        linkedSlots.sortByDescending { it.stack.count }
+        playerSlots.sortBy { it.slotNumber }
+        playerSlots.sortByDescending { it.stack.count }
 
         if (action == QUICK_MOVE) {
             val targets = arrayListOf<WSlot>()
             when (inventoryNumber) {
                 // when in player inventory, target container slots first
                 0 -> {
-                    targets.addAll(containerSlot)
-                    targets.addAll(playerInvSlot)
+                    targets.addAll(linkedSlots)
+                    targets.addAll(playerSlots)
                 }
 
                 // when in crafting slots, target player inventory first
                 1, 2 -> {
-                    targets.addAll(playerInvSlot)
-                    targets.addAll(containerSlot)
+                    targets.addAll(playerSlots)
+                    targets.addAll(linkedSlots)
                 }
 
                 // buffer
-                -2 -> targets.addAll(containerSlot)
+                -2 -> targets.addAll(linkedSlots)
 
                 // when in container slots, only target player inventory
-                else -> targets.addAll(playerInvSlot)
+                else -> targets.addAll(playerSlots)
             }
 
             for (target in targets) {
@@ -375,7 +361,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 buffer.setStack<WSlot>(ItemStack.EMPTY)
             }
         } else if (action == PICKUP_ALL) {
-            playerInvSlot.forEach { slot ->
+            playerSlots.forEach { slot ->
                 if (StackUtilities.equalItemAndTag(slot.stack, cursorStack) and !slot.isLocked) {
                     slot.consume(action, FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK)
                     StackUtilities.merge(slot::getStack, { cursorStack }, slot::getMaxCount, { cursorStack.maxCount }

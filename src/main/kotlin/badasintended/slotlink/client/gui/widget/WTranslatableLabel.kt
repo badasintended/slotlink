@@ -24,7 +24,7 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
         TextRenderer.pass()
-            .text(text).font(font)
+            .text(text)
             .at(x, y, z).scale(scale).maxWidth(maxWidth)
             .shadow(false)
             .color(panelStyle.asColor("label.color"))

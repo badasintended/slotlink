@@ -37,7 +37,6 @@ class WMultiSlot(
 
         val x = floor(x)
         val y = floor(y)
-        val z = floor(z)
         val w = floor(width)
         val h = floor(height)
 
@@ -49,8 +48,8 @@ class WMultiSlot(
             style.asColor("bottom_right")
         )
 
-        val itemRenderer = BaseRenderer.getItemRenderer()
-        val textRenderer = BaseRenderer.getTextRenderer()
+        val itemRenderer = BaseRenderer.getAdvancedItemRenderer()
+        val textRenderer = BaseRenderer.getDefaultTextRenderer()
 
         val count = stack.count
         val countText = when {
@@ -62,11 +61,11 @@ class WMultiSlot(
             }
         }
 
-        val itemX = ((1 + x) + ((w - 18) / 2)).toInt()
-        val itemY = ((1 + y) + ((h - 18) / 2)).toInt()
+        val itemX = (1 + x) + ((w - 18) / 2)
+        val itemY = (1 + y) + ((h - 18) / 2)
 
-        itemRenderer.renderGuiItemIcon(stack, itemX, itemY)
-        itemRenderer.renderGuiItemOverlay(textRenderer, stack, itemX, itemY, "")
+        itemRenderer.renderInGui(matrices, provider, stack, itemX, itemY, (z + 24))
+        itemRenderer.renderGuiItemOverlay(matrices, provider, textRenderer, stack, itemX, itemY, (z + 24), "")
 
         val factor = MinecraftClient.getInstance().window.scaleFactor.toFloat()
         val scale = (1 / factor) * ceil(factor / 2)

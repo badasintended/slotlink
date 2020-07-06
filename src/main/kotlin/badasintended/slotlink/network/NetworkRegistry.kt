@@ -6,6 +6,7 @@ import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import net.fabricmc.fabric.api.network.PacketConsumer
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
@@ -16,7 +17,8 @@ object NetworkRegistry {
     val REMOTE_SAVE = Mod.id("remote_save")
     val CRAFT_ONCE = Mod.id("craft_once")
     val CRAFT_STACK = Mod.id("craft_stack")
-    val CRAFT_CLEAR =  Mod.id("craft_clear")
+    val CRAFT_CLEAR = Mod.id("craft_clear")
+    val CRAFT_PULL = Mod.id("craft_pull")
 
     fun initMain() {
         rS(REQUEST_SAVE, this::requestSave)
@@ -24,6 +26,7 @@ object NetworkRegistry {
         rS(CRAFT_ONCE, this::craftOnce)
         rS(CRAFT_STACK, this::craftStack)
         rS(CRAFT_CLEAR, this::craftClear)
+        rS(CRAFT_PULL, this::craftPull)
     }
 
     private fun rS(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
@@ -74,6 +77,22 @@ object NetworkRegistry {
     private fun craftClear(context: PacketContext, buf: PacketByteBuf) {
         context.taskQueue.execute {
             (context.player.currentScreenHandler as AbstractRequestScreenHandler).clearCraft()
+        }
+    }
+
+    private fun craftPull(context: PacketContext, buf: PacketByteBuf) {
+        val outside = arrayListOf<ArrayList<Item>>()
+
+        for (i in 0 until buf.readInt()) {
+            val inside = arrayListOf<Item>()
+            for (j in 0 until buf.readInt()) {
+                inside.add(buf.readItemStack().item)
+            }
+            outside.add(inside)
+        }
+
+        context.taskQueue.execute {
+            (context.player.currentScreenHandler as AbstractRequestScreenHandler).pullInput(outside)
         }
     }
 

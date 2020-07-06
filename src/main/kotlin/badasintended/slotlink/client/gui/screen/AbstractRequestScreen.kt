@@ -167,10 +167,18 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         scrollbar.setMin<WFakeScrollbar>(0f)
 
+        slotArea = main.createChild(
+            { WSlotArea() },
+            Position.of(scrollArea),
+            sizeOf(144, slotSize)
+        )
+        slotArea.onMouseReleased = { onSlotAreaClick() }
+        slotArea.setHidden<W>(true)
+
         for (i in 0 until 48) {
             val slot = main.createChild(
                 { WMultiSlot({ slotActionPerformed = it }, { sort(lastSort, lastFilter) }) },
-                positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18)),
+                positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18), 2),
                 sizeOf(18)
             )
             slot.setInventoryNumber<WSlot>(-1)
@@ -178,13 +186,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             slot.setHidden<WSlot>(true)
             viewedSlots.add(slot)
         }
-
-        slotArea = main.createChild(
-            { WSlotArea() },
-            Position.of(scrollArea),
-            sizeOf(144, slotSize)
-        )
-        slotArea.onMouseReleased = { onSlotAreaClick() }
 
         searchBar = main.createChild(
             { WSearchBar({ sort(lastSort, it) }, { drawSearchTooltip() }) },
@@ -276,7 +277,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         emptySlots.clear()
         filledSlots.clear()
 
-        c.slotList.forEach { cSlot ->
+        c.linkedSlots.forEach { cSlot ->
             val slot = WLinkedSlot()
             slot.invNumber = cSlot.inventoryNumber
             slot.slotNumber = cSlot.slotNumber
@@ -387,6 +388,12 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         sort(lastSort, lastFilter)
 
         super.resize(client, width, height)
+    }
+
+    override fun keyPressed(keyCode: Int, character: Int, keyModifier: Int): Boolean {
+        if (searchBar.isActive) searchBar.onKeyPressed(keyCode, character, keyModifier)
+        else super.keyPressed(keyCode, character, keyModifier)
+        return true
     }
 
 }

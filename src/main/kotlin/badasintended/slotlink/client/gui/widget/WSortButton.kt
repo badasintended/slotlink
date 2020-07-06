@@ -24,7 +24,6 @@ class WSortButton(
     override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)
         val y = floor(y)
-        val z = floor(z)
         val w = floor(width)
         val h = floor(height)
 

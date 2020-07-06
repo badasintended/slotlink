@@ -1,5 +1,6 @@
 package badasintended.slotlink.common
 
+import badasintended.slotlink.Mod
 import com.google.common.collect.ImmutableMap
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
@@ -8,6 +9,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
+import net.minecraft.world.WorldAccess
 
 /**
  * Generates [VoxelShape] based on the position that shows on [Blockbench](https://blockbench.net).
@@ -43,4 +45,8 @@ fun posFacingAround(pos: BlockPos): ImmutableMap<Direction, BlockPos> {
  */
 fun hasInventory(blockEntity: BlockEntity?): Boolean {
     return Inventory::class.java.isAssignableFrom(blockEntity!!.javaClass)
+}
+
+fun isIgnored(block: Block, world: WorldAccess): Boolean {
+    return world.world.tagManager.blocks().get(Mod.id("ignored"))!!.contains(block)
 }

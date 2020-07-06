@@ -20,7 +20,6 @@ class WCraftingArrow : WAbstractWidget() {
     override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)
         val y = floor(y)
-        val z = floor(z)
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val tint = slotStyle.asColor("background.unfocused")
