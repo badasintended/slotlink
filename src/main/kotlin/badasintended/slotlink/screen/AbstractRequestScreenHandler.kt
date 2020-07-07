@@ -125,11 +125,17 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
         outputSlot.setStack<WSlot>(ItemStack.EMPTY)
 
+        val remainingStacks = world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, craftingInv, world)
+
         val filledInput = inputSlots.filterNot { it.stack.isEmpty }
-        filledInput.forEach { slot ->
-            val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
-            if ((first == null) or (slot.stack.count > 1)) slot.stack.decrement(1)
-            else first!!.stack.decrement(1)
+        filledInput.forEachIndexed { i, slot ->
+            if (remainingStacks[i].isEmpty) {
+                val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
+                if (first == null) slot.stack.decrement(1)
+                else first.stack.decrement(1)
+            } else {
+                slot.setStack<WSlot>(remainingStacks[i])
+            }
         }
         craftItem()
     }
@@ -138,20 +144,24 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         val outputStack = outputSlot.stack
         val craftMax = outputStack.maxCount / outputStack.count
 
-        val filledInput = inputSlots.filterNot { it.stack.isEmpty }
-
         var crafted = 1
         for (i in 0 until craftMax) {
+            val remainingStacks = world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, craftingInv, world)
+            val filledInput = inputSlots.filterNot { it.stack.isEmpty }
+
             var prevSuccess = true
-            filledInput.forEach { slot ->
-                val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
-                if (first == null) {
-                    prevSuccess = prevSuccess and (slot.stack.count >= 1)
-                    slot.stack.decrement(1)
+            filledInput.forEachIndexed { j, slot ->
+                if (remainingStacks[j].isEmpty) {
+                    val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
+                    if (first == null) {
+                        prevSuccess = prevSuccess and (slot.stack.count >= 1)
+                        slot.stack.decrement(1)
+                    } else {
+                        prevSuccess = prevSuccess and true
+                        first.stack.decrement(1)
+                    }
                 } else {
-                    prevSuccess = prevSuccess and true
-                    if (slot.stack.count > 1) slot.stack.decrement(1)
-                    else first.stack.decrement(1)
+                    slot.setStack<WSlot>(remainingStacks[j])
                 }
             }
             if (!prevSuccess) break
@@ -199,6 +209,9 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     fun pullInput(outside: ArrayList<ArrayList<Item>>) {
+        clearCraft()
+        dropInventory(player, world, craftingInv)
+
         playerSlots.sortByDescending { it.stack.count }
         linkedSlots.sortByDescending { it.stack.count }
 

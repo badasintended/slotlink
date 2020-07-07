@@ -8,9 +8,6 @@ import badasintended.slotlink.common.slotAction
 import badasintended.slotlink.network.NetworkRegistry
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import io.netty.buffer.Unpooled
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -104,7 +101,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         // Crafting Result slot
         val resultSlot = main.createChild(
-            { WCraftingResultSlot { sort(lastSort, lastFilter) } },
+            { WCraftingResultSlot { sort() } },
             positionOf(craftingLabel, 91, 24),
             sizeOf(26)
         )
@@ -133,7 +130,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 27) {
             val slot = main.createChild(
-                { WPlayerSlot { sort(lastSort, lastFilter) } },
+                { WPlayerSlot { sort() } },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)),
                 sizeOf(18)
             )
@@ -144,7 +141,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WPlayerSlot { sort(lastSort, lastFilter) } },
+                { WPlayerSlot { sort() } },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), 70),
                 sizeOf(18)
             )
@@ -177,7 +174,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 48) {
             val slot = main.createChild(
-                { WMultiSlot({ slotActionPerformed = it }, { sort(lastSort, lastFilter) }) },
+                { WMultiSlot({ slotActionPerformed = it }, { sort() }) },
                 positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18), 2),
                 sizeOf(18)
             )
@@ -199,17 +196,12 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             sizeOf(14)
         )
 
-        GlobalScope.launch {
-            delay(100)
-            sort(lastSort, lastFilter)
-        }
-
     }
 
     private fun onClearButtonClick() {
         c.clearCraft()
         ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
-        sort(lastSort, lastFilter)
+        sort()
     }
 
     private fun onPutAllButtonClick() {
@@ -217,14 +209,14 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         filledSlots.forEach { slot ->
             slotAction(c, slot.slotNumber, slot.inventoryNumber, 0, QUICK_MOVE, c.player)
         }
-        sort(lastSort, lastFilter)
+        sort()
     }
 
     private fun onSlotAreaClick() {
         if (!slotActionPerformed) {
             slotAction(c, 0, -2, 0, PICKUP, c.player)
             slotAction(c, 0, -2, 0, QUICK_MOVE, c.player)
-            sort(lastSort, lastFilter)
+            sort()
         }
         slotActionPerformed = false
     }
@@ -269,6 +261,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     }
 
+    fun sort() = sort(lastSort, lastFilter)
+
     private fun sort(sortBy: SortBy, filter: String): SortBy {
         if (stillSorting) return lastSort
 
@@ -292,15 +286,15 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         if (trimmedFilter.isNotBlank()) {
             when (trimmedFilter.first()) {
                 '@' -> filledSlots.removeIf {
-                    !Registry.ITEM.getId(it.stack.item).toString().contains(trimmedFilter.drop(1).trim(), true)
+                    !Registry.ITEM.getId(it.stack.item).toString().contains(trimmedFilter.drop(1), true)
                 }
                 '#' -> filledSlots.removeIf r@{ slot ->
-                    val tag = trimmedFilter.drop(1).trim()
+                    val tag = trimmedFilter.drop(1)
                     val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
                     if (tags.isEmpty() and tag.isEmpty()) return@r false
-                    else tags.none { it.toString().contains(tag, true) }
+                    else return@r tags.none { it.toString().contains(tag, true) }
                 }
-                else -> filledSlots.removeIf { !it.stack.item.name.string.contains(trimmedFilter.trim(), true) }
+                else -> filledSlots.removeIf { !it.stack.name.string.contains(trimmedFilter.trim(), true) }
             }
         }
 
@@ -316,7 +310,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         when (sortBy) {
             SortBy.NAME -> {
-                filledStacks.sortBy { it.name.asString() }
+                filledStacks.sortBy { it.name.string }
             }
             SortBy.IDENTIFIER -> {
                 filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
@@ -385,7 +379,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         slotArea.setSize<W>(sizeOf(144, slotSize))
         searchBar.setPosition<W>(positionOf(scrollArea, 0, slotSize + 3))
 
-        sort(lastSort, lastFilter)
+        sort()
 
         super.resize(client, width, height)
     }

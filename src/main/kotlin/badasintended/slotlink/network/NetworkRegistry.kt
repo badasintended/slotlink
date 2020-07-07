@@ -2,10 +2,15 @@ package badasintended.slotlink.network
 
 import badasintended.slotlink.Mod
 import badasintended.slotlink.block.RequestBlock
+import badasintended.slotlink.client.gui.screen.AbstractRequestScreen
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketConsumer
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.minecraft.client.MinecraftClient
 import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
@@ -20,6 +25,8 @@ object NetworkRegistry {
     val CRAFT_CLEAR = Mod.id("craft_clear")
     val CRAFT_PULL = Mod.id("craft_pull")
 
+    val FIRST_SORT = Mod.id("first_sort")
+
     fun initMain() {
         rS(REQUEST_SAVE, this::requestSave)
         rS(REMOTE_SAVE, this::remoteSave)
@@ -29,8 +36,18 @@ object NetworkRegistry {
         rS(CRAFT_PULL, this::craftPull)
     }
 
+    @Environment(EnvType.CLIENT)
+    fun initClient() {
+        rC(FIRST_SORT, this::firstSort)
+    }
+
     private fun rS(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
         ServerSidePacketRegistry.INSTANCE.register(id, PacketConsumer(function))
+    }
+
+    @Environment(EnvType.CLIENT)
+    private fun rC(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
+        ClientSidePacketRegistry.INSTANCE.register(id, PacketConsumer(function))
     }
 
     private fun requestSave(context: PacketContext, buf: PacketByteBuf) {
@@ -93,6 +110,13 @@ object NetworkRegistry {
 
         context.taskQueue.execute {
             (context.player.currentScreenHandler as AbstractRequestScreenHandler).pullInput(outside)
+        }
+    }
+
+    @Environment(EnvType.CLIENT)
+    private fun firstSort(context: PacketContext, buf: PacketByteBuf) {
+        context.taskQueue.run {
+            (MinecraftClient.getInstance().currentScreen as AbstractRequestScreen<*>?)?.sort()
         }
     }
 

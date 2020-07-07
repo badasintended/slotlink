@@ -5,10 +5,14 @@ import badasintended.slotlink.common.openScreen
 import badasintended.slotlink.common.sendActionBar
 import badasintended.slotlink.common.tag2Pos
 import badasintended.slotlink.common.writeRequestData
+import badasintended.slotlink.network.NetworkRegistry
+import io.netty.buffer.Unpooled
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -39,6 +43,10 @@ class RequestBlock : ChildBlock("request") {
                 val masterPos = tag2Pos(nbt.getCompound("masterPos"))
                 writeRequestData(buf, world, masterPos)
             }
+
+            ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                player, NetworkRegistry.FIRST_SORT, PacketByteBuf(Unpooled.buffer())
+            )
         }
 
 

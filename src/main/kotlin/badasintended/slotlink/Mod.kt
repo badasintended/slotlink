@@ -33,6 +33,7 @@ object Mod {
     @Environment(EnvType.CLIENT)
     fun client() {
         ScreenRegistry.init()
+        NetworkRegistry.initClient()
     }
 
 }

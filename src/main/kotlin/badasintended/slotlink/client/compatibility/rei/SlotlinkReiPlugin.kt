@@ -2,7 +2,6 @@ package badasintended.slotlink.client.compatibility.rei
 
 import badasintended.slotlink.Mod
 import badasintended.slotlink.block.BlockRegistry
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_CLEAR
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_PULL
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import com.google.common.collect.Lists
@@ -78,6 +77,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
             if (!foundAll.values.all { it }) return@r Result.createFailed(
                 "error.rei.not.enough.materials", notFound
             )
+            if (!INSTANCE.canServerReceive(CRAFT_PULL)) return@r Result.createFailed("error.rei.not.on.server")
             if (!context.isActuallyCrafting) return@r Result.createSuccessful()
 
             val outside = arrayListOf<ArrayList<Item>>()
@@ -97,9 +97,6 @@ class SlotlinkReiPlugin : REIPluginV0 {
             }
 
             context.minecraft.openScreen(context.containerScreen)
-
-            container.clearCraft()
-            INSTANCE.sendToServer(CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
 
             container.pullInput(outside)
             INSTANCE.sendToServer(CRAFT_PULL, buf)
