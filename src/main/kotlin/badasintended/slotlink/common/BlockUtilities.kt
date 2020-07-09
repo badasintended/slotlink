@@ -1,6 +1,6 @@
 package badasintended.slotlink.common
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import com.google.common.collect.ImmutableMap
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
@@ -48,5 +48,5 @@ fun hasInventory(blockEntity: BlockEntity?): Boolean {
 }
 
 fun isIgnored(block: Block, world: WorldAccess): Boolean {
-    return world.world.tagManager.blocks().get(Mod.id("ignored"))!!.contains(block)
+    return world.world.tagManager.blocks().get(Slotlink.id("ignored"))!!.contains(block)
 }

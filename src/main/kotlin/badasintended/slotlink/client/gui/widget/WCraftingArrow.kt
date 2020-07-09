@@ -1,21 +1,21 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.Mod
+import badasintended.spinnery.client.render.BaseRenderer
+import badasintended.spinnery.common.registry.ThemeRegistry
+import badasintended.spinnery.widget.WAbstractWidget
+import badasintended.spinnery.widget.api.Style
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WAbstractWidget
-import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WCraftingArrow : WAbstractWidget() {
 
-    private val texture = Mod.id("textures/gui/arrow.png")
+    private val texture = Slotlink.id("textures/gui/arrow.png")
 
     override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)

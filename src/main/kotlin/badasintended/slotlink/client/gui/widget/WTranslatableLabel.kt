@@ -1,15 +1,15 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.spinnery.client.render.TextRenderer
+import badasintended.spinnery.common.registry.ThemeRegistry
+import badasintended.spinnery.widget.WStaticText
+import badasintended.spinnery.widget.api.Style
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.TranslatableText
-import spinnery.client.render.TextRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WStaticText
-import spinnery.widget.api.Style
 
 @Environment(EnvType.CLIENT)
 class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
@@ -25,7 +25,7 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
 
         TextRenderer.pass()
             .text(text)
-            .at(x, y, z).scale(scale).maxWidth(maxWidth)
+            .at(x, y, z).scale(scale.toDouble()).maxWidth(maxWidth)
             .shadow(false)
             .color(panelStyle.asColor("label.color"))
             .render(matrices, provider)

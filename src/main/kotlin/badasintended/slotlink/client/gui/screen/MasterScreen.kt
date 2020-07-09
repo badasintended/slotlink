@@ -6,9 +6,9 @@ import badasintended.slotlink.common.sizeOf
 import badasintended.slotlink.screen.MasterScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import spinnery.widget.WPanel
-import spinnery.widget.WSlot
-import spinnery.widget.WAbstractWidget as W
+import badasintended.spinnery.widget.WPanel
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
 class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
@@ -17,8 +17,10 @@ class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
         private fun tlkey(v: String) = "container.slotlink.master.$v"
     }
 
+    override val main: WPanel
+
     init {
-        val main = root.createChild(
+        main = root.createChild(
             { WPanel() },
             positionOf(0, 0, 0),
             sizeOf(200, 100)

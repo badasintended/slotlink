@@ -1,11 +1,11 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.spinnery.common.registry.NetworkRegistry.*
+import badasintended.spinnery.common.utility.MouseUtilities.*
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.api.Action.*
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
-import spinnery.common.registry.NetworkRegistry.*
-import spinnery.common.utility.MouseUtilities.*
-import spinnery.widget.WSlot
-import spinnery.widget.api.Action.*
 
 /**
  * Bruh sometimes, really rare case, sorting after every click crash the game

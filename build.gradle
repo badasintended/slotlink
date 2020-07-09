@@ -28,12 +28,15 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
-	modCompile "com.github.vini2003:spinnery:${project.spinnery}"
-	include "com.github.vini2003:spinnery:${project.spinnery}"
+	//modCompile "com.github.vini2003:spinnery:${project.spinnery}"
+	//include "com.github.vini2003:spinnery:${project.spinnery}"
 
 	modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
 	modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+
+	modCompile "blue.endless:jankson:1.2.0"
+	include "blue.endless:jankson:1.2.0"
 }
 
 if (project.enable_databreaker.toBoolean()) {

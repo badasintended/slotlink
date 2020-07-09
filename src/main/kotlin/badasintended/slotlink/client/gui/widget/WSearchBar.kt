@@ -1,21 +1,21 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.common.spinneryId
+import badasintended.spinnery.client.render.BaseRenderer
+import badasintended.spinnery.common.registry.ThemeRegistry
+import badasintended.spinnery.widget.WTextField
+import badasintended.spinnery.widget.api.Style
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.TranslatableText
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WTextField
-import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSearchBar(
-    private val setSearch: (String) -> Unit,
-    private val drawTooltip: () -> Unit
+    private val tooltip: (MatrixStack) -> Unit,
+    private val search: (String) -> Unit
 ) : WTextField() {
 
     init {
@@ -40,18 +40,23 @@ class WSearchBar(
             slotStyle.asColor("bottom_right")
         )
 
-        if (isFocused and !isActive) drawTooltip.invoke()
-
         renderField(matrices, provider)
+
+        if (isFocused and !isActive) tooltip.invoke(matrices)
     }
 
     override fun onKeyReleased(keyCode: Int, character: Int, keyModifier: Int) {
         super.onKeyReleased(keyCode, character, keyModifier)
-        setSearch.invoke(text)
+        search.invoke(text)
     }
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int) {
-        active = isFocused
+        active = isWithinBounds(mouseX, mouseY)
+        if (active and (mouseButton == 1)) {
+            setText<WSearchBar>("")
+            cursor.assign(Cursor(0, 0))
+            search.invoke(text)
+        }
     }
 
 }

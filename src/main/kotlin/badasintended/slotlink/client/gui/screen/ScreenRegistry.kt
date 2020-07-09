@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.screen.MasterScreenHandler
 import badasintended.slotlink.screen.ModScreenHandler
 import badasintended.slotlink.screen.RemoteScreenHandler
@@ -20,7 +20,7 @@ object ScreenRegistry {
     }
 
     private fun <H : ModScreenHandler, S : ModScreen<H>> r(id: String, function: (H) -> S) {
-        ScreenProviderRegistry.INSTANCE.registerFactory(Mod.id(id), ContainerScreenFactory(function))
+        ScreenProviderRegistry.INSTANCE.registerFactory(Slotlink.id(id), ContainerScreenFactory(function))
     }
 
 }

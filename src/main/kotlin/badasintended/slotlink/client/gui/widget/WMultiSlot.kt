@@ -1,5 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.spinnery.client.render.BaseRenderer
+import badasintended.spinnery.widget.WAbstractWidget
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.api.Action.*
 import badasintended.slotlink.common.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -7,16 +11,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.client.render.TextRenderer
-import spinnery.widget.WSlot
-import spinnery.widget.api.Action
-import spinnery.widget.api.Action.CLONE
-import spinnery.widget.api.Action.PICKUP
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.pow
 
 @Environment(EnvType.CLIENT)
 class WMultiSlot(
@@ -41,31 +37,25 @@ class WMultiSlot(
         val h = floor(height)
 
         BaseRenderer.drawBeveledPanel(
-            matrices, provider,
-            x, y, z, w, h,
+            matrices, provider, x, y, z, w, h,
             style.asColor("top_left"),
             style.asColor("background.unfocused"),
             style.asColor("bottom_right")
         )
 
-        val itemRenderer = BaseRenderer.getAdvancedItemRenderer()
-        val textRenderer = BaseRenderer.getDefaultTextRenderer()
+        val stack = if (previewStack.isEmpty) stack else previewStack
+
+        val itemRenderer = BaseRenderer.getItemRenderer()
+        val textRenderer = BaseRenderer.getTextRenderer()
 
         val count = stack.count
-        val countText = when {
-            count <= 1 -> ""
-            count < 1000 -> "$count"
-            else -> {
-                val exp = (ln(count.toDouble()) / ln(1000.0)).toInt()
-                String.format("%.1f%c", count / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
-            }
-        }
+        val countText = if (count <= 1) "" else withSuffix(count.toLong())
 
-        val itemX = (1 + x) + ((w - 18) / 2)
-        val itemY = (1 + y) + ((h - 18) / 2)
+        val itemX = ((1 + x) + ((w - 18) / 2)).toInt()
+        val itemY = ((1 + y) + ((h - 18) / 2)).toInt()
 
-        itemRenderer.renderInGui(matrices, provider, stack, itemX, itemY, (z + 24))
-        itemRenderer.renderGuiItemOverlay(matrices, provider, textRenderer, stack, itemX, itemY, (z + 24), "")
+        itemRenderer.renderInGui(stack, itemX, itemY)
+        itemRenderer.renderGuiItemOverlay(textRenderer, stack, itemX, itemY, "")
 
         val factor = MinecraftClient.getInstance().window.scaleFactor.toFloat()
         val scale = (1 / factor) * ceil(factor / 2)
@@ -75,8 +65,8 @@ class WMultiSlot(
         matrices.scale(scale, scale, 1f)
         textRenderer.drawWithShadow(
             matrices, countText,
-            ((x + 17 - (TextRenderer.width(countText) * scale)) / scale),
-            ((y + 17 - (TextRenderer.height() * scale)) / scale),
+            ((x + 17 - (textRenderer.getWidth(countText) * scale)) / scale),
+            ((y + 17 - (textRenderer.fontHeight * scale)) / scale),
             0xFFFFFF
         )
         matrices.pop()
@@ -114,9 +104,9 @@ class WMultiSlot(
 
         if (Screen.hasShiftDown()) {
             if (button == LEFT) {
-                linkedSlots.forEach {
-                    slotAction(container, it.slotNumber, it.invNumber, button, Action.QUICK_MOVE, player)
-                }
+                if (Screen.hasControlDown()) linkedSlots.forEach {
+                    slotAction(container, it.slotNumber, it.invNumber, button, QUICK_MOVE, player)
+                } else slotAction(container, sSlotN, sSlotInvN, button, QUICK_MOVE, player)
                 actionPerformed.invoke(true)
                 sort.invoke()
             }
@@ -141,5 +131,9 @@ class WMultiSlot(
         }
     }
 
-
+    override fun <W : WAbstractWidget> setHidden(isHidden: Boolean): W {
+        this.isHidden = isHidden
+        if (isHidden) setFocus(false)
+        return this as W
+    }
 }

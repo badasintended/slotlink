@@ -1,5 +1,10 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import badasintended.spinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import badasintended.spinnery.common.utility.StackUtilities.equalItemAndTag
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.api.Action.CLONE
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
@@ -9,11 +14,6 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.network.PacketByteBuf
-import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import spinnery.common.utility.StackUtilities.equalItemAndTag
-import spinnery.widget.WSlot
-import spinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
 class WCraftingResultSlot(

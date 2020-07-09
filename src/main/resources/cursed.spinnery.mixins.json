@@ -1,0 +1,15 @@
+{
+  "required"          : true,
+  "package"           : "badasintended.spinnery.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins"            : [
+    "ItemStackMixin"
+  ],
+  "client"            : [
+    "InGameHudMixin",
+    "HandledScreenMixin"
+  ],
+  "injectors"         : {
+    "defaultRequire": 1
+  }
+}

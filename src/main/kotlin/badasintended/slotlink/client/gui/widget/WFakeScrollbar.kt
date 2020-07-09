@@ -1,14 +1,14 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.spinnery.client.render.BaseRenderer
+import badasintended.spinnery.common.registry.ThemeRegistry
+import badasintended.spinnery.widget.WVerticalSlider
+import badasintended.spinnery.widget.api.Style
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WVerticalSlider
-import spinnery.widget.api.Style
 import kotlin.math.floor
 
 /**

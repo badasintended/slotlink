@@ -1,21 +1,21 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.Mod
+import badasintended.spinnery.client.render.BaseRenderer
+import badasintended.spinnery.common.registry.ThemeRegistry
+import badasintended.spinnery.widget.WAbstractButton
+import badasintended.spinnery.widget.WButton
+import badasintended.spinnery.widget.api.Style
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WAbstractButton
-import spinnery.widget.WButton
-import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WPutButton(
-    private val tooltip: () -> Unit,
+    private val tooltip: (MatrixStack) -> Unit,
     private val click: () -> Unit
 ) : WButton() {
 
@@ -28,9 +28,9 @@ class WPutButton(
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val tint = slotStyle.asColor("background.unfocused")
 
-        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Mod.id("textures/gui/put.png"))
+        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Slotlink.id("textures/gui/put.png"))
 
-        if (isFocused) tooltip.invoke()
+        if (isFocused) tooltip.invoke(matrices)
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {

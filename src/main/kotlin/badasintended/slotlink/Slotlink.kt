@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier
 import java.util.logging.Level
 import java.util.logging.Logger
 
-object Mod {
+object Slotlink {
 
     const val ID = "slotlink"
 

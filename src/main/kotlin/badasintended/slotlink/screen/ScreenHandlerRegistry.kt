@@ -1,6 +1,6 @@
 package badasintended.slotlink.screen
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import net.fabricmc.fabric.api.container.ContainerFactory
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.minecraft.entity.player.PlayerEntity
@@ -19,7 +19,7 @@ object ScreenHandlerRegistry {
         id: String,
         function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> H
     ) {
-        ContainerProviderRegistry.INSTANCE.registerFactory(Mod.id(id), ContainerFactory(function))
+        ContainerProviderRegistry.INSTANCE.registerFactory(Slotlink.id(id), ContainerFactory(function))
     }
 
 }

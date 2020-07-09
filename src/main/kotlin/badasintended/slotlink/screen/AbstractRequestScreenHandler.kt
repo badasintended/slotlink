@@ -2,6 +2,15 @@ package badasintended.slotlink.screen
 
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.inventory.DummyInventory
+import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
+import badasintended.spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
+import badasintended.spinnery.common.utility.StackUtilities
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.api.Action
+import badasintended.spinnery.widget.api.Action.PICKUP_ALL
+import badasintended.spinnery.widget.api.Action.QUICK_MOVE
+import badasintended.spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
+import badasintended.spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -17,15 +26,6 @@ import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
-import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
-import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
-import spinnery.common.utility.StackUtilities
-import spinnery.widget.WSlot
-import spinnery.widget.api.Action
-import spinnery.widget.api.Action.PICKUP_ALL
-import spinnery.widget.api.Action.QUICK_MOVE
-import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
-import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.component1
@@ -105,7 +105,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         outputSlot.setWhitelist<WSlot>()
 
         playerSlots.addAll(WSlot.addHeadlessPlayerInventory(root))
-        root.recalculateCache()
     }
 
     fun isDeleted(invNumber: Int): Boolean {
@@ -261,7 +260,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
     /**
      * nvm i like mine more :3
-     */
+     *
     override fun onSlotDrag(slotNumber: IntArray, inventoryNumber: IntArray, action: Action) {
         val slots: MutableSet<WSlot> = LinkedHashSet()
 
@@ -294,6 +293,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
     }
 
+
     override fun getDragSlots(mouseButton: Int): MutableSet<WSlot>? {
         return when (mouseButton) {
             0 -> fixedSplitSlots
@@ -301,6 +301,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             else -> null
         }
     }
+    */
 
     override fun onContentChanged(inventory: Inventory) {
         if ((inventory == craftingInv)) {

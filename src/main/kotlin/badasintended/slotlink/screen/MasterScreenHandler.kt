@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
-import spinnery.widget.WSlot
+import badasintended.spinnery.widget.WSlot
 
 class MasterScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
     ModScreenHandler(syncId, player) {

@@ -1,0 +1,12 @@
+{
+  "text.slotlink.configuration.preferredTheme": "Preferred theme",
+  "text.slotlink.configuration.smoothing": "Enable smoothing",
+  "text.slotlink.configuration.arrows": "Enable arrows",
+  "text.slotlink.configuration.fading": "Enable fading",
+  "text.slotlink.configuration.kineticReductionCoefficient": "Kinetic red. coefficient",
+  "text.slotlink.configuration.kineticAccelerationCoefficient": "Kinetic acc. coefficient",
+  "text.slotlink.configuration.dragScrollAccelerationCoefficient": "Drag scroll acc. coefficient",
+  "text.slotlink.configuration.save": "Save",
+  "text.slotlink.configuration.quit": "Quit",
+  "text.slotlink.configuration.title": "Spinnery"
+}

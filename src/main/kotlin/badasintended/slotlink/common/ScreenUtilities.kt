@@ -1,6 +1,13 @@
 package badasintended.slotlink.common
 
-import badasintended.slotlink.Mod
+import badasintended.spinnery.common.container.BaseContainer
+import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import badasintended.spinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import badasintended.spinnery.widget.api.Action
+import badasintended.spinnery.widget.api.Position
+import badasintended.spinnery.widget.api.Size
+import badasintended.spinnery.widget.api.WPositioned
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.block.MasterBlock
 import net.fabricmc.api.EnvType
@@ -15,14 +22,6 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spinnery.Spinnery
-import spinnery.common.container.BaseContainer
-import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import spinnery.widget.api.Action
-import spinnery.widget.api.Position
-import spinnery.widget.api.Size
-import spinnery.widget.api.WPositioned
 import java.util.function.Consumer
 
 /**
@@ -70,10 +69,10 @@ fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
  * Opens a container, what else?
  */
 fun openScreen(id: String, player: PlayerEntity, function: (PacketByteBuf) -> Unit) {
-    ContainerProviderRegistry.INSTANCE.openContainer(Mod.id(id), player as ServerPlayerEntity, Consumer(function))
+    ContainerProviderRegistry.INSTANCE.openContainer(Slotlink.id(id), player as ServerPlayerEntity, Consumer(function))
 }
 
-fun spinneryId(id: String) = Identifier(Spinnery.MOD_ID, id)
+fun spinneryId(id: String) = Identifier("spinnery", id)
 
 /**
  * I just want ints on my gui

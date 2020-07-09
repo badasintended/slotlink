@@ -1,8 +1,8 @@
 package badasintended.slotlink.screen
 
+import badasintended.spinnery.common.container.BaseContainer
+import badasintended.spinnery.widget.WInterface
 import net.minecraft.entity.player.PlayerEntity
-import spinnery.common.container.BaseContainer
-import spinnery.widget.WInterface
 
 abstract class ModScreenHandler(
     syncId: Int,

@@ -1,0 +1,290 @@
+{
+  vars: {
+    bevel_dark: 0xff1b1b1b,
+    bevel_light: 0xff6a6a6a,
+    bg_panel: 0xff393939,
+    bg_interactable: 0xff292929,
+    text_shadow: 0x00000000
+  },
+  prototypes: {
+    label: {
+      label: {
+        color: 0xffffffff,
+        shadow: true,
+        shadow_color: "$text_shadow"
+      }
+    },
+    panel: {
+      shadow: 0xff262626,
+      background: "$bg_panel",
+      highlight: 0xff474747,
+      outline: 0xff000000
+    },
+    slider: {
+      top_left: {
+        background: "$bevel_dark",
+        foreground: "$bevel_light"
+      },
+      bottom_right: {
+        background: "$bevel_light",
+        foreground: "$bevel_dark"
+      },
+      background: {
+        on: 0xff00c116,
+        off: "$bg_interactable"
+      },
+      foreground: 0xff3a3a3a,
+      padding: [
+        1,
+        1
+      ]
+    },
+    text_editor: {
+      top_left: "$bevel_dark",
+      bottom_right: "$bevel_light",
+      background: 0xff000000,
+      text: {
+        color: 0xffffffff,
+        shadow: false,
+        shadow_color: 0x00000000
+      },
+      highlight: 0xb30400ff,
+      cursor: 0xffffffff,
+      label: 0xff808080,
+      padding: [
+        4,
+        4
+      ]
+    }
+  },
+  theme: {
+    "spinnery:panel": {
+      $extend: [
+        "$panel",
+        "$label"
+      ]
+    },
+    "spinnery:vertical_scrollable_container": {
+      $extend: [
+        "$panel",
+        "$panel_label"
+      ],
+      fade: 0xff333333
+    },
+    "spinnery:horizontal_scrollable_container": {
+      $extend: [
+        "$panel",
+        "$panel_label"
+      ],
+      fade: 0xff333333
+    },
+    "spinnery:draggable_area": {
+      $extend: [
+        "$panel",
+        "$label"
+      ],
+      area: {
+        start: 0xff141414,
+        end: 0xff202020
+      },
+    },
+    "spinnery:dropdown": {
+      $extend: [
+        "$panel",
+        "$label"
+      ]
+    },
+    "spinnery:static_image": {
+    },
+    "spinnery:dynamic_image": {
+    },
+    "spinnery:static_text": {
+      text: 0xffffffff,
+      shadow: true,
+      shadowColor: "$text_shadow"
+    },
+    "spinnery:vertical_slider": {
+      $extend: [
+        "$slider",
+        "$label"
+      ]
+    },
+    "spinnery:horizontal_slider": {
+      $extend: [
+        "$slider",
+        "$label"
+      ]
+    },
+    "spinnery:toggle": {
+      $extend: [
+        "$slider",
+        "$label"
+      ]
+    },
+    "spinnery:button": {
+      $extend: [
+        "$label"
+      ],
+      top_left: {
+        on: "$bevel_dark",
+        off: "$bevel_light"
+      },
+      bottom_right: {
+        on: "$bevel_light",
+        off: "$bevel_dark"
+      },
+      background: {
+        on: "$bevel_dark",
+        off: "$bg_interactable"
+      }
+    },
+    "spinnery:slot": {
+      top_left: "$bevel_dark",
+      bottom_right: "$bevel_light",
+      background: {
+        focused: "$bg_interactable",
+        unfocused: "$bg_interactable"
+      },
+      overlay: 0x80ffffff
+    },
+    "spinnery:tab_holder": {
+      $extend: [
+        "$panel",
+        "$label"
+      ]
+    },
+    "spinnery:tab_toggle": {
+      $extend: [
+        "$label"
+      ],
+      shadow: {
+        on: 0xff545454,
+        off: 0xff262626,
+      },
+      background: {
+        on: 0xff444444,
+        off: 0xff393939
+      },
+      highlight: {
+        on: 0xff353535,
+        off: 0xff474747
+      },
+      outline: {
+        on: 0xff000000,
+        off: 0xff000000,
+      },
+    },
+    "spinnery:tooltip": {
+      background: {
+        start: 0xf0100010,
+        end: 0xf0100010,
+      },
+      outline: {
+        start: 0x505000ff,
+        end: 0x5028007f,
+      },
+      shadow: {
+        start: 0xf0100010,
+        end: 0xf0100010,
+      }
+    },
+    "spinnery:horizontal_bar": {
+      background: "spinnery:textures/horizontal_bar_background_dark.png",
+      foreground: "spinnery:textures/horizontal_bar_foreground_dark.png"
+    },
+    "spinnery:vertical_bar": {
+      background: "spinnery:textures/vertical_bar_background_dark.png",
+      foreground: "spinnery:textures/vertical_bar_foreground_dark.png"
+    },
+    "spinnery:vertical_scrollbar": {
+      scroller: {
+        top_left: "$bevel_light",
+        bottom_right: "$bevel_dark",
+        background_default: "$bg_panel",
+        background_hovered: 0xff202020,
+        background_held: 0xff121212
+      },
+      scroll_line: {
+        top_left: "$bevel_dark",
+        bottom_right: "$bevel_light",
+        background: "$bg_interactable"
+      },
+    },
+    "spinnery:horizontal_scrollbar": {
+      scroller: {
+        top_left: "$bevel_light",
+        bottom_right: "$bevel_dark",
+        background: 0xff626262
+      },
+      scroll_line: {
+        top_left: "$bevel_dark",
+        bottom_right: "$bevel_light",
+        background: 0xff626262
+      }
+    },
+    "spinnery:text_area": {
+      $extend: [
+        "$text_editor"
+      ]
+    },
+    "spinnery:text_field": {
+      $extend: [
+        "$text_editor"
+      ]
+    },
+    "spinnery:horizontal_box_container": {
+      border: 0xff000000
+    },
+    "spinnery:vertical_box_container": {
+      border: 0xff000000
+    },
+    "spinnery:form_container": {
+      border: 0xff000000
+    },
+    "spinnery:vertical_arrow_up": {
+      $extend: [
+        "$label"
+      ],
+      top_left: {
+        on: "$bevel_dark",
+        off: "$bevel_light"
+      },
+      bottom_right: {
+        on: "$bevel_light",
+        off: "$bevel_dark"
+      },
+      background: {
+        on: "$bevel_dark",
+        off: "$bg_panel"
+      }
+    },
+    "spinnery:vertical_arrow_down": {
+      $extend: [
+        "$label"
+      ],
+      top_left: {
+        on: "$bevel_dark",
+        off: "$bevel_light"
+      },
+      bottom_right: {
+        on: "$bevel_light",
+        off: "$bevel_dark"
+      },
+      background: {
+        on: "$bevel_dark",
+        off: "$bg_panel"
+      }
+    },
+    "spinnery:option_field": {
+      $extend: [
+        "$text_editor"
+      ],
+      background: {
+        boolean_true: 0xff3d632d,
+        boolean_false: 0xff96222c,
+        incomplete: 0xff934a26,
+        complete: 0xff000000
+      }
+    }
+  }
+}
