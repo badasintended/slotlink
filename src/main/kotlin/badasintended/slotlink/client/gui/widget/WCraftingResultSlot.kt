@@ -1,13 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
+import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
+import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import badasintended.spinnery.common.registry.NetworkRegistry.createSlotClickPacket
 import badasintended.spinnery.common.utility.StackUtilities.equalItemAndTag
 import badasintended.spinnery.widget.WSlot
 import badasintended.spinnery.widget.api.Action.CLONE
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
-import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -20,7 +20,9 @@ class WCraftingResultSlot(
     private val sort: () -> Unit
 ) : WSlot() {
 
-    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {}
+    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
+        sort.invoke()
+    }
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, button: Int) {
@@ -34,7 +36,6 @@ class WCraftingResultSlot(
         if (Screen.hasShiftDown()) {
             container.craftStack()
             if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK, PacketByteBuf(Unpooled.buffer()))
-            sort.invoke()
         } else {
             if ((button == LEFT) or (button == RIGHT)) {
                 if (
@@ -43,7 +44,6 @@ class WCraftingResultSlot(
                 ) return
                 container.craftOnce()
                 INSTANCE.sendToServer(CRAFT_ONCE, PacketByteBuf(Unpooled.buffer()))
-                sort.invoke()
             } else if (button == MIDDLE) {
                 container.onSlotAction(slotNumber, inventoryNumber, button, CLONE, player)
                 INSTANCE.sendToServer(

@@ -31,7 +31,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
     override fun getPluginIdentifier() = Slotlink.id("rei")
 
     override fun registerBounds(displayHelper: DisplayHelper) {
-        //displayHelper.registerProvider(SlotlinkDisplayBoundsProvider())
+        displayHelper.registerHandler(SlotlinkDisplayBoundsProvider())
     }
 
     override fun registerOthers(recipeHelper: RecipeHelper) {

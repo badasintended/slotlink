@@ -1,12 +1,5 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.spinnery.common.utility.StackUtilities.equalItemAndTag
-import badasintended.spinnery.widget.WPanel
-import badasintended.spinnery.widget.WSlot
-import badasintended.spinnery.widget.WVerticalSlider
-import badasintended.spinnery.widget.api.Action.PICKUP
-import badasintended.spinnery.widget.api.Action.QUICK_MOVE
-import badasintended.spinnery.widget.api.Position
 import badasintended.slotlink.client.gui.widget.*
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.common.positionOf
@@ -14,6 +7,13 @@ import badasintended.slotlink.common.sizeOf
 import badasintended.slotlink.common.slotAction
 import badasintended.slotlink.network.NetworkRegistry
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
+import badasintended.spinnery.common.utility.StackUtilities.equalItemAndTag
+import badasintended.spinnery.widget.WPanel
+import badasintended.spinnery.widget.WSlot
+import badasintended.spinnery.widget.WVerticalSlider
+import badasintended.spinnery.widget.api.Action.PICKUP
+import badasintended.spinnery.widget.api.Action.QUICK_MOVE
+import badasintended.spinnery.widget.api.Position
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -85,7 +85,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             positionOf(titleLabel, 19, slotSize + 31 - (if (hideLabel) 8 else 0))
         )
         craftingLabel.setHidden<W>(hideLabel)
-
 
 
         // Crafting Input slots
@@ -286,14 +285,14 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         emptySlots.clear()
         filledSlots.clear()
 
+        c.validateInventories()
+
         c.linkedSlots.forEach { cSlot ->
             val slot = WLinkedSlot()
             slot.invNumber = cSlot.inventoryNumber
             slot.slotNumber = cSlot.slotNumber
             slot.stack = cSlot.stack
-            if (!c.isDeleted(cSlot.inventoryNumber)) {
-                if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
-            }
+            if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
         }
 
         val trimmedFilter = filter.trim()
