@@ -10,8 +10,6 @@ package badasintended.spinnery.common.utility;
 
 import badasintended.spinnery.widget.WAbstractWidget;
 import badasintended.spinnery.widget.api.WEventListener;
-import badasintended.spinnery.widget.api.WFocusedKeyboardListener;
-import badasintended.spinnery.widget.api.WFocusedMouseListener;
 
 public class EventUtilities {
 	/**
@@ -20,11 +18,10 @@ public class EventUtilities {
 	 *
 	 * @return true if mouse event should go through.
 	 */
-	@SuppressWarnings("deprecation")
 	public static <T extends WEventListener> boolean canReceiveMouse(T target) {
 		if (target instanceof WAbstractWidget) {
 			WAbstractWidget widget = (WAbstractWidget) target;
-			return !(widget.isFocusedMouseListener() || target.getClass().isAnnotationPresent(WFocusedMouseListener.class)) || widget.isFocused();
+			return !widget.isFocusedMouseListener() || widget.isFocused();
 		}
 		return true;
 	}
@@ -35,11 +32,10 @@ public class EventUtilities {
 	 *
 	 * @return true if mouse event should go through.
 	 */
-	@SuppressWarnings("deprecation")
 	public static <T extends WEventListener> boolean canReceiveKeyboard(T target) {
 		if (target instanceof WAbstractWidget) {
 			WAbstractWidget widget = (WAbstractWidget) target;
-			return !(widget.isFocusedKeyboardListener() || target.getClass().isAnnotationPresent(WFocusedKeyboardListener.class)) || widget.isFocused();
+			return !widget.isFocusedKeyboardListener() || widget.isFocused();
 		}
 		return true;
 	}
