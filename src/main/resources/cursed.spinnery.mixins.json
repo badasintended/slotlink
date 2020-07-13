@@ -6,7 +6,6 @@
     "ItemStackMixin"
   ],
   "client"            : [
-    "InGameHudMixin",
     "HandledScreenMixin"
   ],
   "injectors"         : {
