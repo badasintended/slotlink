@@ -133,13 +133,18 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     }
 
     fun craftOnce() {
-        if (!playerInventory.cursorStack.isEmpty) return
+        val output = outputSlot.stack
+        val cursor = playerInventory.cursorStack
+        if (!StackUtilities.equalItemAndTag(output, cursor) and !cursor.isEmpty) return
+        if ((output.count + cursor.count) > output.maxCount) return
 
         validateInventories()
 
         craftInternal()
 
-        onSlotAction(0, -3, 0, PICKUP, player)
+        val buffer = buffer3.stack
+        StackUtilities.merge(buffer, cursor, buffer.maxCount, cursor.maxCount)
+            .apply(buffer3::acceptStack, playerInventory::setCursorStack)
     }
 
     fun craftStack() {
