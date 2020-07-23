@@ -7,9 +7,9 @@ import net.minecraft.block.Block
 import net.minecraft.block.Material
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack
-import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
 import net.minecraft.world.BlockView
 
 abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(settings) {
@@ -25,7 +25,7 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
     val id = Slotlink.id(id)
 
     override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
-        tooltip.add(LiteralText("§7").append(TranslatableText("${translationKey}.tooltip")))
+        tooltip.add(TranslatableText("${translationKey}.tooltip").formatted(Formatting.GRAY))
     }
 
 }

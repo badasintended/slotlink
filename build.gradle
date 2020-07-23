@@ -1,7 +1,7 @@
 plugins {
-	id "org.jetbrains.kotlin.jvm" version '1.3.72'
-	id 'fabric-loom' version '0.4-SNAPSHOT'
-	id 'maven-publish'
+    id "org.jetbrains.kotlin.jvm" version '1.3.72'
+    id 'fabric-loom' version '0.4-SNAPSHOT'
+    id 'maven-publish'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -13,96 +13,96 @@ version = "${project.mod_version}+minecraft-${project.minecraft_version}"
 group = project.maven_group
 
 repositories {
-	maven {
-		name = "Spinnery"
-		url  "https://dl.bintray.com/spinnery/Spinnery"
-	}
+    maven {
+        name = "Spinnery"
+        url "https://dl.bintray.com/spinnery/Spinnery"
+    }
 }
 
 dependencies {
-	//to change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    //to change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
-	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
+    modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
-	//modCompile "com.github.vini2003:spinnery:${project.spinnery}"
-	//include "com.github.vini2003:spinnery:${project.spinnery}"
+    modCompile "com.github.vini2003:spinnery:${project.spinnery}"
+    include "com.github.vini2003:spinnery:${project.spinnery}"
 
-	modImplementation "io.github.prospector:modmenu:${project.modmenu}"
+    modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
-	modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+    modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 
-	modCompile "blue.endless:jankson:1.2.0"
-	include "blue.endless:jankson:1.2.0"
+    modCompile "blue.endless:jankson:1.2.0"
+    include "blue.endless:jankson:1.2.0"
 }
 
 if (project.enable_databreaker.toBoolean()) {
-	repositories {
-		maven { url = "https://jitpack.io" }
-	}
+    repositories {
+        maven { url = "https://jitpack.io" }
+    }
 
-	dependencies {
-		modRuntime ("com.github.SuperCoder7979:databreaker:${project.databreaker}") {
-			exclude module : "fabric-loader"
-		}
-	}
+    dependencies {
+        modRuntime("com.github.SuperCoder7979:databreaker:${project.databreaker}") {
+            exclude module: "fabric-loader"
+        }
+    }
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-	}
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
 
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is
 // this fixes some edge cases with special characters not displaying correctly
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType(JavaCompile) {
-	options.encoding = "UTF-8"
+    options.encoding = "UTF-8"
 }
 
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 // if it is present.
 // If you remove this task, sources will not be generated.
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
-	from sourceSets.main.allSource
+    classifier = "sources"
+    from sourceSets.main.allSource
 }
 
 jar {
-	from "LICENSE"
+    from "LICENSE"
 }
 
 // configure the maven publication
 publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(jar) {
-				builtBy remapJar
-			}
-			artifact("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar"){
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
+    publications {
+        mavenJava(MavenPublication) {
+            // add all the jars that should be included when publishing to maven
+            artifact(jar) {
+                builtBy remapJar
+            }
+            artifact("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
 
-	// select the repositories you want to publish to
-	repositories {
-		// uncomment to publish to the local maven
-		// mavenLocal()
-	}
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        // mavenLocal()
+    }
 }

@@ -1,28 +1,38 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.common.spinneryId
-import badasintended.spinnery.client.render.BaseRenderer
-import badasintended.spinnery.common.registry.ThemeRegistry
-import badasintended.spinnery.widget.WTextField
-import badasintended.spinnery.widget.api.Style
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
+import spinnery.client.render.BaseRenderer
+import spinnery.common.registry.ThemeRegistry
+import spinnery.widget.WTextField
+import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSearchBar(
-    private val tooltip: (MatrixStack) -> Unit,
     private val search: (String) -> Unit
 ) : WTextField() {
+
+    companion object {
+        val EMPTY = arrayListOf<Text>()
+    }
+
+    private val tooltip = arrayListOf<Text>(
+        TranslatableText("block.slotlink.request.search.tooltip1").formatted(Formatting.GRAY),
+        TranslatableText("block.slotlink.request.search.tooltip2").formatted(Formatting.GRAY)
+    )
 
     init {
         setLabel<WSearchBar>(TranslatableText("block.slotlink.request.search"))
     }
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         if (isHidden) return
 
         val x = floor(x)
@@ -41,8 +51,6 @@ class WSearchBar(
         )
 
         renderField(matrices, provider)
-
-        if (isFocused and !isActive) tooltip.invoke(matrices)
     }
 
     override fun onKeyReleased(keyCode: Int, character: Int, keyModifier: Int) {
@@ -58,5 +66,7 @@ class WSearchBar(
             search.invoke(text)
         }
     }
+
+    override fun getTooltip() = if (active) EMPTY else tooltip
 
 }

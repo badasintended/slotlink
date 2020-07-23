@@ -1,13 +1,13 @@
 package badasintended.slotlink.screen
 
-import badasintended.spinnery.common.container.BaseContainer
-import badasintended.spinnery.widget.WInterface
 import net.minecraft.entity.player.PlayerEntity
+import spinnery.common.handler.BaseScreenHandler
+import spinnery.widget.WInterface
 
 abstract class ModScreenHandler(
     syncId: Int,
     val player: PlayerEntity
-) : BaseContainer(syncId, player.inventory) {
+) : BaseScreenHandler(syncId, player.inventory) {
 
     protected val root: WInterface = `interface`
 

@@ -2,14 +2,6 @@ package badasintended.slotlink.screen
 
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.inventory.DummyInventory
-import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
-import badasintended.spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
-import badasintended.spinnery.common.utility.StackUtilities
-import badasintended.spinnery.widget.WSlot
-import badasintended.spinnery.widget.api.Action
-import badasintended.spinnery.widget.api.Action.*
-import badasintended.spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
-import badasintended.spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -22,9 +14,19 @@ import net.minecraft.item.Items
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
+import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
+import spinnery.common.utility.MutablePair
+import spinnery.common.utility.StackUtilities
+import spinnery.widget.WSlot
+import spinnery.widget.api.Action
+import spinnery.widget.api.Action.*
+import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
+import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -57,8 +59,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val buffer2: WSlot
     private val buffer3: WSlot
 
-    private val context: ScreenHandlerContext = ScreenHandlerContext.create(player.world, blockPos)
-
     private val fixedSplitSlots = linkedSetOf<WSlot>()
     private val fixedSingleSlots = linkedSetOf<WSlot>()
 
@@ -66,12 +66,10 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
 
         inventoryPos.forEachIndexed { index, blockPos ->
-            context.run { world, _ ->
-                val chunk = world.getWorldChunk(blockPos)
-                val blockEntity = chunk.getBlockEntity(blockPos)!!
-                inventoryStates.add(chunk.getBlockState(blockPos))
-                invMap[index + 3] = blockEntity as Inventory
-            }
+            val chunk = world.getWorldChunk(blockPos)
+            val blockEntity = chunk.getBlockEntity(blockPos)!!
+            inventoryStates.add(chunk.getBlockState(blockPos))
+            invMap[index + 3] = blockEntity as Inventory
         }
 
         inventories[-3] = DummyInventory(1, 1)
@@ -123,11 +121,8 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
     fun validateInventories() {
         invMap.forEach { (i, _) ->
-            var deleted = false
-            context.run { world, _ ->
-                val state = world.getBlockState(inventoryPos[i - 3])
-                deleted = state != inventoryStates[i - 3]
-            }
+            val state = world.getBlockState(inventoryPos[i - 3])
+            val deleted = state != inventoryStates[i - 3]
             if (deleted) linkedSlots.removeIf { it.inventoryNumber == i }
         }
     }
@@ -229,24 +224,22 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
      * Taken from [CraftingScreenHandler]
      */
     private fun craftItem() {
-        context.run { world, _ ->
-            if (!world.isClient) {
-                player as ServerPlayerEntity
-                var itemStack = ItemStack.EMPTY
-                val optional = world.server!!.recipeManager.getFirstMatch(RecipeType.CRAFTING, craftingInv, world)
-                if (optional.isPresent) {
-                    val craftingRecipe = optional.get()
-                    if (resultInv.shouldCraftRecipe(world, player, craftingRecipe)) {
-                        itemStack = craftingRecipe.craft(craftingInv)
-                    }
+        if (!world.isClient) {
+            player as ServerPlayerEntity
+            var itemStack = ItemStack.EMPTY
+            val optional = world.server!!.recipeManager.getFirstMatch(RecipeType.CRAFTING, craftingInv, world)
+            if (optional.isPresent) {
+                val craftingRecipe = optional.get()
+                if (resultInv.shouldCraftRecipe(world, player, craftingRecipe)) {
+                    itemStack = craftingRecipe.craft(craftingInv)
                 }
-                outputSlot.setStack<WSlot>(itemStack)
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(
-                    player, SLOT_UPDATE_PACKET,
-                    createSlotUpdatePacket(syncId, outputSlot.slotNumber, outputSlot.inventoryNumber, itemStack)
-                )
-                resultInv.unlockLastRecipe(player)
             }
+            outputSlot.setStack<WSlot>(itemStack)
+            ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                player, SLOT_UPDATE_PACKET,
+                createSlotUpdatePacket(syncId, outputSlot.slotNumber, outputSlot.inventoryNumber, itemStack)
+            )
+            resultInv.unlockLastRecipe(player)
         }
     }
 
@@ -254,6 +247,48 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         if ((inventory == craftingInv)) {
             craftItem()
         } else super.onContentChanged(inventory)
+    }
+
+    override fun getDragSlots(mouseButton: Int): MutableSet<WSlot>? {
+        return when (mouseButton) {
+            0 -> fixedSplitSlots
+            1 -> fixedSingleSlots
+            else -> null
+        }
+    }
+
+    override fun onSlotDrag(slotNumber: IntArray, inventoryNumber: IntArray, action: Action) {
+        val slots: MutableSet<WSlot> = LinkedHashSet()
+
+        for (i in slotNumber.indices) {
+            val slot = getInterface().getSlot<WSlot>(inventoryNumber[i], slotNumber[i])
+            if (slot != null) slots.add(slot)
+        }
+
+        if (slots.isEmpty()) return
+
+        val split = if (action.isSplit) (playerInventory.cursorStack.count / slots.size).coerceAtLeast(1) else 1
+
+        var stackA = if (action.isPreview) playerInventory.cursorStack.copy() else playerInventory.cursorStack
+
+        if (stackA.isEmpty) return
+
+        for (slotA in slots) {
+            if (slotA.refuses(stackA)) continue
+            val stackB = if (action.isPreview) slotA.stack.copy() else slotA.stack
+            val stacks: MutablePair<ItemStack, ItemStack> = StackUtilities.merge(
+                stackA, stackB, split,
+                stackA.maxCount.coerceAtMost(split + stackB.count)
+            )
+            if (action.isPreview) {
+                previewCursorStack = stacks.first.copy()
+                slotA.setPreviewStack<WSlot>(stacks.second.copy())
+            } else {
+                stackA = stacks.first
+                previewCursorStack = ItemStack.EMPTY
+                slotA.setStack(stacks.second)
+            }
+        }
     }
 
     /**

@@ -1,14 +1,15 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.WTranslatableLabel
+import badasintended.slotlink.client.gui.widget.WVanillaSlot
 import badasintended.slotlink.common.positionOf
 import badasintended.slotlink.common.sizeOf
 import badasintended.slotlink.screen.MasterScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import badasintended.spinnery.widget.WPanel
-import badasintended.spinnery.widget.WSlot
-import badasintended.spinnery.widget.WAbstractWidget as W
+import spinnery.widget.WPanel
+import spinnery.widget.WAbstractWidget as W
+import spinnery.widget.WSlot as S
 
 @Environment(EnvType.CLIENT)
 class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
@@ -42,12 +43,11 @@ class MasterScreen(c: MasterScreenHandler) : ModScreen<MasterScreenHandler>(c) {
 
         for (i in 0 until c.totalInv) {
             val slot = main.createChild(
-                { WSlot() },
+                { WVanillaSlot() },
                 positionOf(connectedStorage, -1 + ((i % 8) * 18), 11 + ((i / 8) * 18), 1),
                 sizeOf(18)
             )
-            slot.setInventoryNumber<WSlot>(1)
-            slot.setSlotNumber<WSlot>(i)
+            slot.setNumber<S>(1, i)
         }
 
         val totalSlot = main.createChild(

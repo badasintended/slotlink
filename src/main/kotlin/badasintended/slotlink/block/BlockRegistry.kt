@@ -1,7 +1,6 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.item.ModItem
-import com.google.common.collect.ImmutableSet
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.Registry.BLOCK
@@ -14,8 +13,6 @@ object BlockRegistry {
 
     val CABLE = CableBlock()
     val LINK_CABLE = LinkCableBlock()
-
-    val BLOCKS: ImmutableSet<ModBlock> = ImmutableSet.of(MASTER, REQUEST, CABLE, LINK_CABLE)
 
     fun init() {
         r(MASTER, REQUEST, CABLE, LINK_CABLE)

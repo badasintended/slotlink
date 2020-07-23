@@ -1,12 +1,5 @@
 package badasintended.slotlink.common
 
-import badasintended.spinnery.common.container.BaseContainer
-import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import badasintended.spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import badasintended.spinnery.widget.api.Action
-import badasintended.spinnery.widget.api.Position
-import badasintended.spinnery.widget.api.Size
-import badasintended.spinnery.widget.api.WPositioned
 import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.block.MasterBlock
@@ -22,6 +15,13 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spinnery.common.handler.BaseScreenHandler
+import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import spinnery.widget.api.Action
+import spinnery.widget.api.Position
+import spinnery.widget.api.Size
+import spinnery.widget.api.WPositioned
 import java.util.function.Consumer
 
 /**
@@ -29,7 +29,6 @@ import java.util.function.Consumer
  * used in request block and remotes
  */
 fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
-    var totalInventory = 0
     val inventoryPos = HashSet<BlockPos>()
 
     val isMasterBlock = world.getBlockState(masterPos).block is MasterBlock
@@ -51,14 +50,13 @@ fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
                 if (linkedBlock.hasBlockEntity()) {
                     val linkedBlockEntity = world.getBlockEntity(linkedPos)
                     if (hasInventory(linkedBlockEntity)) {
-                        totalInventory++
                         inventoryPos.add(linkedPos)
                     }
                 }
             }
         }
 
-        buf.writeInt(totalInventory)
+        buf.writeInt(inventoryPos.size)
         inventoryPos.forEach {
             buf.writeBlockPos(it)
         }
@@ -92,7 +90,7 @@ fun sizeOf(x: Int, y: Int): Size = Size.of(x.toFloat(), y.toFloat())
 fun sizeOf(s: Int): Size = Size.of(s.toFloat())
 
 @Environment(EnvType.CLIENT)
-fun slotAction(container: BaseContainer, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
+fun slotAction(container: BaseScreenHandler, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
     container.onSlotAction(slotN, invN, button, action, player)
     ClientSidePacketRegistry.INSTANCE.sendToServer(
         SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action)

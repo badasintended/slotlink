@@ -1,4 +1,4 @@
-package badasintended.slotlink.client.compatibility.rei
+package badasintended.slotlink.client.compat.rei
 
 import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.BlockRegistry
@@ -8,7 +8,6 @@ import com.google.common.collect.Lists
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import me.shedaniel.rei.api.AutoTransferHandler.Result
-import me.shedaniel.rei.api.DisplayHelper
 import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeHelper
 import me.shedaniel.rei.api.plugins.REIPluginV0
@@ -29,10 +28,6 @@ import java.util.*
 class SlotlinkReiPlugin : REIPluginV0 {
 
     override fun getPluginIdentifier() = Slotlink.id("rei")
-
-    override fun registerBounds(displayHelper: DisplayHelper) {
-        displayHelper.registerHandler(SlotlinkDisplayBoundsProvider())
-    }
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
         recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(BlockRegistry.REQUEST))

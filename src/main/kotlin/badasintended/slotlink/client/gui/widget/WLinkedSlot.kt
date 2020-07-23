@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.spinnery.widget.WAbstractWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.item.ItemStack
+import spinnery.widget.WAbstractWidget
 
 @Environment(EnvType.CLIENT)
 class WLinkedSlot : WAbstractWidget() {

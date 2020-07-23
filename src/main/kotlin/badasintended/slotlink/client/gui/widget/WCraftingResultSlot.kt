@@ -3,17 +3,17 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
-import badasintended.spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import badasintended.spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import badasintended.spinnery.common.utility.StackUtilities.equalItemAndTag
-import badasintended.spinnery.widget.WSlot
-import badasintended.spinnery.widget.api.Action.CLONE
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.network.PacketByteBuf
+import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import spinnery.common.utility.StackUtilities.equalItemAndTag
+import spinnery.widget.WSlot
+import spinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
 class WCraftingResultSlot(
@@ -23,12 +23,13 @@ class WCraftingResultSlot(
     override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
         sort.invoke()
     }
+
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, button: Int) {
         if (!isFocused) return
 
-        val container = `interface`.container as AbstractRequestScreenHandler
+        val container = `interface`.handler as AbstractRequestScreenHandler
         val player = container.player
 
         val cursorStack = player.inventory.cursorStack

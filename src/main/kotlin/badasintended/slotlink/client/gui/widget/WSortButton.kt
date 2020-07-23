@@ -1,27 +1,32 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.spinnery.client.render.BaseRenderer
-import badasintended.spinnery.common.registry.ThemeRegistry
-import badasintended.spinnery.widget.WAbstractButton
-import badasintended.spinnery.widget.WButton
-import badasintended.spinnery.widget.api.Style
 import badasintended.slotlink.common.SortBy
 import badasintended.slotlink.common.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.util.Identifier
+import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
+import spinnery.client.render.BaseRenderer
+import spinnery.common.registry.ThemeRegistry
+import spinnery.widget.WAbstractButton
+import spinnery.widget.WButton
+import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSortButton(
-    private var sortImage: Identifier,
-    private val tooltip: (MatrixStack) -> Unit,
+    private var sort: SortBy,
     private val sortFunction: () -> SortBy
 ) : WButton() {
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    private val tooltip = arrayListOf<Text>(
+        TranslatableText(sort.translationKey).formatted(Formatting.GRAY)
+    )
+
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         val x = floor(x)
         val y = floor(y)
         val w = floor(width)
@@ -45,15 +50,17 @@ class WSortButton(
         )
 
         val tint = panelStyle.asColor("label.color")
-        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, sortImage)
-        //drawTintedImage(sortImage, tint, x, y, z, w, h)
-
-        if (isFocused) tooltip.invoke(matrices)
+        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, sort.texture)
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {
-        if (toggleState) sortImage = sortFunction.invoke().texture
+        if (toggleState) {
+            sort = sortFunction.invoke()
+            tooltip[0] = TranslatableText(sort.translationKey).formatted(Formatting.GRAY)
+        }
         return super.setLowered(toggleState)
     }
+
+    override fun getTooltip() = tooltip
 
 }
