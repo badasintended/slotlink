@@ -15,11 +15,10 @@
   "icon"         : "assets/slotlink/icon.png",
   "environment"  : "*",
   "entrypoints"  : {
-    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Mod::main"}],
-    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Mod::client"}],
-    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compatibility.rei.SlotlinkReiPlugin"}]
+    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
+    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.SlotlinkReiPlugin"}]
   },
-  "mixins"       : [],
   "depends"      : {
     "fabricloader"          : ">=0.8",
     "minecraft"             : "1.16.x",

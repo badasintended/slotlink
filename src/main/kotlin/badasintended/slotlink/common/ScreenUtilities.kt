@@ -1,6 +1,6 @@
 package badasintended.slotlink.common
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.block.MasterBlock
 import net.fabricmc.api.EnvType
@@ -15,8 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spinnery.Spinnery
-import spinnery.common.container.BaseContainer
+import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
 import spinnery.widget.api.Action
@@ -30,7 +29,6 @@ import java.util.function.Consumer
  * used in request block and remotes
  */
 fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
-    var totalInventory = 0
     val inventoryPos = HashSet<BlockPos>()
 
     val isMasterBlock = world.getBlockState(masterPos).block is MasterBlock
@@ -52,14 +50,13 @@ fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
                 if (linkedBlock.hasBlockEntity()) {
                     val linkedBlockEntity = world.getBlockEntity(linkedPos)
                     if (hasInventory(linkedBlockEntity)) {
-                        totalInventory++
                         inventoryPos.add(linkedPos)
                     }
                 }
             }
         }
 
-        buf.writeInt(totalInventory)
+        buf.writeInt(inventoryPos.size)
         inventoryPos.forEach {
             buf.writeBlockPos(it)
         }
@@ -70,10 +67,10 @@ fun writeRequestData(buf: PacketByteBuf, world: World, masterPos: BlockPos) {
  * Opens a container, what else?
  */
 fun openScreen(id: String, player: PlayerEntity, function: (PacketByteBuf) -> Unit) {
-    ContainerProviderRegistry.INSTANCE.openContainer(Mod.id(id), player as ServerPlayerEntity, Consumer(function))
+    ContainerProviderRegistry.INSTANCE.openContainer(Slotlink.id(id), player as ServerPlayerEntity, Consumer(function))
 }
 
-fun spinneryId(id: String) = Identifier(Spinnery.MOD_ID, id)
+fun spinneryId(id: String) = Identifier("spinnery", id)
 
 /**
  * I just want ints on my gui
@@ -93,7 +90,7 @@ fun sizeOf(x: Int, y: Int): Size = Size.of(x.toFloat(), y.toFloat())
 fun sizeOf(s: Int): Size = Size.of(s.toFloat())
 
 @Environment(EnvType.CLIENT)
-fun slotAction(container: BaseContainer, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
+fun slotAction(container: BaseScreenHandler, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
     container.onSlotAction(slotN, invN, button, action, player)
     ClientSidePacketRegistry.INSTANCE.sendToServer(
         SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action)

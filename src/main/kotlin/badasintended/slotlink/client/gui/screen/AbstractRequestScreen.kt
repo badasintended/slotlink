@@ -12,21 +12,18 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.registry.Registry
 import spinnery.common.utility.StackUtilities.equalItemAndTag
 import spinnery.widget.WPanel
-import spinnery.widget.WSlot
 import spinnery.widget.WVerticalSlider
 import spinnery.widget.api.Action.PICKUP
 import spinnery.widget.api.Action.QUICK_MOVE
 import spinnery.widget.api.Position
 import kotlin.math.sign
-import kotlin.streams.toList
 import spinnery.widget.WAbstractWidget as W
+import spinnery.widget.WSlot as S
 
 @Environment(EnvType.CLIENT)
 abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : ModScreen<H>(c) {
@@ -47,7 +44,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     protected var lastSort = c.lastSort
 
     // lol wtf is this
-    private val main: WPanel
+    final override val main: WPanel
     private val titleLabel: WTranslatableLabel
     private val craftingLabel: WTranslatableLabel
     private val playerInvLabel: WTranslatableLabel
@@ -56,6 +53,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private val scrollbar: WFakeScrollbar
     private val viewedSlots = arrayListOf<WMultiSlot>()
     private val slotArea: WSlotArea
+    private val sortButton: WSortButton
     private val searchBar: WSearchBar
 
     init {
@@ -85,19 +83,15 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         craftingLabel.setHidden<W>(hideLabel)
 
-        // Crafting clear button
-        main.createChild(
-            { WPutButton({ drawClearTooltip() }, { onClearButtonClick() }) },
-            positionOf(craftingLabel, -6, 10),
-            sizeOf(6)
-        )
 
-        // Crafting Input slots
-        WSlot.addArray(
-            positionOf(craftingLabel, 1, 10),
-            sizeOf(18),
-            main, 0, 1, 3, 3
-        )
+        for (i in 0 until 9) {
+            val slot = main.createChild(
+                { WVanillaSlot() },
+                positionOf(craftingLabel, (((i % 3) * 18) + 1), (((i / 3) * 18) + 10)),
+                sizeOf(18)
+            )
+            slot.setNumber<S>(1, i)
+        }
 
         // Crafting Result slot
         val resultSlot = main.createChild(
@@ -105,8 +99,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             positionOf(craftingLabel, 91, 24),
             sizeOf(26)
         )
-        resultSlot.setInventoryNumber<WSlot>(2)
-        resultSlot.setSlotNumber<WSlot>(0)
+        resultSlot.setNumber<S>(2, 0)
 
         // Crafting Arrow
         main.createChild(
@@ -121,32 +114,23 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         )
         playerInvLabel.setHidden<W>(hideLabel)
 
-        // that `move all to inventories` button
-        main.createChild(
-            { WPutButton({ drawPutAllTooltip() }, { onPutAllButtonClick() }) },
-            positionOf(playerInvLabel, 155, 4),
-            sizeOf(6)
-        )
-
         for (i in 0 until 27) {
             val slot = main.createChild(
-                { WPlayerSlot { sort() } },
+                { WPlayerSlot(this::putSameItem) { sort() } },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)),
                 sizeOf(18)
             )
-            slot.setInventoryNumber<WSlot>(0)
-            slot.setSlotNumber<WSlot>(i + 9)
+            slot.setNumber<S>(0, i + 9)
             playerInvSlots.add(slot)
         }
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WPlayerSlot { sort() } },
+                { WPlayerSlot(this::putSameItem) { sort() } },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), 70),
                 sizeOf(18)
             )
-            slot.setInventoryNumber<WSlot>(0)
-            slot.setSlotNumber<WSlot>(i)
+            slot.setNumber<S>(0, i)
             playerInvSlots.add(slot)
         }
 
@@ -170,7 +154,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
             sizeOf(144, slotSize)
         )
         slotArea.onMouseReleased = { onSlotAreaClick() }
-        slotArea.setHidden<W>(true)
 
         for (i in 0 until 48) {
             val slot = main.createChild(
@@ -178,37 +161,60 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
                 positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18), 2),
                 sizeOf(18)
             )
-            slot.setInventoryNumber<WSlot>(-1)
-            slot.setSlotNumber<WSlot>(i)
-            slot.setHidden<WSlot>(true)
+            slot.setNumber<S>(-1, i)
+            slot.setHidden<S>(true)
             viewedSlots.add(slot)
         }
 
-        searchBar = main.createChild(
-            { WSearchBar({ sort(lastSort, it) }, { drawSearchTooltip() }) },
-            positionOf(scrollArea, 0, (slotSize + 3)),
-            sizeOf(146, 18)
-        )
-
-        main.createChild(
-            { WSortButton(lastSort.texture, { sort(lastSort.next(), lastFilter) }, { drawSortTooltip() }) },
-            positionOf(searchBar, 148, 1),
+        sortButton = main.createChild(
+            { WSortButton(lastSort) { sort(lastSort.next(), lastFilter) } },
+            positionOf(scrollArea, 148, (slotSize + 4)),
             sizeOf(14)
         )
 
+        searchBar = main.createChild(
+            { WSearchBar { sort(lastSort, it) } },
+            positionOf(sortButton, -148, -1),
+            sizeOf(146, 18)
+        )
+
+        // that `move all to inventories` button
+        main.createChild(
+            { WPutButton("block.slotlink.request.putAllTooltip", this::putAllButtonClick) },
+            positionOf(playerInvLabel, 155, 4),
+            sizeOf(6)
+        )
+
+        // Crafting clear button
+        main.createChild(
+            { WPutButton("block.slotlink.request.craft.clearTooltip", this::clearButtonClick) },
+            positionOf(craftingLabel, -6, 10),
+            sizeOf(6)
+        )
+
+        main.createChild(
+            { WHelpTooltip() },
+            positionOf(scrollbar, 5, -10),
+            sizeOf(8)
+        )
     }
 
-    private fun onClearButtonClick() {
+    private fun clearButtonClick() {
         c.clearCraft()
         ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
         sort()
     }
 
-    private fun onPutAllButtonClick() {
-        val filledSlots = playerInvSlots.filterNot { it.stack.isEmpty }
-        filledSlots.forEach { slot ->
-            slotAction(c, slot.slotNumber, slot.inventoryNumber, 0, QUICK_MOVE, c.player)
-        }
+    private fun putAllButtonClick() {
+        putInternal(playerInvSlots.filterNot { it.stack.isEmpty })
+    }
+
+    private fun putSameItem(stack: ItemStack) {
+        putInternal(playerInvSlots.filterNot { it.stack.isEmpty }.filter { it.stack.item == stack.item })
+    }
+
+    private fun putInternal(slots: List<WPlayerSlot>) {
+        slots.forEach { slotAction(c, it.slotNumber, it.inventoryNumber, 0, QUICK_MOVE, c.player) }
         sort()
     }
 
@@ -244,19 +250,19 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
                 })
 
                 viewedSlot.setLinkedSlots(*serverSlots.toTypedArray())
-                viewedSlot.setStack<WSlot>(filledStack)
-                viewedSlot.setHidden<WSlot>(false)
+                viewedSlot.setStack<S>(filledStack)
+                viewedSlot.setHidden<S>(false)
                 i++
             } else if (j < (emptySlots.size - offset + filledStacks.size)) {
                 viewedSlot.setLinkedSlots(emptySlots[j + offset - filledStacks.size])
-                viewedSlot.setStack<WSlot>(ItemStack.EMPTY)
-                viewedSlot.setHidden<WSlot>(false)
+                viewedSlot.setStack<S>(ItemStack.EMPTY)
+                viewedSlot.setHidden<S>(false)
                 i++
             }
         }
 
         if (i < viewedSlotSize) for (j in i until viewedSlotSize) {
-            viewedSlots[j].setHidden<WSlot>(true)
+            viewedSlots[j].setHidden<S>(true)
         }
 
     }
@@ -271,14 +277,14 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         emptySlots.clear()
         filledSlots.clear()
 
+        c.validateInventories()
+
         c.linkedSlots.forEach { cSlot ->
             val slot = WLinkedSlot()
             slot.invNumber = cSlot.inventoryNumber
             slot.slotNumber = cSlot.slotNumber
             slot.stack = cSlot.stack
-            if (!c.isDeleted(cSlot.inventoryNumber)) {
-                if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
-            }
+            if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
         }
 
         val trimmedFilter = filter.trim()
@@ -334,27 +340,6 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         return lastSort
     }
 
-    private fun drawSearchTooltip() = drawTooltip(
-        "block.slotlink.request.search.tooltip1",
-        "block.slotlink.request.search.tooltip2"
-    )
-
-    private fun drawSortTooltip() = drawTooltip(lastSort.translationKey)
-
-    private fun drawClearTooltip() = drawTooltip("block.slotlink.request.craft.clearTooltip")
-
-    private fun drawPutAllTooltip() = drawTooltip("block.slotlink.request.putAllTooltip")
-
-    private fun drawTooltip(vararg translationKeys: String) {
-        val client = MinecraftClient.getInstance()
-        val mouse = client.mouse
-        val factor = client.window.scaleFactor
-        val x = (mouse.x / factor).toInt()
-        val y = (mouse.y / factor).toInt()
-        val text = translationKeys.asList().stream().map { TranslatableText(it) }.toList()
-        renderTooltip(MatrixStack(), text, x, y)
-    }
-
     private fun updateSlotSize() {
         val scaledHeight = MinecraftClient.getInstance().window.scaledHeight
         slotHeight = 0
@@ -377,7 +362,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         scrollArea.setSize<W>(sizeOf(162, slotSize))
         scrollbar.setSize<W>(sizeOf(14, slotSize))
         slotArea.setSize<W>(sizeOf(144, slotSize))
-        searchBar.setPosition<W>(positionOf(scrollArea, 0, slotSize + 3))
+        sortButton.setPosition<W>(positionOf(scrollArea, 148, slotSize + 4))
 
         sort()
 

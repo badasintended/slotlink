@@ -20,13 +20,16 @@ class WCraftingResultSlot(
     private val sort: () -> Unit
 ) : WSlot() {
 
-    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {}
+    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
+        sort.invoke()
+    }
+
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, button: Int) {
         if (!isFocused) return
 
-        val container = `interface`.container as AbstractRequestScreenHandler
+        val container = `interface`.handler as AbstractRequestScreenHandler
         val player = container.player
 
         val cursorStack = player.inventory.cursorStack
@@ -34,7 +37,6 @@ class WCraftingResultSlot(
         if (Screen.hasShiftDown()) {
             container.craftStack()
             if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK, PacketByteBuf(Unpooled.buffer()))
-            sort.invoke()
         } else {
             if ((button == LEFT) or (button == RIGHT)) {
                 if (
@@ -43,7 +45,6 @@ class WCraftingResultSlot(
                 ) return
                 container.craftOnce()
                 INSTANCE.sendToServer(CRAFT_ONCE, PacketByteBuf(Unpooled.buffer()))
-                sort.invoke()
             } else if (button == MIDDLE) {
                 container.onSlotAction(slotNumber, inventoryNumber, button, CLONE, player)
                 INSTANCE.sendToServer(

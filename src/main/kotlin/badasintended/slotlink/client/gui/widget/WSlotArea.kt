@@ -13,7 +13,9 @@ import kotlin.math.floor
 @Environment(EnvType.CLIENT)
 class WSlotArea : WMouseArea() {
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+        if (isHidden) return
+
         val x = floor(x)
         val y = floor(y)
         val w = floor(width)

@@ -23,7 +23,7 @@ class WFakeScrollbar(
     private val scrollFunction: (Int) -> Unit
 ) : WVerticalSlider() {
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         if (isHidden) return
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))

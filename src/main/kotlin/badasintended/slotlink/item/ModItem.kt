@@ -1,6 +1,6 @@
 package badasintended.slotlink.item
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.BlockRegistry
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.client.item.TooltipContext
@@ -13,10 +13,10 @@ import net.minecraft.world.World
 
 abstract class ModItem(id: String, settings: Settings = SETTINGS) : Item(settings) {
 
-    val id = Mod.id(id)
+    val id = Slotlink.id(id)
 
     companion object {
-        private val GROUP = FabricItemGroupBuilder.build(Mod.id("group")) { ItemStack(BlockRegistry.MASTER) }
+        private val GROUP = FabricItemGroupBuilder.build(Slotlink.id("group")) { ItemStack(BlockRegistry.MASTER) }
 
         val SETTINGS: Settings get() = Settings().group(GROUP)
     }

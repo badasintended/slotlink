@@ -18,14 +18,14 @@ class WTranslatableLabel(key: String, vararg args: Any) : WStaticText() {
         setText<WStaticText>(TranslatableText(key, *args))
     }
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         if (isHidden) return
 
         val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
 
         TextRenderer.pass()
             .text(text)
-            .at(x, y, z).scale(scale).maxWidth(maxWidth)
+            .at(x, y, z)
             .shadow(false)
             .color(panelStyle.asColor("label.color"))
             .render(matrices, provider)

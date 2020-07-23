@@ -1,6 +1,6 @@
-package badasintended.slotlink.client.compatibility.rei
+package badasintended.slotlink.client.compat.rei
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.BlockRegistry
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_PULL
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
@@ -27,7 +27,7 @@ import java.util.*
 @Environment(EnvType.CLIENT)
 class SlotlinkReiPlugin : REIPluginV0 {
 
-    override fun getPluginIdentifier() = Mod.id("rei")
+    override fun getPluginIdentifier() = Slotlink.id("rei")
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
         recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(BlockRegistry.REQUEST))

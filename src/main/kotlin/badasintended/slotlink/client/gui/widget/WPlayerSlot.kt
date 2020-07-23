@@ -1,10 +1,12 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.common.slotAction
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
-import spinnery.common.registry.NetworkRegistry.*
+import net.minecraft.item.ItemStack
+import spinnery.common.registry.NetworkRegistry.SLOT_DRAG_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotDragPacket
 import spinnery.common.utility.MouseUtilities.*
-import spinnery.widget.WSlot
 import spinnery.widget.api.Action.*
 
 /**
@@ -12,13 +14,14 @@ import spinnery.widget.api.Action.*
  * and the only solution that i can think of is this
  */
 class WPlayerSlot(
+    private val putSameItem: (ItemStack) -> Unit,
     private val sort: () -> Unit
-) : WSlot() {
+) : WVanillaSlot() {
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, button: Int) {
         if (!isFocused || isLocked()) return
 
-        val container = `interface`.container
+        val container = `interface`.handler
         val playerInventory = container.playerInventory
         val player = playerInventory.player
 
@@ -26,44 +29,30 @@ class WPlayerSlot(
 
         if (nanoInterval() < nanoDelay() * 1.25f && button == LEFT) {
             skipRelease = true
-            container.onSlotAction(slotNumber, inventoryNumber, button, PICKUP_ALL, player)
-            INSTANCE.sendToServer(
-                SLOT_CLICK_PACKET,
-                createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, PICKUP_ALL)
-            )
+            slotAction(container, slotNumber, inventoryNumber, button, PICKUP_ALL, player)
             sort.invoke()
         } else {
             nanoUpdate()
             if (Screen.hasShiftDown()) {
                 if (button == LEFT) {
-                    `interface`.cachedWidgets[javaClass] = this
-                    container.onSlotAction(slotNumber, inventoryNumber, button, QUICK_MOVE, player)
-                    INSTANCE.sendToServer(
-                        SLOT_CLICK_PACKET,
-                        createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, QUICK_MOVE)
-                    )
-                    sort.invoke()
+                    if (Screen.hasControlDown()) putSameItem.invoke(stack) else {
+                        `interface`.cachedWidgets[javaClass] = this
+                        slotAction(container, slotNumber, inventoryNumber, button, QUICK_MOVE, player)
+                        sort.invoke()
+                    }
                 }
             } else if ((button == LEFT || button == RIGHT) && isCursorEmpty) {
                 skipRelease = true
-                container.onSlotAction(slotNumber, inventoryNumber, button, PICKUP, player)
-                INSTANCE.sendToServer(
-                    SLOT_CLICK_PACKET,
-                    createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, PICKUP)
-                )
+                slotAction(container, slotNumber, inventoryNumber, button, PICKUP, player)
                 sort.invoke()
             } else if (button == MIDDLE) {
-                container.onSlotAction(slotNumber, inventoryNumber, button, CLONE, player)
-                INSTANCE.sendToServer(
-                    SLOT_CLICK_PACKET,
-                    createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, CLONE)
-                )
+                slotAction(container, slotNumber, inventoryNumber, button, CLONE, player)
                 sort.invoke()
             }
         }
 
         if (isWithinBounds(mouseX, mouseY)) {
-            isHeld = true
+            held = true
             heldSince = System.currentTimeMillis()
         }
     }
@@ -71,7 +60,7 @@ class WPlayerSlot(
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {
         if (!isFocused || button == MIDDLE || isLocked()) return
 
-        val container = `interface`.container
+        val container = `interface`.handler
         val player = container.playerInventory.player
 
         val isCached = `interface`.cachedWidgets[javaClass] === this
@@ -82,11 +71,7 @@ class WPlayerSlot(
         if (Screen.hasShiftDown()) {
             if (button == LEFT && !isCached) {
                 `interface`.cachedWidgets[javaClass] = this
-                container.onSlotAction(slotNumber, inventoryNumber, button, QUICK_MOVE, player)
-                INSTANCE.sendToServer(
-                    SLOT_CLICK_PACKET,
-                    createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, QUICK_MOVE)
-                )
+                slotAction(container, slotNumber, inventoryNumber, button, QUICK_MOVE, player)
                 sort.invoke()
             }
         } else {
@@ -105,7 +90,7 @@ class WPlayerSlot(
     override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
         if (button == MIDDLE || isLocked()) return
 
-        val container = `interface`.container
+        val container = `interface`.handler
         val playerInventory = container.playerInventory
         val player = playerInventory.player
 
@@ -124,11 +109,7 @@ class WPlayerSlot(
                 )
                 sort.invoke()
             } else if (!isFocused) return else if ((button == LEFT || button == RIGHT) && !isCursorEmpty) {
-                container.onSlotAction(slotNumber, inventoryNumber, button, PICKUP, player)
-                INSTANCE.sendToServer(
-                    SLOT_CLICK_PACKET,
-                    createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, PICKUP)
-                )
+                slotAction(container, slotNumber, inventoryNumber, button, PICKUP, player)
                 sort.invoke()
             }
         }
@@ -136,7 +117,7 @@ class WPlayerSlot(
         container.flush()
 
         skipRelease = false
-        isHeld = false
+        held = false
     }
 
 }

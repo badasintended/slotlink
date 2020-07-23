@@ -58,7 +58,8 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         }
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        val masterDim = RegistryKey.of(Registry.DIMENSION_TYPE_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
+        val masterDim =
+            RegistryKey.of(Registry.DIMENSION_TYPE_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
 
         if (masterPosTag == CompoundTag()) {
             sendActionBar(world, player, "${baseTlKey}.hasNoMaster")

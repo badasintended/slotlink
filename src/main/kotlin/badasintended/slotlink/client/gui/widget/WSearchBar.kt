@@ -5,7 +5,9 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WTextField
@@ -14,15 +16,23 @@ import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WSearchBar(
-    private val setSearch: (String) -> Unit,
-    private val drawTooltip: () -> Unit
+    private val search: (String) -> Unit
 ) : WTextField() {
+
+    companion object {
+        val EMPTY = arrayListOf<Text>()
+    }
+
+    private val tooltip = arrayListOf<Text>(
+        TranslatableText("block.slotlink.request.search.tooltip1").formatted(Formatting.GRAY),
+        TranslatableText("block.slotlink.request.search.tooltip2").formatted(Formatting.GRAY)
+    )
 
     init {
         setLabel<WSearchBar>(TranslatableText("block.slotlink.request.search"))
     }
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         if (isHidden) return
 
         val x = floor(x)
@@ -40,18 +50,23 @@ class WSearchBar(
             slotStyle.asColor("bottom_right")
         )
 
-        if (isFocused and !isActive) drawTooltip.invoke()
-
         renderField(matrices, provider)
     }
 
     override fun onKeyReleased(keyCode: Int, character: Int, keyModifier: Int) {
         super.onKeyReleased(keyCode, character, keyModifier)
-        setSearch.invoke(text)
+        search.invoke(text)
     }
 
     override fun onMouseClicked(mouseX: Float, mouseY: Float, mouseButton: Int) {
-        active = isFocused
+        active = isWithinBounds(mouseX, mouseY)
+        if (active and (mouseButton == 1)) {
+            setText<WSearchBar>("")
+            cursor.assign(Cursor(0, 0))
+            search.invoke(text)
+        }
     }
+
+    override fun getTooltip() = if (active) EMPTY else tooltip
 
 }

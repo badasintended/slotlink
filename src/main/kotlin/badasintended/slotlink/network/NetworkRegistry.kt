@@ -1,6 +1,6 @@
 package badasintended.slotlink.network
 
-import badasintended.slotlink.Mod
+import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.RequestBlock
 import badasintended.slotlink.client.gui.screen.AbstractRequestScreen
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
@@ -18,14 +18,14 @@ import net.minecraft.util.Identifier
 
 object NetworkRegistry {
 
-    val REQUEST_SAVE = Mod.id("request_save")
-    val REMOTE_SAVE = Mod.id("remote_save")
-    val CRAFT_ONCE = Mod.id("craft_once")
-    val CRAFT_STACK = Mod.id("craft_stack")
-    val CRAFT_CLEAR = Mod.id("craft_clear")
-    val CRAFT_PULL = Mod.id("craft_pull")
+    val REQUEST_SAVE = Slotlink.id("request_save")
+    val REMOTE_SAVE = Slotlink.id("remote_save")
+    val CRAFT_ONCE = Slotlink.id("craft_once")
+    val CRAFT_STACK = Slotlink.id("craft_stack")
+    val CRAFT_CLEAR = Slotlink.id("craft_clear")
+    val CRAFT_PULL = Slotlink.id("craft_pull")
 
-    val FIRST_SORT = Mod.id("first_sort")
+    val FIRST_SORT = Slotlink.id("first_sort")
 
     fun initMain() {
         rS(REQUEST_SAVE, this::requestSave)

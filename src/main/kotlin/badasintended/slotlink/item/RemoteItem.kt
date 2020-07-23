@@ -22,7 +22,7 @@ class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
         masterPos: BlockPos,
         masterDim: RegistryKey<DimensionType>?
     ) {
-        sendActionBar(world, player,"${player.pos.distanceTo(Vec3d.of(masterPos))}")
+        sendActionBar(world, player, "${player.pos.distanceTo(Vec3d.of(masterPos))}")
         if (player.pos.distanceTo(Vec3d.of(masterPos)) > 512) {
             sendActionBar(world, player, "${baseTlKey}.tooFarFromMaster")
         } else super.use(world, player, stack, hand, masterPos, masterDim)
