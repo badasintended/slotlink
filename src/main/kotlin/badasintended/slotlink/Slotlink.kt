@@ -10,17 +10,16 @@ import badasintended.slotlink.screen.ScreenHandlerRegistry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.util.Identifier
-import java.util.logging.Level
-import java.util.logging.Logger
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 object Slotlink {
 
     const val ID = "slotlink"
 
-    val LOGGER: Logger = Logger.getLogger(ID)
+    val LOGGER: Logger = LogManager.getLogger(ID);
 
     fun id(path: String) = Identifier(ID, path)
-    fun log(msg: String, level: Level = Level.INFO) = LOGGER.log(level, "[$ID] $msg")
 
     fun main() {
         BlockRegistry.init()

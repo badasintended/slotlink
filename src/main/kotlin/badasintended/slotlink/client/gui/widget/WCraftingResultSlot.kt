@@ -17,7 +17,7 @@ import spinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
 class WCraftingResultSlot(
-    private val sort: () -> Unit
+    private val sort: () -> Any
 ) : WSlot() {
 
     override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {

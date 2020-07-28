@@ -19,6 +19,7 @@
     "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
     "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.SlotlinkReiPlugin"}]
   },
+  "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {
     "fabricloader"          : ">=0.8",
     "minecraft"             : "1.16.x",

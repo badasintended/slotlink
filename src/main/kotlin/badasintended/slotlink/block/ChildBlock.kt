@@ -1,6 +1,6 @@
 package badasintended.slotlink.block
 
-import badasintended.slotlink.common.pos2Tag
+import badasintended.slotlink.common.toTag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
@@ -56,7 +56,7 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             }
         } else if (neighborBlock is MasterBlock) {
             if (!currentlyHasMaster) {
-                val masterPos = pos2Tag(neighborPos)
+                val masterPos = neighborPos.toTag()
 
                 currentNbt.put("masterPos", masterPos)
                 currentNbt.putBoolean("hasMaster", true)

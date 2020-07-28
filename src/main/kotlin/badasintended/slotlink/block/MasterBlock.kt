@@ -3,14 +3,12 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.common.hasInventory
-import badasintended.slotlink.common.openScreen
-import badasintended.slotlink.common.pos2Tag
-import badasintended.slotlink.common.tag2Pos
+import badasintended.slotlink.common.*
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
+import net.minecraft.block.InventoryProvider
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -60,7 +58,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
             val neighborNbt = neighborBlockEntity!!.toTag(CompoundTag())
             val neighborHasMaster = neighborNbt.getBoolean("hasMaster")
             if (!neighborHasMaster) {
-                val masterPos = pos2Tag(pos)
+                val masterPos = pos.toTag()
                 neighborNbt.put("masterPos", masterPos)
                 neighborNbt.putBoolean("hasMaster", true)
                 neighborBlockEntity.fromTag(neighborState, neighborNbt)
@@ -89,22 +87,33 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
             var maxCount = 0
             linkCables.forEach { tag ->
                 tag as CompoundTag
-                val linkCableNbt = world.getBlockEntity(tag2Pos(tag))!!.toTag(CompoundTag())
-                val linkedPos = tag2Pos(linkCableNbt.getCompound("linkedPos"))
-                val linkedBlock = world.getBlockState(linkedPos).block
-                if (linkedBlock.hasBlockEntity()) {
-                    val linkedBlockEntity = world.getBlockEntity(linkedPos)
-                    if (hasInventory(linkedBlockEntity)) {
+                val linkCableNbt = world.getBlockEntity(tag.toPos())!!.toTag(CompoundTag())
+                val linkedPos = linkCableNbt.getCompound("linkedPos").toPos()
+                val linkedState = world.getBlockState(linkedPos)
+                val linkedBlock = linkedState.block
+                val linkedBlockEntity = world.getBlockEntity(linkedPos)
+                val linkedBlockItem = BlockItem.fromBlock(linkedBlock)
+
+                var inventory: Inventory? = null
+
+                if (!world.isBlockIgnored(linkedBlock)) {
+                    if (linkedBlock.isInvProvider()) {
+                        linkedBlock as InventoryProvider
+                        inventory = linkedBlock.getInventory(linkedState, world, linkedPos)
+                    } else if (linkedBlockEntity.hasInv()) {
                         linkedBlockEntity as Inventory
-                        val linkedBlockId = BlockItem.fromBlock(world.getBlockState(linkedPos).block)
-                        if (linkedBlockId in inventories.keys) {
-                            inventories[linkedBlockId] = inventories[linkedBlockId]!! + 1
-                        } else {
-                            inventories[linkedBlockId] = 1
-                        }
-                        totalSlot += linkedBlockEntity.size()
-                        maxCount += linkedBlockEntity.maxCountPerStack * linkedBlockEntity.size()
+                        inventory = linkedBlockEntity
                     }
+                }
+
+                if (inventory != null) {
+                    if (linkedBlockItem in inventories.keys) {
+                        inventories[linkedBlockItem] = inventories[linkedBlockItem]!! + 1
+                    } else {
+                        inventories[linkedBlockItem] = 1
+                    }
+                    totalSlot += inventory.size()
+                    maxCount += inventory.maxCountPerStack * inventory.size()
                 }
             }
 

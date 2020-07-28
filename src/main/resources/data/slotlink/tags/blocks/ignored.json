@@ -3,6 +3,7 @@
     "minecraft:furnace",
     "minecraft:blast_furnace",
     "minecraft:smoker",
-    "minecraft:brewing_stand"
+    "minecraft:brewing_stand",
+    "minecraft:composter"
   ]
 }

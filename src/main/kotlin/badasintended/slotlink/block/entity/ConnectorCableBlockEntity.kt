@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.pos2Tag
-import badasintended.slotlink.common.tag2Pos
+import badasintended.slotlink.common.toPos
+import badasintended.slotlink.common.toTag
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -18,13 +18,13 @@ abstract class ConnectorCableBlockEntity(
 
     private fun addToMasterConnectorList(world: World) {
         if (hasMaster) {
-            val masterPos = tag2Pos(masterPos)
+            val masterPos = masterPos.toPos()
             val masterBlockState = world.getBlockState(masterPos)
             val masterBlockEntity = world.getBlockEntity(masterPos)!!
             val masterNbt = masterBlockEntity.toTag(CompoundTag())
 
             val masterList = masterNbt.getList(listKey, NbtType.COMPOUND)
-            masterList.add(pos2Tag(pos))
+            masterList.add(pos.toTag())
 
             masterNbt.put(listKey, masterList)
             masterBlockEntity.fromTag(masterBlockState, masterNbt)

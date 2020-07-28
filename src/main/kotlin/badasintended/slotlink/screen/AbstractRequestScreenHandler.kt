@@ -1,9 +1,14 @@
 package badasintended.slotlink.screen
 
+import badasintended.slotlink.client.gui.screen.AbstractRequestScreen
 import badasintended.slotlink.common.SortBy
+import badasintended.slotlink.common.hasInv
+import badasintended.slotlink.common.isInvProvider
 import badasintended.slotlink.inventory.DummyInventory
+import badasintended.slotlink.mixin.ScreenHandlerAccessor
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
+import net.minecraft.block.InventoryProvider
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
@@ -67,9 +72,16 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
         inventoryPos.forEachIndexed { index, blockPos ->
             val chunk = world.getWorldChunk(blockPos)
-            val blockEntity = chunk.getBlockEntity(blockPos)!!
+            val blockState = chunk.getBlockState(blockPos)
+            val block = blockState.block
+            val blockEntity = chunk.getBlockEntity(blockPos)
             inventoryStates.add(chunk.getBlockState(blockPos))
-            invMap[index + 3] = blockEntity as Inventory
+            if (block.isInvProvider()) {
+                block as InventoryProvider
+                invMap[index + 3] = block.getInventory(blockState, world, blockPos)
+            } else if (blockEntity.hasInv()) {
+                invMap[index + 3] = blockEntity as Inventory
+            }
         }
 
         inventories[-3] = DummyInventory(1, 1)
@@ -102,6 +114,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 val slot = root.createChild { WSlot() }
                 slot.setInventoryNumber<WSlot>(num)
                 slot.setSlotNumber<WSlot>(i)
+                slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
                 linkedSlots.add(slot)
             }
         }
@@ -303,6 +316,8 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         action: Action,
         player: PlayerEntity
     ) {
+        this as ScreenHandlerAccessor
+
         validateInventories()
 
         val source: WSlot = root.getSlot(inventoryNumber, slotNumber) ?: return
@@ -370,6 +385,10 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 }
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
+
+        if (inventoryNumber == 0) listeners.forEach {
+            if (it is AbstractRequestScreen<*>) it.onSlotUpdate(this, 0, ItemStack.EMPTY)
+        }
     }
 
     override fun close(player: PlayerEntity) {

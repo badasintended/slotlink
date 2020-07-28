@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.LinkCableBlock
-import badasintended.slotlink.common.tag2Pos
+import badasintended.slotlink.common.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -17,13 +17,13 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
         val linkCableSet = HashSet<CompoundTag>()
         linkCables.forEach { linkCableTag ->
             linkCableTag as CompoundTag
-            val linkCablePos = tag2Pos(linkCableTag)
+            val linkCablePos = linkCableTag.toPos()
             val linkCableBlock = world.getBlockState(linkCablePos).block
             if (linkCableBlock is LinkCableBlock) {
                 val linkCableNbt = world.getBlockEntity(linkCablePos)!!.toTag(CompoundTag())
 
                 val linkCableHasMaster = linkCableNbt.getBoolean("hasMaster")
-                val linkCableMasterPos = tag2Pos(linkCableNbt.getCompound("masterPos"))
+                val linkCableMasterPos = linkCableNbt.getCompound("masterPos").toPos()
 
                 if (linkCableHasMaster and (linkCableMasterPos == pos)) {
                     linkCableSet.add(linkCableTag)

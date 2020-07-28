@@ -10,13 +10,16 @@ import net.minecraft.client.render.item.ItemRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import spinnery.widget.WAbstractWidget
-import spinnery.widget.api.Action.*
+import spinnery.widget.api.Action
+import spinnery.widget.api.Action.PICKUP
+import spinnery.widget.api.Action.QUICK_MOVE
 import kotlin.math.ceil
+import kotlin.reflect.KMutableProperty0
 
 @Environment(EnvType.CLIENT)
 class WMultiSlot(
-    private val actionPerformed: (Boolean) -> Unit,
-    private val sort: () -> Unit
+    private val shouldSort: KMutableProperty0<Boolean>,
+    private val sort: () -> Any
 ) : WVanillaSlot() {
 
     private val linkedSlots = arrayListOf<WLinkedSlot>()
@@ -87,22 +90,21 @@ class WMultiSlot(
                 if (Screen.hasControlDown()) linkedSlots.forEach {
                     slotAction(container, it.slotNumber, it.invNumber, button, QUICK_MOVE, player)
                 } else slotAction(container, sSlotN, sSlotInvN, button, QUICK_MOVE, player)
-                actionPerformed.invoke(true)
+                shouldSort.set(false)
                 sort.invoke()
             }
         } else {
             if ((button == LEFT) or (button == RIGHT) and isCursorEmpty) {
                 skipRelease = true
                 slotAction(container, sSlotN, sSlotInvN, button, PICKUP, player)
-                actionPerformed.invoke(true)
+                shouldSort.set(false)
                 sort.invoke()
             } else if (button == MIDDLE) {
-                slotAction(container, sSlotN, sSlotInvN, button, CLONE, player)
-                actionPerformed.invoke(true)
+                slotAction(container, sSlotN, sSlotInvN, button, Action.CLONE, player)
+                shouldSort.set(false)
                 sort.invoke()
             }
         }
-
 
         if (isWithinBounds(mouseX, mouseY)) {
             held = true

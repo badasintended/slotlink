@@ -1,10 +1,10 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
+import badasintended.slotlink.common.actionBar
 import badasintended.slotlink.common.openScreen
-import badasintended.slotlink.common.sendActionBar
-import badasintended.slotlink.common.tag2Pos
-import badasintended.slotlink.common.writeRequestData
+import badasintended.slotlink.common.toPos
+import badasintended.slotlink.common.writeReqData
 import badasintended.slotlink.network.NetworkRegistry
 import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
@@ -35,18 +35,14 @@ class RequestBlock : ChildBlock("request") {
         val blockEntity = world.getBlockEntity(pos)!!
         val nbt = blockEntity.toTag(CompoundTag())
         val hasMaster = nbt.getBoolean("hasMaster")
-        if (!hasMaster) sendActionBar(world, player, "${translationKey}.hasNoMaster")
+        if (!hasMaster) player.actionBar("${translationKey}.hasNoMaster")
         else if (!world.isClient) {
             openScreen("request", player) { buf ->
                 buf.writeBlockPos(pos)
                 buf.writeInt(nbt.getInt("lastSort"))
-                val masterPos = tag2Pos(nbt.getCompound("masterPos"))
-                writeRequestData(buf, world, masterPos)
+                val masterPos = nbt.getCompound("masterPos").toPos()
+                buf.writeReqData(world, masterPos)
             }
-
-            ServerSidePacketRegistry.INSTANCE.sendToPlayer(
-                player, NetworkRegistry.FIRST_SORT, PacketByteBuf(Unpooled.buffer())
-            )
         }
 
 

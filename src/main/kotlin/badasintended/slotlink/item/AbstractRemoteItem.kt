@@ -35,16 +35,16 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         masterDim: RegistryKey<DimensionType>?
     ) {
         if (masterDim == null) {
-            sendActionBar(world, player, "${baseTlKey}.invalidDimension")
+            player.actionBar("${baseTlKey}.invalidDimension")
         } else if (masterDim != world.dimensionRegistryKey) {
             // multi dimension remote is not really possible with my knowledge
-            sendActionBar(world, player, "${baseTlKey}.differentDimension")
+            player.actionBar("${baseTlKey}.differentDimension")
         } else {
             if (!world.isClient) {
                 openScreen("remote", player) { buf ->
                     buf.writeBlockPos(BlockPos(player.pos))
                     buf.writeInt(stack.orCreateTag.getInt("lastSort"))
-                    writeRequestData(buf, world, masterPos)
+                    buf.writeReqData(world, masterPos)
                     buf.writeBoolean(hand == OFF_HAND)
                 }
             }
@@ -62,8 +62,8 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
             RegistryKey.of(Registry.DIMENSION_TYPE_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
 
         if (masterPosTag == CompoundTag()) {
-            sendActionBar(world, player, "${baseTlKey}.hasNoMaster")
-        } else use(world, player, stack, hand, tag2Pos(masterPosTag), masterDim)
+            player.actionBar("${baseTlKey}.hasNoMaster")
+        } else use(world, player, stack, hand, masterPosTag.toPos(), masterDim)
 
         return TypedActionResult.fail(stack)
     }
@@ -78,9 +78,9 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         val block = world.getBlockState(pos).block
         if (block is MasterBlock) {
             if (player != null) if (player.isSneaking) {
-                stack.orCreateTag.put("masterPos", pos2Tag(pos))
+                stack.orCreateTag.put("masterPos", pos.toTag())
                 stack.orCreateTag.putString("masterDim", dimId)
-                sendActionBar(world, player, "${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
+                player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
                 return ActionResult.CONSUME
             }
         }
@@ -93,7 +93,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
         if (masterPosTag != CompoundTag()) {
-            val masterPos = tag2Pos(masterPosTag)
+            val masterPos = masterPosTag.toPos()
             val masterDim = Identifier(stack.orCreateTag.getString("masterDim"))
             tooltip.add(
                 LiteralText("§5").append(

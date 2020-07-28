@@ -50,8 +50,8 @@ abstract class ConnectorCableBlock(
         neighborPos: BlockPos
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
-        if ((neighbor !is ModBlock) and neighbor.hasBlockEntity() and !isIgnored(neighbor, world)) {
-            if (hasInventory(world.getBlockEntity(neighborPos))) {
+        if ((neighbor !is ModBlock) and !world.isBlockIgnored(neighbor)) {
+            if (world.getBlockEntity(neighborPos).hasInv() or neighbor.isInvProvider()) {
                 val blockEntity = world.getBlockEntity(pos)!!
                 val nbt = blockEntity.toTag(CompoundTag())
                 val linkedPosTag = nbt.getCompound("linkedPos")
@@ -61,19 +61,16 @@ abstract class ConnectorCableBlock(
                 if (linkedPosTag == CompoundTag()) {
                     changeLink = true
                 } else {
-                    val linkedPos = tag2Pos(linkedPosTag)
+                    val linkedPos = linkedPosTag.toPos()
                     val linked = world.getBlockState(linkedPos).block
-                    if (!linked.hasBlockEntity()) {
-                        changeLink = true
-                    } else if (!hasInventory(world.getBlockEntity(linkedPos))) {
-                        changeLink = true
-                    } else if (neighborPos == linkedPos) {
-                        changeLink = true
-                    }
+                    if (
+                        (!world.getBlockEntity(linkedPos).hasInv() and !linked.isInvProvider())
+                        or (neighborPos == linkedPos)
+                    ) changeLink = true
                 }
 
                 if (changeLink) {
-                    nbt.put("linkedPos", pos2Tag(neighborPos))
+                    nbt.put("linkedPos", neighborPos.toTag())
                     blockEntity.fromTag(state, nbt)
                     blockEntity.markDirty()
                     return state.with(propertyMap[facing], true)
@@ -96,7 +93,7 @@ abstract class ConnectorCableBlock(
 
         var updatedState = state
 
-        posFacingAround(pos).forEach { (facing, neighborPos) ->
+        pos.around().forEach { (facing, neighborPos) ->
             updatedState = checkLink(world, pos, facing, updatedState, neighborPos)
         }
 
@@ -113,17 +110,19 @@ abstract class ConnectorCableBlock(
     ): BlockState {
         val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
-        if (neighborPos == tag2Pos(world.getBlockEntity(pos)!!.toTag(CompoundTag()).getCompound("linkedPos"))) {
-            var checkAround = false
-            if ((neighborState.block !is ModBlock)) {
-                if (neighborState.block.hasBlockEntity()) {
-                    if (!hasInventory(world.getBlockEntity(neighborPos)) or isIgnored(neighborState.block, world)) {
-                        checkAround = true
-                    }
-                } else checkAround = true
+        if (neighborPos == world.getBlockEntity(pos)!!.toTag(CompoundTag()).getCompound("linkedPos").toPos()) {
+            val neighbor = neighborState.block
+            var checkAround = neighbor !is ModBlock
+            if ((neighbor !is ModBlock)) {
+                if (
+                    (!world.getBlockEntity(neighborPos).hasInv() and !neighbor.isInvProvider())
+                    or world.isBlockIgnored(neighborState.block)
+                ) {
+                    checkAround = true
+                }// else checkAround = true
             }
             if (checkAround) {
-                posFacingAround(pos).forEach { (facingAround, posAround) ->
+                pos.around().forEach { (facingAround, posAround) ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
                 }
             }

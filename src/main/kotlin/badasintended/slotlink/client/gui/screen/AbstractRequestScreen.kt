@@ -14,6 +14,9 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.ScreenHandlerListener
+import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
 import spinnery.common.utility.StackUtilities.equalItemAndTag
 import spinnery.widget.WPanel
@@ -26,7 +29,7 @@ import spinnery.widget.WAbstractWidget as W
 import spinnery.widget.WSlot as S
 
 @Environment(EnvType.CLIENT)
-abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : ModScreen<H>(c) {
+abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : ModScreen<H>(c), ScreenHandlerListener {
 
     private val emptySlots = arrayListOf<WLinkedSlot>()
     private val filledSlots = arrayListOf<WLinkedSlot>()
@@ -35,9 +38,12 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private var slotHeight = 0
     private var hideLabel = true
 
-    private var slotActionPerformed = false
+    private var shouldSort = false
     private var lastScroll = 0
     private var lastFilter = ""
+
+    private var tick = 0
+    private var firstSort = true
 
     private var stillSorting = false
 
@@ -95,7 +101,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         // Crafting Result slot
         val resultSlot = main.createChild(
-            { WCraftingResultSlot { sort() } },
+            { WCraftingResultSlot(this::sort) },
             positionOf(craftingLabel, 91, 24),
             sizeOf(26)
         )
@@ -116,7 +122,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 27) {
             val slot = main.createChild(
-                { WPlayerSlot(this::putSameItem) { sort() } },
+                { WPlayerSlot(this::putSameItem) },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)),
                 sizeOf(18)
             )
@@ -126,7 +132,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WPlayerSlot(this::putSameItem) { sort() } },
+                { WPlayerSlot(this::putSameItem) },
                 positionOf(playerInvLabel, (((i % 9) * 18) - 1), 70),
                 sizeOf(18)
             )
@@ -157,7 +163,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
         for (i in 0 until 48) {
             val slot = main.createChild(
-                { WMultiSlot({ slotActionPerformed = it }, { sort() }) },
+                { WMultiSlot(this::shouldSort, this::sort) },
                 positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18), 2),
                 sizeOf(18)
             )
@@ -219,12 +225,12 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     }
 
     private fun onSlotAreaClick() {
-        if (!slotActionPerformed) {
+        if (shouldSort) {
             slotAction(c, 0, -2, 0, PICKUP, c.player)
             slotAction(c, 0, -2, 0, QUICK_MOVE, c.player)
             sort()
         }
-        slotActionPerformed = false
+        shouldSort = true
     }
 
     private fun scroll(v: Int) {
@@ -267,7 +273,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     }
 
-    fun sort() = sort(lastSort, lastFilter)
+    private fun sort() = sort(lastSort, lastFilter)
 
     private fun sort(sortBy: SortBy, filter: String): SortBy {
         if (stillSorting) return lastSort
@@ -350,6 +356,11 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     abstract fun saveSort()
 
+    override fun init() {
+        super.init()
+        c.addListener(this)
+    }
+
     override fun resize(client: MinecraftClient, width: Int, height: Int) {
         updateSlotSize()
         val slotSize = slotHeight * 18
@@ -373,6 +384,28 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         if (searchBar.isActive) searchBar.onKeyPressed(keyCode, character, keyModifier)
         else super.keyPressed(keyCode, character, keyModifier)
         return true
+    }
+
+    override fun tick() {
+        super.tick()
+
+        tick++
+        if (tick == 20) tick = 0
+
+        if ((tick == 10) and firstSort) {
+            sort()
+            firstSort = false
+        }
+    }
+
+    override fun onHandlerRegistered(handler: ScreenHandler, stacks: DefaultedList<ItemStack>) {
+        sort()
+    }
+
+    override fun onPropertyUpdate(handler: ScreenHandler, property: Int, value: Int) {}
+
+    override fun onSlotUpdate(handler: ScreenHandler, slotId: Int, stack: ItemStack) {
+        sort()
     }
 
 }

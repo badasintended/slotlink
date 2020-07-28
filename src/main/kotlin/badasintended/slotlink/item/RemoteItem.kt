@@ -1,6 +1,6 @@
 package badasintended.slotlink.item
 
-import badasintended.slotlink.common.sendActionBar
+import badasintended.slotlink.common.actionBar
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Hand
@@ -22,9 +22,9 @@ class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
         masterPos: BlockPos,
         masterDim: RegistryKey<DimensionType>?
     ) {
-        sendActionBar(world, player, "${player.pos.distanceTo(Vec3d.of(masterPos))}")
+        player.actionBar("${player.pos.distanceTo(Vec3d.of(masterPos))}")
         if (player.pos.distanceTo(Vec3d.of(masterPos)) > 512) {
-            sendActionBar(world, player, "${baseTlKey}.tooFarFromMaster")
+            player.actionBar("${baseTlKey}.tooFarFromMaster")
         } else super.use(world, player, stack, hand, masterPos, masterDim)
     }
 
