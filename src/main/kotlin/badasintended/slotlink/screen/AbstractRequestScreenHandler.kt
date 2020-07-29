@@ -6,6 +6,9 @@ import badasintended.slotlink.common.hasInv
 import badasintended.slotlink.common.isInvProvider
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
+import badasintended.slotlink.network.NetworkRegistry.REQUEST_REMOVE
+import badasintended.slotlink.network.NetworkRegistry.REQUEST_SYNC
+import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.block.InventoryProvider
@@ -20,7 +23,10 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.registry.Registry
+import net.minecraft.util.registry.RegistryKey
 import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
 import spinnery.common.utility.MutablePair
@@ -43,12 +49,16 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     val blockPos: BlockPos = buf.readBlockPos()
     var lastSort = SortBy.of(buf.readInt())
 
+    private val dimId = buf.readIdentifier()
+
     private val hasMaster = buf.readBoolean()
 
     private val totalInventory = if (hasMaster) buf.readInt() else 0
 
     private val inventoryPos = arrayListOf<BlockPos>()
     private val inventoryStates = arrayListOf<BlockState>()
+
+    private val masterWorld: ServerWorld?
 
     private val craftingInv = CraftingInventory(this, 3, 3)
     private val resultInv = CraftingResultInventory()
@@ -70,26 +80,16 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     init {
         for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
 
-        inventoryPos.forEachIndexed { index, blockPos ->
-            val chunk = world.getWorldChunk(blockPos)
-            val blockState = chunk.getBlockState(blockPos)
-            val block = blockState.block
-            val blockEntity = chunk.getBlockEntity(blockPos)
-            inventoryStates.add(chunk.getBlockState(blockPos))
-            if (block.isInvProvider()) {
-                block as InventoryProvider
-                invMap[index + 3] = block.getInventory(blockState, world, blockPos)
-            } else if (blockEntity.hasInv()) {
-                invMap[index + 3] = blockEntity as Inventory
-            }
-        }
+        if (!world.isClient) {
+            masterWorld = world.server!!.getWorld(RegistryKey.of(Registry.DIMENSION, dimId))
+            if (masterWorld != null) initServer()
+        } else masterWorld = null
 
-        inventories[-3] = DummyInventory(1, 1)
-        inventories[-2] = DummyInventory(1, 1)
-        inventories[-1] = DummyInventory(8, 6)
+        inventories[-3] = DummyInventory(1)
+        inventories[-2] = DummyInventory(1)
+        inventories[-1] = DummyInventory(8 * 6)
         inventories[1] = craftingInv
         inventories[2] = resultInv
-        inventories.putAll(invMap)
 
         // buffers
         WSlot.addHeadlessArray(root, 0, -1, 8, 6)
@@ -109,16 +109,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             inputSlots.add(slot)
         }
 
-        invMap.forEach { (num, inv) ->
-            for (i in 0 until inv.size()) {
-                val slot = root.createChild { WSlot() }
-                slot.setInventoryNumber<WSlot>(num)
-                slot.setSlotNumber<WSlot>(i)
-                slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
-                linkedSlots.add(slot)
-            }
-        }
-
         outputSlot = root.createChild { WSlot() }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
@@ -132,12 +122,74 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
     }
 
-    fun validateInventories() {
-        invMap.forEach { (i, _) ->
-            val state = world.getBlockState(inventoryPos[i - 3])
-            val deleted = state != inventoryStates[i - 3]
-            if (deleted) linkedSlots.removeIf { it.inventoryNumber == i }
+    private fun initServer() {
+        masterWorld!!
+        inventoryPos.forEachIndexed { index, blockPos ->
+            val chunk = masterWorld.getWorldChunk(blockPos)
+            val blockState = chunk.getBlockState(blockPos)
+            val block = blockState.block
+            val blockEntity = chunk.getBlockEntity(blockPos)
+            inventoryStates.add(chunk.getBlockState(blockPos))
+            if (block.isInvProvider()) {
+                block as InventoryProvider
+                invMap[index + 3] = block.getInventory(blockState, masterWorld, blockPos)
+            } else if (blockEntity.hasInv()) {
+                invMap[index + 3] = blockEntity as Inventory
+            }
         }
+
+        val buf = PacketByteBuf(Unpooled.buffer())
+
+        buf.writeInt(invMap.size)
+        invMap.forEach { (num, inv) ->
+            buf.writeInt(num)
+            buf.writeInt(inv.size())
+            buf.writeInt(inv.maxCountPerStack)
+            for (i in 0 until inv.size()) {
+                buf.writeItemStack(inv.getStack(i))
+            }
+        }
+
+        createSlots(invMap)
+        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_SYNC, buf)
+    }
+
+    fun createSlots(map: Map<Int, Inventory>) {
+        invMap.putAll(map)
+        inventories.putAll(map)
+
+        map.forEach { (num, inv) ->
+            for (i in 0 until inv.size()) {
+                val slot = root.createChild { WSlot() }
+                slot.setInventoryNumber<WSlot>(num)
+                slot.setSlotNumber<WSlot>(i)
+                slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
+                linkedSlots.add(slot)
+            }
+        }
+
+        this as ScreenHandlerAccessor
+        listeners.filterIsInstance<AbstractRequestScreen<*>>().forEach { it.sort() }
+    }
+
+    fun validateInventories() {
+        if (world.isClient) return
+        if (masterWorld == null) return
+
+        val buf = PacketByteBuf(Unpooled.buffer())
+        val deletedNumbers = hashSetOf<Int>()
+
+        invMap.forEach { (i, _) ->
+            val state = masterWorld.getBlockState(inventoryPos[i - 3])
+            val deleted = state != inventoryStates[i - 3]
+            if (deleted) {
+                deletedNumbers.add(i)
+                linkedSlots.removeIf { it.inventoryNumber == i }
+            }
+        }
+
+        buf.writeIntArray(deletedNumbers.toIntArray())
+        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_REMOVE, buf)
     }
 
     fun craftOnce() {
@@ -386,9 +438,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
 
-        if (inventoryNumber == 0) listeners.forEach {
-            if (it is AbstractRequestScreen<*>) it.onSlotUpdate(this, 0, ItemStack.EMPTY)
-        }
+        if (inventoryNumber == 0) listeners.filterIsInstance<AbstractRequestScreen<*>>().forEach { it.sort() }
     }
 
     override fun close(player: PlayerEntity) {

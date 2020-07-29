@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.network.PacketByteBuf
+import spinnery.widget.WSlot
 
 @Environment(EnvType.CLIENT)
 class RequestScreen(c: RequestScreenHandler) : AbstractRequestScreen<RequestScreenHandler>(c) {
@@ -24,6 +25,15 @@ class RequestScreen(c: RequestScreenHandler) : AbstractRequestScreen<RequestScre
 
 @Environment(EnvType.CLIENT)
 class RemoteScreen(c: RemoteScreenHandler) : AbstractRequestScreen<RemoteScreenHandler>(c) {
+
+    override fun init() {
+        super.init()
+        if (!c.offHand) {
+            val slot = playerInvSlots.firstOrNull() { it.slotNumber == playerInventory.selectedSlot }
+            slot?.setHidden<WSlot>(true)
+            playerInvSlots.remove(slot)
+        }
+    }
 
     override fun saveSort() {
         val buf = PacketByteBuf(Unpooled.buffer())

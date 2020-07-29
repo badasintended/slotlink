@@ -8,9 +8,25 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
-import net.minecraft.world.dimension.DimensionType
 
-class UnlimitedRemoteItem : AbstractRemoteItem("unlimited_remote")
+class MultiDimRemoteItem : AbstractRemoteItem("multi_dim_remote")
+
+class UnlimitedRemoteItem : AbstractRemoteItem("unlimited_remote") {
+
+    override fun use(
+        world: World,
+        player: PlayerEntity,
+        stack: ItemStack,
+        hand: Hand,
+        masterPos: BlockPos,
+        masterDim: RegistryKey<World>
+    ) {
+        if (world.registryKey != masterDim) {
+            player.actionBar("${baseTlKey}.differentDimension")
+        } else super.use(world, player, stack, hand, masterPos, masterDim)
+    }
+
+}
 
 class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
 
@@ -20,9 +36,8 @@ class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
         stack: ItemStack,
         hand: Hand,
         masterPos: BlockPos,
-        masterDim: RegistryKey<DimensionType>?
+        masterDim: RegistryKey<World>
     ) {
-        player.actionBar("${player.pos.distanceTo(Vec3d.of(masterPos))}")
         if (player.pos.distanceTo(Vec3d.of(masterPos)) > 512) {
             player.actionBar("${baseTlKey}.tooFarFromMaster")
         } else super.use(world, player, stack, hand, masterPos, masterDim)

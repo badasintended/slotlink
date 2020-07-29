@@ -11,4 +11,5 @@ class RemoteScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf)
 
     val offHand = buf.readBoolean()
 
+
 }

@@ -5,14 +5,10 @@ import badasintended.slotlink.common.actionBar
 import badasintended.slotlink.common.openScreen
 import badasintended.slotlink.common.toPos
 import badasintended.slotlink.common.writeReqData
-import badasintended.slotlink.network.NetworkRegistry
-import io.netty.buffer.Unpooled
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult

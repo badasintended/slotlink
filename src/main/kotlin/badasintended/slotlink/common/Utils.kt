@@ -90,6 +90,8 @@ fun PlayerEntity.actionBar(key: String, vararg args: Any) {
 fun PacketByteBuf.writeReqData(world: World, masterPos: BlockPos) {
     val inventoryPos = HashSet<BlockPos>()
 
+    writeIdentifier(world.registryKey.value)
+
     val isMasterBlock = world.getBlockState(masterPos).block is MasterBlock
     writeBoolean(isMasterBlock)
     if (isMasterBlock) {

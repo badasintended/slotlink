@@ -7,22 +7,17 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.ActionResult
-import net.minecraft.util.Hand
+import net.minecraft.util.*
 import net.minecraft.util.Hand.MAIN_HAND
 import net.minecraft.util.Hand.OFF_HAND
-import net.minecraft.util.Identifier
-import net.minecraft.util.TypedActionResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
-import net.minecraft.world.dimension.DimensionType
 
-abstract class AbstractRemoteItem(id: String) : ModItem(id) {
+abstract class AbstractRemoteItem(id: String) : ModItem(id, SETTINGS.maxCount(1)) {
 
     protected val baseTlKey = "item.slotlink.remote"
 
@@ -32,19 +27,17 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         stack: ItemStack,
         hand: Hand,
         masterPos: BlockPos,
-        masterDim: RegistryKey<DimensionType>?
+        masterDim: RegistryKey<World>
     ) {
-        if (masterDim == null) {
-            player.actionBar("${baseTlKey}.invalidDimension")
-        } else if (masterDim != world.dimensionRegistryKey) {
-            // multi dimension remote is not really possible with my knowledge
-            player.actionBar("${baseTlKey}.differentDimension")
-        } else {
-            if (!world.isClient) {
+        if (!world.isClient) {
+            val dim = world.server!!.getWorld(masterDim)
+            if (dim == null) {
+                player.actionBar("${baseTlKey}.invalidDim")
+            } else {
                 openScreen("remote", player) { buf ->
                     buf.writeBlockPos(BlockPos(player.pos))
                     buf.writeInt(stack.orCreateTag.getInt("lastSort"))
-                    buf.writeReqData(world, masterPos)
+                    buf.writeReqData(dim, masterPos)
                     buf.writeBoolean(hand == OFF_HAND)
                 }
             }
@@ -58,14 +51,13 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         }
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        val masterDim =
-            RegistryKey.of(Registry.DIMENSION_TYPE_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
+        val masterDim = RegistryKey.of(Registry.DIMENSION, Identifier(stack.orCreateTag.getString("masterDim")))
 
         if (masterPosTag == CompoundTag()) {
             player.actionBar("${baseTlKey}.hasNoMaster")
         } else use(world, player, stack, hand, masterPosTag.toPos(), masterDim)
 
-        return TypedActionResult.fail(stack)
+        return TypedActionResult.pass(stack)
     }
 
     override fun useOnBlock(context: ItemUsageContext): ActionResult {
@@ -73,7 +65,7 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
         val stack = context.stack
         val world = context.world
         val pos = context.blockPos
-        val dimId = world.dimensionRegistryKey.value.toString()
+        val dimId = world.registryKey.value.toString()
 
         val block = world.getBlockState(pos).block
         if (block is MasterBlock) {
@@ -96,9 +88,8 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id) {
             val masterPos = masterPosTag.toPos()
             val masterDim = Identifier(stack.orCreateTag.getString("masterDim"))
             tooltip.add(
-                LiteralText("§5").append(
-                    TranslatableText("${baseTlKey}.info", masterPos.x, masterPos.y, masterPos.z, masterDim)
-                )
+                TranslatableText("${baseTlKey}.info", masterPos.x, masterPos.y, masterPos.z, masterDim)
+                    .formatted(Formatting.DARK_PURPLE)
             )
         }
     }

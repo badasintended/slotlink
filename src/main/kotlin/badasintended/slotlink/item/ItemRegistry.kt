@@ -7,11 +7,12 @@ import net.minecraft.util.registry.Registry.ITEM
 
 object ItemRegistry {
 
+    val MULTI_DIM_REMOTE = MultiDimRemoteItem()
     val UNLIMITED_REMOTE = UnlimitedRemoteItem()
     val LIMITED_REMOTE = LimitedRemoteItem()
 
     fun init() {
-        r(UNLIMITED_REMOTE, LIMITED_REMOTE)
+        r(MULTI_DIM_REMOTE, UNLIMITED_REMOTE, LIMITED_REMOTE)
     }
 
     private fun r(vararg items: ModItem) {

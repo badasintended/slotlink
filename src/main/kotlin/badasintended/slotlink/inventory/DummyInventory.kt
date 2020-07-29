@@ -1,24 +1,22 @@
 package badasintended.slotlink.inventory
 
-import badasintended.slotlink.client.gui.widget.WMultiSlot
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.util.collection.DefaultedList
 
-/**
- * Dummy inventory for combined stacks
- * @see WMultiSlot
- */
 class DummyInventory(
-    private val width: Int,
-    private val height: Int
+    private val size: Int
 ) : Inventory {
 
-    private val stacks = DefaultedList.ofSize(height * width, ItemStack.EMPTY)
+    var maxCount = 64
 
-    override fun size(): Int = height * width
+    private val stacks = DefaultedList.ofSize(size, ItemStack.EMPTY)
+
+    override fun getMaxCountPerStack() = maxCount
+
+    override fun size(): Int = size
 
     override fun canPlayerUse(player: PlayerEntity) = true
 

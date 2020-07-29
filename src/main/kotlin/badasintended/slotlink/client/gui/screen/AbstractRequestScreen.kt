@@ -54,7 +54,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
     private val titleLabel: WTranslatableLabel
     private val craftingLabel: WTranslatableLabel
     private val playerInvLabel: WTranslatableLabel
-    private val playerInvSlots = arrayListOf<WPlayerSlot>()
+    protected val playerInvSlots = arrayListOf<WPlayerSlot>()
     private val scrollArea: WMouseArea
     private val scrollbar: WFakeScrollbar
     private val viewedSlots = arrayListOf<WMultiSlot>()
@@ -273,7 +273,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     }
 
-    private fun sort() = sort(lastSort, lastFilter)
+    fun sort() = sort(lastSort, lastFilter)
 
     private fun sort(sortBy: SortBy, filter: String): SortBy {
         if (stillSorting) return lastSort
@@ -398,14 +398,8 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
         }
     }
 
-    override fun onHandlerRegistered(handler: ScreenHandler, stacks: DefaultedList<ItemStack>) {
-        sort()
-    }
-
+    override fun onHandlerRegistered(handler: ScreenHandler, stacks: DefaultedList<ItemStack>) {}
     override fun onPropertyUpdate(handler: ScreenHandler, property: Int, value: Int) {}
-
-    override fun onSlotUpdate(handler: ScreenHandler, slotId: Int, stack: ItemStack) {
-        sort()
-    }
+    override fun onSlotUpdate(handler: ScreenHandler, slotId: Int, stack: ItemStack) {}
 
 }

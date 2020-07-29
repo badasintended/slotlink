@@ -36,6 +36,8 @@
   "item.slotlink.limited_remote.tooltip"      : "Remote that works from 512 meters away.",
   "item.slotlink.unlimited_remote"            : "Unlimited Storage Remote",
   "item.slotlink.unlimited_remote.tooltip"    : "Remote that works on any distance on same dimension",
+  "item.slotlink.multi_dim_remote"            : "Multi Dimensional Remote",
+  "item.slotlink.multi_dim_remote.tooltip"    : "Remote that works on any distance on any dimension",
   "item.slotlink.remote.hasNoMaster"          : "This remote is not connected to any network.",
   "item.slotlink.remote.invalidDimension"     : "The network is not in any valid dimensions. Maybe check your mods.",
   "item.slotlink.remote.differentDimension"   : "You are in different dimension.",
