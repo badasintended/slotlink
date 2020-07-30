@@ -2,15 +2,16 @@
 
 package badasintended.slotlink.block
 
+import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.block.entity.LinkCableBlockEntity
 import badasintended.slotlink.common.*
 import net.minecraft.block.BlockState
+import net.minecraft.block.InventoryProvider
 import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
@@ -50,28 +51,11 @@ abstract class ConnectorCableBlock(
         neighborPos: BlockPos
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
-        if ((neighbor !is ModBlock) and !world.isBlockIgnored(neighbor)) {
-            if (world.getBlockEntity(neighborPos).hasInv() or neighbor.isInvProvider()) {
-                val blockEntity = world.getBlockEntity(pos)!!
-                val nbt = blockEntity.toTag(CompoundTag())
-                val linkedPosTag = nbt.getCompound("linkedPos")
-
-                var changeLink = false
-
-                if (linkedPosTag == CompoundTag()) {
-                    changeLink = true
-                } else {
-                    val linkedPos = linkedPosTag.toPos()
-                    val linked = world.getBlockState(linkedPos).block
-                    if (
-                        (!world.getBlockEntity(linkedPos).hasInv() and !linked.isInvProvider())
-                        or (neighborPos == linkedPos)
-                    ) changeLink = true
-                }
-
-                if (changeLink) {
-                    nbt.put("linkedPos", neighborPos.toTag())
-                    blockEntity.fromTag(state, nbt)
+        if (!world.isBlockIgnored(neighbor)) {
+            if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
+                val blockEntity = world.getBlockEntity(pos) as ConnectorCableBlockEntity
+                if ((blockEntity.getLinkedInventory(world) == null) or (blockEntity.linkedPos.toPos() == neighborPos)) {
+                    blockEntity.linkedPos = neighborPos.toTag()
                     blockEntity.markDirty()
                     return state.with(propertyMap[facing], true)
                 }
@@ -110,18 +94,9 @@ abstract class ConnectorCableBlock(
     ): BlockState {
         val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
-        if (neighborPos == world.getBlockEntity(pos)!!.toTag(CompoundTag()).getCompound("linkedPos").toPos()) {
+        if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos.toPos()) {
             val neighbor = neighborState.block
-            var checkAround = neighbor !is ModBlock
-            if ((neighbor !is ModBlock)) {
-                if (
-                    (!world.getBlockEntity(neighborPos).hasInv() and !neighbor.isInvProvider())
-                    or world.isBlockIgnored(neighborState.block)
-                ) {
-                    checkAround = true
-                }// else checkAround = true
-            }
-            if (checkAround) {
+            if (world.isBlockIgnored(neighbor) and ((world.getBlockEntity(neighborPos) !is Inventory) and (neighbor !is InventoryProvider))) {
                 pos.around().forEach { (facingAround, posAround) ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
                 }

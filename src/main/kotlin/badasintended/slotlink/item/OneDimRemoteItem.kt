@@ -9,9 +9,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 
-class MultiDimRemoteItem : AbstractRemoteItem("multi_dim_remote")
-
-class UnlimitedRemoteItem : AbstractRemoteItem("unlimited_remote") {
+open class UnlimitedRemoteItem(id: String = "unlimited_remote") : MultiDimRemoteItem(id) {
 
     override fun use(
         world: World,
@@ -28,7 +26,7 @@ class UnlimitedRemoteItem : AbstractRemoteItem("unlimited_remote") {
 
 }
 
-class LimitedRemoteItem : AbstractRemoteItem("limited_remote") {
+class LimitedRemoteItem : UnlimitedRemoteItem("limited_remote") {
 
     override fun use(
         world: World,

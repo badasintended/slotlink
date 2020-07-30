@@ -2,10 +2,10 @@ package badasintended.slotlink.client.compat.rei
 
 import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.BlockRegistry
+import badasintended.slotlink.common.buf
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_PULL
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import com.google.common.collect.Lists
-import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import me.shedaniel.rei.api.AutoTransferHandler.Result
 import me.shedaniel.rei.api.EntryStack
@@ -20,7 +20,6 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.resource.language.I18n
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
 import java.util.*
 
@@ -87,7 +86,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
                 outside.add(inside)
             }
 
-            val buf = PacketByteBuf(Unpooled.buffer())
+            val buf = buf()
             buf.writeInt(outside.size)
             outside.forEach { inside ->
                 buf.writeInt(inside.size)

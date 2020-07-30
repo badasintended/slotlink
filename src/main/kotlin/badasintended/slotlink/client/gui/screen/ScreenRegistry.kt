@@ -1,7 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.screen.MasterScreenHandler
 import badasintended.slotlink.screen.ModScreenHandler
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
@@ -15,7 +16,6 @@ object ScreenRegistry {
 
     fun init() {
         r("request") { i: RequestScreenHandler -> RequestScreen(i) }
-        r("master") { i: MasterScreenHandler -> MasterScreen(i) }
         r("remote") { i: RemoteScreenHandler -> RemoteScreen(i) }
     }
 

@@ -3,18 +3,14 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.common.*
-import net.fabricmc.fabric.api.util.NbtType
+import badasintended.slotlink.common.chat
+import badasintended.slotlink.common.toTag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
-import net.minecraft.block.InventoryProvider
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.BlockItem
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -76,53 +72,15 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) openScreen("master", player) { buf ->
-            val nbt = world.getBlockEntity(pos)!!.toTag(CompoundTag())
-            val linkCables = nbt.getList("linkCables", NbtType.COMPOUND)
+        if (!world.isClient) {
+            val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
+            val inventories = blockEntity.getLinkedInventories(world).values
 
-            buf.writeInt(linkCables.size) // total link cables in network
-
-            val inventories = hashMapOf<Item, Int>() // inventory block items
-            var totalSlot = 0
-            var maxCount = 0
-            linkCables.forEach { tag ->
-                tag as CompoundTag
-                val linkCableNbt = world.getBlockEntity(tag.toPos())!!.toTag(CompoundTag())
-                val linkedPos = linkCableNbt.getCompound("linkedPos").toPos()
-                val linkedState = world.getBlockState(linkedPos)
-                val linkedBlock = linkedState.block
-                val linkedBlockEntity = world.getBlockEntity(linkedPos)
-                val linkedBlockItem = BlockItem.fromBlock(linkedBlock)
-
-                var inventory: Inventory? = null
-
-                if (!world.isBlockIgnored(linkedBlock)) {
-                    if (linkedBlock.isInvProvider()) {
-                        linkedBlock as InventoryProvider
-                        inventory = linkedBlock.getInventory(linkedState, world, linkedPos)
-                    } else if (linkedBlockEntity.hasInv()) {
-                        linkedBlockEntity as Inventory
-                        inventory = linkedBlockEntity
-                    }
-                }
-
-                if (inventory != null) {
-                    if (linkedBlockItem in inventories.keys) {
-                        inventories[linkedBlockItem] = inventories[linkedBlockItem]!! + 1
-                    } else {
-                        inventories[linkedBlockItem] = 1
-                    }
-                    totalSlot += inventory.size()
-                    maxCount += inventory.maxCountPerStack * inventory.size()
-                }
-            }
-
-            buf.writeInt(totalSlot)
-            buf.writeInt(maxCount)
-            buf.writeInt(inventories.size)
-            inventories.forEach { (item, count) ->
-                buf.writeItemStack(ItemStack(item, count))
-            }
+            player.chat("")
+            player.chat("$translationKey.use1", pos.x, pos.y, pos.z)
+            player.chat("$translationKey.use2", inventories.size)
+            player.chat("$translationKey.use3", inventories.stream().mapToInt { it.size() }.sum())
+            player.chat("$translationKey.use4", inventories.stream().mapToInt { it.size() * it.maxCountPerStack }.sum())
         }
         return ActionResult.SUCCESS
     }

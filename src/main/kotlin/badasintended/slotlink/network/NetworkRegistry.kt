@@ -1,7 +1,7 @@
 package badasintended.slotlink.network
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.block.RequestBlock
+import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
 import net.fabricmc.api.EnvType
@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 
@@ -34,15 +33,10 @@ object NetworkRegistry {
             val sort = buf.readInt()
 
             context.taskQueue.execute {
-                val world = context.player.world
-                val blockState = world.getBlockState(pos)
-                val block = blockState.block
+                val blockEntity = context.player.world.getBlockEntity(pos)
 
-                if (block is RequestBlock) {
-                    val blockEntity = world.getBlockEntity(pos)!!
-                    val nbt = blockEntity.toTag(CompoundTag())
-                    nbt.putInt("lastSort", sort)
-                    blockEntity.fromTag(blockState, nbt)
+                if (blockEntity is RequestBlockEntity) {
+                    blockEntity.lastSort = sort
                     blockEntity.markDirty()
                 }
             }

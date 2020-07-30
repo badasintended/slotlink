@@ -1,14 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.common.buf
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
 import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
-import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
-import net.minecraft.network.PacketByteBuf
 import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
 import spinnery.common.utility.StackUtilities.equalItemAndTag
@@ -36,7 +35,7 @@ class WCraftingResultSlot(
 
         if (Screen.hasShiftDown()) {
             container.craftStack()
-            if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK, PacketByteBuf(Unpooled.buffer()))
+            if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK, buf())
         } else {
             if ((button == LEFT) or (button == RIGHT)) {
                 if (
@@ -44,7 +43,7 @@ class WCraftingResultSlot(
                     or ((cursorStack.count + stack.count) > cursorStack.maxCount)
                 ) return
                 container.craftOnce()
-                INSTANCE.sendToServer(CRAFT_ONCE, PacketByteBuf(Unpooled.buffer()))
+                INSTANCE.sendToServer(CRAFT_ONCE, buf())
             } else if (button == MIDDLE) {
                 container.onSlotAction(slotNumber, inventoryNumber, button, CLONE, player)
                 INSTANCE.sendToServer(

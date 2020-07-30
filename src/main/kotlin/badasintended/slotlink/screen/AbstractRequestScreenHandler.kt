@@ -1,17 +1,15 @@
 package badasintended.slotlink.screen
 
+import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.client.gui.screen.AbstractRequestScreen
 import badasintended.slotlink.common.SortBy
-import badasintended.slotlink.common.hasInv
-import badasintended.slotlink.common.isInvProvider
+import badasintended.slotlink.common.buf
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
 import badasintended.slotlink.network.NetworkRegistry.REQUEST_REMOVE
 import badasintended.slotlink.network.NetworkRegistry.REQUEST_SYNC
-import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
-import net.minecraft.block.InventoryProvider
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
@@ -51,9 +49,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
     private val dimId = buf.readIdentifier()
 
-    private val hasMaster = buf.readBoolean()
-
-    private val totalInventory = if (hasMaster) buf.readInt() else 0
+    private val masterPos = buf.readBlockPos()
 
     private val inventoryPos = arrayListOf<BlockPos>()
     private val inventoryStates = arrayListOf<BlockState>()
@@ -78,8 +74,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val fixedSingleSlots = linkedSetOf<WSlot>()
 
     init {
-        for (i in 0 until totalInventory) inventoryPos.add(buf.readBlockPos())
-
         if (!world.isClient) {
             masterWorld = world.server!!.getWorld(RegistryKey.of(Registry.DIMENSION, dimId))
             if (masterWorld != null) initServer()
@@ -124,29 +118,27 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
     private fun initServer() {
         masterWorld!!
-        inventoryPos.forEachIndexed { index, blockPos ->
-            val chunk = masterWorld.getWorldChunk(blockPos)
-            val blockState = chunk.getBlockState(blockPos)
-            val block = blockState.block
-            val blockEntity = chunk.getBlockEntity(blockPos)
-            inventoryStates.add(chunk.getBlockState(blockPos))
-            if (block.isInvProvider()) {
-                block as InventoryProvider
-                invMap[index + 3] = block.getInventory(blockState, masterWorld, blockPos)
-            } else if (blockEntity.hasInv()) {
-                invMap[index + 3] = blockEntity as Inventory
-            }
+
+        val masterBlockEntity = masterWorld.getBlockEntity(masterPos) ?: return
+        if (masterBlockEntity !is MasterBlockEntity) return
+
+        var i = 3
+        masterBlockEntity.getLinkedInventories(masterWorld).forEach { (linkedPos, linkedInv) ->
+            inventoryPos.add(linkedPos)
+            inventoryStates.add(masterWorld.getBlockState(linkedPos))
+            invMap[i] = linkedInv
+            i++
         }
 
-        val buf = PacketByteBuf(Unpooled.buffer())
+        val buf = buf()
 
         buf.writeInt(invMap.size)
         invMap.forEach { (num, inv) ->
             buf.writeInt(num)
             buf.writeInt(inv.size())
             buf.writeInt(inv.maxCountPerStack)
-            for (i in 0 until inv.size()) {
-                buf.writeItemStack(inv.getStack(i))
+            for (j in 0 until inv.size()) {
+                buf.writeItemStack(inv.getStack(j))
             }
         }
 
@@ -176,7 +168,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         if (world.isClient) return
         if (masterWorld == null) return
 
-        val buf = PacketByteBuf(Unpooled.buffer())
+        val buf = buf()
         val deletedNumbers = hashSetOf<Int>()
 
         invMap.forEach { (i, _) ->

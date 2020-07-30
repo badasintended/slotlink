@@ -1,14 +1,13 @@
 package badasintended.slotlink.common
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.block.LinkCableBlock
-import badasintended.slotlink.block.MasterBlock
+import badasintended.slotlink.block.ModBlock
 import com.google.common.collect.ImmutableMap
+import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.InventoryProvider
 import net.minecraft.block.entity.BlockEntity
@@ -23,7 +22,6 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.registry.NetworkRegistry
@@ -68,6 +66,7 @@ fun Block.isInvProvider(): Boolean {
 }
 
 fun WorldAccess.isBlockIgnored(block: Block): Boolean {
+    if (block is ModBlock) return true
     return world.tagManager.blocks().get(Slotlink.id("ignored"))!!.contains(block)
 }
 
@@ -87,53 +86,22 @@ fun PlayerEntity.actionBar(key: String, vararg args: Any) {
     if (this is ServerPlayerEntity) sendMessage(TranslatableText(key, *args), true)
 }
 
-fun PacketByteBuf.writeReqData(world: World, masterPos: BlockPos) {
-    val inventoryPos = HashSet<BlockPos>()
-
-    writeIdentifier(world.registryKey.value)
-
-    val isMasterBlock = world.getBlockState(masterPos).block is MasterBlock
-    writeBoolean(isMasterBlock)
-    if (isMasterBlock) {
-        val masterNbt = world.getBlockEntity(masterPos)!!.toTag(CompoundTag())
-        val linkCables = masterNbt.getList("linkCables", NbtType.COMPOUND)
-        linkCables.forEach { linkCablePosTag ->
-            linkCablePosTag as CompoundTag
-            val linkCablePos = linkCablePosTag.toPos()
-            val linkCableBlock = world.getBlockState(linkCablePos).block
-
-            if (linkCableBlock is LinkCableBlock) {
-                val linkCableNbt = world.getBlockEntity(linkCablePos)!!.toTag(CompoundTag())
-                val linkedPos = linkCableNbt.getCompound("linkedPos").toPos()
-                val linkedBlock = world.getBlockState(linkedPos).block
-
-                if (!world.isBlockIgnored(linkedBlock)) {
-                    if (linkedBlock.isInvProvider()) {
-                        inventoryPos.add(linkedPos)
-                    } else if (linkedBlock.hasBlockEntity()) {
-                        val linkedBlockEntity = world.getBlockEntity(linkedPos)
-                        if (linkedBlockEntity.hasInv()) {
-                            inventoryPos.add(linkedPos)
-                        }
-                    }
-                }
-            }
-        }
-
-        writeInt(inventoryPos.size)
-        inventoryPos.forEach {
-            writeBlockPos(it)
-        }
-    }
+fun PlayerEntity.chat(key: String, vararg args: Any) {
+    if (this is ServerPlayerEntity) sendMessage(TranslatableText(key, *args), false)
 }
 
 /**
  * Opens a container, what else?
  */
-fun openScreen(id: String, player: PlayerEntity, function: (PacketByteBuf) -> Unit) {
+@Suppress("DEPRECATION")
+fun PlayerEntity.openScreen(id: String, function: (PacketByteBuf) -> Unit) {
     ContainerProviderRegistry.INSTANCE.openContainer(
-        Slotlink.id(id), player as ServerPlayerEntity, Consumer(function)
+        Slotlink.id(id), this as ServerPlayerEntity, Consumer(function)
     )
+}
+
+fun buf(): PacketByteBuf {
+    return PacketByteBuf(Unpooled.buffer())
 }
 
 fun spinneryId(id: String) = Identifier("spinnery", id)

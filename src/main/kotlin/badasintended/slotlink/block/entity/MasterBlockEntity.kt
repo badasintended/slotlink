@@ -5,13 +5,32 @@ import badasintended.slotlink.common.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.inventory.Inventory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
 
     private var linkCables = ListTag()
+
+    fun getLinkedInventories(world: World): Map<BlockPos, Inventory> {
+        val linkedMap = linkedMapOf<BlockPos, Inventory>()
+
+        linkCables.forEach { linkCablePosTag ->
+            linkCablePosTag as CompoundTag
+            val cablePos = linkCablePosTag.toPos()
+            val cableBlockEntity = world.getBlockEntity(cablePos)
+
+            if (cableBlockEntity is LinkCableBlockEntity) {
+                val inventory = cableBlockEntity.getLinkedInventory(world)
+                if (inventory != null) linkedMap[cableBlockEntity.linkedPos.toPos()] = inventory
+            }
+        }
+
+        return linkedMap
+    }
 
     private fun validateConnectors(world: World) {
         val linkCableSet = HashSet<CompoundTag>()

@@ -1,10 +1,11 @@
 package badasintended.slotlink.block
 
+import badasintended.slotlink.block.entity.ChildBlockEntity
+import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.common.toTag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
@@ -19,56 +20,44 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
         neighborPos: BlockPos,
         moved: Boolean
     ) {
-        val blockEntity = world.getBlockEntity(pos)
-        val neighborState = world.getBlockState(neighborPos)
-        val neighborBlock = neighborState.block
+        val blockEntity = world.getBlockEntity(pos) as ChildBlockEntity
+        val neighborBlock = world.getBlockState(neighborPos).block
+        val neighborBlockEntity = world.getBlockEntity(neighborPos)
+        val currentlyHasMaster = blockEntity.hasMaster
 
-        val currentNbt = blockEntity!!.toTag(CompoundTag())
-        val currentlyHasMaster = currentNbt.getBoolean("hasMaster")
+        if (neighborBlockEntity is ChildBlockEntity) {
+            val neighborHasMaster = neighborBlockEntity.hasMaster
 
-        if (neighborBlock is ChildBlock) {
-            val neighborBlockEntity = world.getBlockEntity(neighborPos)
-            val neighborNbt = neighborBlockEntity!!.toTag(CompoundTag())
-            val neighborHasMaster = neighborNbt.getBoolean("hasMaster")
-
-            val masterPos = currentNbt.getCompound("masterPos")
-            val neighborMasterPos = neighborNbt.getCompound("masterPos")
+            val currentMasterPos = blockEntity.masterPos
+            val neighborMasterPos = neighborBlockEntity.masterPos
 
             if (currentlyHasMaster and !neighborHasMaster) {
-                if (masterPos == neighborMasterPos) {
-                    currentNbt.putBoolean("hasMaster", false)
-                    blockEntity.fromTag(state, currentNbt)
+                if (currentMasterPos == neighborMasterPos) {
+                    blockEntity.hasMaster = false
                     blockEntity.markDirty()
                     world.updateNeighbors(pos, block)
                 } else {
-                    neighborNbt.putBoolean("hasMaster", true)
-                    neighborNbt.put("masterPos", masterPos)
-                    neighborBlockEntity.fromTag(neighborState, neighborNbt)
+                    neighborBlockEntity.hasMaster = true
+                    neighborBlockEntity.masterPos = currentMasterPos
                     neighborBlockEntity.markDirty()
                     world.updateNeighbors(neighborPos, neighborBlock)
                 }
             } else if (!currentlyHasMaster and neighborHasMaster) {
-                currentNbt.putBoolean("hasMaster", true)
-                currentNbt.put("masterPos", neighborMasterPos)
-                blockEntity.fromTag(state, currentNbt)
+                blockEntity.hasMaster = true
+                blockEntity.masterPos = neighborMasterPos
                 blockEntity.markDirty()
                 world.updateNeighbors(pos, block)
             }
-        } else if (neighborBlock is MasterBlock) {
+        } else if (neighborBlockEntity is MasterBlockEntity) {
             if (!currentlyHasMaster) {
                 val masterPos = neighborPos.toTag()
-
-                currentNbt.put("masterPos", masterPos)
-                currentNbt.putBoolean("hasMaster", true)
-
-                blockEntity.fromTag(state, currentNbt)
+                blockEntity.masterPos = masterPos
+                blockEntity.hasMaster = true
                 blockEntity.markDirty()
-
                 world.updateNeighbors(pos, block)
             }
         } else if (currentlyHasMaster) {
-            currentNbt.putBoolean("hasMaster", false)
-            blockEntity.fromTag(state, currentNbt)
+            blockEntity.hasMaster = false
             blockEntity.markDirty()
             world.updateNeighbors(pos, block)
         }

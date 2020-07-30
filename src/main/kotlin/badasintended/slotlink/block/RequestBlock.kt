@@ -4,11 +4,9 @@ import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.common.actionBar
 import badasintended.slotlink.common.openScreen
 import badasintended.slotlink.common.toPos
-import badasintended.slotlink.common.writeReqData
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -28,19 +26,16 @@ class RequestBlock : ChildBlock("request") {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        val blockEntity = world.getBlockEntity(pos)!!
-        val nbt = blockEntity.toTag(CompoundTag())
-        val hasMaster = nbt.getBoolean("hasMaster")
-        if (!hasMaster) player.actionBar("${translationKey}.hasNoMaster")
+        val blockEntity = world.getBlockEntity(pos) as RequestBlockEntity
+        if (!blockEntity.hasMaster) player.actionBar("${translationKey}.hasNoMaster")
         else if (!world.isClient) {
-            openScreen("request", player) { buf ->
+            player.openScreen("request") { buf ->
                 buf.writeBlockPos(pos)
-                buf.writeInt(nbt.getInt("lastSort"))
-                val masterPos = nbt.getCompound("masterPos").toPos()
-                buf.writeReqData(world, masterPos)
+                buf.writeInt(blockEntity.lastSort)
+                buf.writeIdentifier(world.registryKey.value)
+                buf.writeBlockPos(blockEntity.masterPos.toPos())
             }
         }
-
 
         return ActionResult.SUCCESS
     }

@@ -1,19 +1,14 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.common.SortBy
-import badasintended.slotlink.common.positionOf
-import badasintended.slotlink.common.sizeOf
-import badasintended.slotlink.common.slotAction
+import badasintended.slotlink.common.*
 import badasintended.slotlink.network.NetworkRegistry
 import badasintended.slotlink.screen.AbstractRequestScreenHandler
-import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
-import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
 import net.minecraft.util.collection.DefaultedList
@@ -207,7 +202,7 @@ abstract class AbstractRequestScreen<H : AbstractRequestScreenHandler>(c: H) : M
 
     private fun clearButtonClick() {
         c.clearCraft()
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, PacketByteBuf(Unpooled.buffer()))
+        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, buf())
         sort()
     }
 

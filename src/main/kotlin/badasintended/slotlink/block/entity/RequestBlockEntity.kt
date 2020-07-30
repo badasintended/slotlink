@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag
 
 class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST) {
 
-    private var lastSort = 0
+    var lastSort = 0
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)

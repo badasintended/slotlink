@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package badasintended.slotlink.screen
 
 import badasintended.slotlink.Slotlink
@@ -10,7 +12,6 @@ import net.minecraft.util.Identifier
 object ScreenHandlerRegistry {
 
     fun init() {
-        r("master") { id, _, player, buf -> MasterScreenHandler(id, player, buf) }
         r("request") { id, _, player, buf -> RequestScreenHandler(id, player, buf) }
         r("remote") { id, _, player, buf -> RemoteScreenHandler(id, player, buf) }
     }

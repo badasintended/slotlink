@@ -1,7 +1,10 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
-import badasintended.slotlink.common.*
+import badasintended.slotlink.common.actionBar
+import badasintended.slotlink.common.openScreen
+import badasintended.slotlink.common.toPos
+import badasintended.slotlink.common.toTag
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -17,7 +20,7 @@ import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 
-abstract class AbstractRemoteItem(id: String) : ModItem(id, SETTINGS.maxCount(1)) {
+open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SETTINGS.maxCount(1)) {
 
     protected val baseTlKey = "item.slotlink.remote"
 
@@ -34,10 +37,11 @@ abstract class AbstractRemoteItem(id: String) : ModItem(id, SETTINGS.maxCount(1)
             if (dim == null) {
                 player.actionBar("${baseTlKey}.invalidDim")
             } else {
-                openScreen("remote", player) { buf ->
+                player.openScreen("remote") { buf ->
                     buf.writeBlockPos(BlockPos(player.pos))
                     buf.writeInt(stack.orCreateTag.getInt("lastSort"))
-                    buf.writeReqData(dim, masterPos)
+                    buf.writeIdentifier(dim.registryKey.value)
+                    buf.writeBlockPos(masterPos)
                     buf.writeBoolean(hand == OFF_HAND)
                 }
             }
