@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package badasintended.slotlink.common
+package badasintended.slotlink.common.util
 
 import badasintended.slotlink.Slotlink
 import net.minecraft.util.Identifier

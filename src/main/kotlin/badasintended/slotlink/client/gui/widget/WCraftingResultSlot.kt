@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.buf
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_ONCE
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_STACK
-import badasintended.slotlink.screen.AbstractRequestScreenHandler
+import badasintended.slotlink.common.util.buf
+import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_ONCE
+import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_STACK
+import badasintended.slotlink.gui.screen.RequestScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
@@ -16,11 +16,11 @@ import spinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
 class WCraftingResultSlot(
-    private val sort: () -> Any
+    //private val sort: () -> Any
 ) : WSlot() {
 
     override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
-        sort.invoke()
+        //sort.invoke()
     }
 
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
@@ -28,14 +28,16 @@ class WCraftingResultSlot(
     override fun onMouseClicked(mouseX: Float, mouseY: Float, button: Int) {
         if (!isFocused) return
 
-        val container = `interface`.handler as AbstractRequestScreenHandler
+        val container = `interface`.handler as RequestScreenHandler
         val player = container.player
 
         val cursorStack = player.inventory.cursorStack
 
         if (Screen.hasShiftDown()) {
             container.craftStack()
-            if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK, buf())
+            if (button == LEFT) INSTANCE.sendToServer(CRAFT_STACK,
+                buf()
+            )
         } else {
             if ((button == LEFT) or (button == RIGHT)) {
                 if (

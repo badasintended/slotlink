@@ -1,7 +1,7 @@
-package badasintended.slotlink.block.entity
+package badasintended.slotlink.common.registry
 
-import badasintended.slotlink.block.BlockRegistry
 import badasintended.slotlink.block.ModBlock
+import badasintended.slotlink.block.entity.*
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
@@ -16,6 +16,8 @@ object BlockEntityTypeRegistry {
 
     val CABLE = c(BlockRegistry.CABLE) { CableBlockEntity() }
     val LINK_CABLE = c(BlockRegistry.LINK_CABLE) { LinkCableBlockEntity() }
+    val IMPORT_CABLE = c(BlockRegistry.IMPORT_CABLE) { ImportCableBlockEntity() }
+    val EXPORT_CABLE = c(BlockRegistry.EXPORT_CABLE) { ExportCableBlockEntity() }
 
     fun init() {
         r(BlockRegistry.MASTER, MASTER)
@@ -23,6 +25,8 @@ object BlockEntityTypeRegistry {
 
         r(BlockRegistry.CABLE, CABLE)
         r(BlockRegistry.LINK_CABLE, LINK_CABLE)
+        r(BlockRegistry.IMPORT_CABLE, IMPORT_CABLE)
+        r(BlockRegistry.EXPORT_CABLE, EXPORT_CABLE)
     }
 
     private fun r(modBlock: ModBlock, blockEntityType: BlockEntityType<out BlockEntity>) {

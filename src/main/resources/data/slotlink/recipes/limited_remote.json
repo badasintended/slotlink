@@ -1,0 +1,15 @@
+{
+  "type"   : "minecraft:crafting_shaped",
+  "pattern": [
+    "SDS",
+    "GRG",
+    "SDS"
+  ],
+  "key"    : {
+    "S": {"item": "minecraft:redstone"},
+    "R": {"item": "slotlink:request"},
+    "G": {"item": "minecraft:gold_ingot"},
+    "D": {"item": "minecraft:diamond"}
+  },
+  "result" : {"item": "slotlink:limited_remote"}
+}

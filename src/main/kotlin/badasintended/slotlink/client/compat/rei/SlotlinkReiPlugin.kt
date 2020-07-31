@@ -1,10 +1,10 @@
 package badasintended.slotlink.client.compat.rei
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.block.BlockRegistry
-import badasintended.slotlink.common.buf
-import badasintended.slotlink.network.NetworkRegistry.CRAFT_PULL
-import badasintended.slotlink.screen.AbstractRequestScreenHandler
+import badasintended.slotlink.common.util.buf
+import badasintended.slotlink.common.registry.BlockRegistry
+import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_PULL
+import badasintended.slotlink.gui.screen.RequestScreenHandler
 import com.google.common.collect.Lists
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import me.shedaniel.rei.api.AutoTransferHandler.Result
@@ -33,7 +33,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
 
         recipeHelper.registerAutoCraftingHandler r@{ context ->
             val container = context.container
-            if (container !is AbstractRequestScreenHandler) return@r Result.createNotApplicable()
+            if (container !is RequestScreenHandler) return@r Result.createNotApplicable()
 
             val display = context.recipe
 

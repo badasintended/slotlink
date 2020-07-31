@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.screen.ModScreenHandler
+import badasintended.slotlink.gui.screen.ModScreenHandler
 import me.shedaniel.rei.impl.ScreenHelper
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -12,7 +12,6 @@ import spinnery.client.render.BaseRenderer
 import spinnery.client.render.layer.SpinneryLayers
 import spinnery.client.screen.BaseHandledScreen
 import spinnery.widget.WInterface
-import spinnery.widget.WPanel
 
 @Environment(EnvType.CLIENT)
 abstract class ModScreen<C : ModScreenHandler>(
@@ -20,8 +19,6 @@ abstract class ModScreen<C : ModScreenHandler>(
 ) : BaseHandledScreen<C>(LiteralText(""), c, c.player) {
 
     protected val root: WInterface = `interface`
-
-    abstract val main: WPanel
 
     /**
      * Explicitly use vanilla item renderer to prevent incompatibility with other mod.
@@ -43,7 +40,11 @@ abstract class ModScreen<C : ModScreenHandler>(
         provider.draw(SpinneryLayers.getTooltip())
         provider.draw()
 
-        val stack = if (c.previewCursorStack.isEmpty && c.getDragSlots(0).isEmpty() && c.getDragSlots(1).isEmpty())
+        val stack = if (
+            c.previewCursorStack.isEmpty
+            and c.getDragSlots(0).isNullOrEmpty()
+            and c.getDragSlots(1).isNullOrEmpty()
+        )
             c.playerInventory.cursorStack else c.previewCursorStack
 
         val itemRenderer = BaseRenderer.getDefaultItemRenderer()

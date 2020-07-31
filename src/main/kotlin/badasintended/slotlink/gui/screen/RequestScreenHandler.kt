@@ -1,22 +1,19 @@
-package badasintended.slotlink.screen
+package badasintended.slotlink.gui.screen
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.client.gui.screen.AbstractRequestScreen
-import badasintended.slotlink.common.SortBy
-import badasintended.slotlink.common.buf
+import badasintended.slotlink.client.gui.screen.RequestScreen
+import badasintended.slotlink.common.util.buf
+import badasintended.slotlink.common.util.SortBy
+import badasintended.slotlink.common.registry.NetworkRegistry.REQUEST_REMOVE
+import badasintended.slotlink.common.registry.NetworkRegistry.REQUEST_SYNC
+import badasintended.slotlink.gui.widget.WServerSlot
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
-import badasintended.slotlink.network.NetworkRegistry.REQUEST_REMOVE
-import badasintended.slotlink.network.NetworkRegistry.REQUEST_SYNC
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.CraftingInventory
-import net.minecraft.inventory.CraftingResultInventory
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
+import net.minecraft.inventory.*
+import net.minecraft.item.*
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
@@ -27,7 +24,6 @@ import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.RegistryKey
 import spinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
-import spinnery.common.utility.MutablePair
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.WSlot
 import spinnery.widget.api.Action
@@ -41,7 +37,7 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 
-abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
+open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
     ModScreenHandler(syncId, player) {
 
     val blockPos: BlockPos = buf.readBlockPos()
@@ -70,9 +66,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
     private val buffer2: WSlot
     private val buffer3: WSlot
 
-    private val fixedSplitSlots = linkedSetOf<WSlot>()
-    private val fixedSingleSlots = linkedSetOf<WSlot>()
-
     init {
         if (!world.isClient) {
             masterWorld = world.server!!.getWorld(RegistryKey.of(Registry.DIMENSION, dimId))
@@ -97,19 +90,19 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         buffer3.setSlotNumber<WSlot>(0)
 
         for (i in 0 until 9) {
-            val slot = root.createChild { WSlot() }
+            val slot = root.createChild { WServerSlot(this::sort) }
             slot.setInventoryNumber<WSlot>(1)
             slot.setSlotNumber<WSlot>(i)
             inputSlots.add(slot)
         }
 
-        outputSlot = root.createChild { WSlot() }
+        outputSlot = root.createChild { WServerSlot(this::sort) }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
 
         for (i in 0 until 36) {
-            val slot = root.createChild { WSlot() }
+            val slot = root.createChild { WServerSlot(this::sort) }
             slot.setInventoryNumber<WSlot>(0)
             slot.setSlotNumber<WSlot>(i)
             playerSlots.add(slot)
@@ -152,7 +145,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
 
         map.forEach { (num, inv) ->
             for (i in 0 until inv.size()) {
-                val slot = root.createChild { WSlot() }
+                val slot = root.createChild { WServerSlot(this::sort) }
                 slot.setInventoryNumber<WSlot>(num)
                 slot.setSlotNumber<WSlot>(i)
                 slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
@@ -161,7 +154,7 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
 
         this as ScreenHandlerAccessor
-        listeners.filterIsInstance<AbstractRequestScreen<*>>().forEach { it.sort() }
+        sort()
     }
 
     fun validateInventories() {
@@ -300,52 +293,17 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
         }
     }
 
+    private fun sort() {
+        this as ScreenHandlerAccessor
+        listeners.filterIsInstance<RequestScreen<*>>().forEach { it.sort() }
+    }
+
     override fun onContentChanged(inventory: Inventory) {
         if ((inventory == craftingInv)) {
             craftItem()
         } else super.onContentChanged(inventory)
-    }
 
-    override fun getDragSlots(mouseButton: Int): MutableSet<WSlot>? {
-        return when (mouseButton) {
-            0 -> fixedSplitSlots
-            1 -> fixedSingleSlots
-            else -> null
-        }
-    }
-
-    override fun onSlotDrag(slotNumber: IntArray, inventoryNumber: IntArray, action: Action) {
-        val slots: MutableSet<WSlot> = LinkedHashSet()
-
-        for (i in slotNumber.indices) {
-            val slot = getInterface().getSlot<WSlot>(inventoryNumber[i], slotNumber[i])
-            if (slot != null) slots.add(slot)
-        }
-
-        if (slots.isEmpty()) return
-
-        val split = if (action.isSplit) (playerInventory.cursorStack.count / slots.size).coerceAtLeast(1) else 1
-
-        var stackA = if (action.isPreview) playerInventory.cursorStack.copy() else playerInventory.cursorStack
-
-        if (stackA.isEmpty) return
-
-        for (slotA in slots) {
-            if (slotA.refuses(stackA)) continue
-            val stackB = if (action.isPreview) slotA.stack.copy() else slotA.stack
-            val stacks: MutablePair<ItemStack, ItemStack> = StackUtilities.merge(
-                stackA, stackB, split,
-                stackA.maxCount.coerceAtMost(split + stackB.count)
-            )
-            if (action.isPreview) {
-                previewCursorStack = stacks.first.copy()
-                slotA.setPreviewStack<WSlot>(stacks.second.copy())
-            } else {
-                stackA = stacks.first
-                previewCursorStack = ItemStack.EMPTY
-                slotA.setStack(stacks.second)
-            }
-        }
+        this as ScreenHandlerAccessor
     }
 
     /**
@@ -429,8 +387,6 @@ abstract class AbstractRequestScreenHandler(syncId: Int, player: PlayerEntity, b
                 }
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)
-
-        if (inventoryNumber == 0) listeners.filterIsInstance<AbstractRequestScreen<*>>().forEach { it.sort() }
     }
 
     override fun close(player: PlayerEntity) {

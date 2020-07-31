@@ -1,13 +1,8 @@
-@file:Suppress("DEPRECATION")
-
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
-import badasintended.slotlink.block.entity.LinkCableBlockEntity
-import badasintended.slotlink.common.*
-import net.minecraft.block.BlockState
-import net.minecraft.block.InventoryProvider
-import net.minecraft.block.ShapeContext
+import badasintended.slotlink.common.util.*
+import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.Inventory
@@ -16,9 +11,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import net.minecraft.world.BlockView
-import net.minecraft.world.World
-import net.minecraft.world.WorldAccess
+import net.minecraft.world.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -64,6 +57,8 @@ abstract class ConnectorCableBlock(
         return state
     }
 
+    protected abstract fun WorldAccess.isBlockIgnored(block: Block): Boolean
+
     override fun createBlockEntity(view: BlockView) = blockEntity.createInstance()
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
@@ -106,5 +101,3 @@ abstract class ConnectorCableBlock(
     }
 
 }
-
-class LinkCableBlock : ConnectorCableBlock("link_cable", LinkCableBlockEntity::class)

@@ -1,5 +1,6 @@
-package badasintended.slotlink.block
+package badasintended.slotlink.common.registry
 
+import badasintended.slotlink.block.*
 import badasintended.slotlink.item.ModItem
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry
@@ -13,9 +14,11 @@ object BlockRegistry {
 
     val CABLE = CableBlock()
     val LINK_CABLE = LinkCableBlock()
+    val IMPORT_CABLE = ImportCableBlock()
+    val EXPORT_CABLE = ExportCableBlock()
 
     fun init() {
-        r(MASTER, REQUEST, CABLE, LINK_CABLE)
+        r(MASTER, REQUEST, CABLE, LINK_CABLE, IMPORT_CABLE, EXPORT_CABLE)
     }
 
     private fun r(vararg modBlocks: ModBlock) {

@@ -1,11 +1,10 @@
 @file:Suppress("DEPRECATION")
 
-package badasintended.slotlink.client.gui.screen
+package badasintended.slotlink.common.registry
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.screen.ModScreenHandler
-import badasintended.slotlink.screen.RemoteScreenHandler
-import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.client.gui.screen.*
+import badasintended.slotlink.gui.screen.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.screen.ContainerScreenFactory
@@ -17,6 +16,7 @@ object ScreenRegistry {
     fun init() {
         r("request") { i: RequestScreenHandler -> RequestScreen(i) }
         r("remote") { i: RemoteScreenHandler -> RemoteScreen(i) }
+        r("transfer") { i: TransferScreenHandler -> TransferScreen(i) }
     }
 
     private fun <H : ModScreenHandler, S : ModScreen<H>> r(id: String, function: (H) -> S) {

@@ -8,9 +8,7 @@ import net.minecraft.item.ItemStack
 import spinnery.client.render.AdvancedItemRenderer
 import spinnery.client.render.BaseRenderer
 import spinnery.widget.WSlot
-import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.pow
+import kotlin.math.*
 
 /**
  * [WSlot] that explicitly uses vanilla [ItemRenderer] instead of [AdvancedItemRenderer],
@@ -32,15 +30,12 @@ open class WVanillaSlot : WSlot() {
     }
 
     protected open fun drawItem(
-        matrices: MatrixStack,
+        matrices: MatrixStack, provider: VertexConsumerProvider,
         stack: ItemStack, itemRenderer: ItemRenderer, textRenderer: TextRenderer,
-        x: Float, y: Float, w: Float, h: Float
+        itemX: Int, itemY: Int
     ) {
         val count = stack.count
         val countText = countText(count)
-
-        val itemX = ((1 + x) + ((w - 18) / 2)).toInt()
-        val itemY = ((1 + y) + ((h - 18) / 2)).toInt()
 
         itemRenderer.renderGuiItemIcon(stack, itemX, itemY)
         itemRenderer.renderGuiItemOverlay(
@@ -67,11 +62,11 @@ open class WVanillaSlot : WSlot() {
         provider.draw()
 
         drawItem(
-            matrices,
+            matrices, provider,
             if (previewStack.isEmpty) stack else previewStack,
             BaseRenderer.getDefaultItemRenderer(),
             BaseRenderer.getDefaultTextRenderer(),
-            x, y, w, h
+            ((1 + x) + ((w - 18) / 2)).toInt(), ((1 + y) + ((h - 18) / 2)).toInt()
         )
 
         if (isFocused) BaseRenderer.drawQuad(

@@ -1,8 +1,9 @@
 @file:Suppress("DEPRECATION")
 
-package badasintended.slotlink.screen
+package badasintended.slotlink.common.registry
 
 import badasintended.slotlink.Slotlink
+import badasintended.slotlink.gui.screen.*
 import net.fabricmc.fabric.api.container.ContainerFactory
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.minecraft.entity.player.PlayerEntity
@@ -14,6 +15,7 @@ object ScreenHandlerRegistry {
     fun init() {
         r("request") { id, _, player, buf -> RequestScreenHandler(id, player, buf) }
         r("remote") { id, _, player, buf -> RemoteScreenHandler(id, player, buf) }
+        r("transfer") { id, _, player, buf -> TransferScreenHandler(id, player, buf) }
     }
 
     private fun <H : ModScreenHandler> r(

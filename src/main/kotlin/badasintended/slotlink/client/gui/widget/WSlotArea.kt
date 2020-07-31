@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.spinneryId
+import badasintended.slotlink.common.util.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
@@ -21,8 +21,12 @@ class WSlotArea : WMouseArea() {
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
-        val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("slot")
+        ))
+        val panelStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("panel")
+        ))
 
         BaseRenderer.drawBeveledPanel(
             matrices, provider,

@@ -1,5 +1,6 @@
 package badasintended.slotlink.block.entity
 
+import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
 import net.minecraft.block.BlockState
 import net.minecraft.nbt.CompoundTag
 

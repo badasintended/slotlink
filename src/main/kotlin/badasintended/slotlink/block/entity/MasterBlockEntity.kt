@@ -1,19 +1,23 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.block.LinkCableBlock
-import badasintended.slotlink.common.toPos
+import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.common.util.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.util.Tickable
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
-class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
+class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable {
 
-    private var linkCables = ListTag()
+    var linkCables = ListTag()
+    var transferCables = ListTag()
+
+    private var tick = 0
 
     fun getLinkedInventories(world: World): Map<BlockPos, Inventory> {
         val linkedMap = linkedMapOf<BlockPos, Inventory>()
@@ -32,31 +36,37 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
         return linkedMap
     }
 
-    private fun validateConnectors(world: World) {
-        val linkCableSet = HashSet<CompoundTag>()
-        linkCables.forEach { linkCableTag ->
-            linkCableTag as CompoundTag
-            val linkCablePos = linkCableTag.toPos()
-            val linkCableBlock = world.getBlockState(linkCablePos).block
-            if (linkCableBlock is LinkCableBlock) {
-                val linkCableNbt = world.getBlockEntity(linkCablePos)!!.toTag(CompoundTag())
-
-                val linkCableHasMaster = linkCableNbt.getBoolean("hasMaster")
-                val linkCableMasterPos = linkCableNbt.getCompound("masterPos").toPos()
-
-                if (linkCableHasMaster and (linkCableMasterPos == pos)) {
-                    linkCableSet.add(linkCableTag)
+    private fun validateCables(world: World) {
+        val linkCableSet = linkedSetOf<CompoundTag>()
+        linkCables.forEach { tag ->
+            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
+            if (blockEntity is LinkCableBlockEntity) {
+                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)){
+                    linkCableSet.add(tag)
                 }
             }
         }
         linkCables.clear()
         linkCables.addAll(linkCableSet)
+
+        val transferCableSet = linkedSetOf<CompoundTag>()
+        transferCables.forEach { tag ->
+            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
+            if (blockEntity is TransferCableBlockEntity) {
+                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)){
+                    transferCableSet.add(tag)
+                }
+            }
+        }
+        transferCables.clear()
+        transferCables.addAll(transferCableSet)
     }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
         tag.put("linkCables", linkCables)
+        tag.put("transferCables", transferCables)
 
         return tag
     }
@@ -65,11 +75,26 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER) {
         super.fromTag(state, tag)
 
         linkCables = tag.getList("linkCables", NbtType.COMPOUND)
+        transferCables = tag.getList("transferCables", NbtType.COMPOUND)
     }
 
     override fun markDirty() {
-        if (world != null) validateConnectors(world!!)
         super.markDirty()
+
+        val world = getWorld() ?: return
+        validateCables(world)
+    }
+
+    override fun tick() {
+        tick++
+        if (tick == 20) {
+            tick = 0
+            val world = getWorld() ?: return
+            transferCables.forEach { tag ->
+                val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
+                if (blockEntity is TransferCableBlockEntity) blockEntity.transfer(world, this)
+            }
+        }
     }
 
 }

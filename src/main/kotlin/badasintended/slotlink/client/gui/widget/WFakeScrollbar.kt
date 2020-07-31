@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.spinneryId
+import badasintended.slotlink.common.util.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
@@ -26,8 +26,12 @@ class WFakeScrollbar(
     override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
         if (isHidden) return
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
-        val panelStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("panel")))
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("slot")
+        ))
+        val panelStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("panel")
+        ))
 
         // why
         val x = floor(x)

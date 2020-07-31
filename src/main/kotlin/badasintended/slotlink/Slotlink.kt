@@ -2,12 +2,7 @@
 
 package badasintended.slotlink
 
-import badasintended.slotlink.block.BlockRegistry
-import badasintended.slotlink.block.entity.BlockEntityTypeRegistry
-import badasintended.slotlink.client.gui.screen.ScreenRegistry
-import badasintended.slotlink.item.ItemRegistry
-import badasintended.slotlink.network.NetworkRegistry
-import badasintended.slotlink.screen.ScreenHandlerRegistry
+import badasintended.slotlink.common.registry.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.util.Identifier

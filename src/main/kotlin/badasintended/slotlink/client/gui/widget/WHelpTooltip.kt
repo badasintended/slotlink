@@ -1,12 +1,10 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.common.spinneryId
+import badasintended.slotlink.common.util.spinneryId
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.LiteralText
-import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
+import net.minecraft.text.*
 import net.minecraft.util.Formatting
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
@@ -32,7 +30,9 @@ class WHelpTooltip : WAbstractWidget() {
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("slot")
+        ))
         val tint = slotStyle.asColor("background.unfocused")
 
         BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Slotlink.id("textures/gui/help.png"))

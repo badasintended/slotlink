@@ -1,10 +1,8 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
-import badasintended.slotlink.common.actionBar
-import badasintended.slotlink.common.openScreen
-import badasintended.slotlink.common.toPos
-import badasintended.slotlink.common.toTag
+import badasintended.slotlink.common.*
+import badasintended.slotlink.common.util.*
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -61,7 +59,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             player.actionBar("${baseTlKey}.hasNoMaster")
         } else use(world, player, stack, hand, masterPosTag.toPos(), masterDim)
 
-        return TypedActionResult.pass(stack)
+        return TypedActionResult.success(stack)
     }
 
     override fun useOnBlock(context: ItemUsageContext): ActionResult {
@@ -77,7 +75,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
                 stack.orCreateTag.put("masterPos", pos.toTag())
                 stack.orCreateTag.putString("masterDim", dimId)
                 player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
-                return ActionResult.CONSUME
+                return ActionResult.SUCCESS
             }
         }
 

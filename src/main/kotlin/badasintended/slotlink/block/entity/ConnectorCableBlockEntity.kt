@@ -1,20 +1,14 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.*
-import net.fabricmc.fabric.api.util.NbtType
-import net.minecraft.block.BlockState
-import net.minecraft.block.InventoryProvider
+import badasintended.slotlink.common.util.toPos
+import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.inventory.Inventory
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class ConnectorCableBlockEntity(
-    type: BlockEntityType<out BlockEntity>,
-    private val listKey: String
-) : ChildBlockEntity(type) {
+abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type) {
 
     var linkedPos = CompoundTag()
 
@@ -26,30 +20,16 @@ abstract class ConnectorCableBlockEntity(
         val blockEntity = world.getBlockEntity(linkedPos)
 
         if (!world.isBlockIgnored(linkedBlock)) {
-            if (linkedBlock.isInvProvider()) {
-                return (linkedBlock as InventoryProvider).getInventory(linkedState, world, linkedPos)
-            } else if (blockEntity.hasInv()) {
-                return blockEntity!! as Inventory
+            if (linkedBlock is InventoryProvider) {
+                return linkedBlock.getInventory(linkedState, world, linkedPos)
+            } else if (blockEntity is Inventory) {
+                return blockEntity
             }
         }
         return null
     }
 
-    private fun addToMasterConnectorList(world: World) {
-        if (hasMaster) {
-            val masterPos = masterPos.toPos()
-            val masterBlockState = world.getBlockState(masterPos)
-            val masterBlockEntity = world.getBlockEntity(masterPos)!!
-            val masterNbt = masterBlockEntity.toTag(CompoundTag())
-
-            val masterList = masterNbt.getList(listKey, NbtType.COMPOUND)
-            masterList.add(pos.toTag())
-
-            masterNbt.put(listKey, masterList)
-            masterBlockEntity.fromTag(masterBlockState, masterNbt)
-            masterBlockEntity.markDirty()
-        }
-    }
+    protected abstract fun WorldAccess.isBlockIgnored(block: Block): Boolean
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
@@ -65,11 +45,13 @@ abstract class ConnectorCableBlockEntity(
         linkedPos = tag.getCompound("linkedPos")
     }
 
-    override fun markDirty() {
-        if (world != null) addToMasterConnectorList(world!!)
-        super.markDirty()
+    override fun markRemoved() {
+        super.markRemoved()
+
+        if (hasMaster) {
+            val master = world?.getBlockEntity(masterPos.toPos())
+            if (master is MasterBlockEntity) master.markDirty()
+        }
     }
 
 }
-
-class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE, "linkCables")

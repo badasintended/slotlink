@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.common.spinneryId
+import badasintended.slotlink.common.util.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
@@ -32,7 +32,9 @@ class WPutButton(
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
+            spinneryId("slot")
+        ))
         val tint = slotStyle.asColor("background.unfocused")
 
         BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Slotlink.id("textures/gui/put.png"))

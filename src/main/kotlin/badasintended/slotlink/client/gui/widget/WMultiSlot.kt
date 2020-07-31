@@ -1,11 +1,12 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.slotAction
+import badasintended.slotlink.common.util.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.item.ItemRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
@@ -18,8 +19,7 @@ import kotlin.reflect.KMutableProperty0
 
 @Environment(EnvType.CLIENT)
 class WMultiSlot(
-    private val shouldSort: KMutableProperty0<Boolean>,
-    private val sort: () -> Any
+    private val shouldSort: KMutableProperty0<Boolean>
 ) : WVanillaSlot() {
 
     private val linkedSlots = arrayListOf<WLinkedSlot>()
@@ -31,15 +31,12 @@ class WMultiSlot(
     }
 
     override fun drawItem(
-        matrices: MatrixStack,
+        matrices: MatrixStack, provider: VertexConsumerProvider,
         stack: ItemStack, itemRenderer: ItemRenderer, textRenderer: TextRenderer,
-        x: Float, y: Float, w: Float, h: Float
+        itemX: Int, itemY: Int
     ) {
         val count = stack.count
         val countText = countText(count)
-
-        val itemX = ((1 + x) + ((w - 18) / 2)).toInt()
-        val itemY = ((1 + y) + ((h - 18) / 2)).toInt()
 
         itemRenderer.renderGuiItemIcon(stack, itemX, itemY)
         itemRenderer.renderGuiItemOverlay(
@@ -54,8 +51,8 @@ class WMultiSlot(
         matrices.scale(scale, scale, 1f)
         textRenderer.drawWithShadow(
             matrices, countText,
-            ((x + 17 - (textRenderer.getWidth(countText) * scale)) / scale),
-            ((y + 17 - (textRenderer.fontHeight * scale)) / scale),
+            ((itemX + 16 - (textRenderer.getWidth(countText) * scale)) / scale),
+            ((itemY + 16 - (textRenderer.fontHeight * scale)) / scale),
             0xFFFFFF
         )
         matrices.pop()
@@ -81,6 +78,8 @@ class WMultiSlot(
 
         val isCursorEmpty = playerInventory.cursorStack.isEmpty
 
+        shouldSort.set(!isCursorEmpty)
+
         val slot = linkedSlots.first()
         val sSlotN = slot.slotNumber
         val sSlotInvN = slot.invNumber
@@ -88,28 +87,49 @@ class WMultiSlot(
         if (Screen.hasShiftDown()) {
             if (button == LEFT) {
                 if (Screen.hasControlDown()) linkedSlots.forEach {
-                    slotAction(container, it.slotNumber, it.invNumber, button, QUICK_MOVE, player)
-                } else slotAction(container, sSlotN, sSlotInvN, button, QUICK_MOVE, player)
-                shouldSort.set(false)
-                sort.invoke()
+                    slotAction(
+                        container,
+                        it.slotNumber,
+                        it.invNumber,
+                        button,
+                        QUICK_MOVE,
+                        player
+                    )
+                } else slotAction(
+                    container,
+                    sSlotN,
+                    sSlotInvN,
+                    button,
+                    QUICK_MOVE,
+                    player
+                )
             }
         } else {
             if ((button == LEFT) or (button == RIGHT) and isCursorEmpty) {
                 skipRelease = true
-                slotAction(container, sSlotN, sSlotInvN, button, PICKUP, player)
-                shouldSort.set(false)
-                sort.invoke()
+                slotAction(
+                    container,
+                    sSlotN,
+                    sSlotInvN,
+                    button,
+                    PICKUP,
+                    player
+                )
             } else if (button == MIDDLE) {
-                slotAction(container, sSlotN, sSlotInvN, button, Action.CLONE, player)
-                shouldSort.set(false)
-                sort.invoke()
+                slotAction(
+                    container,
+                    sSlotN,
+                    sSlotInvN,
+                    button,
+                    Action.CLONE,
+                    player
+                )
             }
         }
 
         if (isWithinBounds(mouseX, mouseY)) {
             held = true
             heldSince = System.currentTimeMillis()
-            sort.invoke()
         }
     }
 

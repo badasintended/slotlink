@@ -1,9 +1,9 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.common.actionBar
-import badasintended.slotlink.common.openScreen
-import badasintended.slotlink.common.toPos
+import badasintended.slotlink.common.util.actionBar
+import badasintended.slotlink.common.util.openScreen
+import badasintended.slotlink.common.util.toPos
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity

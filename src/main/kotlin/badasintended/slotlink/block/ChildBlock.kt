@@ -2,10 +2,8 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.common.toTag
-import net.minecraft.block.Block
-import net.minecraft.block.BlockEntityProvider
-import net.minecraft.block.BlockState
+import badasintended.slotlink.common.util.toTag
+import net.minecraft.block.*
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 

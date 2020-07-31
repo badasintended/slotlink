@@ -1,0 +1,13 @@
+{
+  "type"   : "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "CHC",
+    " C "
+  ],
+  "key"    : {
+    "C": {"item": "slotlink:cable"},
+    "H": {"item": "minecraft:hopper"}
+  },
+  "result" : {"item": "slotlink:import_cable", "count": 4}
+}
