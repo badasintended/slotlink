@@ -11,6 +11,7 @@ assignees: ''
 - Minecraft: VERSION
 - Fabric API: VERSION
 - slotlink: VERSION
+- Spinnery: VERSION
 - related mod: VERSION
 
 **Problem**
