@@ -1,13 +1,13 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.common.util.mergeStack
 import badasintended.slotlink.common.util.toPos
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
-import spinnery.common.utility.StackUtilities
 
 class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.IMPORT_CABLE) {
 
@@ -38,10 +38,7 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
             if (linkCable !is LinkCableBlockEntity) continue
             val target = linkCable.getLinkedInventory(world) ?: continue
             for (j in 0 until target.size()) {
-                val targetStack = target.getStack(j)
-                StackUtilities
-                    .merge(sourceStack, targetStack, sourceStack.maxCount, targetStack.maxCount)
-                    .apply({ sourceStack = it }, { target.setStack(j, it) })
+                target.mergeStack(j, sourceStack)
                 if (sourceStack.isEmpty) break
             }
             target.markDirty()

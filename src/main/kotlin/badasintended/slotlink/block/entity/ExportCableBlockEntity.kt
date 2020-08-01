@@ -1,10 +1,10 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.common.util.mergeStack
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
-import spinnery.common.utility.StackUtilities
 
 class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.EXPORT_CABLE) {
 
@@ -24,11 +24,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
                 if (!sourceStack.isValid()) continue
                 for (k in targetSlots) {
                     if (target is SidedInventory) if (!target.canInsert(k, sourceStack, side.opposite)) continue
-                    val targetStack = target.getStack(k)
-                    StackUtilities.merge(sourceStack, targetStack, sourceStack.maxCount, targetStack.maxCount).apply({
-                        source.setStack(j, it)
-                        sourceStack.count = it.count
-                    }, { target.setStack(k, it) })
+                    target.mergeStack(k, sourceStack)
                     source.markDirty()
                     target.markDirty()
                     if (sourceStack.isEmpty) break@all

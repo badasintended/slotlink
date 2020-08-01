@@ -8,6 +8,8 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.inventory.Inventory
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -19,6 +21,7 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.registry.NetworkRegistry
+import spinnery.common.utility.StackUtilities
 import spinnery.widget.api.*
 import java.util.function.Consumer
 
@@ -119,4 +122,18 @@ fun Direction.texture(): Identifier {
 
 fun Direction.next(): Direction {
     return Direction.byId(id + 1)
+}
+
+fun Inventory.mergeStack(slot: Int, source: ItemStack) {
+    if (!isValid(slot, source)) return
+    val target = getStack(slot)
+    if (target.isEmpty) {
+        setStack(slot, source.copy())
+        source.count = 0
+    } else {
+        if (!StackUtilities.equalItemAndTag(source, target)) return
+        val i = source.count.coerceAtMost(target.maxCount - target.count)
+        target.increment(i)
+        source.decrement(i)
+    }
 }
