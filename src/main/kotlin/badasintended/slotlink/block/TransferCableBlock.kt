@@ -16,18 +16,14 @@ import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 import kotlin.reflect.KClass
 
-abstract class TransferCableBlock(id: String, blockEntity: KClass<out TransferCableBlockEntity>) :
-    ConnectorCableBlock(id, blockEntity) {
+abstract class TransferCableBlock(id: String, blockEntity: KClass<out TransferCableBlockEntity>) : ConnectorCableBlock(
+    id, blockEntity
+) {
 
     override fun WorldAccess.isBlockIgnored(block: Block) = block is ModBlock
 
     override fun onUse(
-        state: BlockState,
-        world: World,
-        pos: BlockPos,
-        player: PlayerEntity,
-        hand: Hand,
-        hit: BlockHitResult
+        state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
     ): ActionResult {
         if (player.mainHandStack.isEmpty) {
             if (!world.isClient) {

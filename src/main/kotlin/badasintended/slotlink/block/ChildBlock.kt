@@ -11,12 +11,7 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
 
     // TODO: Optimize this part
     override fun neighborUpdate(
-        state: BlockState,
-        world: World,
-        pos: BlockPos,
-        block: Block,
-        neighborPos: BlockPos,
-        moved: Boolean
+        state: BlockState, world: World, pos: BlockPos, block: Block, neighborPos: BlockPos, moved: Boolean
     ) {
         val blockEntity = world.getBlockEntity(pos) as ChildBlockEntity
         val neighborBlock = world.getBlockState(neighborPos).block

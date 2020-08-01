@@ -18,8 +18,7 @@ import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
 class WPutButton(
-    private val tlKey: String,
-    private val click: () -> Unit
+    private val tlKey: String, private val click: () -> Unit
 ) : WButton() {
 
     private val tooltip = arrayListOf<Text>(
@@ -32,9 +31,11 @@ class WPutButton(
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("slot")
-        ))
+        val slotStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("slot")
+            )
+        )
         val tint = slotStyle.asColor("background.unfocused")
 
         BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Slotlink.id("textures/gui/put.png"))

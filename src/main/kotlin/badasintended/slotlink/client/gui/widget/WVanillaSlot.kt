@@ -30,9 +30,13 @@ open class WVanillaSlot : WSlot() {
     }
 
     protected open fun drawItem(
-        matrices: MatrixStack, provider: VertexConsumerProvider,
-        stack: ItemStack, itemRenderer: ItemRenderer, textRenderer: TextRenderer,
-        itemX: Int, itemY: Int
+        matrices: MatrixStack,
+        provider: VertexConsumerProvider,
+        stack: ItemStack,
+        itemRenderer: ItemRenderer,
+        textRenderer: TextRenderer,
+        itemX: Int,
+        itemY: Int
     ) {
         val count = stack.count
         val countText = countText(count)
@@ -54,25 +58,19 @@ open class WVanillaSlot : WSlot() {
         val h = floor(height)
 
         BaseRenderer.drawBeveledPanel(
-            matrices, provider, x, y, z, w, h,
-            style.asColor("top_left"),
-            style.asColor("background.unfocused"),
+            matrices, provider, x, y, z, w, h, style.asColor("top_left"), style.asColor("background.unfocused"),
             style.asColor("bottom_right")
         )
         provider.draw()
 
         drawItem(
-            matrices, provider,
-            if (previewStack.isEmpty) stack else previewStack,
-            BaseRenderer.getDefaultItemRenderer(),
-            BaseRenderer.getDefaultTextRenderer(),
+            matrices, provider, if (previewStack.isEmpty) stack else previewStack,
+            BaseRenderer.getDefaultItemRenderer(), BaseRenderer.getDefaultTextRenderer(),
             ((1 + x) + ((w - 18) / 2)).toInt(), ((1 + y) + ((h - 18) / 2)).toInt()
         )
 
         if (isFocused) BaseRenderer.drawQuad(
-            matrices, provider,
-            (x + 1), (y + 1), (z + 201), (w - 2), (h - 2),
-            style.asColor("overlay")
+            matrices, provider, (x + 1), (y + 1), (z + 201), (w - 2), (h - 2), style.asColor("overlay")
         )
     }
 

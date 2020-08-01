@@ -2,10 +2,10 @@ package badasintended.slotlink.gui.screen
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.client.gui.screen.RequestScreen
-import badasintended.slotlink.common.util.buf
-import badasintended.slotlink.common.util.SortBy
 import badasintended.slotlink.common.registry.NetworkRegistry.REQUEST_REMOVE
 import badasintended.slotlink.common.registry.NetworkRegistry.REQUEST_SYNC
+import badasintended.slotlink.common.util.SortBy
+import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.widget.WServerSlot
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
@@ -36,9 +36,9 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 
-
-open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) :
-    ModScreenHandler(syncId, player) {
+open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : ModScreenHandler(
+    syncId, player
+) {
 
     val blockPos: BlockPos = buf.readBlockPos()
     var lastSort = SortBy.of(buf.readInt())
@@ -90,19 +90,19 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
         buffer3.setSlotNumber<WSlot>(0)
 
         for (i in 0 until 9) {
-            val slot = root.createChild { WServerSlot(this::sort) }
+            val slot = root.createChild { WServerSlot { screen { it.sort() } } }
             slot.setInventoryNumber<WSlot>(1)
             slot.setSlotNumber<WSlot>(i)
             inputSlots.add(slot)
         }
 
-        outputSlot = root.createChild { WServerSlot(this::sort) }
+        outputSlot = root.createChild { WServerSlot { screen { it.sort() } } }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
 
         for (i in 0 until 36) {
-            val slot = root.createChild { WServerSlot(this::sort) }
+            val slot = root.createChild { WServerSlot { screen { it.sort() } } }
             slot.setInventoryNumber<WSlot>(0)
             slot.setSlotNumber<WSlot>(i)
             playerSlots.add(slot)
@@ -145,7 +145,7 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
 
         map.forEach { (num, inv) ->
             for (i in 0 until inv.size()) {
-                val slot = root.createChild { WServerSlot(this::sort) }
+                val slot = root.createChild { WServerSlot { screen { it.sort() } } }
                 slot.setInventoryNumber<WSlot>(num)
                 slot.setSlotNumber<WSlot>(i)
                 slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
@@ -153,8 +153,10 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
             }
         }
 
-        this as ScreenHandlerAccessor
-        sort()
+        screen {
+            it.shouldSort = true
+            it.sort()
+        }
     }
 
     fun validateInventories() {
@@ -188,7 +190,8 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
         craftInternal()
 
         val buffer = buffer3.stack
-        StackUtilities.merge(buffer, cursor, buffer.maxCount, cursor.maxCount)
+        StackUtilities
+            .merge(buffer, cursor, buffer.maxCount, cursor.maxCount)
             .apply(buffer3::acceptStack, playerInventory::setCursorStack)
     }
 
@@ -248,7 +251,8 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
     private fun craftInternal() {
         if (!StackUtilities.equalItemAndTag(outputSlot.stack, buffer3.stack) and !buffer3.stack.isEmpty) return
 
-        StackUtilities.merge(outputSlot.stack, buffer3.stack, outputSlot.stack.maxCount, buffer3.stack.maxCount)
+        StackUtilities
+            .merge(outputSlot.stack, buffer3.stack, outputSlot.stack.maxCount, buffer3.stack.maxCount)
             .apply(outputSlot::acceptStack, buffer3::acceptStack)
 
         val remainingStacks = world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, craftingInv, world)
@@ -293,9 +297,10 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
         }
     }
 
-    private fun sort() {
+    private fun screen(x: (RequestScreen<*>) -> Any) {
+        if (!world.isClient) return
         this as ScreenHandlerAccessor
-        listeners.filterIsInstance<RequestScreen<*>>().forEach { it.sort() }
+        listeners.filterIsInstance<RequestScreen<*>>().forEach { x.invoke(it) }
     }
 
     override fun onContentChanged(inventory: Inventory) {
@@ -312,11 +317,7 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
      * of the [linkedSlots] and vice versa.
      */
     override fun onSlotAction(
-        slotNumber: Int,
-        inventoryNumber: Int,
-        button: Int,
-        action: Action,
-        player: PlayerEntity
+        slotNumber: Int, inventoryNumber: Int, button: Int, action: Action, player: PlayerEntity
     ) {
         this as ScreenHandlerAccessor
 
@@ -364,7 +365,8 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
                 ) {
                     val max = if (target.stack.isEmpty) source.maxCount else target.maxCount
                     source.consume(action, FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
-                    StackUtilities.merge(source::getStack, target::getStack, source::getMaxCount) { max }
+                    StackUtilities
+                        .merge(source::getStack, target::getStack, source::getMaxCount) { max }
                         .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
                     if ((source.inventoryNumber in arrayOf(2, 0, -2, -3)) and !source.stack.isEmpty) {
                         continue
@@ -382,8 +384,9 @@ open class RequestScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketBy
             playerSlots.forEach { slot ->
                 if (StackUtilities.equalItemAndTag(slot.stack, cursorStack) and !slot.isLocked) {
                     slot.consume(action, FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK)
-                    StackUtilities.merge(slot::getStack, { cursorStack }, slot::getMaxCount, { cursorStack.maxCount }
-                    ).apply({ slot.setStack<WSlot>(it) }, { playerInventory.cursorStack = it })
+                    StackUtilities
+                        .merge(slot::getStack, { cursorStack }, slot::getMaxCount, { cursorStack.maxCount })
+                        .apply({ slot.setStack<WSlot>(it) }, { playerInventory.cursorStack = it })
                 }
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)

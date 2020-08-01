@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.compat.rei
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.common.registry.BlockRegistry
 import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_PULL
+import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import com.google.common.collect.Lists
 import it.unimi.dsi.fastutil.ints.IntArrayList

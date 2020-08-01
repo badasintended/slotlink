@@ -8,8 +8,7 @@ import spinnery.widget.WAbstractButton
 import kotlin.reflect.KMutableProperty0
 
 class WSideButton(
-    private val direction: KMutableProperty0<Direction>,
-    private val save: () -> Any
+    private val direction: KMutableProperty0<Direction>, private val save: () -> Any
 ) : WSlotButton() {
 
     override fun getTextureId() = direction.get().texture()

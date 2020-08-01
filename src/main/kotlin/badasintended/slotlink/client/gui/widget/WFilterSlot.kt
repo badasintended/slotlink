@@ -19,14 +19,17 @@ class WFilterSlot(
     override fun getStack() = filterStack
 
     override fun drawItem(
-        matrices: MatrixStack, provider: VertexConsumerProvider,
-        stack: ItemStack, itemRenderer: ItemRenderer, textRenderer: TextRenderer,
-        itemX: Int, itemY: Int
+        matrices: MatrixStack,
+        provider: VertexConsumerProvider,
+        stack: ItemStack,
+        itemRenderer: ItemRenderer,
+        textRenderer: TextRenderer,
+        itemX: Int,
+        itemY: Int
     ) {
         itemRenderer.renderGuiItemIcon(stack, itemX, itemY)
         BaseRenderer.drawQuad(
-            matrices, provider,
-            itemX.toFloat(), itemY.toFloat(), z + 201, 16f, 16f,
+            matrices, provider, itemX.toFloat(), itemY.toFloat(), z + 201, 16f, 16f,
             Color.of(style.asColor("background.unfocused").RGB + 0x40000000)
         )
     }

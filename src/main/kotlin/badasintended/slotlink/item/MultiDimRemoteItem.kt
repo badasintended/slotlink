@@ -1,7 +1,6 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
-import badasintended.slotlink.common.*
 import badasintended.slotlink.common.util.*
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
@@ -90,8 +89,9 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             val masterPos = masterPosTag.toPos()
             val masterDim = Identifier(stack.orCreateTag.getString("masterDim"))
             tooltip.add(
-                TranslatableText("${baseTlKey}.info", masterPos.x, masterPos.y, masterPos.z, masterDim)
-                    .formatted(Formatting.DARK_PURPLE)
+                TranslatableText("${baseTlKey}.info", masterPos.x, masterPos.y, masterPos.z, masterDim).formatted(
+                    Formatting.DARK_PURPLE
+                )
             )
         }
     }

@@ -11,8 +11,7 @@ import spinnery.widget.api.Action
 import java.util.*
 
 abstract class ModScreenHandler(
-    syncId: Int,
-    val player: PlayerEntity
+    syncId: Int, val player: PlayerEntity
 ) : BaseScreenHandler(syncId, player.inventory) {
 
     protected val root: WInterface = `interface`
@@ -48,8 +47,7 @@ abstract class ModScreenHandler(
             if (slotA.refuses(stackA)) continue
             val stackB = if (action.isPreview) slotA.stack.copy() else slotA.stack
             val stacks: MutablePair<ItemStack, ItemStack> = StackUtilities.merge(
-                stackA, stackB, split,
-                stackA.maxCount.coerceAtMost(split + stackB.count)
+                stackA, stackB, split, stackA.maxCount.coerceAtMost(split + stackB.count)
             )
             if (action.isPreview) {
                 previewCursorStack = stacks.first.copy()

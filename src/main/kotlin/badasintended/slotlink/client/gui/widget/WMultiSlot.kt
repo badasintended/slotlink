@@ -31,9 +31,13 @@ class WMultiSlot(
     }
 
     override fun drawItem(
-        matrices: MatrixStack, provider: VertexConsumerProvider,
-        stack: ItemStack, itemRenderer: ItemRenderer, textRenderer: TextRenderer,
-        itemX: Int, itemY: Int
+        matrices: MatrixStack,
+        provider: VertexConsumerProvider,
+        stack: ItemStack,
+        itemRenderer: ItemRenderer,
+        textRenderer: TextRenderer,
+        itemX: Int,
+        itemY: Int
     ) {
         val count = stack.count
         val countText = countText(count)
@@ -50,10 +54,8 @@ class WMultiSlot(
         matrices.translate(0.0, 0.0, (z + 200.0))
         matrices.scale(scale, scale, 1f)
         textRenderer.drawWithShadow(
-            matrices, countText,
-            ((itemX + 16 - (textRenderer.getWidth(countText) * scale)) / scale),
-            ((itemY + 16 - (textRenderer.fontHeight * scale)) / scale),
-            0xFFFFFF
+            matrices, countText, ((itemX + 16 - (textRenderer.getWidth(countText) * scale)) / scale),
+            ((itemY + 16 - (textRenderer.fontHeight * scale)) / scale), 0xFFFFFF
         )
         matrices.pop()
     }
@@ -61,11 +63,7 @@ class WMultiSlot(
     /**
      * Drag event shouldn't happen here
      */
-    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
-        `interface`.handler.flush()
-        skipRelease = false
-        held = false
-    }
+    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {}
 
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 
@@ -78,58 +76,24 @@ class WMultiSlot(
 
         val isCursorEmpty = playerInventory.cursorStack.isEmpty
 
-        shouldSort.set(!isCursorEmpty)
-
-        val slot = linkedSlots.first()
+        val slot = linkedSlots.firstOrNull() ?: return
         val sSlotN = slot.slotNumber
         val sSlotInvN = slot.invNumber
+
+        shouldSort.set(!isCursorEmpty)
 
         if (Screen.hasShiftDown()) {
             if (button == LEFT) {
                 if (Screen.hasControlDown()) linkedSlots.forEach {
-                    slotAction(
-                        container,
-                        it.slotNumber,
-                        it.invNumber,
-                        button,
-                        QUICK_MOVE,
-                        player
-                    )
-                } else slotAction(
-                    container,
-                    sSlotN,
-                    sSlotInvN,
-                    button,
-                    QUICK_MOVE,
-                    player
-                )
+                    slotAction(container, it.slotNumber, it.invNumber, button, QUICK_MOVE, player)
+                } else slotAction(container, sSlotN, sSlotInvN, button, QUICK_MOVE, player)
             }
         } else {
-            if ((button == LEFT) or (button == RIGHT) and isCursorEmpty) {
-                skipRelease = true
-                slotAction(
-                    container,
-                    sSlotN,
-                    sSlotInvN,
-                    button,
-                    PICKUP,
-                    player
-                )
+            if (((button == LEFT) or (button == RIGHT)) and isCursorEmpty) {
+                slotAction(container, sSlotN, sSlotInvN, button, PICKUP, player)
             } else if (button == MIDDLE) {
-                slotAction(
-                    container,
-                    sSlotN,
-                    sSlotInvN,
-                    button,
-                    Action.CLONE,
-                    player
-                )
+                slotAction(container, sSlotN, sSlotInvN, button, Action.CLONE, player)
             }
-        }
-
-        if (isWithinBounds(mouseX, mouseY)) {
-            held = true
-            heldSince = System.currentTimeMillis()
         }
     }
 

@@ -23,24 +23,22 @@ abstract class WSlotButton : WButton() {
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("slot")
-        ))
-        val panelStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("panel")
-        ))
+        val slotStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("slot")
+            )
+        )
+        val panelStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("panel")
+            )
+        )
 
         if (isLowered) BaseRenderer.drawBeveledPanel(
-            matrices, provider,
-            x, y, z, w, h,
-            panelStyle.asColor("shadow"),
-            slotStyle.asColor("background.unfocused"),
+            matrices, provider, x, y, z, w, h, panelStyle.asColor("shadow"), slotStyle.asColor("background.unfocused"),
             panelStyle.asColor("highlight")
         ) else BaseRenderer.drawBeveledPanel(
-            matrices, provider,
-            x, y, z, w, h,
-            panelStyle.asColor("highlight"),
-            panelStyle.asColor("background"),
+            matrices, provider, x, y, z, w, h, panelStyle.asColor("highlight"), panelStyle.asColor("background"),
             panelStyle.asColor("shadow")
         )
 

@@ -19,8 +19,7 @@ object ScreenHandlerRegistry {
     }
 
     private fun <H : ModScreenHandler> r(
-        id: String,
-        function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> H
+        id: String, function: (Int, Identifier, PlayerEntity, PacketByteBuf) -> H
     ) {
         ContainerProviderRegistry.INSTANCE.registerFactory(Slotlink.id(id), ContainerFactory(function))
     }

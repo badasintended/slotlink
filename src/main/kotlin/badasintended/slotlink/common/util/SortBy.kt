@@ -6,11 +6,15 @@ import badasintended.slotlink.Slotlink
 import net.minecraft.util.Identifier
 
 enum class SortBy(
-    val texture: Identifier,
-    val translationKey: String
+    val texture: Identifier, val translationKey: String
 ) {
-    NAME(Slotlink.id("textures/gui/name.png"), "container.slotlink.request.sort.name"),
-    IDENTIFIER(Slotlink.id("textures/gui/identifier.png"), "container.slotlink.request.sort.identifier"),
+
+    NAME(
+        Slotlink.id("textures/gui/name.png"), "container.slotlink.request.sort.name"
+    ),
+    IDENTIFIER(
+        Slotlink.id("textures/gui/identifier.png"), "container.slotlink.request.sort.identifier"
+    ),
     COUNT(Slotlink.id("textures/gui/count.png"), "container.slotlink.request.sort.count");
 
     companion object {

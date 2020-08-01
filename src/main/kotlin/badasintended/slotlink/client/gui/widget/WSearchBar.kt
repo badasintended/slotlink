@@ -40,16 +40,15 @@ class WSearchBar(
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("slot")
-        ))
+        val slotStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("slot")
+            )
+        )
 
         BaseRenderer.drawBeveledPanel(
-            matrices, provider,
-            x, (y + 1), z, (w - 2), (h - 4),
-            slotStyle.asColor("top_left"),
-            slotStyle.asColor("background.unfocused"),
-            slotStyle.asColor("bottom_right")
+            matrices, provider, x, (y + 1), z, (w - 2), (h - 4), slotStyle.asColor("top_left"),
+            slotStyle.asColor("background.unfocused"), slotStyle.asColor("bottom_right")
         )
 
         renderField(matrices, provider)

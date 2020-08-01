@@ -18,9 +18,8 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
         var sourceSlot = -1
         var sourceStack = ItemStack.EMPTY
 
-        val sourceSlots =
-            if (source is SidedInventory) source.getAvailableSlots(side.opposite).toList()
-            else (0 until source.size()).toList()
+        val sourceSlots = if (source is SidedInventory) source.getAvailableSlots(side.opposite).toList()
+        else (0 until source.size()).toList()
 
         for (i in sourceSlots) {
             val stack = source.getStack(i)
@@ -40,7 +39,8 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
             val target = linkCable.getLinkedInventory(world) ?: continue
             for (j in 0 until target.size()) {
                 val targetStack = target.getStack(j)
-                StackUtilities.merge(sourceStack, targetStack, sourceStack.maxCount, targetStack.maxCount)
+                StackUtilities
+                    .merge(sourceStack, targetStack, sourceStack.maxCount, targetStack.maxCount)
                     .apply({ sourceStack = it }, { target.setStack(j, it) })
                 if (sourceStack.isEmpty) break
             }

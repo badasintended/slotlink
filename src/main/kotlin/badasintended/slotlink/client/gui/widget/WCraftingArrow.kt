@@ -21,9 +21,11 @@ class WCraftingArrow : WAbstractWidget() {
         val x = floor(x)
         val y = floor(y)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("slot")
-        ))
+        val slotStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("slot")
+            )
+        )
         val tint = slotStyle.asColor("background.unfocused")
 
         BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, 22f, 15f, tint, texture)

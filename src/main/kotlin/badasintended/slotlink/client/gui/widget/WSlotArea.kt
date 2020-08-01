@@ -21,18 +21,19 @@ class WSlotArea : WMouseArea() {
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("slot")
-        ))
-        val panelStyle = Style.of(ThemeRegistry.getStyle(theme,
-            spinneryId("panel")
-        ))
+        val slotStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("slot")
+            )
+        )
+        val panelStyle = Style.of(
+            ThemeRegistry.getStyle(
+                theme, spinneryId("panel")
+            )
+        )
 
         BaseRenderer.drawBeveledPanel(
-            matrices, provider,
-            x, y, z, w, h,
-            slotStyle.asColor("top_left"),
-            panelStyle.asColor("shadow"),
+            matrices, provider, x, y, z, w, h, slotStyle.asColor("top_left"), panelStyle.asColor("shadow"),
             slotStyle.asColor("bottom_right")
         )
     }

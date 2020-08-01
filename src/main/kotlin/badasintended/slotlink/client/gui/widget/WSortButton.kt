@@ -10,8 +10,7 @@ import spinnery.widget.WAbstractButton
 
 @Environment(EnvType.CLIENT)
 class WSortButton(
-    private var sort: SortBy,
-    private val sortFunction: () -> SortBy
+    private var sort: SortBy, private val sortFunction: () -> SortBy
 ) : WSlotButton() {
 
     private val tooltip = arrayListOf<Text>(

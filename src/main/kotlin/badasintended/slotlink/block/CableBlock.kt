@@ -22,11 +22,8 @@ import net.minecraft.world.WorldAccess
 open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
 
     companion object {
-        val SETTINGS: Settings = FabricBlockSettings
-            .of(Material.GLASS)
-            .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES)
-            .hardness(3f)
+        val SETTINGS: Settings =
+            FabricBlockSettings.of(Material.GLASS).breakByHand(true).breakByTool(FabricToolTags.PICKAXES).hardness(3f)
 
         val NORTH: BooleanProperty = BooleanProperty.of("north")
         val SOUTH: BooleanProperty = BooleanProperty.of("south")
@@ -35,7 +32,8 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
         val UP: BooleanProperty = BooleanProperty.of("up")
         val DOWN: BooleanProperty = BooleanProperty.of("down")
 
-        val propertyMap: ImmutableMap<Direction, BooleanProperty> = ImmutableMap.builder<Direction, BooleanProperty>()
+        val propertyMap: ImmutableMap<Direction, BooleanProperty> = ImmutableMap
+            .builder<Direction, BooleanProperty>()
             .put(Direction.NORTH, NORTH)
             .put(Direction.SOUTH, SOUTH)
             .put(Direction.EAST, EAST)

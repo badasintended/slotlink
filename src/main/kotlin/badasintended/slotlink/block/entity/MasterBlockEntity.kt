@@ -41,7 +41,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         linkCables.forEach { tag ->
             val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
             if (blockEntity is LinkCableBlockEntity) {
-                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)){
+                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)) {
                     linkCableSet.add(tag)
                 }
             }
@@ -53,7 +53,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         transferCables.forEach { tag ->
             val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
             if (blockEntity is TransferCableBlockEntity) {
-                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)){
+                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)) {
                     transferCableSet.add(tag)
                 }
             }

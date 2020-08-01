@@ -16,8 +16,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 abstract class ConnectorCableBlock(
-    id: String,
-    private val blockEntity: KClass<out BlockEntity>
+    id: String, private val blockEntity: KClass<out BlockEntity>
 ) : CableBlock(id) {
 
     /**
@@ -37,11 +36,7 @@ abstract class ConnectorCableBlock(
      * TODO: Optimize, maybe.
      */
     private fun checkLink(
-        world: WorldAccess,
-        pos: BlockPos,
-        facing: Direction,
-        state: BlockState,
-        neighborPos: BlockPos
+        world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (!world.isBlockIgnored(neighbor)) {
@@ -91,7 +86,10 @@ abstract class ConnectorCableBlock(
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
         if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos.toPos()) {
             val neighbor = neighborState.block
-            if (world.isBlockIgnored(neighbor) and ((world.getBlockEntity(neighborPos) !is Inventory) and (neighbor !is InventoryProvider))) {
+            if (world.isBlockIgnored(neighbor) and ((world.getBlockEntity(
+                    neighborPos
+                ) !is Inventory) and (neighbor !is InventoryProvider))
+            ) {
                 pos.around().forEach { (facingAround, posAround) ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
                 }

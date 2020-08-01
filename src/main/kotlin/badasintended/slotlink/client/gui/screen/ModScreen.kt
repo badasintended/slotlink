@@ -40,12 +40,10 @@ abstract class ModScreen<C : ModScreenHandler>(
         provider.draw(SpinneryLayers.getTooltip())
         provider.draw()
 
-        val stack = if (
-            c.previewCursorStack.isEmpty
-            and c.getDragSlots(0).isNullOrEmpty()
-            and c.getDragSlots(1).isNullOrEmpty()
-        )
-            c.playerInventory.cursorStack else c.previewCursorStack
+        val stack = if (c.previewCursorStack.isEmpty and c.getDragSlots(0).isNullOrEmpty() and c
+                .getDragSlots(1)
+                .isNullOrEmpty()
+        ) c.playerInventory.cursorStack else c.previewCursorStack
 
         val itemRenderer = BaseRenderer.getDefaultItemRenderer()
 

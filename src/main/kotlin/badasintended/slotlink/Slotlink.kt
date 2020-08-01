@@ -13,7 +13,7 @@ object Slotlink {
 
     const val ID = "slotlink"
 
-    val LOGGER: Logger = LogManager.getLogger(ID);
+    val LOGGER: Logger = LogManager.getLogger(ID)
 
     fun id(path: String) = Identifier(ID, path)
 

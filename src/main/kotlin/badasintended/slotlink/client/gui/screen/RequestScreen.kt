@@ -1,7 +1,6 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.common.registry.NetworkRegistry
 import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.RequestScreenHandler
@@ -38,7 +37,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     private var slotHeight = 0
     private var hideLabel = true
 
-    private var shouldSort = true
+    var shouldSort = false
     private var lastScroll = 0
     private var lastFilter = ""
 
@@ -65,11 +64,8 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         val slotSize = slotHeight * 18
 
         main = root.createChild(
-            { WPanel() },
-            positionOf(0, 0, 0),
-            sizeOf(
-                176,
-                197 + (slotSize - (if (hideLabel) 17 else 0))
+            { WPanel() }, positionOf(0, 0, 0), sizeOf(
+                176, 197 + (slotSize - (if (hideLabel) 17 else 0))
             )
         )
         main.setParent<W>(root)
@@ -79,69 +75,46 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         // Storage Request title
         titleLabel = main.createChild(
-            { WTranslatableLabel("container.slotlink.request") },
-            positionOf(main, 8, 6)
+            { WTranslatableLabel("container.slotlink.request") }, positionOf(main, 8, 6)
         )
 
         // Crafting label
         craftingLabel = main.createChild(
             { WTranslatableLabel("container.crafting") },
-            positionOf(
-                titleLabel,
-                19,
-                slotSize + 31 - (if (hideLabel) 8 else 0)
-            )
+            positionOf(titleLabel, 19, slotSize + 31 - (if (hideLabel) 8 else 0))
         )
         craftingLabel.setHidden<W>(hideLabel)
 
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WVanillaSlot() },
-                positionOf(
-                    craftingLabel,
-                    (((i % 3) * 18) + 1),
-                    (((i / 3) * 18) + 10)
-                ),
-                sizeOf(18)
+                { WVanillaSlot() }, positionOf(craftingLabel, (((i % 3) * 18) + 1), (((i / 3) * 18) + 10)), sizeOf(18)
             )
             slot.setNumber<S>(1, i)
         }
 
         // Crafting Result slot
         val resultSlot = main.createChild(
-            { WCraftingResultSlot(/*this::sort*/) },
-            positionOf(craftingLabel, 91, 24),
-            sizeOf(26)
+            { WCraftingResultSlot() }, positionOf(craftingLabel, 91, 24), sizeOf(26)
         )
         resultSlot.setNumber<S>(2, 0)
 
         // Crafting Arrow
         main.createChild(
-            { WCraftingArrow() },
-            positionOf(resultSlot, -29, 6)
+            { WCraftingArrow() }, positionOf(resultSlot, -29, 6)
         )
 
         // Player Inventory label
         playerInvLabel = main.createChild(
             { WTranslatableLabel("container.inventory") },
-            positionOf(
-                craftingLabel,
-                -19,
-                (66 - (if (hideLabel) 9 else 0))
-            )
+            positionOf(craftingLabel, -19, (66 - (if (hideLabel) 9 else 0)))
         )
         playerInvLabel.setHidden<W>(hideLabel)
 
         for (i in 0 until 27) {
             val slot = main.createChild(
                 { WPlayerSlot(this::putSameItem) },
-                positionOf(
-                    playerInvLabel,
-                    (((i % 9) * 18) - 1),
-                    (((i / 9) * 18) + 11)
-                ),
-                sizeOf(18)
+                positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)), sizeOf(18)
             )
             slot.setNumber<S>(0, i + 9)
             playerInvSlots.add(slot)
@@ -149,49 +122,30 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WPlayerSlot(this::putSameItem) },
-                positionOf(
-                    playerInvLabel,
-                    (((i % 9) * 18) - 1),
-                    69
-                ),
-                sizeOf(18)
+                { WPlayerSlot(this::putSameItem) }, positionOf(playerInvLabel, (((i % 9) * 18) - 1), 69), sizeOf(18)
             )
             slot.setNumber<S>(0, i)
             playerInvSlots.add(slot)
         }
 
         scrollArea = main.createChild(
-            { WMouseArea() },
-            positionOf(titleLabel, -1, 11),
-            sizeOf(162, slotSize)
+            { WMouseArea() }, positionOf(titleLabel, -1, 11), sizeOf(162, slotSize)
         )
         scrollArea.onMouseScrolled = { scroll(lastScroll - sign(it).toInt()) }
 
         scrollbar = main.createChild(
-            { WFakeScrollbar { scroll(it) } },
-            positionOf(scrollArea, 148, 0),
-            sizeOf(14, slotSize)
+            { WFakeScrollbar { scroll(it) } }, positionOf(scrollArea, 148, 0), sizeOf(14, slotSize)
         )
         scrollbar.setMin<WFakeScrollbar>(0f)
 
         slotArea = main.createChild(
-            { WSlotArea() },
-            Position.of(scrollArea),
-            sizeOf(144, slotSize)
+            { WSlotArea() }, Position.of(scrollArea), sizeOf(144, slotSize)
         )
         slotArea.onMouseReleased = { onSlotAreaClick() }
 
         for (i in 0 until 48) {
             val slot = main.createChild(
-                { WMultiSlot(this::shouldSort) },
-                positionOf(
-                    scrollArea,
-                    ((i % 8) * 18),
-                    ((i / 8) * 18),
-                    2
-                ),
-                sizeOf(18)
+                { WMultiSlot(this::shouldSort) }, positionOf(scrollArea, ((i % 8) * 18), ((i / 8) * 18), 2), sizeOf(18)
             )
             slot.setNumber<S>(-1, i)
             slot.setHidden<S>(true)
@@ -200,42 +154,33 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         sortButton = main.createChild(
             { WSortButton(lastSort) { sort(lastSort.next(), lastFilter) } },
-            positionOf(scrollArea, 148, (slotSize + 4)),
-            sizeOf(14)
+            positionOf(scrollArea, 148, (slotSize + 4)), sizeOf(14)
         )
 
         searchBar = main.createChild(
-            { WSearchBar { sort(lastSort, it) } },
-            positionOf(sortButton, -148, -1),
-            sizeOf(146, 18)
+            { WSearchBar { sort(lastSort, it) } }, positionOf(sortButton, -148, -1), sizeOf(146, 18)
         )
 
         // that `move all to inventories` button
         main.createChild(
             { WPutButton("block.slotlink.request.putAllTooltip", this::putAllButtonClick) },
-            positionOf(playerInvLabel, 155, 4),
-            sizeOf(6)
+            positionOf(playerInvLabel, 155, 4), sizeOf(6)
         )
 
         // Crafting clear button
         main.createChild(
             { WPutButton("block.slotlink.request.craft.clearTooltip", this::clearButtonClick) },
-            positionOf(craftingLabel, -6, 10),
-            sizeOf(6)
+            positionOf(craftingLabel, -6, 10), sizeOf(6)
         )
 
         main.createChild(
-            { WHelpTooltip() },
-            positionOf(scrollbar, 5, -10),
-            sizeOf(8)
+            { WHelpTooltip() }, positionOf(scrollbar, 5, -10), sizeOf(8)
         )
     }
 
     private fun clearButtonClick() {
         c.clearCraft()
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR,
-            buf()
-        )
+        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, buf())
     }
 
     private fun putAllButtonClick() {
@@ -247,16 +192,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     }
 
     private fun putInternal(slots: List<WPlayerSlot>) {
-        slots.forEach {
-            slotAction(
-                c,
-                it.slotNumber,
-                it.inventoryNumber,
-                0,
-                QUICK_MOVE,
-                c.player
-            )
-        }
+        slots.forEach { slotAction(c, it.slotNumber, it.inventoryNumber, 0, QUICK_MOVE, c.player) }
     }
 
     private fun onSlotAreaClick() {
@@ -362,15 +298,9 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         }
 
         when (sortBy) {
-            SortBy.NAME -> {
-                filledStacks.sortBy { it.name.string }
-            }
-            SortBy.IDENTIFIER -> {
-                filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
-            }
-            SortBy.COUNT -> {
-                filledStacks.sortByDescending { it.count }
-            }
+            SortBy.NAME -> filledStacks.sortBy { it.name.string }
+            SortBy.IDENTIFIER -> filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
+            SortBy.COUNT -> filledStacks.sortByDescending { it.count }
         }
 
         val slotSize = filledStacks.size + emptySlots.size
@@ -392,7 +322,6 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         slotHeight = slotHeight.coerceAtLeast(3)
     }
 
-
     override fun init() {
         super.init()
         c.addListener(this)
@@ -402,38 +331,15 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         updateSlotSize()
         val slotSize = slotHeight * 18
 
-        main.setSize<W>(
-            sizeOf(
-                176,
-                197 + (slotSize - (if (hideLabel) 17 else 0))
-            )
-        )
-        craftingLabel.setPosition<W>(
-            positionOf(
-                titleLabel,
-                19,
-                slotSize + 31 - (if (hideLabel) 8 else 0)
-            )
-        )
+        main.setSize<W>(sizeOf(176, 197 + (slotSize - (if (hideLabel) 17 else 0))))
+        craftingLabel.setPosition<W>(positionOf(titleLabel, 19, slotSize + 31 - (if (hideLabel) 8 else 0)))
         craftingLabel.setHidden<W>(hideLabel)
-        playerInvLabel.setPosition<W>(
-            positionOf(
-                craftingLabel,
-                -19,
-                66 - (if (hideLabel) 9 else 0)
-            )
-        )
+        playerInvLabel.setPosition<W>(positionOf(craftingLabel, -19, 66 - (if (hideLabel) 9 else 0)))
         playerInvLabel.setHidden<W>(hideLabel)
         scrollArea.setSize<W>(sizeOf(162, slotSize))
         scrollbar.setSize<W>(sizeOf(14, slotSize))
         slotArea.setSize<W>(sizeOf(144, slotSize))
-        sortButton.setPosition<W>(
-            positionOf(
-                scrollArea,
-                148,
-                slotSize + 4
-            )
-        )
+        sortButton.setPosition<W>(positionOf(scrollArea, 148, slotSize + 4))
 
         sort()
 

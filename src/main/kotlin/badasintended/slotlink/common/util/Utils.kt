@@ -1,14 +1,12 @@
 package badasintended.slotlink.common.util
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.block.ModBlock
 import com.google.common.collect.ImmutableMap
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
@@ -19,7 +17,6 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import net.minecraft.world.WorldAccess
 import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.registry.NetworkRegistry
 import spinnery.widget.api.*
@@ -104,7 +101,8 @@ fun bbCuboid(xPos: Int, yPos: Int, zPos: Int, xSize: Int, ySize: Int, zSize: Int
 }
 
 fun BlockPos.around(): ImmutableMap<Direction, BlockPos> {
-    return ImmutableMap.builder<Direction, BlockPos>()
+    return ImmutableMap
+        .builder<Direction, BlockPos>()
         .put(Direction.NORTH, north())
         .put(Direction.SOUTH, south())
         .put(Direction.EAST, east())

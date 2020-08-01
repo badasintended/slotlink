@@ -1,9 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.common.util.actionBar
-import badasintended.slotlink.common.util.openScreen
-import badasintended.slotlink.common.util.toPos
+import badasintended.slotlink.common.util.*
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -19,12 +17,7 @@ class RequestBlock : ChildBlock("request") {
     override fun createBlockEntity(view: BlockView): BlockEntity = RequestBlockEntity()
 
     override fun onUse(
-        state: BlockState,
-        world: World,
-        pos: BlockPos,
-        player: PlayerEntity,
-        hand: Hand,
-        hit: BlockHitResult
+        state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
     ): ActionResult {
         val blockEntity = world.getBlockEntity(pos) as RequestBlockEntity
         if (!blockEntity.hasMaster) player.actionBar("${translationKey}.hasNoMaster")

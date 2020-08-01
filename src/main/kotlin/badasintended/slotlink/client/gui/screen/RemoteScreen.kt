@@ -14,7 +14,7 @@ class RemoteScreen(c: RemoteScreenHandler) : RequestScreen<RemoteScreenHandler>(
     override fun init() {
         super.init()
         if (!c.offHand) {
-            val slot = playerInvSlots.firstOrNull() { it.slotNumber == playerInventory.selectedSlot }
+            val slot = playerInvSlots.firstOrNull { it.slotNumber == playerInventory.selectedSlot }
             slot?.setHidden<WSlot>(true)
             playerInvSlots.remove(slot)
         }
