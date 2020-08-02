@@ -1,12 +1,20 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
+import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.common.util.*
+import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.*
@@ -34,12 +42,15 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             if (dim == null) {
                 player.actionBar("${baseTlKey}.invalidDim")
             } else {
-                player.openScreen("remote") { buf ->
-                    buf.writeBlockPos(BlockPos(player.pos))
-                    buf.writeInt(stack.orCreateTag.getInt("lastSort"))
-                    buf.writeIdentifier(dim.registryKey.value)
-                    buf.writeBlockPos(masterPos)
-                    buf.writeBoolean(hand == OFF_HAND)
+                val master = dim.getBlockEntity(masterPos)
+                if (master !is MasterBlockEntity) {
+                    player.actionBar("${baseTlKey}.masterNotFound")
+                } else {
+                    player.openHandledScreen(
+                        ScreenHandlerFactory(
+                            dim, master, SortBy.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
+                        )
+                    )
                 }
             }
         }
@@ -94,6 +105,33 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
                 )
             )
         }
+    }
+
+    class ScreenHandlerFactory(
+        private val masterWorld: World,
+        private val master: MasterBlockEntity,
+        private val lastSort: SortBy,
+        private val offHand: Boolean
+    ) : ExtendedScreenHandlerFactory {
+
+        private val inventories = master.getLinkedInventories(masterWorld).values.toSet()
+
+        override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
+            val handler = RemoteScreenHandler(
+                syncId, inv, inventories, lastSort, offHand, ScreenHandlerContext.create(masterWorld, master.pos)
+            )
+            master.watchers.add(handler)
+            return handler
+        }
+
+        override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
+            buf.writeInventorySet(inventories)
+            buf.writeVarInt(lastSort.ordinal)
+            buf.writeBoolean(offHand)
+        }
+
+        override fun getDisplayName() = TranslatableText("container.slotlink.request")
+
     }
 
 }

@@ -5,16 +5,11 @@ import badasintended.slotlink.common.registry.NetworkRegistry
 import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.TransferScreenHandler
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.minecraft.item.ItemStack
-import net.minecraft.util.collection.DefaultedList
-import net.minecraft.util.math.Direction
 import spinnery.widget.*
 
 class TransferScreen(c: TransferScreenHandler) : ModScreen<TransferScreenHandler>(c) {
 
     private val filterSlots = arrayListOf<WFilterSlot>()
-    private var isBlackList = false
-    private var side = Direction.DOWN
 
     init {
         val main = root.createChild(
@@ -37,15 +32,16 @@ class TransferScreen(c: TransferScreenHandler) : ModScreen<TransferScreenHandler
                 ), sizeOf(18)
             )
             slot.setNumber<WSlot>(1, i)
+            slot.setStack<WSlot>(c.filter[i])
             filterSlots.add(slot)
         }
 
         main.createChild(
-            { WSideButton(this::side, this::save) }, positionOf(main, 27, 36), sizeOf(14)
+            { WSideButton(c::side, this::save) }, positionOf(main, 27, 36), sizeOf(14)
         )
 
         main.createChild(
-            { WFilterButton(this::isBlackList, this::save) }, positionOf(main, 135, 36), sizeOf(14)
+            { WFilterButton(c::isBlacklist, this::save) }, positionOf(main, 135, 36), sizeOf(14)
         )
 
         val playerInvLabel = main.createChild(
@@ -71,17 +67,11 @@ class TransferScreen(c: TransferScreenHandler) : ModScreen<TransferScreenHandler
         }
     }
 
-    fun setMode(side: Direction, isBlackList: Boolean, filter: DefaultedList<ItemStack>) {
-        this.side = side
-        this.isBlackList = isBlackList
-        filterSlots.forEachIndexed { i, s -> s.setStack<WSlot>(filter[i]) }
-    }
-
     private fun save() {
         val buf = buf()
         buf.writeBlockPos(c.pos)
-        buf.writeInt(side.id)
-        buf.writeBoolean(isBlackList)
+        buf.writeInt(c.side.id)
+        buf.writeBoolean(c.isBlacklist)
         filterSlots.forEach { buf.writeItemStack(it.stack) }
 
         ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.TRANSFER_WRITE, buf)

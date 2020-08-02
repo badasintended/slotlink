@@ -1,7 +1,9 @@
 package badasintended.slotlink.gui.screen
 
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.screen.ScreenHandlerType
 import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.utility.MutablePair
 import spinnery.common.utility.StackUtilities
@@ -11,8 +13,10 @@ import spinnery.widget.api.Action
 import java.util.*
 
 abstract class ModScreenHandler(
-    syncId: Int, val player: PlayerEntity
-) : BaseScreenHandler(syncId, player.inventory) {
+    syncId: Int, playerInventory: PlayerInventory
+) : BaseScreenHandler(syncId, playerInventory) {
+
+    val player: PlayerEntity = playerInventory.player
 
     protected val root: WInterface = `interface`
 
@@ -59,5 +63,7 @@ abstract class ModScreenHandler(
             }
         }
     }
+
+    abstract override fun getType(): ScreenHandlerType<*>
 
 }

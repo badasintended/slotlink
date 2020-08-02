@@ -1,11 +1,23 @@
 package badasintended.slotlink.gui.screen
 
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.network.PacketByteBuf
+import badasintended.slotlink.common.registry.ScreenHandlerRegistry
+import badasintended.slotlink.common.util.SortBy
+import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.inventory.Inventory
+import net.minecraft.screen.ScreenHandlerContext
+import net.minecraft.util.math.BlockPos
 
-class RemoteScreenHandler(syncId: Int, player: PlayerEntity, buf: PacketByteBuf) : RequestScreenHandler(
-    syncId, player, buf
+class RemoteScreenHandler(
+    syncId: Int,
+    playerInventory: PlayerInventory,
+    invSet: Set<Inventory>,
+    lastSort: SortBy,
+    val offHand: Boolean,
+    context: ScreenHandlerContext
+) : RequestScreenHandler(
+    syncId, playerInventory, BlockPos.ORIGIN, invSet, lastSort, context
 ) {
 
-    val offHand = buf.readBoolean()
+    override fun getType() = ScreenHandlerRegistry.REMOTE
+
 }

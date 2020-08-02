@@ -1,11 +1,11 @@
 package badasintended.slotlink.common.util
 
 import badasintended.slotlink.Slotlink
+import badasintended.slotlink.inventory.DummyInventory
 import com.google.common.collect.ImmutableMap
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
@@ -15,6 +15,7 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
+import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
@@ -23,15 +24,6 @@ import spinnery.common.handler.BaseScreenHandler
 import spinnery.common.registry.NetworkRegistry
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.api.*
-import java.util.function.Consumer
-
-/**
- * Opens a container, what else?
- */
-@Suppress("DEPRECATION")
-fun PlayerEntity.openScreen(id: String, function: (PacketByteBuf) -> Unit) {
-    ContainerProviderRegistry.INSTANCE.openContainer(Slotlink.id(id), this as ServerPlayerEntity, Consumer(function))
-}
 
 fun spinneryId(id: String) = Identifier("spinnery", id)
 
@@ -125,15 +117,48 @@ fun Direction.next(): Direction {
 }
 
 fun Inventory.mergeStack(slot: Int, source: ItemStack) {
-    if (!isValid(slot, source)) return
-    val target = getStack(slot)
-    if (target.isEmpty) {
-        setStack(slot, source.copy())
-        source.count = 0
-    } else {
-        if (!StackUtilities.equalItemAndTag(source, target)) return
-        val i = source.count.coerceAtMost(target.maxCount - target.count)
-        target.increment(i)
-        source.decrement(i)
+    var target = getStack(slot)
+    for (i in target.count until target.maxCount) {
+        if (!isValid(slot, source)) return
+        if (target.isEmpty) {
+            val stack = source.copy()
+            stack.count = 1
+            setStack(slot, stack)
+            source.decrement(1)
+            target = getStack(slot)
+        } else {
+            if (!StackUtilities.equalItemAndTag(source, target)) return
+            target.increment(1)
+            source.decrement(1)
+        }
+        if (target.count == target.maxCount) return
     }
+}
+
+fun PacketByteBuf.writeInventorySet(inventories: Set<Inventory>) {
+    writeVarInt(inventories.size)
+    inventories.forEach {
+        writeVarInt(it.size())
+    }
+}
+
+fun PacketByteBuf.readInventorySet(): LinkedHashSet<Inventory> {
+    val set = linkedSetOf<Inventory>()
+    for (i in 0 until readVarInt()) {
+        set.add(DummyInventory(readVarInt()))
+    }
+    return set
+}
+
+fun PacketByteBuf.writeInventory(stacks: DefaultedList<ItemStack>) {
+    writeVarInt(stacks.size)
+    stacks.forEach { writeItemStack(it) }
+}
+
+fun PacketByteBuf.readInventory(): DefaultedList<ItemStack> {
+    val stack = DefaultedList.ofSize(readVarInt(), ItemStack.EMPTY)
+    for (i in 0 until stack.size) {
+        stack[i] = readItemStack()
+    }
+    return stack
 }

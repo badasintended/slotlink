@@ -11,7 +11,7 @@ import net.minecraft.world.World
 
 class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.IMPORT_CABLE) {
 
-    override var side = Direction.UP
+    override var side = Direction.DOWN
 
     override fun transfer(world: World, master: MasterBlockEntity) {
         val source = getLinkedInventory(world) ?: return

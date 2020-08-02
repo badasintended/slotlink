@@ -1,6 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.common.util.MasterWatcher
 import badasintended.slotlink.common.util.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
@@ -16,6 +17,8 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
     var linkCables = ListTag()
     var transferCables = ListTag()
+
+    var watchers = hashSetOf<MasterWatcher>()
 
     private var tick = 0
 
@@ -83,6 +86,11 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
         val world = getWorld() ?: return
         validateCables(world)
+    }
+
+    override fun markRemoved() {
+        super.markRemoved()
+        watchers.forEach { it.onMasterRemoved() }
     }
 
     override fun tick() {

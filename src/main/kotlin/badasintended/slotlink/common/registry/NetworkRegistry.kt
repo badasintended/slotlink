@@ -3,14 +3,10 @@ package badasintended.slotlink.common.registry
 import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
-import badasintended.slotlink.client.gui.screen.TransferScreen
 import badasintended.slotlink.gui.screen.RequestScreenHandler
-import badasintended.slotlink.inventory.DummyInventory
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.*
-import net.minecraft.client.MinecraftClient
-import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
@@ -28,9 +24,7 @@ object NetworkRegistry {
     val CRAFT_PULL = Slotlink.id("craft_pull")
     val TRANSFER_WRITE = Slotlink.id("transfer_write")
 
-    val REQUEST_SYNC = Slotlink.id("request_sync")
     val REQUEST_REMOVE = Slotlink.id("request_remove")
-    val TRANSFER_READ = Slotlink.id("transfer_read")
 
     fun initMain() {
         rS(REQUEST_SAVE) { context, buf ->
@@ -112,30 +106,6 @@ object NetworkRegistry {
 
     @Environment(EnvType.CLIENT)
     fun initClient() {
-        rC(REQUEST_SYNC) { context, buf ->
-            /**
-             * 1. inv count
-             * 2. inv number
-             * 3. inv size
-             * 4. inv maxCount
-             * 5. inv stacks
-             */
-            val invMap = hashMapOf<Int, Inventory>()
-
-            for (i in 0 until buf.readInt()) {
-                val num = buf.readInt()
-                val inv = DummyInventory(buf.readInt())
-                inv.maxCount = buf.readInt()
-                for (j in 0 until inv.size()) {
-                    inv.setStack(j, buf.readItemStack())
-                }
-                invMap[num] = inv
-            }
-            context.taskQueue.execute {
-                (context.player.currentScreenHandler as RequestScreenHandler).createSlots(invMap)
-            }
-        }
-
         rC(REQUEST_REMOVE) { context, buf ->
             val deletedInv = buf.readIntArray()
 
@@ -146,19 +116,6 @@ object NetworkRegistry {
                 }
             }
         }
-
-        rC(TRANSFER_READ) { context, buf ->
-            val side = Direction.byId(buf.readInt())
-            val isBlackList = buf.readBoolean()
-            val filter = DefaultedList.ofSize(9, ItemStack.EMPTY)
-            for (i in 0 until 9) filter[i] = buf.readItemStack()
-
-            context.taskQueue.execute {
-                val screen = MinecraftClient.getInstance().currentScreen
-                if (screen is TransferScreen) screen.setMode(side, isBlackList, filter)
-            }
-        }
-
     }
 
     private fun rS(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {

@@ -37,7 +37,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     private var slotHeight = 0
     private var hideLabel = true
 
-    var shouldSort = false
+    private var shouldSort = false
     private var lastScroll = 0
     private var lastFilter = ""
 
@@ -247,7 +247,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     open fun saveSort() {
         val buf = buf()
-        buf.writeBlockPos(c.blockPos)
+        buf.writeBlockPos(c.masterPos)
         buf.writeInt(lastSort.ordinal)
         ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_SAVE, buf)
     }
@@ -329,6 +329,8 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     override fun resize(client: MinecraftClient, width: Int, height: Int) {
         updateSlotSize()
+        viewedSlots.forEach { it.setHidden<S>(true) }
+
         val slotSize = slotHeight * 18
 
         main.setSize<W>(sizeOf(176, 197 + (slotSize - (if (hideLabel) 17 else 0))))
@@ -358,6 +360,18 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         if (searchBar.isActive) searchBar.onKeyPressed(keyCode, character, keyModifier)
         else super.keyPressed(keyCode, character, keyModifier)
         return true
+    }
+
+    override fun tick() {
+        tick++
+        if (tick == 1) {
+            tick = 0
+            if (firstSort) {
+                firstSort = false
+                shouldSort = true
+                sort()
+            }
+        }
     }
 
     override fun onHandlerRegistered(handler: ScreenHandler, stacks: DefaultedList<ItemStack>) {}

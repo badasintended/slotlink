@@ -1,21 +1,29 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ModBlock
-import badasintended.slotlink.common.util.toPos
-import badasintended.slotlink.common.util.toTag
+import badasintended.slotlink.common.util.*
+import badasintended.slotlink.gui.screen.TransferScreenHandler
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventories
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.ScreenHandler
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ConnectorCableBlockEntity(type) {
+abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ConnectorCableBlockEntity(type),
+    ExtendedScreenHandlerFactory {
 
     var isBlackList = false
     var filter: DefaultedList<ItemStack> = DefaultedList.ofSize(9, ItemStack.EMPTY)
@@ -67,5 +75,18 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
             }
         }
     }
+
+    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
+        return TransferScreenHandler(syncId, inv, pos, side, isBlackList, filter)
+    }
+
+    override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
+        buf.writeBlockPos(pos)
+        buf.writeVarInt(side.id)
+        buf.writeBoolean(isBlackList)
+        buf.writeInventory(filter)
+    }
+
+    override fun getDisplayName() = TranslatableText("container.slotlink.transfer")
 
 }
