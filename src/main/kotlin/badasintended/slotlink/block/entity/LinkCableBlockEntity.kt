@@ -5,7 +5,11 @@ import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
 import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.common.util.toTag
+import badasintended.slotlink.gui.screen.LinkScreenHandler
 import net.minecraft.block.Block
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.screen.ScreenHandler
 import net.minecraft.world.WorldAccess
 
 class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE) {
@@ -26,6 +30,10 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.L
                 master.markDirty()
             }
         }
+    }
+
+    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
+        return LinkScreenHandler(syncId, inv, pos, priority, isBlackList, filter)
     }
 
 }

@@ -5,7 +5,7 @@ import badasintended.slotlink.block.entity.LinkCableBlockEntity
 import net.minecraft.block.Block
 import net.minecraft.world.WorldAccess
 
-class LinkCableBlock : ConnectorCableBlock("link_cable", LinkCableBlockEntity::class) {
+class LinkCableBlock : ConnectorCableBlock("link_cable", ::LinkCableBlockEntity) {
 
     override fun WorldAccess.isBlockIgnored(block: Block): Boolean {
         if (block is ModBlock) return true

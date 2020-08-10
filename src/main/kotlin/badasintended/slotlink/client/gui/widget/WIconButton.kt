@@ -1,6 +1,5 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.Slotlink
 import badasintended.slotlink.common.util.spinneryId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -9,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
+import net.minecraft.util.Identifier
 import spinnery.client.render.BaseRenderer
 import spinnery.common.registry.ThemeRegistry
 import spinnery.widget.WAbstractButton
@@ -17,8 +17,8 @@ import spinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
-class WPutButton(
-    private val tlKey: String, private val click: () -> Unit
+class WIconButton(
+    tlKey: String, private val texture: Identifier, private val click: () -> Unit
 ) : WButton() {
 
     private val tooltip = arrayListOf<Text>(
@@ -31,14 +31,10 @@ class WPutButton(
         val w = floor(width)
         val h = floor(height)
 
-        val slotStyle = Style.of(
-            ThemeRegistry.getStyle(
-                theme, spinneryId("slot")
-            )
-        )
+        val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))
         val tint = slotStyle.asColor("background.unfocused")
 
-        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, Slotlink.id("textures/gui/put.png"))
+        BaseRenderer.drawTexturedQuad(matrices, provider, x, y, z, w, h, tint, texture)
     }
 
     override fun <W : WAbstractButton> setLowered(toggleState: Boolean): W {

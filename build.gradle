@@ -34,9 +34,6 @@ dependencies {
     modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
     modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
-
-    modCompile "blue.endless:jankson:1.2.0"
-    include "blue.endless:jankson:1.2.0"
 }
 
 if (project.enable_databreaker.toBoolean()) {

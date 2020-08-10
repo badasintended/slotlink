@@ -11,15 +11,10 @@ import net.minecraft.client.gui.screen.Screen
 import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
 import spinnery.common.utility.StackUtilities.equalItemAndTag
-import spinnery.widget.WSlot
 import spinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
-class WCraftingResultSlot : WSlot() {
-
-    override fun onMouseReleased(mouseX: Float, mouseY: Float, button: Int) {
-        //sort.invoke()
-    }
+class WCraftingResultSlot : WVanillaSlot() {
 
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 

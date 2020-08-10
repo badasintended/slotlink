@@ -4,20 +4,23 @@ import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.common.util.*
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
+import net.minecraft.screen.NamedScreenHandlerFactory
+import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.*
+import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.*
-import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
-abstract class ConnectorCableBlock(
-    id: String, private val blockEntity: KClass<out BlockEntity>
-) : CableBlock(id) {
+abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
 
     /**
      * - Checks linked block (e.g. chest) and update block state accordingly.
@@ -41,7 +44,7 @@ abstract class ConnectorCableBlock(
         val neighbor = world.getBlockState(neighborPos).block
         if (!world.isBlockIgnored(neighbor)) {
             if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
-                val blockEntity = world.getBlockEntity(pos) as ConnectorCableBlockEntity
+                val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
                 if ((blockEntity.getLinkedInventory(world) == null) or (blockEntity.linkedPos.toPos() == neighborPos)) {
                     blockEntity.linkedPos = neighborPos.toTag()
                     blockEntity.markDirty()
@@ -54,8 +57,6 @@ abstract class ConnectorCableBlock(
 
     protected abstract fun WorldAccess.isBlockIgnored(block: Block): Boolean
 
-    override fun createBlockEntity(view: BlockView) = blockEntity.createInstance()
-
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, ctx)
@@ -66,11 +67,9 @@ abstract class ConnectorCableBlock(
         super.onPlaced(world, pos, state, placer, itemStack)
 
         var updatedState = state
-
         pos.around().forEach { (facing, neighborPos) ->
             updatedState = checkLink(world, pos, facing, updatedState, neighborPos)
         }
-
         world.setBlockState(pos, updatedState)
     }
 
@@ -96,6 +95,29 @@ abstract class ConnectorCableBlock(
             }
         }
         return updatedState
+    }
+
+    override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+        super.buildTooltip(stack, view, tooltip, options)
+        tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
+    }
+
+    override fun onUse(
+        state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
+    ): ActionResult {
+        if (player.mainHandStack.isEmpty) {
+            player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
+            return ActionResult.SUCCESS
+        }
+        return ActionResult.PASS
+    }
+
+    override fun createScreenHandlerFactory(
+        state: BlockState, world: World, pos: BlockPos
+    ): NamedScreenHandlerFactory? {
+        val blockEntity = world.getBlockEntity(pos) ?: return null
+        if (blockEntity !is ConnectorCableBlockEntity) return null
+        return blockEntity
     }
 
 }

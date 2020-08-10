@@ -1,5 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.item.ItemRenderer
@@ -10,8 +12,9 @@ import spinnery.client.render.BaseRenderer
 import spinnery.widget.WSlot
 import spinnery.widget.api.Color
 
+@Environment(EnvType.CLIENT)
 class WFilterSlot(
-    private val save: () -> Any
+    private val update: (ItemStack) -> Any
 ) : WVanillaSlot() {
 
     private var filterStack: ItemStack = ItemStack.EMPTY
@@ -40,7 +43,7 @@ class WFilterSlot(
         filterStack = `interface`.handler.playerInventory.cursorStack.copy()
         filterStack.count = 1
         filterStack.tag = CompoundTag()
-        save.invoke()
+        update.invoke(stack)
     }
 
     override fun <W : WSlot> setStack(stack: ItemStack): W {

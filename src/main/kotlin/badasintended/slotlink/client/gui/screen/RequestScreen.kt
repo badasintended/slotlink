@@ -12,8 +12,7 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
-import net.minecraft.text.LiteralText
-import net.minecraft.text.MutableText
+import net.minecraft.text.*
 import net.minecraft.util.Formatting
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
@@ -29,6 +28,15 @@ import spinnery.widget.WSlot as S
 
 @Environment(EnvType.CLIENT)
 open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), ScreenHandlerListener {
+
+    private val help = arrayListOf<Text>(
+        TranslatableText("block.slotlink.request.help1"),
+        TranslatableText("block.slotlink.request.help2").formatted(Formatting.GRAY),
+        TranslatableText("block.slotlink.request.help3").formatted(Formatting.GRAY), LiteralText(""),
+        TranslatableText("block.slotlink.request.help4"),
+        TranslatableText("block.slotlink.request.help5").formatted(Formatting.GRAY),
+        TranslatableText("block.slotlink.request.help6").formatted(Formatting.GRAY)
+    )
 
     private val emptySlots = arrayListOf<WLinkedSlot>()
     private val filledSlots = arrayListOf<WLinkedSlot>()
@@ -56,7 +64,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     private val scrollbar: WFakeScrollbar
     private val viewedSlots = arrayListOf<WMultiSlot>()
     private val slotArea: WSlotArea
-    private val sortButton: WSortButton
+    private val sortButton: WSlotButton
     private val searchBar: WSearchBar
 
     init {
@@ -64,7 +72,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         val slotSize = slotHeight * 18
 
         main = root.createChild(
-            { WPanel() }, positionOf(0, 0, 0), sizeOf(
+            ::WPanel, positionOf(0, 0, 0), sizeOf(
                 176, 197 + (slotSize - (if (hideLabel) 17 else 0))
             )
         )
@@ -88,21 +96,17 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                { WVanillaSlot() }, positionOf(craftingLabel, (((i % 3) * 18) + 1), (((i / 3) * 18) + 10)), sizeOf(18)
+                ::WVanillaSlot, positionOf(craftingLabel, (((i % 3) * 18) + 1), (((i / 3) * 18) + 10)), sizeOf(18)
             )
             slot.setNumber<S>(1, i)
         }
 
         // Crafting Result slot
-        val resultSlot = main.createChild(
-            { WCraftingResultSlot() }, positionOf(craftingLabel, 91, 24), sizeOf(26)
-        )
+        val resultSlot = main.createChild(::WCraftingResultSlot, positionOf(craftingLabel, 91, 24), sizeOf(26))
         resultSlot.setNumber<S>(2, 0)
 
         // Crafting Arrow
-        main.createChild(
-            { WCraftingArrow() }, positionOf(resultSlot, -29, 6)
-        )
+        main.createChild(::WCraftingArrow, positionOf(resultSlot, -29, 6))
 
         // Player Inventory label
         playerInvLabel = main.createChild(
@@ -128,19 +132,15 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
             playerInvSlots.add(slot)
         }
 
-        scrollArea = main.createChild(
-            { WMouseArea() }, positionOf(titleLabel, -1, 11), sizeOf(162, slotSize)
-        )
+        scrollArea = main.createChild(::WMouseArea, positionOf(titleLabel, -1, 11), sizeOf(162, slotSize))
         scrollArea.onMouseScrolled = { scroll(lastScroll - sign(it).toInt()) }
 
         scrollbar = main.createChild(
-            { WFakeScrollbar { scroll(it) } }, positionOf(scrollArea, 148, 0), sizeOf(14, slotSize)
+            { WFakeScrollbar(this::scroll) }, positionOf(scrollArea, 148, 0), sizeOf(14, slotSize)
         )
         scrollbar.setMin<WFakeScrollbar>(0f)
 
-        slotArea = main.createChild(
-            { WSlotArea() }, Position.of(scrollArea), sizeOf(144, slotSize)
-        )
+        slotArea = main.createChild(::WSlotArea, Position.of(scrollArea), sizeOf(144, slotSize))
         slotArea.onMouseReleased = { onSlotAreaClick() }
 
         for (i in 0 until 48) {
@@ -152,10 +152,12 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
             viewedSlots.add(slot)
         }
 
-        sortButton = main.createChild(
-            { WSortButton(lastSort) { sort(lastSort.next(), lastFilter) } },
-            positionOf(scrollArea, 148, (slotSize + 4)), sizeOf(14)
-        )
+        sortButton = main.createChild({
+            WSlotButton()
+                .tlKey { lastSort.translationKey }
+                .texture { lastSort.texture }
+                .onClick { sort(lastSort.next(), lastFilter) }
+        }, positionOf(scrollArea, 148, (slotSize + 4)), sizeOf(14))
 
         searchBar = main.createChild(
             { WSearchBar { sort(lastSort, it) } }, positionOf(sortButton, -148, -1), sizeOf(146, 18)
@@ -163,18 +165,18 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         // that `move all to inventories` button
         main.createChild(
-            { WPutButton("block.slotlink.request.putAllTooltip", this::putAllButtonClick) },
+            { WIconButton("block.slotlink.request.putAllTooltip", tex("gui/put"), this::putAllButtonClick) },
             positionOf(playerInvLabel, 155, 4), sizeOf(6)
         )
 
         // Crafting clear button
         main.createChild(
-            { WPutButton("block.slotlink.request.craft.clearTooltip", this::clearButtonClick) },
+            { WIconButton("block.slotlink.request.craft.clearTooltip", tex("gui/put"), this::clearButtonClick) },
             positionOf(craftingLabel, -6, 10), sizeOf(6)
         )
 
         main.createChild(
-            { WHelpTooltip() }, positionOf(scrollbar, 5, -10), sizeOf(8)
+            { WHelpTooltip("block.slotlink.request", 7) }, positionOf(scrollbar, 5, -10), sizeOf(8)
         )
     }
 
@@ -306,7 +308,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         val slotSize = filledStacks.size + emptySlots.size
 
         scrollbar.setMax<WFakeScrollbar>(((slotSize / 8) - slotHeight + 1f).coerceAtLeast(0f))
-        if (lastSort != sortBy) scroll(0) else scroll(lastScroll)
+        if ((lastSort != sortBy) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
         lastSort = sortBy
         saveSort()
 

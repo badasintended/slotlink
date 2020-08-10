@@ -4,10 +4,14 @@ import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.common.util.toTag
 import net.minecraft.block.*
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(id, settings), BlockEntityProvider {
+abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity, settings: Settings = SETTINGS) :
+    ModBlock(id, settings),
+    BlockEntityProvider {
 
     // TODO: Optimize this part
     override fun neighborUpdate(
@@ -55,5 +59,7 @@ abstract class ChildBlock(id: String, settings: Settings = SETTINGS) : ModBlock(
             world.updateNeighbors(pos, block)
         }
     }
+
+    override fun createBlockEntity(world: BlockView) = blockEntity.invoke()
 
 }

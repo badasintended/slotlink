@@ -6,7 +6,6 @@ import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_PULL
 import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import com.google.common.collect.Lists
-import it.unimi.dsi.fastutil.ints.IntArrayList
 import me.shedaniel.rei.api.AutoTransferHandler.Result
 import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeHelper
@@ -17,7 +16,6 @@ import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
-import net.minecraft.client.resource.language.I18n
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeType
@@ -43,39 +41,12 @@ class SlotlinkReiPlugin : REIPluginV0 {
             val recipe = display.optionalRecipe.get()
             if (recipe.type != RecipeType.CRAFTING) return@r Result.createNotApplicable()
 
-            if (!context.minecraft.player!!.recipeBook.contains(recipe)) return@r Result.createFailed(
-                I18n.translate("error.rei.recipe.not.unlocked")
-            )
-
             val input = Lists.newArrayListWithCapacity<List<EntryStack>>(9)
             for (i in 0 until 9) input.add(Collections.emptyList())
             display.inputEntries.forEachIndexed { i, entry ->
                 input[DefaultCraftingCategory.getSlotWithSize(display, i, 3)] = entry
             }
 
-            val stacks = arrayListOf<ItemStack>()
-            container.playerSlots.filterNot { it.stack.isEmpty }.forEach { stacks.add(it.stack.copy()) }
-            container.linkedSlots.filterNot { it.stack.isEmpty }.forEach { stacks.add(it.stack.copy()) }
-
-            val notFound = IntArrayList()
-            val foundAll = mutableMapOf<Int, Boolean>()
-            input.forEachIndexed { i, list ->
-                var foundOne = list.isEmpty()
-                for (entry in list) {
-                    val first = stacks.firstOrNull { it.item == entry.item }
-                    if ((first != null) or (entry.isEmpty)) {
-                        first?.decrement(1)
-                        foundOne = true
-                        break
-                    }
-                }
-                if (!foundOne) notFound.add(i)
-                foundAll[i] = foundOne
-            }
-
-            if (!foundAll.values.all { it }) return@r Result.createFailed(
-                "error.rei.not.enough.materials", notFound
-            )
             if (!INSTANCE.canServerReceive(CRAFT_PULL)) return@r Result.createFailed("error.rei.not.on.server")
             if (!context.isActuallyCrafting) return@r Result.createSuccessful()
 

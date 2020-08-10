@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
@@ -62,7 +60,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
     ): ActionResult {
         if (!world.isClient) {
             val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
-            val inventories = blockEntity.getLinkedInventories(world).values
+            val inventories = blockEntity.getLinkedInventories(world).keys
 
             player.chat("")
             player.chat("$translationKey.use1", pos.x, pos.y, pos.z)

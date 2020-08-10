@@ -1,13 +1,15 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.*
+import badasintended.slotlink.common.util.SortBy
+import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
+import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
@@ -20,7 +22,7 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
 
     var lastSort = 0
 
-    private var inventories = emptySet<Inventory>()
+    private var inventories = emptyMap<Inventory, Pair<Boolean, Set<Item>>>()
     private var _masterPos = BlockPos.ORIGIN
 
     override fun toTag(tag: CompoundTag): CompoundTag {
@@ -43,7 +45,7 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
         _masterPos = masterPos.toPos()
         val master = world.getBlockEntity(_masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
-        inventories = master.getLinkedInventories(world).values.toSet()
+        inventories = master.getLinkedInventories(world)
         val handler = RequestScreenHandler(
             syncId, inv, _masterPos, inventories, SortBy.of(lastSort), ScreenHandlerContext.create(world, _masterPos)
         )
@@ -53,8 +55,8 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
         buf.writeBlockPos(_masterPos)
-        buf.writeInventorySet(inventories)
         buf.writeVarInt(lastSort)
+        buf.writeIntArray(inventories.keys.stream().mapToInt { it.size() }.toArray())
     }
 
     override fun getDisplayName() = TranslatableText("container.slotlink.request")

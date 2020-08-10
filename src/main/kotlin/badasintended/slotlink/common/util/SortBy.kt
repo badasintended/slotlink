@@ -1,21 +1,12 @@
-@file:Suppress("unused")
-
 package badasintended.slotlink.common.util
 
-import badasintended.slotlink.Slotlink
 import net.minecraft.util.Identifier
 
-enum class SortBy(
-    val texture: Identifier, val translationKey: String
-) {
+enum class SortBy(val texture: Identifier, val translationKey: String) {
 
-    NAME(
-        Slotlink.id("textures/gui/name.png"), "container.slotlink.request.sort.name"
-    ),
-    IDENTIFIER(
-        Slotlink.id("textures/gui/identifier.png"), "container.slotlink.request.sort.identifier"
-    ),
-    COUNT(Slotlink.id("textures/gui/count.png"), "container.slotlink.request.sort.count");
+    NAME(tex("gui/name"), "container.slotlink.request.sort.name"),
+    IDENTIFIER(tex("gui/identifier"), "container.slotlink.request.sort.identifier"),
+    COUNT(tex("gui/count"), "container.slotlink.request.sort.count");
 
     companion object {
         val values = values()
@@ -23,6 +14,6 @@ enum class SortBy(
     }
 
     fun next(): SortBy {
-        return values[(this.ordinal + 1) % values.size]
+        return values[(ordinal + 1) % values.size]
     }
 }

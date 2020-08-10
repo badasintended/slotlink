@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.CableBlockEntity
@@ -19,7 +17,7 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.WorldAccess
 
-open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
+open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlockEntity) : ChildBlock(id, be, SETTINGS) {
 
     companion object {
         val SETTINGS: Settings =
@@ -43,15 +41,10 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
             .build()
     }
 
-    /**
-     * @return whether block in pos is an instance of [ModBlock]
-     */
-    private fun canConnect(world: WorldAccess, pos: BlockPos): Boolean {
-        val block = world.getBlockState(pos).block
+    protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
+        val block = world.getBlockState(neighborPos).block
         return block is ModBlock
     }
-
-    override fun createBlockEntity(view: BlockView): BlockEntity = CableBlockEntity()
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
         builder.add(NORTH, SOUTH, EAST, WEST, UP, DOWN)
@@ -78,8 +71,6 @@ open class CableBlock(id: String = "cable") : ChildBlock(id, SETTINGS) {
         pos: BlockPos,
         neighborPos: BlockPos
     ): BlockState {
-        super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
-
         return state.with(propertyMap[facing], canConnect(world, neighborPos))
     }
 

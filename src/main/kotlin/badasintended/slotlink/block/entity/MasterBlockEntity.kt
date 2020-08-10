@@ -3,37 +3,55 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
 import badasintended.slotlink.common.util.MasterWatcher
 import badasintended.slotlink.common.util.toPos
+import badasintended.slotlink.mixin.DoubleInventoryAccessor
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.inventory.DoubleInventory
 import net.minecraft.inventory.Inventory
+import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.util.Tickable
-import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable {
 
     var linkCables = ListTag()
-    var transferCables = ListTag()
+
+    var importCables = ListTag()
+
+    var exportCables = ListTag()
 
     var watchers = hashSetOf<MasterWatcher>()
 
     private var tick = 0
 
-    fun getLinkedInventories(world: World): Map<BlockPos, Inventory> {
-        val linkedMap = linkedMapOf<BlockPos, Inventory>()
+    fun getLinkedInventories(world: World): Map<Inventory, Pair<Boolean, Set<Item>>> {
+        val linkedMap = linkedMapOf<Inventory, Pair<Boolean, Set<Item>>>()
 
-        linkCables.forEach { linkCablePosTag ->
+        val cables = arrayListOf<LinkCableBlockEntity>()
+
+        linkCables.sortedByDescending { (it as CompoundTag).getInt("p") }.forEach { linkCablePosTag ->
             linkCablePosTag as CompoundTag
             val cablePos = linkCablePosTag.toPos()
-            val cableBlockEntity = world.getBlockEntity(cablePos)
+            val cable = world.getBlockEntity(cablePos)
 
-            if (cableBlockEntity is LinkCableBlockEntity) {
-                val inventory = cableBlockEntity.getLinkedInventory(world)
-                if (inventory != null) linkedMap[cableBlockEntity.linkedPos.toPos()] = inventory
+            if (cable is LinkCableBlockEntity) cables.add(cable)
+        }
+
+        cables.sortByDescending { it.priority }
+        for (cable in cables) {
+            val inventory = cable.getLinkedInventory(world) ?: continue
+            val key = inventory.first
+            if (key is DoubleInventory) {
+                key as DoubleInventoryAccessor
+                if (linkedMap.keys
+                        .filterIsInstance<DoubleInventory>()
+                        .any { it.isPart(key.first) or it.isPart(key.second) }
+                ) continue
             }
+            linkedMap[key] = inventory.second
         }
 
         return linkedMap
@@ -52,24 +70,37 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         linkCables.clear()
         linkCables.addAll(linkCableSet)
 
-        val transferCableSet = linkedSetOf<CompoundTag>()
-        transferCables.forEach { tag ->
+        val importCableSet = linkedSetOf<CompoundTag>()
+        importCables.forEach { tag ->
             val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-            if (blockEntity is TransferCableBlockEntity) {
+            if (blockEntity is ImportCableBlockEntity) {
                 if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)) {
-                    transferCableSet.add(tag)
+                    importCableSet.add(tag)
                 }
             }
         }
-        transferCables.clear()
-        transferCables.addAll(transferCableSet)
+        importCables.clear()
+        importCables.addAll(importCableSet)
+
+        val exportCableSet = linkedSetOf<CompoundTag>()
+        exportCables.forEach { tag ->
+            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
+            if (blockEntity is ExportCableBlockEntity) {
+                if (blockEntity.hasMaster and (blockEntity.masterPos.toPos() == pos)) {
+                    exportCableSet.add(tag)
+                }
+            }
+        }
+        exportCables.clear()
+        exportCables.addAll(exportCableSet)
     }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
         tag.put("linkCables", linkCables)
-        tag.put("transferCables", transferCables)
+        tag.put("exportCables", exportCables)
+        tag.put("importCables", importCables)
 
         return tag
     }
@@ -78,7 +109,8 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         super.fromTag(state, tag)
 
         linkCables = tag.getList("linkCables", NbtType.COMPOUND)
-        transferCables = tag.getList("transferCables", NbtType.COMPOUND)
+        exportCables = tag.getList("exportCables", NbtType.COMPOUND)
+        importCables = tag.getList("importCables", NbtType.COMPOUND)
     }
 
     override fun markDirty() {
@@ -95,12 +127,28 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
     override fun tick() {
         tick++
-        if (tick == 20) {
+        if (tick == 10) {
+            val world = getWorld() ?: return
+            val cables = arrayListOf<ImportCableBlockEntity>()
+            importCables.forEach { tag ->
+                val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
+                if (blockEntity is ImportCableBlockEntity) cables.add(blockEntity)
+            }
+            cables.sortByDescending { it.priority }
+            for (cable in cables) {
+                if (cable.transfer(world, this)) break
+            }
+        } else if (tick == 20) {
             tick = 0
             val world = getWorld() ?: return
-            transferCables.forEach { tag ->
+            val cables = arrayListOf<ExportCableBlockEntity>()
+            exportCables.forEach { tag ->
                 val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-                if (blockEntity is TransferCableBlockEntity) blockEntity.transfer(world, this)
+                if (blockEntity is ExportCableBlockEntity) cables.add(blockEntity)
+            }
+            cables.sortByDescending { it.priority }
+            for (cable in cables) {
+                if (cable.transfer(world, this)) break
             }
         }
     }

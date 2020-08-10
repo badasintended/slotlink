@@ -1,11 +1,14 @@
 package badasintended.slotlink.client.gui.widget
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen.hasControlDown
 import net.minecraft.client.gui.screen.Screen.hasShiftDown
 import net.minecraft.item.ItemStack
 import spinnery.common.utility.MouseUtilities.nanoDelay
 import spinnery.common.utility.MouseUtilities.nanoInterval
 
+@Environment(EnvType.CLIENT)
 class WPlayerSlot(
     private val putSameItem: (ItemStack) -> Unit
 ) : WVanillaSlot() {

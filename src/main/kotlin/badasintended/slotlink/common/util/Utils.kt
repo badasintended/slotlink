@@ -1,7 +1,6 @@
 package badasintended.slotlink.common.util
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.inventory.DummyInventory
 import com.google.common.collect.ImmutableMap
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
@@ -21,7 +20,8 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import spinnery.common.handler.BaseScreenHandler
-import spinnery.common.registry.NetworkRegistry
+import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
 import spinnery.common.utility.StackUtilities
 import spinnery.widget.api.*
 
@@ -48,8 +48,7 @@ fun sizeOf(s: Int): Size = Size.of(s.toFloat())
 fun slotAction(container: BaseScreenHandler, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
     container.onSlotAction(slotN, invN, button, action, player)
     ClientSidePacketRegistry.INSTANCE.sendToServer(
-        NetworkRegistry.SLOT_CLICK_PACKET,
-        NetworkRegistry.createSlotClickPacket(container.syncId, slotN, invN, button, action)
+        SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action)
     )
 }
 
@@ -116,6 +115,10 @@ fun Direction.next(): Direction {
     return Direction.byId(id + 1)
 }
 
+fun Direction.tlKey(): String {
+    return "container.slotlink.cable.side.${asString()}"
+}
+
 fun Inventory.mergeStack(slot: Int, source: ItemStack) {
     var target = getStack(slot)
     for (i in target.count until target.maxCount) {
@@ -135,21 +138,6 @@ fun Inventory.mergeStack(slot: Int, source: ItemStack) {
     }
 }
 
-fun PacketByteBuf.writeInventorySet(inventories: Set<Inventory>) {
-    writeVarInt(inventories.size)
-    inventories.forEach {
-        writeVarInt(it.size())
-    }
-}
-
-fun PacketByteBuf.readInventorySet(): LinkedHashSet<Inventory> {
-    val set = linkedSetOf<Inventory>()
-    for (i in 0 until readVarInt()) {
-        set.add(DummyInventory(readVarInt()))
-    }
-    return set
-}
-
 fun PacketByteBuf.writeInventory(stacks: DefaultedList<ItemStack>) {
     writeVarInt(stacks.size)
     stacks.forEach { writeItemStack(it) }
@@ -162,3 +150,5 @@ fun PacketByteBuf.readInventory(): DefaultedList<ItemStack> {
     }
     return stack
 }
+
+fun tex(path: String) = Slotlink.id("textures/${path}.png")

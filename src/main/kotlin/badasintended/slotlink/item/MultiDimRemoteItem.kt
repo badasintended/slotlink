@@ -114,7 +114,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getLinkedInventories(masterWorld).values.toSet()
+        private val inventories = master.getLinkedInventories(masterWorld)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
             val handler = RemoteScreenHandler(
@@ -125,8 +125,9 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         }
 
         override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-            buf.writeInventorySet(inventories)
+            buf.writeBlockPos(BlockPos.ORIGIN)
             buf.writeVarInt(lastSort.ordinal)
+            buf.writeIntArray(inventories.keys.stream().mapToInt { it.size() }.toArray())
             buf.writeBoolean(offHand)
         }
 

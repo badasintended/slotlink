@@ -1,5 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.item.ItemRenderer
@@ -16,6 +18,7 @@ import kotlin.math.*
  *
  * TODO: remove when fixed in spinnery
  */
+@Environment(EnvType.CLIENT)
 open class WVanillaSlot : WSlot() {
 
     protected fun countText(value: Int): String {
