@@ -4,7 +4,6 @@
   "package"           : "badasintended.slotlink.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins"            : ["DoubleInventoryAccessor", "ScreenHandlerAccessor", "WallMountedBlockMixin"],
-  "client"            : [],
   "injectors"         : {
     "defaultRequire": 1
   }

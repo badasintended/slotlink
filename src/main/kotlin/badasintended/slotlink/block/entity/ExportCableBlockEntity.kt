@@ -13,7 +13,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
         val target = getLinkedInventory(world)?.first ?: return false
 
-        val targetSlots = if (target is SidedInventory) target.getAvailableSlots(side.opposite).toList()
+        val targetSlots = if (target is SidedInventory) target.getAvailableSlots(side).toList()
         else (0 until target.size()).toList()
 
         val inventories = master.getLinkedInventories(world).keys
@@ -23,7 +23,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
                 val sourceStack = source.getStack(j)
                 if (!sourceStack.isValid()) continue
                 for (k in targetSlots) {
-                    if (target is SidedInventory) if (!target.canInsert(k, sourceStack, side.opposite)) continue
+                    if (target is SidedInventory) if (!target.canInsert(k, sourceStack, side)) continue
                     target.mergeStack(k, sourceStack)
                     source.markDirty()
                     target.markDirty()

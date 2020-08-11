@@ -18,7 +18,10 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
 
         var targets = master.getLinkedInventories(world)
 
-        val sourceSlots = if (source is SidedInventory) source.getAvailableSlots(side.opposite).toList()
+        val sourceSlots = if (source is SidedInventory) source
+            .getAvailableSlots(side)
+            .toList()
+            .filter { source.canExtract(it, source.getStack(it), side) }
         else (0 until source.size()).toList()
 
         for (i in sourceSlots) {
@@ -40,16 +43,6 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
         }
 
         if (sourceSlot == -1) return false
-
-        /*
-        for (tag in master.linkCables) {
-            val linkCablePos = (tag as CompoundTag).toPos()
-            val linkCable = world.getBlockEntity(linkCablePos) ?: continue
-            if (linkCable !is LinkCableBlockEntity) continue
-            val target = linkCable.getLinkedInventory(world) ?: continue
-
-        }
-         */
 
         for (target in targets.keys) {
             for (j in 0 until target.size()) {
