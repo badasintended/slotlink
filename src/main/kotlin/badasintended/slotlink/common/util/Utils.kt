@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
+import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
@@ -119,10 +120,11 @@ fun Direction.tlKey(): String {
     return "container.slotlink.cable.side.${asString()}"
 }
 
-fun Inventory.mergeStack(slot: Int, source: ItemStack) {
+fun Inventory.mergeStack(slot: Int, source: ItemStack, side: Direction) {
     var target = getStack(slot)
     for (i in target.count until target.maxCount) {
         if (!isValid(slot, source)) return
+        if (this is SidedInventory) if (!canInsert(slot, source, side)) return
         if (target.isEmpty) {
             val stack = source.copy()
             stack.count = 1

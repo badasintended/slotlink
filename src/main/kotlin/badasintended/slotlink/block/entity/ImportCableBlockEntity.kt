@@ -46,7 +46,7 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
 
         for (target in targets.keys) {
             for (j in 0 until target.size()) {
-                target.mergeStack(j, sourceStack)
+                target.mergeStack(j, sourceStack, side)
                 if (sourceStack.isEmpty) break
             }
             target.markDirty()
