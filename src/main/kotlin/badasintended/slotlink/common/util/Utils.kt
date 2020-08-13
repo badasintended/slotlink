@@ -122,13 +122,13 @@ fun Direction.tlKey(): String {
 
 fun Inventory.mergeStack(slot: Int, source: ItemStack, side: Direction) {
     var target = getStack(slot)
-    for (i in target.count until target.maxCount) {
-        if (!isValid(slot, source)) return
-        if (this is SidedInventory) if (!canInsert(slot, source, side)) return
+    while ((target.count < target.maxCount) and !source.isEmpty) {
+        val one = source.copy()
+        one.count = 1
+        if (!isValid(slot, one)) return
+        if (this is SidedInventory) if (!canInsert(slot, one, side)) return
         if (target.isEmpty) {
-            val stack = source.copy()
-            stack.count = 1
-            setStack(slot, stack)
+            setStack(slot, one)
             source.decrement(1)
             target = getStack(slot)
         } else {
@@ -136,7 +136,6 @@ fun Inventory.mergeStack(slot: Int, source: ItemStack, side: Direction) {
             target.increment(1)
             source.decrement(1)
         }
-        if (target.count == target.maxCount) return
     }
 }
 

@@ -20,7 +20,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
 
         for (source in inventories) {
             for (j in 0 until source.size()) {
-                val sourceStack = source.getStack(j).copy()
+                val sourceStack = source.getStack(j)
                 if (!sourceStack.isValid()) continue
                 for (k in targetSlots) {
                     target.mergeStack(k, sourceStack, side)
