@@ -8,10 +8,10 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WTextField
-import spinnery.widget.api.Style
+import sbinnery.client.render.BaseRenderer
+import sbinnery.common.registry.ThemeRegistry
+import sbinnery.widget.WTextField
+import sbinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
@@ -32,7 +32,7 @@ class WSearchBar(
         setLabel<WSearchBar>(TranslatableText("block.slotlink.request.search"))
     }
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         if (isHidden) return
 
         val x = floor(x)

@@ -7,8 +7,9 @@ import badasintended.slotlink.common.registry.NetworkRegistry.REQUEST_REMOVE
 import badasintended.slotlink.common.registry.ScreenHandlerRegistry
 import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.widget.WServerSlot
-import badasintended.slotlink.gui.widget.WSyncedSlot
+import badasintended.slotlink.gui.widget.WSyncedInterface
 import badasintended.slotlink.inventory.DummyInventory
+import badasintended.slotlink.inventory.SyncedInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
@@ -20,12 +21,15 @@ import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.*
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
-import spinnery.common.utility.StackUtilities
-import spinnery.widget.WSlot
-import spinnery.widget.api.Action
-import spinnery.widget.api.Action.*
-import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
-import spinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
+import sbinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
+import sbinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
+import sbinnery.common.utility.StackUtilities
+import sbinnery.widget.WInterface
+import sbinnery.widget.WSlot
+import sbinnery.widget.api.Action
+import sbinnery.widget.api.Action.*
+import sbinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
+import sbinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
 import java.util.*
 import kotlin.collections.set
 
@@ -49,18 +53,12 @@ open class RequestScreenHandler(
     private val buffer2: WSlot
     private val buffer3: WSlot
 
+    private val syncedInventory = SyncedInventory()
+    private val syncedInterface = WSyncedInterface(this, this::sort)
+
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
         syncId, playerInventory, buf.readBlockPos(), SortBy.of(buf.readVarInt()), ScreenHandlerContext.EMPTY
-    ) {
-        buf.readIntArray().forEachIndexed { invN, size ->
-            inventories[invN + 3] = DummyInventory(size)
-            for (slotN in 0 until size) {
-                val slot = root.createChild { WSyncedSlot(this::onSetStack) }
-                slot.setNumber<WSlot>(invN + 3, slotN)
-                linkedSlots.add(slot)
-            }
-        }
-    }
+    )
 
     constructor(
         syncId: Int,
@@ -70,11 +68,13 @@ open class RequestScreenHandler(
         lastSort: SortBy,
         context: ScreenHandlerContext
     ) : this(syncId, playerInventory, masterPos, lastSort, context) {
+        val root = `interface`
+
         var i = 3
         invMap.forEach { (inv, filter) ->
             inventories[i] = inv
             for (j in 0 until inv.size()) {
-                val slot = root.createChild { WServerSlot(this::onSetStack) }
+                val slot = root.createChild { WServerSlot(this::sort) }
                 slot.setInventoryNumber<WSlot>(i)
                 slot.setSlotNumber<WSlot>(j)
                 if (filter.second.isNotEmpty()) {
@@ -87,13 +87,16 @@ open class RequestScreenHandler(
                     }
                 }
                 linkedSlots.add(slot)
-                slot.setStack<WSlot>(inv.getStack(j))
+                val stack = inv.getStack(j)
+                slot.setStack<WSlot>(stack)
             }
             i++
         }
     }
 
     init {
+        val root = `interface`
+
         inventories[-3] = DummyInventory(1)
         inventories[-2] = DummyInventory(1)
         inventories[-1] = DummyInventory(8 * 6)
@@ -112,19 +115,19 @@ open class RequestScreenHandler(
         buffer3.setSlotNumber<WSlot>(0)
 
         for (j in 0 until 9) {
-            val slot = root.createChild { WServerSlot(this::onSetStack) }
+            val slot = root.createChild { WServerSlot(this::sort) }
             slot.setInventoryNumber<WSlot>(1)
             slot.setSlotNumber<WSlot>(j)
             inputSlots.add(slot)
         }
 
-        outputSlot = root.createChild { WServerSlot(this::onSetStack) }
+        outputSlot = root.createChild { WServerSlot(this::sort) }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
 
         for (j in 0 until 36) {
-            val slot = root.createChild { WServerSlot(this::onSetStack) }
+            val slot = root.createChild { WServerSlot(this::sort) }
             slot.setInventoryNumber<WSlot>(0)
             slot.setSlotNumber<WSlot>(j)
             playerSlots.add(slot)
@@ -258,11 +261,14 @@ open class RequestScreenHandler(
                 }
             }
             outputSlot.setStack<WSlot>(itemStack)
+            ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                player, SLOT_UPDATE_PACKET, createSlotUpdatePacket(syncId, 0, 2, itemStack)
+            )
             resultInv.unlockLastRecipe(player)
         }
     }
 
-    private fun onSetStack(invN: Int, slot: Int, stack: ItemStack) {
+    private fun sort() {
         if (world.isClient) screen { it.sort() }
     }
 
@@ -276,8 +282,6 @@ open class RequestScreenHandler(
         if ((inventory == craftingInv)) {
             craftItem()
         } else super.onContentChanged(inventory)
-
-        this as ScreenHandlerAccessor
     }
 
     /**
@@ -294,7 +298,7 @@ open class RequestScreenHandler(
 
         validateInventories()
 
-        val source: WSlot = root.getSlot(inventoryNumber, slotNumber) ?: return
+        val source: WSlot = `interface`.getSlot(inventoryNumber, slotNumber) ?: return
         if (source.isLocked) return
 
         val cursorStack = playerInventory.cursorStack
@@ -345,7 +349,7 @@ open class RequestScreenHandler(
                 }
             }
             if (inventoryNumber in -3..-2) {
-                val buffer = root.getSlot<WSlot>(inventoryNumber, 0)
+                val buffer = `interface`.getSlot<WSlot>(inventoryNumber, 0)
                 if (!buffer.stack.isEmpty) {
                     playerInventory.cursorStack = buffer.stack
                     buffer.setStack<WSlot>(ItemStack.EMPTY)
@@ -375,6 +379,14 @@ open class RequestScreenHandler(
             if (master is MasterBlockEntity) master.watchers.remove(this)
         }
         super.close(player)
+    }
+
+    override fun getInventory(inventoryNumber: Int): Inventory? {
+        return if (world.isClient and (inventoryNumber >= 3)) syncedInventory else inventories[inventoryNumber]
+    }
+
+    override fun getInterface(): WInterface {
+        return if (world.isClient) syncedInterface else serverInterface
     }
 
     override fun getType(): ScreenHandlerType<*> {

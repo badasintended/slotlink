@@ -56,7 +56,6 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
         buf.writeBlockPos(_masterPos)
         buf.writeVarInt(lastSort)
-        buf.writeIntArray(inventories.keys.stream().mapToInt { it.size() }.toArray())
     }
 
     override fun getDisplayName() = TranslatableText("container.slotlink.request")

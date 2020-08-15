@@ -8,11 +8,11 @@ import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WButton
-import spinnery.widget.api.Color
-import spinnery.widget.api.Style
+import sbinnery.client.render.BaseRenderer
+import sbinnery.common.registry.ThemeRegistry
+import sbinnery.widget.WButton
+import sbinnery.widget.api.Color
+import sbinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
@@ -47,7 +47,7 @@ class WSlotButton : WButton() {
 
     fun texture(v: Identifier) = texture { v }
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)
         val y = floor(y)
         val w = floor(width)

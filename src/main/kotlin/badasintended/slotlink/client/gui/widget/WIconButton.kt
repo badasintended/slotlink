@@ -9,11 +9,11 @@ import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WAbstractButton
-import spinnery.widget.WButton
-import spinnery.widget.api.Style
+import sbinnery.client.render.BaseRenderer
+import sbinnery.common.registry.ThemeRegistry
+import sbinnery.widget.WAbstractButton
+import sbinnery.widget.WButton
+import sbinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
@@ -25,7 +25,7 @@ class WIconButton(
         TranslatableText(tlKey).formatted(Formatting.GRAY)
     )
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)
         val y = floor(y)
         val w = floor(width)

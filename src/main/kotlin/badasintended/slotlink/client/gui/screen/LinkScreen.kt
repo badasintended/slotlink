@@ -5,7 +5,7 @@ import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.LinkScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import spinnery.widget.*
+import sbinnery.widget.*
 
 @Environment(EnvType.CLIENT)
 open class LinkScreen<H : LinkScreenHandler>(c: H) : ModScreen<H>(c) {
@@ -66,14 +66,14 @@ open class LinkScreen<H : LinkScreenHandler>(c: H) : ModScreen<H>(c) {
 
         for (i in 0 until 27) {
             val slot = main.createChild(
-                ::WVanillaSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)), sizeOf(18)
+                ::WSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)), sizeOf(18)
             )
             slot.setNumber<WSlot>(0, i + 9)
         }
 
         for (i in 0 until 9) {
             val slot = main.createChild(
-                ::WVanillaSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), 69), sizeOf(18)
+                ::WSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), 69), sizeOf(18)
             )
             slot.setNumber<WSlot>(0, i)
         }

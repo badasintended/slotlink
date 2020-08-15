@@ -8,13 +8,14 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
-import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import spinnery.common.utility.StackUtilities.equalItemAndTag
-import spinnery.widget.api.Action.CLONE
+import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import sbinnery.common.utility.StackUtilities.equalItemAndTag
+import sbinnery.widget.WSlot
+import sbinnery.widget.api.Action.CLONE
 
 @Environment(EnvType.CLIENT)
-class WCraftingResultSlot : WVanillaSlot() {
+class WCraftingResultSlot : WSlot() {
 
     override fun onMouseDragged(mouseX: Float, mouseY: Float, button: Int, deltaX: Double, deltaY: Double) {}
 

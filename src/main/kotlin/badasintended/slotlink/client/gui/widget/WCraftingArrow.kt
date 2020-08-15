@@ -6,10 +6,10 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WAbstractWidget
-import spinnery.widget.api.Style
+import sbinnery.client.render.BaseRenderer
+import sbinnery.common.registry.ThemeRegistry
+import sbinnery.widget.WAbstractWidget
+import sbinnery.widget.api.Style
 import kotlin.math.floor
 
 @Environment(EnvType.CLIENT)
@@ -17,7 +17,7 @@ class WCraftingArrow : WAbstractWidget() {
 
     private val texture = tex("gui/arrow")
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         val x = floor(x)
         val y = floor(y)
 

@@ -11,7 +11,7 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
-import spinnery.widget.WSlot
+import sbinnery.widget.WSlot
 
 open class LinkScreenHandler(
     syncId: Int,
@@ -29,7 +29,7 @@ open class LinkScreenHandler(
     )
 
     init {
-        WSlot.addHeadlessPlayerInventory(root)
+        WSlot.addHeadlessPlayerInventory(`interface`)
     }
 
     protected open fun save() {

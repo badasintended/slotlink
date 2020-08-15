@@ -1,9 +1,9 @@
 package badasintended.slotlink.gui.widget
 
 import net.minecraft.item.ItemStack
-import spinnery.widget.WSlot
+import sbinnery.widget.WSlot
 
-class WSyncedSlot(onSetStack: (Int, Int, ItemStack) -> Unit) : WServerSlot(onSetStack) {
+class WSyncedSlot(onSetStack: () -> Unit) : WServerSlot(onSetStack) {
 
     private var syncedStack = ItemStack.EMPTY
 
@@ -11,7 +11,7 @@ class WSyncedSlot(onSetStack: (Int, Int, ItemStack) -> Unit) : WServerSlot(onSet
 
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         syncedStack = stack
-        onSetStack.invoke(inventoryNumber, slotNumber, stack)
+        onSetStack.invoke()
         return this as W
     }
 

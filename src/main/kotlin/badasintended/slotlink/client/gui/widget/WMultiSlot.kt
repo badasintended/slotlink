@@ -4,23 +4,22 @@ import badasintended.slotlink.common.util.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.item.ItemRenderer
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.item.ItemStack
-import spinnery.widget.WAbstractWidget
-import spinnery.widget.api.Action
-import spinnery.widget.api.Action.PICKUP
-import spinnery.widget.api.Action.QUICK_MOVE
-import kotlin.math.ceil
+import sbinnery.client.render.BaseRenderer
+import sbinnery.widget.WAbstractWidget
+import sbinnery.widget.WSlot
+import sbinnery.widget.api.Action
+import sbinnery.widget.api.Action.PICKUP
+import sbinnery.widget.api.Action.QUICK_MOVE
+import kotlin.math.*
 import kotlin.reflect.KMutableProperty0
 
 @Environment(EnvType.CLIENT)
 class WMultiSlot(
     private val shouldSort: KMutableProperty0<Boolean>
-) : WVanillaSlot() {
+) : WSlot() {
 
     private val linkedSlots = arrayListOf<WLinkedSlot>()
 
@@ -30,17 +29,34 @@ class WMultiSlot(
         linkedSlots.sortByDescending { it.stack.count }
     }
 
-    override fun drawItem(
-        matrices: MatrixStack,
-        provider: VertexConsumerProvider,
-        stack: ItemStack,
-        itemRenderer: ItemRenderer,
-        textRenderer: TextRenderer,
-        itemX: Int,
-        itemY: Int
-    ) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
+        if (isHidden) return
+
+        val x = floor(x)
+        val y = floor(y)
+        val w = floor(width)
+        val h = floor(height)
+
+        BaseRenderer.drawBeveledPanel(
+            matrices, provider, x, y, z, w, h, style.asColor("top_left"), style.asColor("background.unfocused"),
+            style.asColor("bottom_right")
+        )
+        provider.draw()
+
+        val itemRenderer = BaseRenderer.getItemRenderer()
+        val textRenderer = BaseRenderer.getDefaultTextRenderer()
+        val itemX = ((1 + x) + ((w - 18) / 2)).toInt()
+        val itemY = ((1 + y) + ((h - 18) / 2)).toInt()
+
         val count = stack.count
-        val countText = countText(count)
+        val countText = when {
+            count <= 1 -> ""
+            count < 1000 -> "$count"
+            else -> {
+                val exp = (ln(count.toDouble()) / ln(1000.0)).toInt()
+                String.format("%.1f%c", count / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
+            }
+        }
 
         itemRenderer.renderGuiItemIcon(stack, itemX, itemY)
         itemRenderer.renderGuiItemOverlay(
@@ -58,6 +74,10 @@ class WMultiSlot(
             ((itemY + 16 - (textRenderer.fontHeight * scale)) / scale), 0xFFFFFF
         )
         matrices.pop()
+
+        if (isFocused) BaseRenderer.drawQuad(
+            matrices, provider, (x + 1), (y + 1), (z + 201), (w - 2), (h - 2), style.asColor("overlay")
+        )
     }
 
     /**

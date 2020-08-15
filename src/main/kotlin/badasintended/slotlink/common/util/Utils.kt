@@ -20,11 +20,11 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import spinnery.common.handler.BaseScreenHandler
-import spinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import spinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import spinnery.common.utility.StackUtilities
-import spinnery.widget.api.*
+import sbinnery.common.handler.BaseScreenHandler
+import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
+import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
+import sbinnery.common.utility.StackUtilities
+import sbinnery.widget.api.*
 
 fun spinneryId(id: String) = Identifier("spinnery", id)
 

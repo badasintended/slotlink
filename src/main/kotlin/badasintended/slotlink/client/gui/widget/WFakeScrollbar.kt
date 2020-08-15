@@ -5,10 +5,10 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
-import spinnery.client.render.BaseRenderer
-import spinnery.common.registry.ThemeRegistry
-import spinnery.widget.WVerticalSlider
-import spinnery.widget.api.Style
+import sbinnery.client.render.BaseRenderer
+import sbinnery.common.registry.ThemeRegistry
+import sbinnery.widget.WVerticalSlider
+import sbinnery.widget.api.Style
 import kotlin.math.floor
 
 /**
@@ -23,7 +23,7 @@ class WFakeScrollbar(
     private val scrollFunction: (Int) -> Unit
 ) : WVerticalSlider() {
 
-    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider) {
+    override fun draw(matrices: MatrixStack, provider: VertexConsumerProvider.Immediate) {
         if (isHidden) return
 
         val slotStyle = Style.of(ThemeRegistry.getStyle(theme, spinneryId("slot")))

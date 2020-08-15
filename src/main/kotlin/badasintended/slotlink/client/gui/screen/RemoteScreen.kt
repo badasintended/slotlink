@@ -6,7 +6,7 @@ import badasintended.slotlink.gui.screen.RemoteScreenHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
-import spinnery.widget.WSlot
+import sbinnery.widget.WSlot
 
 @Environment(EnvType.CLIENT)
 class RemoteScreen(c: RemoteScreenHandler) : RequestScreen<RemoteScreenHandler>(c) {

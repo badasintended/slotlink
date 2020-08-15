@@ -3,7 +3,7 @@ package badasintended.slotlink.client.gui.widget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.text.TranslatableText
-import spinnery.widget.WStaticText
+import sbinnery.widget.WStaticText
 
 @Environment(EnvType.CLIENT)
 class WTranslatableLabel(key: String, vararg args: Any) : WLabel() {

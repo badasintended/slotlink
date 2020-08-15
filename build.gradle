@@ -17,10 +17,7 @@ version = "${project.mod_version}+minecraft-${project.minecraft_version}"
 group = project.maven_group
 
 repositories {
-    maven {
-        name = "Spinnery"
-        url "https://dl.bintray.com/spinnery/Spinnery"
-    }
+    mavenLocal()
 }
 
 dependencies {

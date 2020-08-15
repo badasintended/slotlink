@@ -30,7 +30,7 @@ class DummyInventory(
         stacks[slot] = stack
     }
 
-    override fun isEmpty() = stacks.none { !it.isEmpty }
+    override fun isEmpty() = stacks.all { it.isEmpty }
     override fun clear() = stacks.clear()
 
 }

@@ -127,7 +127,6 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
             buf.writeBlockPos(BlockPos.ORIGIN)
             buf.writeVarInt(lastSort.ordinal)
-            buf.writeIntArray(inventories.keys.stream().mapToInt { it.size() }.toArray())
             buf.writeBoolean(offHand)
         }
 
