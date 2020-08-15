@@ -272,7 +272,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
                 }
                 '#' -> filledSlots.removeIf r@{ slot ->
                     val tag = trimmedFilter.drop(1)
-                    val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
+                    val tags = c.world.tagManager.items.getTagsFor(slot.stack.item)
                     if (tags.isEmpty() and tag.isEmpty()) return@r false
                     else return@r tags.none { it.toString().contains(tag, true) }
                 }

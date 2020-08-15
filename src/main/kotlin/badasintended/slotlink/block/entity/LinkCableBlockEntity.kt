@@ -10,13 +10,14 @@ import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
+import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
 class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE) {
 
     override fun WorldAccess.isBlockIgnored(block: Block): Boolean {
         if (block is ModBlock) return true
-        return world.tagManager.blocks().get(Slotlink.id("ignored"))?.contains(block) ?: false
+        return if (this is World) tagManager.blocks.getTag(Slotlink.id("ignored"))?.contains(block) ?: false else false
     }
 
     override fun markDirty() {

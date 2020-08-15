@@ -14,6 +14,7 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.collection.DefaultedList
+import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
 abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type),
@@ -28,6 +29,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
     var filter: DefaultedList<ItemStack> = DefaultedList.ofSize(9, ItemStack.EMPTY)
 
     fun getLinkedInventory(world: WorldAccess): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
+        if (world !is World) return null
         if (linkedPos == CompoundTag()) return null
         val linkedPos = linkedPos.toPos()
         val linkedState = world.getBlockState(linkedPos)
@@ -37,7 +39,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         if (!world.isBlockIgnored(linkedBlock)) when {
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
-                val inv = ChestBlock.getInventory(linkedBlock, linkedState, world.world, linkedPos, true) ?: return null
+                val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null
                 return Pair(inv, Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet()))
             }
             linkedBlock is InventoryProvider -> {
