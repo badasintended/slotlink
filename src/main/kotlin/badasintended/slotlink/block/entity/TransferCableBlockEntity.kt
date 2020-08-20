@@ -37,7 +37,8 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
         return transferInternal(world, master)
     }
 
-    protected fun ItemStack.isValid(): Boolean {
+    protected fun ItemStack?.isValid(): Boolean {
+        if (this == null) return false
         if (isEmpty) return false
         if (filter.all { it.isEmpty }) return true
         if (isBlackList) {
