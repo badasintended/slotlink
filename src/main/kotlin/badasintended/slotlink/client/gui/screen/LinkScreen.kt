@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.LinkScreenHandler
+import badasintended.slotlink.util.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import sbinnery.widget.*

@@ -2,8 +2,8 @@ package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import badasintended.slotlink.util.*
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity

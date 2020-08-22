@@ -15,9 +15,13 @@
   "icon"         : "assets/slotlink/icon.png",
   "environment"  : "*",
   "entrypoints"  : {
-    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
-    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
-    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.SlotlinkReiPlugin"}]
+    "main"           : [
+      "badasintended.slotlink.api.SlotlinkCompat",
+      {"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}
+    ],
+    "client"         : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei_plugins_v0" : [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.SlotlinkReiPlugin"}],
+    "slotlink-compat": [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.StockpileCompat"}]
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {

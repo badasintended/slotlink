@@ -1,10 +1,10 @@
-package badasintended.slotlink.client.compat.rei
+package badasintended.slotlink.client.compat
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.common.registry.BlockRegistry
-import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_PULL
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.BlockRegistry
+import badasintended.slotlink.registry.NetworkRegistry.CRAFT_PULL
+import badasintended.slotlink.util.buf
 import com.google.common.collect.Lists
 import me.shedaniel.rei.api.AutoTransferHandler.Result
 import me.shedaniel.rei.api.EntryStack

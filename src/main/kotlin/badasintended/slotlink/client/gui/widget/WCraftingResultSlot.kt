@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_ONCE
-import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_STACK
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry.CRAFT_ONCE
+import badasintended.slotlink.registry.NetworkRegistry.CRAFT_STACK
+import badasintended.slotlink.util.buf
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE

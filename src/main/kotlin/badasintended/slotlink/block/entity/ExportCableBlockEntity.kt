@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.*
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.util.*
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World

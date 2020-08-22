@@ -1,4 +1,4 @@
-package badasintended.slotlink.common.registry
+package badasintended.slotlink.registry
 
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.block.entity.*

@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.MasterWatcher
-import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.mixin.DoubleInventoryAccessor
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.util.MasterWatcher
+import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -27,7 +27,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
     private var tick = 0
 
-    fun getLinkedInventories(world: World): Map<Inventory, Pair<Boolean, Set<Item>>> {
+    fun getLinkedInventories(world: World, compat: Boolean = false): Map<Inventory, Pair<Boolean, Set<Item>>> {
         val linkedMap = linkedMapOf<Inventory, Pair<Boolean, Set<Item>>>()
 
         val cables = arrayListOf<LinkCableBlockEntity>()
@@ -42,7 +42,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
         cables.sortByDescending { it.priority }
         for (cable in cables) {
-            val inventory = cable.getLinkedInventory(world) ?: continue
+            val inventory = cable.getLinkedInventory(world, compat) ?: continue
             val key = inventory.first
             if (key is DoubleInventory) {
                 key as DoubleInventoryAccessor

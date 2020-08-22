@@ -1,4 +1,4 @@
-package badasintended.slotlink.common.util
+package badasintended.slotlink.util
 
 import net.minecraft.util.Identifier
 

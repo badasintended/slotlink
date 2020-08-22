@@ -1,7 +1,7 @@
 package badasintended.slotlink.gui.screen
 
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry
-import badasintended.slotlink.common.util.SortBy
+import badasintended.slotlink.registry.ScreenHandlerRegistry
+import badasintended.slotlink.util.SortBy
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item

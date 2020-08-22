@@ -22,10 +22,7 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
     val id = Slotlink.id(id)
 
     override fun appendTooltip(
-        stack: ItemStack,
-        view: BlockView?,
-        tooltip: MutableList<Text>,
-        options: TooltipContext
+        stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
     ) {
         tooltip.add(TranslatableText("${translationKey}.tooltip").formatted(Formatting.GRAY))
     }

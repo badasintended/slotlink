@@ -2,7 +2,7 @@
 
 package badasintended.slotlink
 
-import badasintended.slotlink.common.registry.*
+import badasintended.slotlink.registry.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.util.Identifier

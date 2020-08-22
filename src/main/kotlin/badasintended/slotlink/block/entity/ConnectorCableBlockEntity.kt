@@ -1,7 +1,8 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.util.toPos
-import badasintended.slotlink.common.util.writeInventory
+import badasintended.slotlink.api.SlotlinkCompat
+import badasintended.slotlink.util.toPos
+import badasintended.slotlink.util.writeInventory
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.*
 import net.minecraft.block.entity.*
@@ -28,7 +29,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     var filter: DefaultedList<ItemStack> = DefaultedList.ofSize(9, ItemStack.EMPTY)
 
-    fun getLinkedInventory(world: WorldAccess): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
+    fun getLinkedInventory(world: WorldAccess, compat: Boolean = false): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
         if (world !is World) return null
         if (linkedPos == CompoundTag()) return null
         val linkedPos = linkedPos.toPos()
@@ -37,6 +38,12 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         val linkedBlockEntity = world.getBlockEntity(linkedPos)
 
         if (!world.isBlockIgnored(linkedBlock)) when {
+            compat and SlotlinkCompat.hasHandler(linkedBlockEntity) -> {
+                return Pair(
+                    SlotlinkCompat.getHandler(linkedBlockEntity),
+                    Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet())
+                )
+            }
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
                 val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null

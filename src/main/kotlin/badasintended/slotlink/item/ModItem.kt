@@ -1,7 +1,7 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.common.registry.BlockRegistry
+import badasintended.slotlink.registry.BlockRegistry
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.Item

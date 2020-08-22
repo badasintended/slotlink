@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.util.spinneryId
-import badasintended.slotlink.common.util.tex
+import badasintended.slotlink.util.spinneryId
+import badasintended.slotlink.util.tex
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.render.VertexConsumerProvider

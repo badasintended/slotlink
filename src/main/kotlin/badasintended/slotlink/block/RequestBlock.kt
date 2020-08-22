@@ -1,7 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.common.util.actionBar
+import badasintended.slotlink.util.actionBar
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.screen.NamedScreenHandlerFactory

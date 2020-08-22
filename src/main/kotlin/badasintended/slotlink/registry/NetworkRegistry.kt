@@ -1,10 +1,10 @@
-package badasintended.slotlink.common.registry
+package badasintended.slotlink.registry
 
 import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.entity.*
-import badasintended.slotlink.common.util.RedstoneMode
-import badasintended.slotlink.common.util.readInventory
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.util.RedstoneMode
+import badasintended.slotlink.util.readInventory
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.*
@@ -23,6 +23,7 @@ object NetworkRegistry {
     val CRAFT_PULL = Slotlink.id("craft_pull")
     val LINK_WRITE = Slotlink.id("link_write")
     val TRANSFER_WRITE = Slotlink.id("transfer_write")
+    val REQUEST_INIT = Slotlink.id("request_init")
 
     val REQUEST_REMOVE = Slotlink.id("request_remove")
     val REQUEST_CURSOR = Slotlink.id("request_cursor")
@@ -121,6 +122,15 @@ object NetworkRegistry {
                     blockEntity.filter = filter
                     blockEntity.markDirty()
                 }
+            }
+        }
+
+        rS(REQUEST_INIT) { context, buf ->
+            val syncId = buf.readVarInt()
+
+            context.taskQueue.execute {
+                val screenHandler = context.player.currentScreenHandler
+                if (screenHandler.syncId == syncId) if (screenHandler is RequestScreenHandler) screenHandler.init()
             }
         }
     }

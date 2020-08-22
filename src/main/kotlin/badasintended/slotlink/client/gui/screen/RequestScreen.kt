@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.common.registry.NetworkRegistry
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry
+import badasintended.slotlink.util.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -216,8 +216,6 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         viewedSlots.forEach { it.setHidden<W>(true) }
 
-        var i = 0
-
         for (j in 0 until viewedSlotSize) {
             val viewedSlot = viewedSlots[j]
             viewedSlot.setHidden<WSlot>(false)
@@ -240,7 +238,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     open fun saveSort() {
         val buf = buf()
-        buf.writeBlockPos(c.masterPos)
+        buf.writeBlockPos(c.requestPos)
         buf.writeInt(lastSort.ordinal)
         ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_SAVE, buf)
     }
@@ -315,7 +313,15 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     override fun init() {
         super.init()
+        val buf = buf()
+        buf.writeVarInt(c.syncId)
+        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_INIT, buf)
         c.addListener(this)
+    }
+
+    override fun removed() {
+        super.removed()
+        c.removeListener(this)
     }
 
     override fun resize(client: MinecraftClient, width: Int, height: Int) {

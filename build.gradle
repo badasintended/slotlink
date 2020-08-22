@@ -17,7 +17,7 @@ version = "${project.mod_version}+minecraft-${project.minecraft_version}"
 group = project.maven_group
 
 repositories {
-    mavenLocal()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -29,12 +29,24 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
-    modCompile "com.github.vini2003:spinnery:${project.spinnery}"
-    include "com.github.vini2003:spinnery:${project.spinnery}"
+    modCompile "com.github.badasintended:Spinnery:${project.spinnery}"
+    include "com.github.badasintended:Spinnery:${project.spinnery}"
 
     modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
     modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+}
+
+if (project.enable_compat.toBoolean()) {
+    repositories {
+        maven {
+            url = "https://www.cursemaven.com"
+        }
+    }
+
+    dependencies {
+        modCompileOnly "curse.maven:stockpile:3018405"
+    }
 }
 
 if (project.enable_databreaker.toBoolean()) {

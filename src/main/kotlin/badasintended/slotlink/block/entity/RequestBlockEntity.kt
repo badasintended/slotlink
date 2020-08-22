@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.SortBy
-import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.util.SortBy
+import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -45,16 +45,16 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
         _masterPos = masterPos.toPos()
         val master = world.getBlockEntity(_masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
-        inventories = master.getLinkedInventories(world)
+        inventories = master.getLinkedInventories(world, true)
         val handler = RequestScreenHandler(
-            syncId, inv, _masterPos, inventories, SortBy.of(lastSort), ScreenHandlerContext.create(world, _masterPos)
+            syncId, inv, pos, inventories, SortBy.of(lastSort), ScreenHandlerContext.create(world, _masterPos)
         )
         master.watchers.add(handler)
         return handler
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-        buf.writeBlockPos(_masterPos)
+        buf.writeBlockPos(pos)
         buf.writeVarInt(lastSort)
     }
 

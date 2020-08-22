@@ -1,6 +1,6 @@
 package badasintended.slotlink.item
 
-import badasintended.slotlink.common.util.actionBar
+import badasintended.slotlink.util.actionBar
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Hand

@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ModBlock
-import badasintended.slotlink.common.util.RedstoneMode
-import badasintended.slotlink.common.util.RedstoneMode.*
 import badasintended.slotlink.gui.screen.TransferScreenHandler
+import badasintended.slotlink.util.RedstoneMode
+import badasintended.slotlink.util.RedstoneMode.*
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity

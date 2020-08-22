@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.common.registry.NetworkRegistry.REMOTE_SAVE
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry.REMOTE_SAVE
+import badasintended.slotlink.util.buf
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE

@@ -1,7 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
-import badasintended.slotlink.common.util.*
+import badasintended.slotlink.util.*
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
