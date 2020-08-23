@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.Slotlink
-import badasintended.slotlink.api.SlotlinkCompat
+import badasintended.slotlink.api.Compat
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.gui.screen.LinkScreenHandler
 import badasintended.slotlink.registry.BlockEntityTypeRegistry
@@ -17,7 +17,7 @@ import net.minecraft.world.WorldAccess
 class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE) {
 
     override fun WorldAccess.isBlockIgnored(block: Block): Boolean {
-        if ((block is ModBlock) or SlotlinkCompat.isBlacklisted(block)) return true
+        if ((block is ModBlock) or Compat.isBlacklisted(block)) return true
         return if (this is World) tagManager.blocks.getTag(Slotlink.id("ignored"))?.contains(block) ?: false else false
     }
 

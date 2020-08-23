@@ -7,8 +7,8 @@ import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This will only called on {@link badasintended.slotlink.block.entity.LinkCableBlockEntity}
- * @param <T> the block entity
+ * Custom inventory handling for weird inventories.
+ * only called on request block and remote.
  */
 public abstract class InventoryHandler<T extends BlockEntity> {
 

@@ -10,7 +10,7 @@ object StockpileCompat : SlotlinkCompatInitializer {
 
     override fun dependencies() = arrayOf("stockpile")
 
-    override fun initialize(compat: SlotlinkCompat) {
+    override fun initialize(compat: Compat) {
         compat.registerHandler(ItemBarrelBlockEntity::class.java, object : InventoryHandler<ItemBarrelBlockEntity>() {
             override fun size(t: ItemBarrelBlockEntity): Int {
                 return t.storage.capacity.toInt()

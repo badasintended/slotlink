@@ -1,6 +1,6 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.api.SlotlinkCompat
+import badasintended.slotlink.api.Compat
 import badasintended.slotlink.util.toPos
 import badasintended.slotlink.util.writeInventory
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
@@ -37,13 +37,17 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         val linkedBlock = linkedState.block
         val linkedBlockEntity = world.getBlockEntity(linkedPos)
 
-        if (!world.isBlockIgnored(linkedBlock)) when {
-            compat and SlotlinkCompat.hasHandler(linkedBlockEntity) -> {
+        if (compat) {
+            val registered = Compat.getRegisteredClass(linkedBlockEntity)
+            if (registered != null) {
                 return Pair(
-                    SlotlinkCompat.getHandler(linkedBlockEntity),
+                    Compat.getHandler(registered, linkedBlockEntity),
                     Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet())
                 )
             }
+        }
+
+        if (!world.isBlockIgnored(linkedBlock)) when {
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
                 val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null

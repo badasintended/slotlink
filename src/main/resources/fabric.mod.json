@@ -16,7 +16,7 @@
   "environment"  : "*",
   "entrypoints"  : {
     "main"           : [
-      "badasintended.slotlink.api.SlotlinkCompat",
+      "badasintended.slotlink.api.Compat",
       {"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}
     ],
     "client"         : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
