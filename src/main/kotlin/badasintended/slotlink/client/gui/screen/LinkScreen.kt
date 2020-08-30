@@ -55,8 +55,8 @@ open class LinkScreen<H : LinkScreenHandler>(c: H) : ModScreen<H>(c) {
 
         filterButton = main.createChild({
             WSlotButton()
-                .tlKey { "container.slotlink.cable.${if (c.isBlacklist) "black" else "white"}list" }
-                .texture { tex("gui/${if (c.isBlacklist) "black" else "white"}list") }
+                .tlKey { "container.slotlink.cable.filter.${if (c.isBlacklist) "black" else "white"}list" }
+                .texture { tex("gui/filter_${if (c.isBlacklist) "black" else "white"}list") }
                 .onClick { c.isBlacklist = !c.isBlacklist }
         }, positionOf(main, 119, 36), sizeOf(14))
 

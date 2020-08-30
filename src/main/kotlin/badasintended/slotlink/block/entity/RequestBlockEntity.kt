@@ -2,7 +2,7 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import badasintended.slotlink.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.util.SortBy
+import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
@@ -47,7 +47,7 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
         if (master !is MasterBlockEntity) return null
         inventories = master.getLinkedInventories(world, true)
         val handler = RequestScreenHandler(
-            syncId, inv, pos, inventories, SortBy.of(lastSort), ScreenHandlerContext.create(world, _masterPos)
+            syncId, inv, pos, inventories, Sort.of(lastSort), ScreenHandlerContext.create(world, _masterPos), master
         )
         master.watchers.add(handler)
         return handler

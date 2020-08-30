@@ -1,10 +1,8 @@
 package badasintended.slotlink.registry
 
-import badasintended.slotlink.Slotlink
 import badasintended.slotlink.block.entity.*
 import badasintended.slotlink.gui.screen.RequestScreenHandler
-import badasintended.slotlink.util.RedstoneMode
-import badasintended.slotlink.util.readInventory
+import badasintended.slotlink.util.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.*
@@ -15,18 +13,19 @@ import net.minecraft.util.math.Direction
 
 object NetworkRegistry {
 
-    val REQUEST_SAVE = Slotlink.id("request_save")
-    val REMOTE_SAVE = Slotlink.id("remote_save")
-    val CRAFT_ONCE = Slotlink.id("craft_once")
-    val CRAFT_STACK = Slotlink.id("craft_stack")
-    val CRAFT_CLEAR = Slotlink.id("craft_clear")
-    val CRAFT_PULL = Slotlink.id("craft_pull")
-    val LINK_WRITE = Slotlink.id("link_write")
-    val TRANSFER_WRITE = Slotlink.id("transfer_write")
-    val REQUEST_INIT = Slotlink.id("request_init")
+    val REQUEST_SAVE = identifier("request_save")
+    val REMOTE_SAVE = identifier("remote_save")
+    val CRAFT_ONCE = identifier("craft_once")
+    val CRAFT_STACK = identifier("craft_stack")
+    val CRAFT_CLEAR = identifier("craft_clear")
+    val CRAFT_PULL = identifier("craft_pull")
+    val LINK_WRITE = identifier("link_write")
+    val TRANSFER_WRITE = identifier("transfer_write")
+    val REQUEST_INIT_SERVER = identifier("request_init_server")
 
-    val REQUEST_REMOVE = Slotlink.id("request_remove")
-    val REQUEST_CURSOR = Slotlink.id("request_cursor")
+    val REQUEST_REMOVE = identifier("request_remove")
+    val REQUEST_CURSOR = identifier("request_cursor")
+    val REQUEST_INIT_CLIENT = identifier("request_init_client")
 
     fun initMain() {
         rS(REQUEST_SAVE) { context, buf ->
@@ -125,7 +124,7 @@ object NetworkRegistry {
             }
         }
 
-        rS(REQUEST_INIT) { context, buf ->
+        rS(REQUEST_INIT_SERVER) { context, buf ->
             val syncId = buf.readVarInt()
 
             context.taskQueue.execute {
@@ -153,6 +152,17 @@ object NetworkRegistry {
 
             context.taskQueue.execute {
                 context.player.inventory.cursorStack = stack
+            }
+        }
+
+        rC(REQUEST_INIT_CLIENT) { context, buf ->
+            val id = buf.readVarInt()
+
+            context.taskQueue.execute {
+                val handler = context.player.currentScreenHandler
+                if (handler.syncId == id) if (handler is RequestScreenHandler) {
+                    handler.init()
+                }
             }
         }
     }

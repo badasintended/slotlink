@@ -13,8 +13,10 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.collection.DefaultedList
+import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
@@ -29,10 +31,22 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     var filter: DefaultedList<ItemStack> = DefaultedList.ofSize(9, ItemStack.EMPTY)
 
-    fun getLinkedInventory(world: WorldAccess, compat: Boolean = false): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
+    fun getLinkedInventory(
+        world: WorldAccess, master: MasterBlockEntity? = null, forceLoad: Boolean = false, compat: Boolean = false
+    ): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
         if (world !is World) return null
         if (linkedPos == CompoundTag()) return null
         val linkedPos = linkedPos.toPos()
+
+        if (!world.isClient and (master != null) and forceLoad) {
+            world as ServerWorld
+            val chunkPos = ChunkPos(pos)
+            if (!world.forcedChunks.contains(chunkPos.toLong())) {
+                world.setChunkForced(chunkPos.x, chunkPos.z, true)
+                master!!.forcedChunks.add(chunkPos.x to chunkPos.z)
+            }
+        }
+
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
         val linkedBlockEntity = world.getBlockEntity(linkedPos)
@@ -40,10 +54,10 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         if (compat) {
             val registered = Compat.getRegisteredClass(linkedBlockEntity)
             if (registered != null) {
-                return Pair(
-                    Compat.getHandler(registered, linkedBlockEntity),
-                    Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet())
-                )
+                return Compat.getHandler(registered, linkedBlockEntity) to (isBlackList to filter
+                    .filterNot { it.isEmpty }
+                    .map { it.item }
+                    .toSet())
             }
         }
 
@@ -51,18 +65,16 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
                 val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null
-                return Pair(inv, Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet()))
+                return inv to (isBlackList to filter.filterNot { it.isEmpty }.map { it.item }.toSet())
             }
             linkedBlock is InventoryProvider -> {
-                return Pair(
-                    linkedBlock.getInventory(linkedState, world, linkedPos),
-                    Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet())
-                )
+                return linkedBlock.getInventory(linkedState, world, linkedPos) to (isBlackList to filter
+                    .filterNot { it.isEmpty }
+                    .map { it.item }
+                    .toSet())
             }
             linkedBlockEntity is Inventory -> {
-                return Pair(
-                    linkedBlockEntity, Pair(isBlackList, filter.filterNot { it.isEmpty }.map { it.item }.toSet())
-                )
+                return linkedBlockEntity to (isBlackList to filter.filterNot { it.isEmpty }.map { it.item }.toSet())
             }
         }
         return null

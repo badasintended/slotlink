@@ -2,12 +2,12 @@ package badasintended.slotlink.gui.screen
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.client.gui.screen.RequestScreen
-import badasintended.slotlink.gui.widget.WServerSlot
-import badasintended.slotlink.gui.widget.WSyncedInterface
+import badasintended.slotlink.gui.widget.*
 import badasintended.slotlink.inventory.DummyInventory
 import badasintended.slotlink.inventory.SyncedInventory
 import badasintended.slotlink.mixin.ScreenHandlerAccessor
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_CURSOR
+import badasintended.slotlink.registry.NetworkRegistry.REQUEST_INIT_CLIENT
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_REMOVE
 import badasintended.slotlink.registry.ScreenHandlerRegistry
 import badasintended.slotlink.util.*
@@ -37,12 +37,13 @@ open class RequestScreenHandler(
     syncId: Int,
     playerInventory: PlayerInventory,
     val requestPos: BlockPos,
-    val lastSort: SortBy,
-    private val context: ScreenHandlerContext
+    val lastSort: Sort,
+    private val context: ScreenHandlerContext,
+    private val master: MasterBlockEntity?
 ) : ModScreenHandler(syncId, playerInventory), MasterWatcher {
 
     private val craftingInv = CraftingInventory(this, 3, 3)
-    private val resultInv = CraftingResultInventory()
+    val resultInv = CraftingResultInventory()
 
     private val inputSlots = arrayListOf<WSlot>()
     private val outputSlot: WSlot
@@ -59,7 +60,7 @@ open class RequestScreenHandler(
     private var initialized = false
 
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
-        syncId, playerInventory, buf.readBlockPos(), SortBy.of(buf.readVarInt()), ScreenHandlerContext.EMPTY
+        syncId, playerInventory, buf.readBlockPos(), Sort.of(buf.readVarInt()), ScreenHandlerContext.EMPTY, null
     )
 
     constructor(
@@ -67,9 +68,10 @@ open class RequestScreenHandler(
         playerInventory: PlayerInventory,
         masterPos: BlockPos,
         invMap: Map<Inventory, Pair<Boolean, Set<Item>>>,
-        lastSort: SortBy,
-        context: ScreenHandlerContext
-    ) : this(syncId, playerInventory, masterPos, lastSort, context) {
+        lastSort: Sort,
+        context: ScreenHandlerContext,
+        master: MasterBlockEntity
+    ) : this(syncId, playerInventory, masterPos, lastSort, context, master) {
         val root = `interface`
 
         var i = 3
@@ -120,7 +122,7 @@ open class RequestScreenHandler(
             inputSlots.add(slot)
         }
 
-        outputSlot = root.createChild { WServerSlot(this::sort) }
+        outputSlot = root.createChild { WCraftingResultSlot(this, this::sort) }
         outputSlot.setInventoryNumber<WSlot>(2)
         outputSlot.setSlotNumber<WSlot>(0)
         outputSlot.setWhitelist<WSlot>()
@@ -135,13 +137,18 @@ open class RequestScreenHandler(
 
     fun init() {
         if (!initialized) {
-            linkedSlots.forEach {
-                if (!it.stack.isEmpty) ServerSidePacketRegistry.INSTANCE.sendToPlayer(
-                    player, SLOT_UPDATE_PACKET,
-                    createSlotUpdatePacket(syncId, it.slotNumber, it.inventoryNumber, it.stack)
-                )
-            }
             initialized = true
+            if (world.isClient) {
+                sort()
+            } else {
+                linkedSlots.forEach {
+                    if (!it.stack.isEmpty) ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                        player, SLOT_UPDATE_PACKET,
+                        createSlotUpdatePacket(syncId, it.slotNumber, it.inventoryNumber, it.stack)
+                    )
+                }
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_INIT_CLIENT, buf().writeVarInt(syncId))
+            }
         }
     }
 
@@ -280,7 +287,7 @@ open class RequestScreenHandler(
     }
 
     private fun sort() {
-        if (world.isClient) screen { it.sort() }
+        if (world.isClient and initialized) screen { it.sort() }
     }
 
     private fun screen(x: (RequestScreen<*>) -> Any) {
@@ -389,10 +396,8 @@ open class RequestScreenHandler(
     override fun close(player: PlayerEntity) {
         clearCraft()
         dropInventory(player, world, craftingInv)
-        context.run { world, pos ->
-            val master = world.getBlockEntity(pos)
-            if (master is MasterBlockEntity) master.watchers.remove(this)
-        }
+        master?.watchers?.remove(this)
+        master?.unloadForcedChunks()
         super.close(player)
     }
 

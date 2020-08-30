@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.util.mc
 import badasintended.slotlink.util.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
@@ -66,7 +66,7 @@ class WMultiSlot(
             textRenderer, stack, itemX, itemY, ""
         )
 
-        val factor = MinecraftClient.getInstance().window.scaleFactor.toFloat()
+        val factor = mc().window.scaleFactor.toFloat()
         val scale = (1 / factor) * ceil(factor / 2)
 
         matrices.push()

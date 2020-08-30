@@ -1,7 +1,8 @@
 package badasintended.slotlink.gui.screen
 
+import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.registry.ScreenHandlerRegistry
-import badasintended.slotlink.util.SortBy
+import badasintended.slotlink.util.Sort
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
@@ -24,10 +25,11 @@ class RemoteScreenHandler : RequestScreenHandler {
         syncId: Int,
         playerInventory: PlayerInventory,
         invMap: Map<Inventory, Pair<Boolean, Set<Item>>>,
-        lastSort: SortBy,
+        lastSort: Sort,
         offHand: Boolean,
-        context: ScreenHandlerContext
-    ) : super(syncId, playerInventory, BlockPos.ORIGIN, invMap, lastSort, context) {
+        context: ScreenHandlerContext,
+        master: MasterBlockEntity
+    ) : super(syncId, playerInventory, BlockPos.ORIGIN, invMap, lastSort, context, master) {
         this.offHand = offHand
     }
 

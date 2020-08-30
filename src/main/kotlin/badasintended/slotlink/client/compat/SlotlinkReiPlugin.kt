@@ -1,10 +1,10 @@
 package badasintended.slotlink.client.compat
 
-import badasintended.slotlink.Slotlink
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import badasintended.slotlink.registry.BlockRegistry
 import badasintended.slotlink.registry.NetworkRegistry.CRAFT_PULL
 import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.identifier
 import com.google.common.collect.Lists
 import me.shedaniel.rei.api.AutoTransferHandler.Result
 import me.shedaniel.rei.api.EntryStack
@@ -24,7 +24,7 @@ import java.util.*
 @Environment(EnvType.CLIENT)
 class SlotlinkReiPlugin : REIPluginV0 {
 
-    override fun getPluginIdentifier() = Slotlink.id("rei")
+    override fun getPluginIdentifier() = identifier("rei")
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
         recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(BlockRegistry.REQUEST))

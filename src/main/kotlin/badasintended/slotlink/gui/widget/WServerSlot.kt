@@ -9,6 +9,7 @@ open class WServerSlot(
 
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         super.setStack<W>(stack)
+        linkedInventory.markDirty()
         onSetStack.invoke()
         return this as W
     }

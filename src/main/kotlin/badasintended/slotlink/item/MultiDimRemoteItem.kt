@@ -48,7 +48,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
                 } else {
                     player.openHandledScreen(
                         ScreenHandlerFactory(
-                            dim, master, SortBy.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
+                            dim, master, Sort.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
                         )
                     )
                 }
@@ -110,15 +110,16 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     class ScreenHandlerFactory(
         private val masterWorld: World,
         private val master: MasterBlockEntity,
-        private val lastSort: SortBy,
+        private val lastSort: Sort,
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getLinkedInventories(masterWorld)
+        private val inventories = master.getLinkedInventories(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
             val handler = RemoteScreenHandler(
-                syncId, inv, inventories, lastSort, offHand, ScreenHandlerContext.create(masterWorld, master.pos)
+                syncId, inv, inventories, lastSort, offHand, ScreenHandlerContext.create(masterWorld, master.pos),
+                master
             )
             master.watchers.add(handler)
             return handler

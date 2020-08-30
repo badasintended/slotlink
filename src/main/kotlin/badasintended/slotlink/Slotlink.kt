@@ -5,17 +5,10 @@ package badasintended.slotlink
 import badasintended.slotlink.registry.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.util.Identifier
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 object Slotlink {
 
     const val ID = "slotlink"
-
-    val LOGGER: Logger = LogManager.getLogger(ID)
-
-    fun id(path: String) = Identifier(ID, path)
 
     fun main() {
         BlockRegistry.init()

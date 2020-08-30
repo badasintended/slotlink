@@ -29,8 +29,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
-    modCompile "com.github.badasintended:Spinnery:${project.spinnery}"
-    include "com.github.badasintended:Spinnery:${project.spinnery}"
+    modCompile "com.github.badasintended:spinnery:${project.spinnery}"
+    include "com.github.badasintended:spinnery:${project.spinnery}"
 
     modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 

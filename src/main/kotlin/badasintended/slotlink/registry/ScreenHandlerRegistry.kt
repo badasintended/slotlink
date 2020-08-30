@@ -1,7 +1,7 @@
 package badasintended.slotlink.registry
 
-import badasintended.slotlink.Slotlink
 import badasintended.slotlink.gui.screen.*
+import badasintended.slotlink.util.identifier
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.network.PacketByteBuf
@@ -24,7 +24,7 @@ object ScreenHandlerRegistry {
     private fun <H : ModScreenHandler> r(
         id: String, func: (Int, PlayerInventory, PacketByteBuf) -> H
     ): ScreenHandlerType<H> {
-        return ScreenHandlerRegistry.registerExtended(Slotlink.id(id), func)
+        return ScreenHandlerRegistry.registerExtended(identifier(id), func)
     }
 
 }

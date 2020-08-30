@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
+import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
@@ -20,6 +21,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
+import org.apache.logging.log4j.LogManager
 import sbinnery.common.handler.BaseScreenHandler
 import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
@@ -109,7 +111,7 @@ fun BlockPos.around(): ImmutableMap<Direction, BlockPos> {
 
 @Environment(EnvType.CLIENT)
 fun Direction.texture(): Identifier {
-    return Slotlink.id("textures/gui/side_${asString()}.png")
+    return identifier("textures/gui/side_${asString()}.png")
 }
 
 fun Direction.next(): Direction {
@@ -152,4 +154,11 @@ fun PacketByteBuf.readInventory(): DefaultedList<ItemStack> {
     return stack
 }
 
-fun tex(path: String) = Slotlink.id("textures/${path}.png")
+fun tex(path: String) = identifier("textures/${path}.png")
+
+@Environment(EnvType.CLIENT)
+fun mc(): MinecraftClient = MinecraftClient.getInstance()
+
+fun identifier(path: String) = Identifier(Slotlink.ID, path)
+
+fun log() = LogManager.getLogger(Slotlink.ID)

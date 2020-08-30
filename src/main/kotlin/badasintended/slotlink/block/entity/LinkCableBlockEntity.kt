@@ -1,12 +1,10 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.Slotlink
 import badasintended.slotlink.api.Compat
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.gui.screen.LinkScreenHandler
 import badasintended.slotlink.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.util.toPos
-import badasintended.slotlink.util.toTag
+import badasintended.slotlink.util.*
 import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -18,7 +16,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.L
 
     override fun WorldAccess.isBlockIgnored(block: Block): Boolean {
         if ((block is ModBlock) or Compat.isBlacklisted(block)) return true
-        return if (this is World) tagManager.blocks.getTag(Slotlink.id("ignored"))?.contains(block) ?: false else false
+        return if (this is World) tagManager.blocks.getTag(identifier("ignored"))?.contains(block) ?: false else false
     }
 
     override fun markDirty() {
