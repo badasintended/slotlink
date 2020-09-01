@@ -97,10 +97,8 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return updatedState
     }
 
-    override fun appendTooltip(
-        stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
-    ) {
-        super.appendTooltip(stack, view, tooltip, options)
+    override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+        super.buildTooltip(stack, view, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
     }
 

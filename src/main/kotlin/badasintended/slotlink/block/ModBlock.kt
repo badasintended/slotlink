@@ -21,7 +21,7 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
 
     val id = modId(id)
 
-    override fun appendTooltip(
+    override fun buildTooltip(
         stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
     ) {
         tooltip.add(TranslatableText("${translationKey}.tooltip").formatted(Formatting.GRAY))

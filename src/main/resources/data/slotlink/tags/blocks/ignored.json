@@ -4,9 +4,6 @@
     "minecraft:blast_furnace",
     "minecraft:smoker",
     "minecraft:brewing_stand",
-    "minecraft:composter",
-    {"id": "trash-it:trash_can", "required": false},
-    {"id": "simpledrawers:drawer_controller", "required": false},
-    {"id": "#simpledrawers:drawers", "required": false}
+    "minecraft:composter"
   ]
 }
