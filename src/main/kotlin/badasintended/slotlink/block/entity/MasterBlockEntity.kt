@@ -61,7 +61,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
     }
 
     fun unloadForcedChunks(world: World) {
-        if (!world.isClient) {
+        if (!world.isClient and watchers.isEmpty()) {
             world as ServerWorld
             forcedChunks.forEach {
                 world.setChunkForced(it.first, it.second, false)
@@ -71,7 +71,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
     }
 
     fun forceChunk(world: World) {
-        if (!world.isClient) {
+        if (!world.isClient and watchers.isNotEmpty()) {
             world as ServerWorld
             forcedChunks.forEach {
                 world.setChunkForced(it.first, it.second, true)
