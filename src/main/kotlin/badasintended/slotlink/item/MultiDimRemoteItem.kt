@@ -2,8 +2,8 @@ package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import badasintended.slotlink.util.*
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
@@ -13,7 +13,6 @@ import net.minecraft.item.ItemUsageContext
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
@@ -48,7 +47,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
                 } else {
                     player.openHandledScreen(
                         ScreenHandlerFactory(
-                            dim, master, SortBy.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
+                            dim, master, Sort.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
                         )
                     )
                 }
@@ -110,16 +109,14 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     class ScreenHandlerFactory(
         private val masterWorld: World,
         private val master: MasterBlockEntity,
-        private val lastSort: SortBy,
+        private val lastSort: Sort,
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getLinkedInventories(masterWorld)
+        private val inventories = master.getLinkedInventories(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-            val handler = RemoteScreenHandler(
-                syncId, inv, inventories, lastSort, offHand, ScreenHandlerContext.create(masterWorld, master.pos)
-            )
+            val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, offHand, masterWorld, master)
             master.watchers.add(handler)
             return handler
         }

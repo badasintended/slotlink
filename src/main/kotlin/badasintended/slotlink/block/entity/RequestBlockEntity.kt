@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.SortBy
-import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -13,7 +13,6 @@ import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.math.BlockPos
@@ -45,16 +44,14 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
         _masterPos = masterPos.toPos()
         val master = world.getBlockEntity(_masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
-        inventories = master.getLinkedInventories(world)
-        val handler = RequestScreenHandler(
-            syncId, inv, _masterPos, inventories, SortBy.of(lastSort), ScreenHandlerContext.create(world, _masterPos)
-        )
+        inventories = master.getLinkedInventories(world, true)
+        val handler = RequestScreenHandler(syncId, inv, pos, inventories, Sort.of(lastSort), world, master)
         master.watchers.add(handler)
         return handler
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-        buf.writeBlockPos(_masterPos)
+        buf.writeBlockPos(pos)
         buf.writeVarInt(lastSort)
     }
 

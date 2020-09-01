@@ -1,6 +1,6 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package badasintended.slotlink.common.registry
+package badasintended.slotlink.registry
 
 import badasintended.slotlink.item.*
 import net.minecraft.util.registry.Registry

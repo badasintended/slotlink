@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.common.util.MasterWatcher
-import badasintended.slotlink.common.util.toPos
 import badasintended.slotlink.mixin.DoubleInventoryAccessor
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.util.MasterWatcher
+import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -12,6 +12,7 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Tickable
 import net.minecraft.world.World
 
@@ -27,7 +28,9 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
     private var tick = 0
 
-    fun getLinkedInventories(world: World): Map<Inventory, Pair<Boolean, Set<Item>>> {
+    val forcedChunks = hashSetOf<Pair<Int, Int>>()
+
+    fun getLinkedInventories(world: World, request: Boolean = false): Map<Inventory, Pair<Boolean, Set<Item>>> {
         val linkedMap = linkedMapOf<Inventory, Pair<Boolean, Set<Item>>>()
 
         val cables = arrayListOf<LinkCableBlockEntity>()
@@ -42,7 +45,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
         cables.sortByDescending { it.priority }
         for (cable in cables) {
-            val inventory = cable.getLinkedInventory(world) ?: continue
+            val inventory = cable.getLinkedInventory(world, this, request, request) ?: continue
             val key = inventory.first
             if (key is DoubleInventory) {
                 key as DoubleInventoryAccessor
@@ -55,6 +58,25 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         }
 
         return linkedMap
+    }
+
+    fun unloadForcedChunks(world: World) {
+        if (!world.isClient and watchers.isEmpty()) {
+            world as ServerWorld
+            forcedChunks.forEach {
+                world.setChunkForced(it.first, it.second, false)
+            }
+        }
+        forcedChunks.clear()
+    }
+
+    fun forceChunk(world: World) {
+        if (!world.isClient and watchers.isNotEmpty()) {
+            world as ServerWorld
+            forcedChunks.forEach {
+                world.setChunkForced(it.first, it.second, true)
+            }
+        }
     }
 
     private fun validateCables(world: World) {

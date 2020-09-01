@@ -1,5 +1,5 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.common.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.registry.BlockEntityTypeRegistry
 
 class CableBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.CABLE)

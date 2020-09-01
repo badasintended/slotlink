@@ -6,9 +6,9 @@
     "QCQ"
   ],
   "key"    : {
-    "Q": {"item": "minecraft:quartz_block"},
-    "C": {"item": "slotlink:cable"},
-    "D": {"item": "minecraft:diamond"}
+    "D": {"tag": "c:diamonds"},
+    "Q": {"tag": "c:quartz_blocks"},
+    "C": {"item": "slotlink:cable"}
   },
   "result" : {"item": "slotlink:master"}
 }

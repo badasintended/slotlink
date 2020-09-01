@@ -1,11 +1,11 @@
-package badasintended.slotlink.common.registry
+package badasintended.slotlink.registry
 
 import badasintended.slotlink.client.gui.screen.*
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry.LINK
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry.REMOTE
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry.REQUEST
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry.TRANSFER
 import badasintended.slotlink.gui.screen.ModScreenHandler
+import badasintended.slotlink.registry.ScreenHandlerRegistry.LINK
+import badasintended.slotlink.registry.ScreenHandlerRegistry.REMOTE
+import badasintended.slotlink.registry.ScreenHandlerRegistry.REQUEST
+import badasintended.slotlink.registry.ScreenHandlerRegistry.TRANSFER
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry

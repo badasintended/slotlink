@@ -1,6 +1,6 @@
 package badasintended.slotlink.block
 
-import badasintended.slotlink.Slotlink
+import badasintended.slotlink.util.modId
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
@@ -19,9 +19,11 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
             FabricBlockSettings.of(Material.STONE).breakByHand(true).breakByTool(FabricToolTags.PICKAXES).hardness(5f)
     }
 
-    val id = Slotlink.id(id)
+    val id = modId(id)
 
-    override fun buildTooltip(stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+    override fun appendTooltip(
+        stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
+    ) {
         tooltip.add(TranslatableText("${translationKey}.tooltip").formatted(Formatting.GRAY))
     }
 

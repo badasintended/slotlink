@@ -5,7 +5,7 @@
   "name"         : "slotlink",
   "description"  : "Clone of Storage Networks for Fabric Loader, for lazy people who doesn't want to sort chests!",
   "authors"      : ["deirn"],
-  "contributors" : [],
+  "contributors" : ["Imbarainbow"],
   "contact"      : {
     "homepage": "https://github.com/badasintended/slotlink",
     "sources" : "https://github.com/badasintended/slotlink",
@@ -13,11 +13,14 @@
   },
   "license"      : "LGPL-3.0",
   "icon"         : "assets/slotlink/icon.png",
-  "environment"  : "*",
   "entrypoints"  : {
-    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
-    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
-    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.SlotlinkReiPlugin"}]
+    "main"           : [
+      "badasintended.slotlink.api.Compat",
+      {"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}
+    ],
+    "client"         : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei_plugins_v0" : [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.SlotlinkReiPlugin"}],
+    "slotlink-compat": [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.StockpileCompat"}]
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {

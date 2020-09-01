@@ -1,7 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.common.util.actionBar
+import badasintended.slotlink.util.actionBar
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.screen.NamedScreenHandlerFactory
@@ -17,8 +17,11 @@ class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
         state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
     ): ActionResult {
         val blockEntity = world.getBlockEntity(pos) as RequestBlockEntity
-        if (!blockEntity.hasMaster) player.actionBar("${translationKey}.hasNoMaster")
-        else player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
+        if (!blockEntity.hasMaster) {
+            player.actionBar("${translationKey}.hasNoMaster")
+        } else {
+            player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
+        }
         return ActionResult.SUCCESS
     }
 

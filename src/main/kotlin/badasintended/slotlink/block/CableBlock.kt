@@ -1,7 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.CableBlockEntity
-import badasintended.slotlink.common.util.bbCuboid
+import badasintended.slotlink.util.bbCuboid
 import com.google.common.collect.ImmutableMap
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags

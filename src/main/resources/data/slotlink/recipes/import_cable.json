@@ -6,8 +6,8 @@
     " C "
   ],
   "key"    : {
-    "C": {"item": "slotlink:cable"},
-    "H": {"item": "minecraft:hopper"}
+    "H": {"tag": "c:hoppers"},
+    "C": {"item": "slotlink:cable"}
   },
   "result" : {"item": "slotlink:import_cable", "count": 4}
 }

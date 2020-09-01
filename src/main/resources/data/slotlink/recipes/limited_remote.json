@@ -6,10 +6,10 @@
     "SDS"
   ],
   "key"    : {
-    "S": {"item": "minecraft:redstone"},
+    "S": {"tag": "c:redstone_dusts"},
     "R": {"item": "slotlink:request"},
-    "G": {"item": "minecraft:gold_ingot"},
-    "D": {"item": "minecraft:diamond"}
+    "G": {"tag": "c:gold_ingots"},
+    "D": {"tag": "c:diamonds"}
   },
   "result" : {"item": "slotlink:limited_remote"}
 }

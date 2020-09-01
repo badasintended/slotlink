@@ -1,12 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.util.slotAction
+import badasintended.slotlink.util.getClient
+import badasintended.slotlink.util.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.item.ItemStack
 import sbinnery.client.render.BaseRenderer
 import sbinnery.widget.WAbstractWidget
 import sbinnery.widget.WSlot
@@ -20,6 +21,8 @@ import kotlin.reflect.KMutableProperty0
 class WMultiSlot(
     private val shouldSort: KMutableProperty0<Boolean>
 ) : WSlot() {
+
+    private var multiStack = ItemStack.EMPTY
 
     private val linkedSlots = arrayListOf<WLinkedSlot>()
 
@@ -63,7 +66,7 @@ class WMultiSlot(
             textRenderer, stack, itemX, itemY, ""
         )
 
-        val factor = MinecraftClient.getInstance().window.scaleFactor.toFloat()
+        val factor = getClient().window.scaleFactor.toFloat()
         val scale = (1 / factor) * ceil(factor / 2)
 
         matrices.push()
@@ -123,4 +126,12 @@ class WMultiSlot(
         if (isHidden) setFocus(false)
         return this as W
     }
+
+    override fun <W : WSlot> setStack(stack: ItemStack): W {
+        multiStack = stack
+        return this as W
+    }
+
+    override fun getStack(): ItemStack = multiStack
+
 }

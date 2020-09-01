@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.WSlotButton
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.TransferScreenHandler
+import badasintended.slotlink.util.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 

@@ -1,12 +1,12 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_ONCE
-import badasintended.slotlink.common.registry.NetworkRegistry.CRAFT_STACK
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry.CRAFT_ONCE
+import badasintended.slotlink.registry.NetworkRegistry.CRAFT_STACK
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import net.minecraft.client.gui.screen.Screen
 import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
@@ -29,9 +29,7 @@ class WCraftingResultSlot : WSlot() {
 
         if (Screen.hasShiftDown()) {
             container.craftStack()
-            if (button == LEFT) INSTANCE.sendToServer(
-                CRAFT_STACK, buf()
-            )
+            if (button == LEFT) c2s(CRAFT_STACK, buf())
         } else {
             if ((button == LEFT) or (button == RIGHT)) {
                 if ((!equalItemAndTag(
@@ -39,10 +37,10 @@ class WCraftingResultSlot : WSlot() {
                     ) and !cursorStack.isEmpty) or ((cursorStack.count + stack.count) > cursorStack.maxCount)
                 ) return
                 container.craftOnce()
-                INSTANCE.sendToServer(CRAFT_ONCE, buf())
+                c2s(CRAFT_ONCE, buf())
             } else if (button == MIDDLE) {
                 container.onSlotAction(slotNumber, inventoryNumber, button, CLONE, player)
-                INSTANCE.sendToServer(
+                c2s(
                     SLOT_CLICK_PACKET,
                     createSlotClickPacket(container.syncId, slotNumber, inventoryNumber, button, CLONE)
                 )

@@ -1,9 +1,8 @@
 package badasintended.slotlink.gui.screen
 
-import badasintended.slotlink.common.registry.NetworkRegistry
-import badasintended.slotlink.common.registry.ScreenHandlerRegistry
-import badasintended.slotlink.common.util.*
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
+import badasintended.slotlink.registry.NetworkRegistry
+import badasintended.slotlink.registry.ScreenHandlerRegistry
+import badasintended.slotlink.util.*
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
@@ -31,14 +30,16 @@ class TransferScreenHandler(
     override fun save() {
         if (!world.isClient) return
         val buf = buf()
-        buf.writeBlockPos(pos)
-        buf.writeVarInt(priority)
-        buf.writeBoolean(isBlacklist)
-        buf.writeInventory(filter)
-        buf.writeVarInt(side.id)
-        buf.writeVarInt(redstone.ordinal)
+        buf.apply {
+            writeBlockPos(pos)
+            writeVarInt(priority)
+            writeBoolean(isBlacklist)
+            writeInventory(filter)
+            writeVarInt(side.id)
+            writeVarInt(redstone.ordinal)
+        }
 
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.TRANSFER_WRITE, buf)
+        c2s(NetworkRegistry.TRANSFER_WRITE, buf)
     }
 
     override fun getType(): ScreenHandlerType<*> {

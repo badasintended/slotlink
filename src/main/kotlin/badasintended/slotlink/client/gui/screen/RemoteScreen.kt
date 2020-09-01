@@ -1,11 +1,11 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.common.registry.NetworkRegistry.REMOTE_SAVE
-import badasintended.slotlink.common.util.buf
 import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry.REMOTE_SAVE
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
 import sbinnery.widget.WSlot
 
 @Environment(EnvType.CLIENT)
@@ -22,9 +22,11 @@ class RemoteScreen(c: RemoteScreenHandler) : RequestScreen<RemoteScreenHandler>(
 
     override fun saveSort() {
         val buf = buf()
-        buf.writeBoolean(c.offHand)
-        buf.writeInt(lastSort.ordinal)
-        INSTANCE.sendToServer(REMOTE_SAVE, buf)
+        buf.apply {
+            writeBoolean(c.offHand)
+            writeInt(lastSort.ordinal)
+        }
+        c2s(REMOTE_SAVE, buf)
     }
 
 }

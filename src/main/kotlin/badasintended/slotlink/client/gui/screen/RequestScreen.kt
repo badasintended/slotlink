@@ -1,18 +1,19 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.common.registry.NetworkRegistry
-import badasintended.slotlink.common.util.*
 import badasintended.slotlink.gui.screen.RequestScreenHandler
+import badasintended.slotlink.registry.NetworkRegistry
+import badasintended.slotlink.util.*
+import badasintended.slotlink.util.Sort.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
-import net.minecraft.text.*
+import net.minecraft.text.LiteralText
+import net.minecraft.text.MutableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
@@ -27,15 +28,6 @@ import sbinnery.widget.WAbstractWidget as W
 
 @Environment(EnvType.CLIENT)
 open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), ScreenHandlerListener {
-
-    private val help = arrayListOf<Text>(
-        TranslatableText("block.slotlink.request.help1"),
-        TranslatableText("block.slotlink.request.help2").formatted(Formatting.GRAY),
-        TranslatableText("block.slotlink.request.help3").formatted(Formatting.GRAY), LiteralText(""),
-        TranslatableText("block.slotlink.request.help4"),
-        TranslatableText("block.slotlink.request.help5").formatted(Formatting.GRAY),
-        TranslatableText("block.slotlink.request.help6").formatted(Formatting.GRAY)
-    )
 
     private val emptySlots = arrayListOf<WLinkedSlot>()
     private val filledSlots = arrayListOf<WLinkedSlot>()
@@ -181,7 +173,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     private fun clearButtonClick() {
         c.clearCraft()
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, buf())
+        c2s(NetworkRegistry.CRAFT_CLEAR, buf())
     }
 
     private fun putAllButtonClick() {
@@ -216,51 +208,53 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         viewedSlots.forEach { it.setHidden<W>(true) }
 
-        var i = 0
-
         for (j in 0 until viewedSlotSize) {
-            val viewedSlot = viewedSlots[j]
-            viewedSlot.setHidden<WSlot>(false)
-            if (j < (filledStacks.size - offset)) {
-                val filledStack = filledStacks[j + offset]
-                val serverSlots = arrayListOf<WLinkedSlot>()
+            viewedSlots[j].apply {
+                setHidden<WSlot>(false)
+                if (j < (filledStacks.size - offset)) {
+                    val filledStack = filledStacks[j + offset]
+                    val serverSlots = arrayListOf<WLinkedSlot>()
 
-                serverSlots.addAll(filledSlots.filter { slot ->
-                    equalItemAndTag(filledStack, slot.copiedStack)
-                })
+                    serverSlots.addAll(filledSlots.filter { slot ->
+                        equalItemAndTag(filledStack, slot.copiedStack)
+                    })
 
-                viewedSlot.setLinkedSlots(*serverSlots.toTypedArray())
-                viewedSlot.setStack<WSlot>(filledStack)
-            } else {
-                viewedSlot.setStack<WSlot>(ItemStack.EMPTY)
-                viewedSlot.setLinkedSlots()
+                    setLinkedSlots(*serverSlots.toTypedArray())
+                    setStack<WSlot>(filledStack)
+                } else {
+                    setStack<WSlot>(ItemStack.EMPTY)
+                    setLinkedSlots()
+                }
             }
         }
     }
 
     open fun saveSort() {
         val buf = buf()
-        buf.writeBlockPos(c.masterPos)
-        buf.writeInt(lastSort.ordinal)
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_SAVE, buf)
+        buf.apply {
+            writeBlockPos(c.requestPos)
+            writeInt(lastSort.ordinal)
+        }
+        c2s(NetworkRegistry.REQUEST_SAVE, buf)
     }
 
     fun sort() {
         if (shouldSort) sort(lastSort, lastFilter)
     }
 
-    private fun sort(sortBy: SortBy, filter: String): SortBy {
+    private fun sort(sort: Sort, filter: String): Sort {
         emptySlots.clear()
         filledSlots.clear()
 
         c.validateInventories()
 
-        c.linkedSlots.forEach { cSlot ->
-            val slot = WLinkedSlot()
-            slot.invNumber = cSlot.inventoryNumber
-            slot.slotNumber = cSlot.slotNumber
-            slot.stack = cSlot.stack
-            if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
+        c.linkedSlots.forEach {
+            val slot = WLinkedSlot().apply {
+                invNumber = it.inventoryNumber
+                slotNumber = it.slotNumber
+                stack = it.stack
+            }
+            if (it.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
         }
 
         val trimmedFilter = filter.trim()
@@ -272,7 +266,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
                 }
                 '#' -> filledSlots.removeIf r@{ slot ->
                     val tag = trimmedFilter.drop(1)
-                    val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
+                    val tags = c.world.tagManager.items.getTagsFor(slot.stack.item)
                     if (tags.isEmpty() and tag.isEmpty()) return@r false
                     else return@r tags.none { it.toString().contains(tag, true) }
                 }
@@ -290,15 +284,18 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
             slot.copiedStack = copyStack
         }
 
-        when (sortBy) {
-            SortBy.NAME -> filledStacks.sortBy { it.name.string }
-            SortBy.IDENTIFIER -> filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
-            SortBy.COUNT -> filledStacks.sortByDescending { it.count }
+        when (sort) {
+            NAME -> filledStacks.sortBy { it.name.string }
+            NAME_DESC -> filledStacks.sortByDescending { it.name.string }
+            ID -> filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
+            ID_DESC -> filledStacks.sortByDescending { Registry.ITEM.getId(it.item).toString() }
+            COUNT -> filledStacks.sortBy { it.count }
+            COUNT_DESC -> filledStacks.sortByDescending { it.count }
         }
 
         scrollbar.setMax<WFakeScrollbar>((ceil(filledStacks.size / 8f) - slotHeight).coerceAtLeast(0f))
-        if ((lastSort != sortBy) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
-        lastSort = sortBy
+        if ((lastSort != sort) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
+        lastSort = sort
         saveSort()
 
         lastFilter = filter
@@ -306,7 +303,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     }
 
     private fun updateSlotSize() {
-        val scaledHeight = MinecraftClient.getInstance().window.scaledHeight
+        val scaledHeight = getClient().window.scaledHeight
         slotHeight = 0
         for (i in 3..6) if (scaledHeight > (207 + (i * 18))) slotHeight = i
         hideLabel = (slotHeight == 0)
@@ -315,7 +312,15 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     override fun init() {
         super.init()
+        val buf = buf()
+        buf.writeVarInt(c.syncId)
+        c2s(NetworkRegistry.REQUEST_INIT_SERVER, buf)
         c.addListener(this)
+    }
+
+    override fun removed() {
+        super.removed()
+        c.removeListener(this)
     }
 
     override fun resize(client: MinecraftClient, width: Int, height: Int) {
