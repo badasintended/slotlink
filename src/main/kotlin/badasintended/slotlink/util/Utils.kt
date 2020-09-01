@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
@@ -22,6 +23,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import sbinnery.common.handler.BaseScreenHandler
 import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
 import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
@@ -50,9 +52,7 @@ fun sizeOf(s: Int): Size = Size.of(s.toFloat())
 @Environment(EnvType.CLIENT)
 fun slotAction(container: BaseScreenHandler, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
     container.onSlotAction(slotN, invN, button, action, player)
-    ClientSidePacketRegistry.INSTANCE.sendToServer(
-        SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action)
-    )
+    c2s(SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action))
 }
 
 fun BlockPos.toTag(): CompoundTag {
@@ -111,7 +111,7 @@ fun BlockPos.around(): ImmutableMap<Direction, BlockPos> {
 
 @Environment(EnvType.CLIENT)
 fun Direction.texture(): Identifier {
-    return identifier("textures/gui/side_${asString()}.png")
+    return modId("textures/gui/side_${asString()}.png")
 }
 
 fun Direction.next(): Direction {
@@ -154,11 +154,20 @@ fun PacketByteBuf.readInventory(): DefaultedList<ItemStack> {
     return stack
 }
 
-fun tex(path: String) = identifier("textures/${path}.png")
+fun tex(path: String) = modId("textures/${path}.png")
+
+fun modId(path: String) = Identifier(Slotlink.ID, path)
+
+val log: Logger = LogManager.getLogger(Slotlink.ID)
 
 @Environment(EnvType.CLIENT)
-fun mc(): MinecraftClient = MinecraftClient.getInstance()
+fun getClient(): MinecraftClient = MinecraftClient.getInstance()
 
-fun identifier(path: String) = Identifier(Slotlink.ID, path)
+@Environment(EnvType.CLIENT)
+fun c2s(id: Identifier, buf: PacketByteBuf) {
+    ClientSidePacketRegistry.INSTANCE.sendToServer(id, buf)
+}
 
-fun log() = LogManager.getLogger(Slotlink.ID)
+fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf) {
+    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf)
+}

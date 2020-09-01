@@ -42,7 +42,6 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
             world as ServerWorld
             val chunkPos = ChunkPos(pos)
             if (!world.forcedChunks.contains(chunkPos.toLong())) {
-                world.setChunkForced(chunkPos.x, chunkPos.z, true)
                 master!!.forcedChunks.add(chunkPos.x to chunkPos.z)
             }
         }

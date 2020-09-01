@@ -13,19 +13,19 @@ import net.minecraft.util.math.Direction
 
 object NetworkRegistry {
 
-    val REQUEST_SAVE = identifier("request_save")
-    val REMOTE_SAVE = identifier("remote_save")
-    val CRAFT_ONCE = identifier("craft_once")
-    val CRAFT_STACK = identifier("craft_stack")
-    val CRAFT_CLEAR = identifier("craft_clear")
-    val CRAFT_PULL = identifier("craft_pull")
-    val LINK_WRITE = identifier("link_write")
-    val TRANSFER_WRITE = identifier("transfer_write")
-    val REQUEST_INIT_SERVER = identifier("request_init_server")
+    val REQUEST_SAVE = modId("request_save")
+    val REMOTE_SAVE = modId("remote_save")
+    val CRAFT_ONCE = modId("craft_once")
+    val CRAFT_STACK = modId("craft_stack")
+    val CRAFT_CLEAR = modId("craft_clear")
+    val CRAFT_PULL = modId("craft_pull")
+    val LINK_WRITE = modId("link_write")
+    val TRANSFER_WRITE = modId("transfer_write")
+    val REQUEST_INIT_SERVER = modId("request_init_server")
 
-    val REQUEST_REMOVE = identifier("request_remove")
-    val REQUEST_CURSOR = identifier("request_cursor")
-    val REQUEST_INIT_CLIENT = identifier("request_init_client")
+    val REQUEST_REMOVE = modId("request_remove")
+    val REQUEST_CURSOR = modId("request_cursor")
+    val REQUEST_INIT_CLIENT = modId("request_init_client")
 
     fun initMain() {
         rS(REQUEST_SAVE) { context, buf ->

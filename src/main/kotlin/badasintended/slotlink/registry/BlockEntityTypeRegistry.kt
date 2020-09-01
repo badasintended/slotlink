@@ -8,27 +8,30 @@ import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.Registry.BLOCK_ENTITY_TYPE
 import java.util.function.Supplier
 
+typealias T = BlockEntityType<*>
+typealias B = BlockRegistry
+
 object BlockEntityTypeRegistry {
 
-    lateinit var MASTER: BlockEntityType<*>
-    lateinit var REQUEST: BlockEntityType<*>
+    lateinit var MASTER: T
+    lateinit var REQUEST: T
 
-    lateinit var CABLE: BlockEntityType<*>
-    lateinit var LINK_CABLE: BlockEntityType<*>
-    lateinit var IMPORT_CABLE: BlockEntityType<*>
-    lateinit var EXPORT_CABLE: BlockEntityType<*>
+    lateinit var CABLE: T
+    lateinit var LINK_CABLE: T
+    lateinit var IMPORT_CABLE: T
+    lateinit var EXPORT_CABLE: T
 
     fun init() {
-        MASTER = r(BlockRegistry.MASTER, ::MasterBlockEntity)
-        REQUEST = r(BlockRegistry.REQUEST, ::RequestBlockEntity)
+        MASTER = r(B.MASTER, ::MasterBlockEntity)
+        REQUEST = r(B.REQUEST, ::RequestBlockEntity)
 
-        CABLE = r(BlockRegistry.CABLE, ::CableBlockEntity)
-        LINK_CABLE = r(BlockRegistry.LINK_CABLE, ::LinkCableBlockEntity)
-        IMPORT_CABLE = r(BlockRegistry.IMPORT_CABLE, ::ImportCableBlockEntity)
-        EXPORT_CABLE = r(BlockRegistry.EXPORT_CABLE, ::ExportCableBlockEntity)
+        CABLE = r(B.CABLE, ::CableBlockEntity)
+        LINK_CABLE = r(B.LINK_CABLE, ::LinkCableBlockEntity)
+        IMPORT_CABLE = r(B.IMPORT_CABLE, ::ImportCableBlockEntity)
+        EXPORT_CABLE = r(B.EXPORT_CABLE, ::ExportCableBlockEntity)
     }
 
-    private fun <T : BlockEntity> r(block: ModBlock, function: () -> T): BlockEntityType<T> {
+    private fun <E : BlockEntity> r(block: ModBlock, function: () -> E): BlockEntityType<E> {
         return Registry.register(
             BLOCK_ENTITY_TYPE, block.id, BlockEntityType.Builder.create(Supplier(function), block).build(null)
         )

@@ -28,11 +28,9 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
 
     private var tick = 0
 
-    val forcedChunks = arrayListOf<Pair<Int, Int>>()
+    val forcedChunks = hashSetOf<Pair<Int, Int>>()
 
-    fun getLinkedInventories(
-        world: World, request: Boolean = false
-    ): Map<Inventory, Pair<Boolean, Set<Item>>> {
+    fun getLinkedInventories(world: World, request: Boolean = false): Map<Inventory, Pair<Boolean, Set<Item>>> {
         val linkedMap = linkedMapOf<Inventory, Pair<Boolean, Set<Item>>>()
 
         val cables = arrayListOf<LinkCableBlockEntity>()
@@ -62,8 +60,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         return linkedMap
     }
 
-    fun unloadForcedChunks() {
-        val world = world ?: return
+    fun unloadForcedChunks(world: World) {
         if (!world.isClient) {
             world as ServerWorld
             forcedChunks.forEach {
@@ -71,6 +68,15 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
             }
         }
         forcedChunks.clear()
+    }
+
+    fun forceChunk(world: World) {
+        if (!world.isClient) {
+            world as ServerWorld
+            forcedChunks.forEach {
+                world.setChunkForced(it.first, it.second, true)
+            }
+        }
     }
 
     private fun validateCables(world: World) {

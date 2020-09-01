@@ -3,7 +3,6 @@ package badasintended.slotlink.gui.screen
 import badasintended.slotlink.registry.NetworkRegistry
 import badasintended.slotlink.registry.ScreenHandlerRegistry
 import badasintended.slotlink.util.*
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
@@ -40,7 +39,7 @@ open class LinkScreenHandler(
         buf.writeBoolean(isBlacklist)
         buf.writeInventory(filter)
 
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.LINK_WRITE, buf)
+        c2s(NetworkRegistry.LINK_WRITE, buf)
     }
 
     override fun getType(): ScreenHandlerType<*> {

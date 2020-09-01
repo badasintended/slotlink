@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.mc
+import badasintended.slotlink.util.getClient
 import badasintended.slotlink.util.slotAction
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -66,7 +66,7 @@ class WMultiSlot(
             textRenderer, stack, itemX, itemY, ""
         )
 
-        val factor = mc().window.scaleFactor.toFloat()
+        val factor = getClient().window.scaleFactor.toFloat()
         val scale = (1 / factor) * ceil(factor / 2)
 
         matrices.push()

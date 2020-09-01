@@ -13,7 +13,6 @@ import net.minecraft.item.ItemUsageContext
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
@@ -117,10 +116,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         private val inventories = master.getLinkedInventories(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-            val handler = RemoteScreenHandler(
-                syncId, inv, inventories, lastSort, offHand, ScreenHandlerContext.create(masterWorld, master.pos),
-                master
-            )
+            val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, offHand, masterWorld, master)
             master.watchers.add(handler)
             return handler
         }

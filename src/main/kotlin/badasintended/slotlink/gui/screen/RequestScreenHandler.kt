@@ -11,16 +11,17 @@ import badasintended.slotlink.registry.NetworkRegistry.REQUEST_INIT_CLIENT
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_REMOVE
 import badasintended.slotlink.registry.ScreenHandlerRegistry
 import badasintended.slotlink.util.*
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.*
 import net.minecraft.item.*
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.RecipeType
-import net.minecraft.screen.*
+import net.minecraft.screen.CraftingScreenHandler
+import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
 import sbinnery.common.registry.NetworkRegistry.SLOT_UPDATE_PACKET
 import sbinnery.common.registry.NetworkRegistry.createSlotUpdatePacket
 import sbinnery.common.utility.StackUtilities
@@ -38,7 +39,6 @@ open class RequestScreenHandler(
     playerInventory: PlayerInventory,
     val requestPos: BlockPos,
     val lastSort: Sort,
-    private val context: ScreenHandlerContext,
     private val master: MasterBlockEntity?
 ) : ModScreenHandler(syncId, playerInventory), MasterWatcher {
 
@@ -59,19 +59,22 @@ open class RequestScreenHandler(
 
     private var initialized = false
 
+    /** Client side **/
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
-        syncId, playerInventory, buf.readBlockPos(), Sort.of(buf.readVarInt()), ScreenHandlerContext.EMPTY, null
+        syncId, playerInventory, buf.readBlockPos(), Sort.of(buf.readVarInt()), null
     )
 
+    /** Server side **/
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
         masterPos: BlockPos,
         invMap: Map<Inventory, Pair<Boolean, Set<Item>>>,
         lastSort: Sort,
-        context: ScreenHandlerContext,
+        world: World,
         master: MasterBlockEntity
-    ) : this(syncId, playerInventory, masterPos, lastSort, context, master) {
+    ) : this(syncId, playerInventory, masterPos, lastSort, master) {
+        this.world = world
         val root = `interface`
 
         var i = 3
@@ -79,8 +82,7 @@ open class RequestScreenHandler(
             inventories[i] = inv
             for (j in 0 until inv.size()) {
                 val slot = root.createChild { WServerSlot(this::sort) }
-                slot.setInventoryNumber<WSlot>(i)
-                slot.setSlotNumber<WSlot>(j)
+                slot.setNumber<WSlot>(i, j)
                 if (filter.second.isNotEmpty()) {
                     if (filter.first) {
                         slot.setBlacklist<WSlot>()
@@ -142,30 +144,29 @@ open class RequestScreenHandler(
                 sort()
             } else {
                 linkedSlots.forEach {
-                    if (!it.stack.isEmpty) ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                    if (!it.stack.isEmpty) s2c(
                         player, SLOT_UPDATE_PACKET,
                         createSlotUpdatePacket(syncId, it.slotNumber, it.inventoryNumber, it.stack)
                     )
                 }
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_INIT_CLIENT, buf().writeVarInt(syncId))
+                s2c(player, REQUEST_INIT_CLIENT, buf().writeVarInt(syncId))
+                master?.forceChunk(world)
             }
         }
     }
 
     fun validateInventories() {
-        context.run { world, _ ->
-            if (!world.isClient) {
-                val removedInventories = linkedSlots
-                    .filter { it.linkedInventory == null }
-                    .stream()
-                    .mapToInt { it.inventoryNumber }
-                    .distinct()
-                    .toArray()
-                linkedSlots.removeIf { it.linkedInventory == null }
-                val buf = buf()
-                buf.writeIntArray(removedInventories)
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_REMOVE, buf)
-            }
+        if (!world.isClient) {
+            val removedInventories = linkedSlots
+                .filter { it.linkedInventory == null }
+                .stream()
+                .mapToInt { it.inventoryNumber }
+                .distinct()
+                .toArray()
+            linkedSlots.removeIf { it.linkedInventory == null }
+            val buf = buf()
+            buf.writeIntArray(removedInventories)
+            s2c(player, REQUEST_REMOVE, buf)
         }
     }
 
@@ -271,7 +272,7 @@ open class RequestScreenHandler(
         if (!world.isClient) {
             player as ServerPlayerEntity
             var itemStack = ItemStack.EMPTY
-            val optional = world.server!!.recipeManager.getFirstMatch(RecipeType.CRAFTING, craftingInv, world)
+            val optional = world.recipeManager.getFirstMatch(RecipeType.CRAFTING, craftingInv, world)
             if (optional.isPresent) {
                 val craftingRecipe = optional.get()
                 if (resultInv.shouldCraftRecipe(world, player, craftingRecipe)) {
@@ -279,9 +280,7 @@ open class RequestScreenHandler(
                 }
             }
             outputSlot.setStack<WSlot>(itemStack)
-            ServerSidePacketRegistry.INSTANCE.sendToPlayer(
-                player, SLOT_UPDATE_PACKET, createSlotUpdatePacket(syncId, 0, 2, itemStack)
-            )
+            s2c(player, SLOT_UPDATE_PACKET, createSlotUpdatePacket(syncId, 0, 2, itemStack))
             resultInv.unlockLastRecipe(player)
         }
     }
@@ -390,14 +389,14 @@ open class RequestScreenHandler(
 
         val buf = buf()
         buf.writeItemStack(playerInventory.cursorStack)
-        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, REQUEST_CURSOR, buf)
+        s2c(player, REQUEST_CURSOR, buf)
     }
 
     override fun close(player: PlayerEntity) {
         clearCraft()
         dropInventory(player, world, craftingInv)
         master?.watchers?.remove(this)
-        master?.unloadForcedChunks()
+        master?.unloadForcedChunks(world)
         super.close(player)
     }
 

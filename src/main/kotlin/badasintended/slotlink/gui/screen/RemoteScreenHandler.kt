@@ -7,9 +7,9 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
 import net.minecraft.network.PacketByteBuf
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
 
 class RemoteScreenHandler : RequestScreenHandler {
 
@@ -27,9 +27,9 @@ class RemoteScreenHandler : RequestScreenHandler {
         invMap: Map<Inventory, Pair<Boolean, Set<Item>>>,
         lastSort: Sort,
         offHand: Boolean,
-        context: ScreenHandlerContext,
+        world: World,
         master: MasterBlockEntity
-    ) : super(syncId, playerInventory, BlockPos.ORIGIN, invMap, lastSort, context, master) {
+    ) : super(syncId, playerInventory, BlockPos.ORIGIN, invMap, lastSort, world, master) {
         this.offHand = offHand
     }
 

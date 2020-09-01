@@ -17,8 +17,11 @@ class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
         state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
     ): ActionResult {
         val blockEntity = world.getBlockEntity(pos) as RequestBlockEntity
-        if (!blockEntity.hasMaster) player.actionBar("${translationKey}.hasNoMaster")
-        else player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
+        if (!blockEntity.hasMaster) {
+            player.actionBar("${translationKey}.hasNoMaster")
+        } else {
+            player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
+        }
         return ActionResult.SUCCESS
     }
 

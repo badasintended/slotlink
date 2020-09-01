@@ -13,7 +13,6 @@ import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.math.BlockPos
@@ -46,9 +45,7 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
         val master = world.getBlockEntity(_masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
         inventories = master.getLinkedInventories(world, true)
-        val handler = RequestScreenHandler(
-            syncId, inv, pos, inventories, Sort.of(lastSort), ScreenHandlerContext.create(world, _masterPos), master
-        )
+        val handler = RequestScreenHandler(syncId, inv, pos, inventories, Sort.of(lastSort), world, master)
         master.watchers.add(handler)
         return handler
     }

@@ -7,7 +7,6 @@ import badasintended.slotlink.util.*
 import badasintended.slotlink.util.Sort.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
@@ -174,7 +173,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
     private fun clearButtonClick() {
         c.clearCraft()
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.CRAFT_CLEAR, buf())
+        c2s(NetworkRegistry.CRAFT_CLEAR, buf())
     }
 
     private fun putAllButtonClick() {
@@ -210,30 +209,33 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         viewedSlots.forEach { it.setHidden<W>(true) }
 
         for (j in 0 until viewedSlotSize) {
-            val viewedSlot = viewedSlots[j]
-            viewedSlot.setHidden<WSlot>(false)
-            if (j < (filledStacks.size - offset)) {
-                val filledStack = filledStacks[j + offset]
-                val serverSlots = arrayListOf<WLinkedSlot>()
+            viewedSlots[j].apply {
+                setHidden<WSlot>(false)
+                if (j < (filledStacks.size - offset)) {
+                    val filledStack = filledStacks[j + offset]
+                    val serverSlots = arrayListOf<WLinkedSlot>()
 
-                serverSlots.addAll(filledSlots.filter { slot ->
-                    equalItemAndTag(filledStack, slot.copiedStack)
-                })
+                    serverSlots.addAll(filledSlots.filter { slot ->
+                        equalItemAndTag(filledStack, slot.copiedStack)
+                    })
 
-                viewedSlot.setLinkedSlots(*serverSlots.toTypedArray())
-                viewedSlot.setStack<WSlot>(filledStack)
-            } else {
-                viewedSlot.setStack<WSlot>(ItemStack.EMPTY)
-                viewedSlot.setLinkedSlots()
+                    setLinkedSlots(*serverSlots.toTypedArray())
+                    setStack<WSlot>(filledStack)
+                } else {
+                    setStack<WSlot>(ItemStack.EMPTY)
+                    setLinkedSlots()
+                }
             }
         }
     }
 
     open fun saveSort() {
         val buf = buf()
-        buf.writeBlockPos(c.requestPos)
-        buf.writeInt(lastSort.ordinal)
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_SAVE, buf)
+        buf.apply {
+            writeBlockPos(c.requestPos)
+            writeInt(lastSort.ordinal)
+        }
+        c2s(NetworkRegistry.REQUEST_SAVE, buf)
     }
 
     fun sort() {
@@ -246,12 +248,13 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
 
         c.validateInventories()
 
-        c.linkedSlots.forEach { cSlot ->
-            val slot = WLinkedSlot()
-            slot.invNumber = cSlot.inventoryNumber
-            slot.slotNumber = cSlot.slotNumber
-            slot.stack = cSlot.stack
-            if (cSlot.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
+        c.linkedSlots.forEach {
+            val slot = WLinkedSlot().apply {
+                invNumber = it.inventoryNumber
+                slotNumber = it.slotNumber
+                stack = it.stack
+            }
+            if (it.stack.isEmpty) emptySlots.add(slot) else filledSlots.add(slot)
         }
 
         val trimmedFilter = filter.trim()
@@ -300,7 +303,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
     }
 
     private fun updateSlotSize() {
-        val scaledHeight = mc().window.scaledHeight
+        val scaledHeight = getClient().window.scaledHeight
         slotHeight = 0
         for (i in 3..6) if (scaledHeight > (207 + (i * 18))) slotHeight = i
         hideLabel = (slotHeight == 0)
@@ -311,7 +314,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         super.init()
         val buf = buf()
         buf.writeVarInt(c.syncId)
-        ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.REQUEST_INIT_SERVER, buf)
+        c2s(NetworkRegistry.REQUEST_INIT_SERVER, buf)
         c.addListener(this)
     }
 

@@ -10,11 +10,7 @@ class DummyInventory(
     private val size: Int
 ) : Inventory {
 
-    var maxCount = 64
-
     private val stacks = DefaultedList.ofSize(size, ItemStack.EMPTY)
-
-    override fun getMaxCountPerStack() = maxCount
 
     override fun size(): Int = size
 
