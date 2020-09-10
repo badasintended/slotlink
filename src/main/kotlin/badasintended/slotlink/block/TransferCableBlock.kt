@@ -8,7 +8,7 @@ import net.minecraft.world.WorldAccess
 
 abstract class TransferCableBlock(id: String, be: () -> BlockEntity) : ConnectorCableBlock(id, be) {
 
-    override fun WorldAccess.isBlockIgnored(block: Block) = block is ModBlock
+    override fun Block.isIgnored() = this is ModBlock
 
     override fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
         val block = world.getBlockState(neighborPos).block

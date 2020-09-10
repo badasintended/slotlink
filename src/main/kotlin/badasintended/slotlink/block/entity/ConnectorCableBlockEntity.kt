@@ -60,7 +60,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
             }
         }
 
-        if (!world.isBlockIgnored(linkedBlock)) when {
+        if (!linkedBlock.isIgnored()) when {
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
                 val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null
@@ -79,7 +79,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         return null
     }
 
-    protected abstract fun WorldAccess.isBlockIgnored(block: Block): Boolean
+    protected abstract fun Block.isIgnored(): Boolean
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)

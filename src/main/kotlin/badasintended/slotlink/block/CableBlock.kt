@@ -41,6 +41,16 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
             .build()
     }
 
+    object Shape {
+        val north = bbCuboid(6, 6, 0, 4, 4, 10)
+        val south = bbCuboid(6, 6, 6, 4, 4, 10)
+        val east = bbCuboid(6, 6, 6, 10, 4, 4)
+        val west = bbCuboid(0, 6, 6, 10, 4, 4)
+        val up = bbCuboid(6, 6, 6, 4, 10, 4)
+        val down = bbCuboid(6, 0, 6, 4, 10, 4)
+        val center = bbCuboid(6, 6, 6, 4, 4, 4)
+    }
+
     protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
         val block = world.getBlockState(neighborPos).block
         return block is ModBlock
@@ -75,23 +85,16 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
     }
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        val north = bbCuboid(6, 6, 0, 4, 4, 10)
-        val south = bbCuboid(6, 6, 6, 4, 4, 10)
-        val east = bbCuboid(6, 6, 6, 10, 4, 4)
-        val west = bbCuboid(0, 6, 6, 10, 4, 4)
-        val up = bbCuboid(6, 6, 6, 4, 10, 4)
-        val down = bbCuboid(6, 0, 6, 4, 10, 4)
-
-        var result = bbCuboid(6, 6, 6, 4, 4, 4)
-
-        if (state[NORTH]) result = VoxelShapes.union(result, north)
-        if (state[SOUTH]) result = VoxelShapes.union(result, south)
-        if (state[EAST]) result = VoxelShapes.union(result, east)
-        if (state[WEST]) result = VoxelShapes.union(result, west)
-        if (state[UP]) result = VoxelShapes.union(result, up)
-        if (state[DOWN]) result = VoxelShapes.union(result, down)
-
-        return result
+        Shape.run {
+            var result = center
+            if (state[NORTH]) result = VoxelShapes.union(result, north)
+            if (state[SOUTH]) result = VoxelShapes.union(result, south)
+            if (state[EAST]) result = VoxelShapes.union(result, east)
+            if (state[WEST]) result = VoxelShapes.union(result, west)
+            if (state[UP]) result = VoxelShapes.union(result, up)
+            if (state[DOWN]) result = VoxelShapes.union(result, down)
+            return result
+        }
     }
 
 }
