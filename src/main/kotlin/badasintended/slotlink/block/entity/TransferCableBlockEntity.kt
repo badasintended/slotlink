@@ -17,7 +17,6 @@ import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
-import net.minecraft.world.WorldAccess
 
 abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ConnectorCableBlockEntity(type) {
 
@@ -49,7 +48,7 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
         return true
     }
 
-    override fun WorldAccess.isBlockIgnored(block: Block) = block is ModBlock
+    override fun Block.isIgnored() = this is ModBlock
 
     override fun fromTag(state: BlockState, tag: CompoundTag) {
         super.fromTag(state, tag)
