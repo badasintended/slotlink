@@ -39,16 +39,14 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
             .put(Direction.UP, UP)
             .put(Direction.DOWN, DOWN)
             .build()
-    }
 
-    object Shape {
-        val north = bbCuboid(6, 6, 0, 4, 4, 10)
-        val south = bbCuboid(6, 6, 6, 4, 4, 10)
-        val east = bbCuboid(6, 6, 6, 10, 4, 4)
-        val west = bbCuboid(0, 6, 6, 10, 4, 4)
-        val up = bbCuboid(6, 6, 6, 4, 10, 4)
-        val down = bbCuboid(6, 0, 6, 4, 10, 4)
         val center = bbCuboid(6, 6, 6, 4, 4, 4)
+
+        val shapes = mapOf(
+            NORTH to bbCuboid(6, 6, 0, 4, 4, 10), SOUTH to bbCuboid(6, 6, 6, 4, 4, 10),
+            EAST to bbCuboid(6, 6, 6, 10, 4, 4), WEST to bbCuboid(0, 6, 6, 10, 4, 4), UP to bbCuboid(6, 6, 6, 4, 10, 4),
+            DOWN to bbCuboid(6, 0, 6, 4, 10, 4)
+        )
     }
 
     protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
@@ -85,16 +83,7 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
     }
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        Shape.run {
-            var result = center
-            if (state[NORTH]) result = VoxelShapes.union(result, north)
-            if (state[SOUTH]) result = VoxelShapes.union(result, south)
-            if (state[EAST]) result = VoxelShapes.union(result, east)
-            if (state[WEST]) result = VoxelShapes.union(result, west)
-            if (state[UP]) result = VoxelShapes.union(result, up)
-            if (state[DOWN]) result = VoxelShapes.union(result, down)
-            return result
-        }
+        return VoxelShapes.union(center, *shapes.filter { state[it.key] }.values.toTypedArray())
     }
 
 }

@@ -4,7 +4,6 @@ import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.util.*
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
-import net.minecraft.block.entity.HopperBlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -23,6 +22,10 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.*
 
 abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
+
+    companion object {
+        val end = bbCuboid(5, 5, 5, 6, 6, 6)
+    }
 
     /**
      * - Checks linked block (e.g. chest) and update block state accordingly.
@@ -60,7 +63,6 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     protected abstract fun Block.isIgnored(): Boolean
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        val end = bbCuboid(5, 5, 5, 6, 6, 6)
         val result = super.getOutlineShape(state, view, pos, ctx)
         return VoxelShapes.union(result, end)
     }
@@ -68,11 +70,11 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
         val state = super.getPlacementState(ctx)
         val world = ctx.world
-        val pos = BlockPos(ctx.hitPos)
-        if (world.getBlockState(pos).block.isIgnored()) return state
-
-        return if (HopperBlockEntity.getInventoryAt(world, pos) != null) {
-            state?.with(propertyMap[ctx.side.opposite], true)
+        val face = ctx.side.opposite
+        val pos = ctx.blockPos.offset(face)
+        val block = world.getBlockState(pos).block
+        return if (!block.isIgnored() and ((world.getBlockEntity(pos) is Inventory) or (block is InventoryProvider))) {
+            state?.with(propertyMap[face], true)
         } else {
             state
         }
