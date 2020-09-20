@@ -9,6 +9,7 @@ class WSyncedSlot(onSetStack: () -> Unit) : WServerSlot(onSetStack) {
 
     override fun getStack(): ItemStack = syncedStack
 
+    @Suppress("UNCHECKED_CAST")
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         syncedStack = stack
         onSetStack.invoke()

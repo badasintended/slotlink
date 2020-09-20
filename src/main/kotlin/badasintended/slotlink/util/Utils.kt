@@ -7,6 +7,8 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.fabricmc.fabric.api.tag.TagRegistry
+import net.minecraft.block.Block
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
@@ -15,6 +17,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.tag.Tag
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
@@ -171,3 +174,5 @@ fun c2s(id: Identifier, buf: PacketByteBuf) {
 fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf) {
     ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf)
 }
+
+val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))

@@ -1,20 +1,24 @@
 package badasintended.slotlink.util
 
-enum class Sort(id: String) {
+import net.minecraft.item.ItemStack
+import net.minecraft.util.registry.Registry
 
-    NAME("name"),
-    NAME_DESC("name_desc"),
+enum class Sort(val sorter: (ArrayList<ItemStack>) -> Any) {
 
-    ID("id"),
-    ID_DESC("id_desc"),
+    NAME({ it -> it.sortBy { it.name.string } }),
+    NAME_DESC({ it -> it.sortByDescending { it.name.string } }),
 
-    COUNT("count"),
-    COUNT_DESC("count_desc");
+    ID({ it -> it.sortBy { Registry.ITEM.getId(it.item).toString() } }),
+    ID_DESC({ it -> it.sortByDescending { Registry.ITEM.getId(it.item).toString() } }),
 
-    val texture = tex("gui/sort_$id")
-    val translationKey = "container.slotlink.request.sort.$id"
+    COUNT({ it -> it.sortBy { it.count } }),
+    COUNT_DESC({ it -> it.sortByDescending { it.count } });
+
+    val texture = tex("gui/sort_${name.toLowerCase()}")
+    val translationKey = "container.slotlink.request.sort.${name.toLowerCase()}"
 
     companion object {
+
         val values = values()
         fun of(i: Int) = values[i.coerceIn(0, 5)]
     }

@@ -4,7 +4,6 @@ import badasintended.slotlink.client.gui.widget.*
 import badasintended.slotlink.gui.screen.RequestScreenHandler
 import badasintended.slotlink.registry.NetworkRegistry
 import badasintended.slotlink.util.*
-import badasintended.slotlink.util.Sort.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
@@ -246,7 +245,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
         emptySlots.clear()
         filledSlots.clear()
 
-        c.validateInventories()
+        //c.validateInventories()
 
         c.linkedSlots.forEach {
             val slot = WLinkedSlot().apply {
@@ -267,7 +266,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
                 '#' -> filledSlots.removeIf r@{ slot ->
                     val tag = trimmedFilter.drop(1)
                     val tags = c.world.tagManager.items().getTagsFor(slot.stack.item)
-                    if (tags.isEmpty() and tag.isEmpty()) return@r false
+                    if (tags.isEmpty() and tag.isBlank()) return@r false
                     else return@r tags.none { it.toString().contains(tag, true) }
                 }
                 else -> filledSlots.removeIf { !it.stack.name.string.contains(trimmedFilter.trim(), true) }
@@ -284,14 +283,7 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
             slot.copiedStack = copyStack
         }
 
-        when (sort) {
-            NAME -> filledStacks.sortBy { it.name.string }
-            NAME_DESC -> filledStacks.sortByDescending { it.name.string }
-            ID -> filledStacks.sortBy { Registry.ITEM.getId(it.item).toString() }
-            ID_DESC -> filledStacks.sortByDescending { Registry.ITEM.getId(it.item).toString() }
-            COUNT -> filledStacks.sortBy { it.count }
-            COUNT_DESC -> filledStacks.sortByDescending { it.count }
-        }
+        sort.sorter.invoke(filledStacks)
 
         scrollbar.setMax<WFakeScrollbar>((ceil(filledStacks.size / 8f) - slotHeight).coerceAtLeast(0f))
         if ((lastSort != sort) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
