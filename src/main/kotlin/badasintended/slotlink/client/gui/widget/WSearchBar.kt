@@ -20,6 +20,7 @@ class WSearchBar(
 ) : WTextField() {
 
     companion object {
+
         val EMPTY = arrayListOf<Text>()
     }
 

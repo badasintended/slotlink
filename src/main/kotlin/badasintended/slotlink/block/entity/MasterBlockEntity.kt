@@ -46,7 +46,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypeRegistry.MASTER), Tickable 
         cables.sortByDescending { it.priority }
         for (cable in cables) {
             val inventory = cable.getLinkedInventory(world, this, request, request) ?: continue
-            val key = inventory.first ?: continue
+            val key = inventory.first
             if (key is DoubleInventory) {
                 key as DoubleInventoryAccessor
                 if (linkedMap.keys

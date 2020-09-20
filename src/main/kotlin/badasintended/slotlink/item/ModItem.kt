@@ -16,6 +16,7 @@ abstract class ModItem(id: String, settings: Settings = SETTINGS) : Item(setting
     val id = modId(id)
 
     companion object {
+
         private val GROUP = FabricItemGroupBuilder.build(modId("group")) { ItemStack(BlockRegistry.MASTER) }
 
         val SETTINGS: Settings get() = Settings().group(GROUP)

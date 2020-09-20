@@ -3,6 +3,7 @@ package badasintended.slotlink.compat
 import badasintended.slotlink.api.*
 import me.branchpanic.mods.stockpile.content.block.TrashCanBlock
 import me.branchpanic.mods.stockpile.content.blockentity.ItemBarrelBlockEntity
+import me.branchpanic.mods.stockpile.impl.storage.MassItemStackStorage
 import net.minecraft.item.ItemStack
 import sbinnery.common.utility.StackUtilities
 
@@ -13,7 +14,7 @@ object StockpileCompat : SlotlinkCompatInitializer {
     override fun initialize(compat: Compat) {
         compat.registerHandler(ItemBarrelBlockEntity::class.java, object : InventoryHandler<ItemBarrelBlockEntity>() {
             override fun size(t: ItemBarrelBlockEntity): Int {
-                return t.storage.capacity.toInt()
+                return (t.storage as MassItemStackStorage).maxStacks
             }
 
             override fun isValid(t: ItemBarrelBlockEntity, slot: Int, stack: ItemStack): Boolean {

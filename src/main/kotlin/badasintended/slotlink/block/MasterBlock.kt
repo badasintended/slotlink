@@ -32,6 +32,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
         blockEntity.markDirty()
     }
 
+    @Suppress("DEPRECATION")
     override fun neighborUpdate(
         state: BlockState, world: World, pos: BlockPos, block: Block, neighborPos: BlockPos, moved: Boolean
     ) {
@@ -60,7 +61,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
     ): ActionResult {
         if (!world.isClient) {
             val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
-            val inventories = blockEntity.getLinkedInventories(world).keys
+            val inventories = blockEntity.getLinkedInventories(world, true).keys
 
             player.chat("")
             player.chat("$translationKey.use1", pos.x, pos.y, pos.z)

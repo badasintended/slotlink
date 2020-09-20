@@ -5,7 +5,6 @@ import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.gui.screen.LinkScreenHandler
 import badasintended.slotlink.registry.BlockEntityTypeRegistry
 import badasintended.slotlink.util.*
-import net.fabricmc.fabric.api.tag.TagRegistry
 import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -15,7 +14,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.L
 
     override fun Block.isIgnored(): Boolean {
         if ((this is ModBlock) or Compat.isBlacklisted(this)) return true
-        return TagRegistry.block(modId("ignored")).contains(this)
+        return ignoredTag.contains(this)
     }
 
     override fun markDirty() {

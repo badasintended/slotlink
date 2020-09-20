@@ -7,6 +7,7 @@ open class WServerSlot(
     protected val onSetStack: () -> Unit
 ) : WSlot() {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         super.setStack<W>(stack)
         linkedInventory.markDirty()

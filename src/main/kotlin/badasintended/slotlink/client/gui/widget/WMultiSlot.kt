@@ -127,6 +127,7 @@ class WMultiSlot(
         return this as W
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         multiStack = stack
         return this as W

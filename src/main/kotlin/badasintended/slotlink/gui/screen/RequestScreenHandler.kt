@@ -9,6 +9,7 @@ import badasintended.slotlink.mixin.ScreenHandlerAccessor
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_CURSOR
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_INIT_CLIENT
 import badasintended.slotlink.registry.NetworkRegistry.REQUEST_REMOVE
+import badasintended.slotlink.registry.NetworkRegistry.SYNC_STACKS
 import badasintended.slotlink.registry.ScreenHandlerRegistry
 import badasintended.slotlink.util.*
 import net.minecraft.entity.player.PlayerEntity
@@ -143,11 +144,20 @@ open class RequestScreenHandler(
             if (world.isClient) {
                 sort()
             } else {
-                linkedSlots.forEach {
-                    if (!it.stack.isEmpty) s2c(
-                        player, SLOT_UPDATE_PACKET,
-                        createSlotUpdatePacket(syncId, it.slotNumber, it.inventoryNumber, it.stack)
-                    )
+                val stacks = linkedSlots
+                    .filter { !it.stack.isEmpty }
+                    .distinctBy { it.stack.item to it.stack.tag }
+                    .map { it.stack.copy().apply { count = 1 } }
+
+                stacks.forEach { stack ->
+                    val buf = buf().apply {
+                        writeVarInt(syncId)
+                        writeItemStack(stack)
+                        val slots = linkedSlots.filter { StackUtilities.equalItemAndTag(stack, it.stack) }
+                        writeVarInt(slots.size)
+                        slots.forEach { writeIntArray(intArrayOf(it.inventoryNumber, it.slotNumber, it.stack.count)) }
+                    }
+                    s2c(player, SYNC_STACKS, buf)
                 }
                 s2c(player, REQUEST_INIT_CLIENT, buf().writeVarInt(syncId))
                 master?.forceChunk(world)

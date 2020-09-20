@@ -24,6 +24,7 @@ import net.minecraft.world.*
 abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
 
     companion object {
+
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
     }
 
@@ -50,7 +51,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         if (!neighbor.isIgnored()) {
             if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
                 val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getLinkedInventory(world) == null)) {
+                if ((blockEntity.getLinkedInventory(world) == null) or (blockEntity.linkedPos.toPos() == neighborPos)) {
                     blockEntity.linkedPos = neighborPos.toTag()
                     blockEntity.markDirty()
                     return state.with(propertyMap[facing], true)
@@ -62,6 +63,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
 
     protected abstract fun Block.isIgnored(): Boolean
 
+    @Suppress("DEPRECATION")
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
         val result = super.getOutlineShape(state, view, pos, ctx)
         return VoxelShapes.union(result, end)
@@ -90,6 +92,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         world.setBlockState(pos, updatedState)
     }
 
+    @Suppress("DEPRECATION")
     override fun getStateForNeighborUpdate(
         state: BlockState,
         facing: Direction,

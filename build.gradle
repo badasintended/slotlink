@@ -2,7 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version '1.3.72'
+    id "org.jetbrains.kotlin.jvm" version '1.4.0'
     id 'fabric-loom' version '0.4-SNAPSHOT'
     id 'maven-publish'
 }
@@ -32,7 +32,7 @@ dependencies {
     modCompile "com.github.badasintended:spinnery:${project.spinnery}"
     include "com.github.badasintended:spinnery:${project.spinnery}"
 
-    modImplementation "io.github.prospector:modmenu:${project.modmenu}"
+    //modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
     modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 }

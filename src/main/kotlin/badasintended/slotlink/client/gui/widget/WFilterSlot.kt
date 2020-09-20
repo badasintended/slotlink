@@ -40,6 +40,7 @@ class WFilterSlot(
         update.invoke(stack)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <W : WSlot> setStack(stack: ItemStack): W {
         this.filterStack = stack
         return this as W
