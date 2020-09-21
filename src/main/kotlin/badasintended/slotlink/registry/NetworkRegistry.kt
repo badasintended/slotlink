@@ -10,6 +10,7 @@ import net.minecraft.item.Item
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
+import sbinnery.widget.WSlot
 
 object NetworkRegistry {
 
@@ -26,6 +27,7 @@ object NetworkRegistry {
     val REQUEST_REMOVE = modId("request_remove")
     val REQUEST_CURSOR = modId("request_cursor")
     val REQUEST_INIT_CLIENT = modId("request_init_client")
+    val SYNC_STACKS = modId("sync_stack")
 
     fun initMain() {
         rS(REQUEST_SAVE) { context, buf ->
@@ -162,6 +164,29 @@ object NetworkRegistry {
                 val handler = context.player.currentScreenHandler
                 if (handler.syncId == id) if (handler is RequestScreenHandler) {
                     handler.init()
+                }
+            }
+        }
+
+        rC(SYNC_STACKS) { context, buf ->
+            val id = buf.readVarInt()
+            val stack = buf.readItemStack()
+            val map = hashMapOf<Int, HashMap<Int, Int>>()
+            for (i in 0 until buf.readVarInt()) {
+                val array = buf.readIntArray(3)
+                map.getOrPut(array[0], ::HashMap)[array[1]] = array[2]
+            }
+
+            context.taskQueue.execute {
+                val handler = context.player.currentScreenHandler
+                if (handler.syncId == id) if (handler is RequestScreenHandler) {
+                    map.forEach { (inv, slots) ->
+                        slots.forEach { (slot, count) ->
+                            handler.`interface`
+                                .getSlot<WSlot>(inv, slot)
+                                .setStack<WSlot>(stack.copy().apply { this.count = count })
+                        }
+                    }
                 }
             }
         }

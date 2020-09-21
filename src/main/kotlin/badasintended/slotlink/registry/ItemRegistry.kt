@@ -1,11 +1,10 @@
-@file:Suppress("MemberVisibilityCanBePrivate")
-
 package badasintended.slotlink.registry
 
 import badasintended.slotlink.item.*
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.Registry.ITEM
 
+@Suppress("MemberVisibilityCanBePrivate")
 object ItemRegistry {
 
     val MULTI_DIM_REMOTE = MultiDimRemoteItem()

@@ -8,6 +8,7 @@ class WSyncedInterface(
     handler: RequestScreenHandler, private val onSetStack: () -> Unit
 ) : WInterface(handler) {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <W : WSlot> getSlot(inventoryNumber: Int, slotNumber: Int): W {
         var slot = allWidgets
             .filterIsInstance<WSlot>()
