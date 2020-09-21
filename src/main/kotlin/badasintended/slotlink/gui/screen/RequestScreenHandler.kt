@@ -263,7 +263,11 @@ open class RequestScreenHandler(
             if (remainingStacks[slot.slotNumber].isEmpty) {
                 if (slot.stack.count == 1) {
                     val first = linkedSlots.firstOrNull { StackUtilities.equalItemAndTag(it.stack, slot.stack) }
-                    if (first == null) slot.stack.decrement(1) else first.stack.decrement(1)
+                    if (first == null) slot.stack.decrement(1) else {
+                        val stack = first.stack.copy()
+                        stack.decrement(1)
+                        first.setStack<WSlot>(stack)
+                    }
                 } else {
                     slot.stack.decrement(1)
                 }
