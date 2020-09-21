@@ -33,7 +33,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     fun getLinkedInventory(
         world: WorldAccess, master: MasterBlockEntity? = null, forceLoad: Boolean = false, compat: Boolean = false
-    ): Pair<Inventory, Pair<Boolean, Set<Item>>>? {
+    ): Pair<Inventory?, Pair<Boolean, Set<Item>>>? {
         if (world !is World) return null
         if (linkedPos == CompoundTag()) return null
         val linkedPos = linkedPos.toPos()
