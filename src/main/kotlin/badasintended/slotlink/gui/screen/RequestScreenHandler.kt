@@ -32,7 +32,6 @@ import sbinnery.widget.api.Action
 import sbinnery.widget.api.Action.*
 import sbinnery.widget.api.Action.Subtype.FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK
 import sbinnery.widget.api.Action.Subtype.FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK
-import java.util.*
 import kotlin.collections.set
 
 open class RequestScreenHandler(
@@ -96,7 +95,8 @@ open class RequestScreenHandler(
                 slot.setMaximumCount<WSlot>(inv.maxCountPerStack)
                 linkedSlots.add(slot)
                 val stack = inv.getStack(j)
-                slot.setStack<WSlot>(stack)
+                slot.acceptStack(stack)
+                cachedInventories.getOrPut(i, ::HashMap)[j] = stack
             }
             i++
         }
@@ -155,7 +155,11 @@ open class RequestScreenHandler(
                         writeItemStack(stack)
                         val slots = linkedSlots.filter { StackUtilities.equalItemAndTag(stack, it.stack) }
                         writeVarInt(slots.size)
-                        slots.forEach { writeIntArray(intArrayOf(it.inventoryNumber, it.slotNumber, it.stack.count)) }
+                        slots.forEach {
+                            writeVarInt(it.inventoryNumber)
+                            writeVarInt(it.slotNumber)
+                            writeVarInt(it.stack.count)
+                        }
                     }
                     s2c(player, SYNC_STACKS, buf)
                 }
@@ -165,7 +169,37 @@ open class RequestScreenHandler(
         }
     }
 
-    fun validateInventories() {
+    fun multiClick(slots: ArrayList<Pair<Int, Int>>) {
+        var combinedStack: ItemStack? = null
+        linkedSlots.filter { it.inventoryNumber to it.slotNumber in slots }.forEach {
+            val stack = it.stack.copy()
+            if (combinedStack == null) {
+                combinedStack = stack
+                it.acceptStack(ItemStack.EMPTY)
+            } else combinedStack?.apply {
+                StackUtilities.merge(stack, this, maxCount, maxCount).apply(it::acceptStack) {}
+            }
+        }
+        if (combinedStack != null) {
+            playerInventory.cursorStack = combinedStack
+            s2c(player, REQUEST_CURSOR, buf().writeItemStack(combinedStack))
+        }
+    }
+
+    fun syncStacks(stack: ItemStack, map: HashMap<Int, HashMap<Int, Int>>) {
+        val root = `interface`
+        map.forEach { (invN, slotNs) ->
+            slotNs.forEach { (slotN, itemCount) ->
+                val slot = root.createChild { WSyncedSlot(this::sort) }.apply {
+                    setNumber<WSlot>(invN, slotN)
+                    acceptStack(stack.copy().apply { count = itemCount })
+                }
+                linkedSlots.add(slot)
+            }
+        }
+    }
+
+    private fun validateInventories() {
         if (!world.isClient) {
             val removedInventories = linkedSlots
                 .filter { it.linkedInventory == null }
@@ -240,7 +274,7 @@ open class RequestScreenHandler(
                     stack.count = 1
                     stack.tag = first.stack.tag
                     first.stack.decrement(1)
-                    inputSlots[slotN].setStack<WSlot>(stack)
+                    inputSlots[slotN].acceptStack(stack)
                     break
                 }
             }
@@ -266,13 +300,13 @@ open class RequestScreenHandler(
                     if (first == null) slot.stack.decrement(1) else {
                         val stack = first.stack.copy()
                         stack.decrement(1)
-                        first.setStack<WSlot>(stack)
+                        first.acceptStack(stack)
                     }
                 } else {
                     slot.stack.decrement(1)
                 }
             } else {
-                slot.setStack<WSlot>(remainingStacks[slot.slotNumber])
+                slot.acceptStack(remainingStacks[slot.slotNumber])
             }
         }
 
@@ -293,13 +327,13 @@ open class RequestScreenHandler(
                     itemStack = craftingRecipe.craft(craftingInv)
                 }
             }
-            outputSlot.setStack<WSlot>(itemStack)
+            outputSlot.acceptStack(itemStack)
             s2c(player, SLOT_UPDATE_PACKET, createSlotUpdatePacket(syncId, 0, 2, itemStack))
             resultInv.unlockLastRecipe(player)
         }
     }
 
-    private fun sort() {
+    fun sort() {
         if (world.isClient and initialized) screen { it.sort() }
     }
 
@@ -377,7 +411,7 @@ open class RequestScreenHandler(
                     source.consume(action, FROM_SLOT_TO_SLOT_CUSTOM_FULL_STACK)
                     StackUtilities
                         .merge(source::getStack, target::getStack, source::getMaxCount) { max }
-                        .apply({ source.setStack<WSlot>(it) }, { target.setStack<WSlot>(it) })
+                        .apply(source::acceptStack, target::acceptStack)
                     if ((source.inventoryNumber in arrayOf(2, 0, -2, -3)) and !source.stack.isEmpty) {
                         continue
                     } else break
@@ -387,7 +421,7 @@ open class RequestScreenHandler(
                 val buffer = `interface`.getSlot<WSlot>(inventoryNumber, 0)
                 if (!buffer.stack.isEmpty) {
                     playerInventory.cursorStack = buffer.stack
-                    buffer.setStack<WSlot>(ItemStack.EMPTY)
+                    buffer.acceptStack(ItemStack.EMPTY)
                 }
             }
         } else if (action == PICKUP_ALL) {
@@ -395,8 +429,8 @@ open class RequestScreenHandler(
                 if (StackUtilities.equalItemAndTag(slot.stack, cursorStack) and !slot.isLocked) {
                     slot.consume(action, FROM_SLOT_TO_CURSOR_CUSTOM_FULL_STACK)
                     StackUtilities
-                        .merge(slot::getStack, { cursorStack }, slot::getMaxCount, { cursorStack.maxCount })
-                        .apply({ slot.setStack<WSlot>(it) }, { playerInventory.cursorStack = it })
+                        .merge(slot::getStack, { cursorStack }, slot::getMaxCount, cursorStack::getMaxCount)
+                        .apply(slot::acceptStack) { playerInventory.cursorStack = it }
                 }
             }
         } else super.onSlotAction(slotNumber, inventoryNumber, button, action, player)

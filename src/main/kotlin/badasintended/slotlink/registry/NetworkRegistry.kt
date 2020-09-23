@@ -10,7 +10,6 @@ import net.minecraft.item.Item
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
-import sbinnery.widget.WSlot
 
 object NetworkRegistry {
 
@@ -23,6 +22,7 @@ object NetworkRegistry {
     val LINK_WRITE = modId("link_write")
     val TRANSFER_WRITE = modId("transfer_write")
     val REQUEST_INIT_SERVER = modId("request_init_server")
+    val REQUEST_MULTI_CLICK = modId("request_multi_click")
 
     val REQUEST_REMOVE = modId("request_remove")
     val REQUEST_CURSOR = modId("request_cursor")
@@ -134,6 +134,22 @@ object NetworkRegistry {
                 if (screenHandler.syncId == syncId) if (screenHandler is RequestScreenHandler) screenHandler.init()
             }
         }
+
+        rS(REQUEST_MULTI_CLICK) { context, buf ->
+            val syncId = buf.readVarInt()
+            val size = buf.readVarInt()
+            val slots = arrayListOf<Pair<Int, Int>>()
+            for (i in 0 until size) {
+                slots.add(buf.readVarInt() to buf.readVarInt())
+            }
+
+            context.taskQueue.execute {
+                val screenHandler = context.player.currentScreenHandler
+                if (screenHandler.syncId == syncId) if (screenHandler is RequestScreenHandler) {
+                    screenHandler.multiClick(slots)
+                }
+            }
+        }
     }
 
     @Environment(EnvType.CLIENT)
@@ -173,21 +189,12 @@ object NetworkRegistry {
             val stack = buf.readItemStack()
             val map = hashMapOf<Int, HashMap<Int, Int>>()
             for (i in 0 until buf.readVarInt()) {
-                val array = buf.readIntArray(3)
-                map.getOrPut(array[0], ::HashMap)[array[1]] = array[2]
+                map.getOrPut(buf.readVarInt(), ::HashMap)[buf.readVarInt()] = buf.readVarInt()
             }
 
             context.taskQueue.execute {
                 val handler = context.player.currentScreenHandler
-                if (handler.syncId == id) if (handler is RequestScreenHandler) {
-                    map.forEach { (inv, slots) ->
-                        slots.forEach { (slot, count) ->
-                            handler.`interface`
-                                .getSlot<WSlot>(inv, slot)
-                                .setStack<WSlot>(stack.copy().apply { this.count = count })
-                        }
-                    }
-                }
+                if (handler.syncId == id) if (handler is RequestScreenHandler) handler.syncStacks(stack, map)
             }
         }
     }

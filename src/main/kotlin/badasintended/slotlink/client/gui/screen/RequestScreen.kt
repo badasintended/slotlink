@@ -219,9 +219,9 @@ open class RequestScreen<H : RequestScreenHandler>(c: H) : ModScreen<H>(c), Scre
                     })
 
                     setLinkedSlots(*serverSlots.toTypedArray())
-                    setStack<WSlot>(filledStack)
+                    acceptStack(filledStack)
                 } else {
-                    setStack<WSlot>(ItemStack.EMPTY)
+                    acceptStack(ItemStack.EMPTY)
                     setLinkedSlots()
                 }
             }

@@ -20,7 +20,7 @@ import net.minecraft.world.World
 
 abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ConnectorCableBlockEntity(type) {
 
-    var redstone = ON
+    var redstone = OFF
 
     abstract var side: Direction
 

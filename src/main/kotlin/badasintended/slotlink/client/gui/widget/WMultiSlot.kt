@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.getClient
-import badasintended.slotlink.util.slotAction
+import badasintended.slotlink.registry.NetworkRegistry.REQUEST_MULTI_CLICK
+import badasintended.slotlink.util.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
@@ -12,7 +12,6 @@ import sbinnery.client.render.BaseRenderer
 import sbinnery.widget.WAbstractWidget
 import sbinnery.widget.WSlot
 import sbinnery.widget.api.Action
-import sbinnery.widget.api.Action.PICKUP
 import sbinnery.widget.api.Action.QUICK_MOVE
 import kotlin.math.*
 import kotlin.reflect.KMutableProperty0
@@ -113,7 +112,23 @@ class WMultiSlot(
             }
         } else {
             if (((button == LEFT) or (button == RIGHT)) and isCursorEmpty) {
-                slotAction(container, sSlotN, sSlotInvN, button, PICKUP, player)
+                val slots = arrayListOf<WLinkedSlot>()
+                var size = 0
+                linkedSlots.forEach {
+                    if (size < stack.maxCount) {
+                        slots.add(it)
+                        size += it.stack.count
+                    }
+                }
+                val buf = buf().apply {
+                    writeVarInt(container.syncId)
+                    writeVarInt(slots.size)
+                    slots.forEach {
+                        writeVarInt(it.invNumber)
+                        writeVarInt(it.slotNumber)
+                    }
+                }
+                c2s(REQUEST_MULTI_CLICK, buf)
             } else if (button == MIDDLE) {
                 slotAction(container, sSlotN, sSlotInvN, button, Action.CLONE, player)
             }
