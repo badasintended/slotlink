@@ -247,6 +247,7 @@ open class RequestScreenHandler(
     fun applyRecipe(recipe: Recipe<*>) {
         if (recipe.type == RecipeType.CRAFTING) {
             clearCraftingGrid()
+            sendContentUpdates()
             alignRecipeToGrid(3, 3, -1, recipe, recipe.previewInputs.iterator(), 0)
         }
     }
@@ -382,8 +383,14 @@ open class RequestScreenHandler(
         val ingredient = inputs.next()
         if (ingredient.isEmpty) return
 
-        val pair = filledSlots.firstOrNull { ingredient.test(it.stack) } ?: return
-        val stack = pair.first.removeStack(pair.second, 1)
+        val pair = filledSlots.firstOrNull { ingredient.test(it.stack) }
+        val stack = if (pair == null) {
+            slots
+                .firstOrNull { (it.inventory is PlayerInventory) and it.canTakeItems(player) and (ingredient.test(it.stack)) }
+                ?.takeStack(1) ?: return
+        } else {
+            pair.first.removeStack(pair.second, 1)
+        }
 
         input.setStack(slot, stack)
     }
