@@ -61,7 +61,7 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
     ): ActionResult {
         if (!world.isClient) {
             val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
-            val inventories = blockEntity.getLinkedInventories(world, true).keys
+            val inventories = blockEntity.getInventories(world, true)
 
             player.chat("")
             player.chat("$translationKey.use1", pos.x, pos.y, pos.z)

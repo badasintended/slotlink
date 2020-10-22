@@ -3,7 +3,12 @@
   "minVersion"        : "0.8",
   "package"           : "badasintended.slotlink.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins"            : ["DoubleInventoryAccessor", "ScreenHandlerAccessor", "WallMountedBlockMixin"],
+  "mixins"            : [
+    "CraftingScreenHandlerAccessor",
+    "DoubleInventoryAccessor",
+    "SlotAccessor",
+    "WallMountedBlockMixin"
+  ],
   "injectors"         : {
     "defaultRequire": 1
   }

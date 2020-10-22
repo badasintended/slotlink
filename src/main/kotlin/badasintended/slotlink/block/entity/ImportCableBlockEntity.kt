@@ -1,52 +1,42 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.util.*
-import net.minecraft.inventory.SidedInventory
+import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.util.toTag
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.IMPORT_CABLE) {
+class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.IMPORT_CABLE) {
 
     override var side = Direction.DOWN
 
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
-        val source = getLinkedInventory(world)?.first ?: return false
+        val source = getInventory(world)
+        if (source.isNull) return false
+        val sourceSlots = source.getAvailableSlots(side).filter { source.canExtract(it, source.getStack(it), side) }
+
         var sourceSlot = -1
         var sourceStack = ItemStack.EMPTY
 
-        var targets = master.getLinkedInventories(world)
+        val targets = master.getInventories(world)
 
-        val sourceSlots = if (source is SidedInventory) source
-            .getAvailableSlots(side)
-            .toList()
-            .filter { source.canExtract(it, source.getStack(it), side) }
-        else (0 until source.size()).toList()
-
-        for (i in sourceSlots) {
-            val stack = source.getStack(i)
-            if (stack.isValid()) {
-                val filtered = targets.filter r@{ entry ->
-                    val filter = entry.value
-                    val isBlackList = filter.first
-                    if (filter.second.isEmpty()) return@r true
-                    return@r (filter.second.contains(stack.item)) == !isBlackList
-                }
-                if (filtered.isNotEmpty()) {
-                    sourceSlot = i
+        for (slot in sourceSlots) {
+            val stack = source.getStack(slot)
+            if (stack.isEmpty) continue
+            if (source.isValid(stack)) {
+                if (targets.any { it.isValid(stack) }) {
                     sourceStack = stack
-                    targets = filtered
+                    sourceSlot = slot
                     break
                 }
             }
         }
 
-        if (sourceSlot == -1) return false
+        if (sourceStack.isEmpty or (sourceSlot == -1)) return false
 
-        for (target in targets.keys) {
-            for (j in 0 until target.size()) {
-                target.mergeStack(j, sourceStack, side)
+        for (target in targets) {
+            for (i in 0 until target.size()) {
+                target.merge(i, sourceStack, side)
                 if (sourceStack.isEmpty) break
             }
             target.markDirty()
@@ -62,7 +52,7 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
         super.markDirty()
 
         if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos.toPos())
+            val master = world?.getBlockEntity(masterPos)
 
             if (master is MasterBlockEntity) {
                 master.importCables.add(pos.toTag())

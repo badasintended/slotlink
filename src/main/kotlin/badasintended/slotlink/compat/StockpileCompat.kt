@@ -1,11 +1,11 @@
 package badasintended.slotlink.compat
 
 import badasintended.slotlink.api.*
+import badasintended.slotlink.util.isItemAndTagEqual
 import me.branchpanic.mods.stockpile.content.block.TrashCanBlock
 import me.branchpanic.mods.stockpile.content.blockentity.ItemBarrelBlockEntity
 import me.branchpanic.mods.stockpile.impl.storage.MassItemStackStorage
 import net.minecraft.item.ItemStack
-import sbinnery.common.utility.StackUtilities
 
 object StockpileCompat : SlotlinkCompatInitializer {
 
@@ -20,7 +20,7 @@ object StockpileCompat : SlotlinkCompatInitializer {
             override fun isValid(t: ItemBarrelBlockEntity, slot: Int, stack: ItemStack): Boolean {
                 if (t.storage.isFull) return false
                 if (t.storage.contents.reference.isEmpty) return true
-                return (StackUtilities.equalItemAndTag(stack, t.storage.contents.reference))
+                return stack.isItemAndTagEqual(t.storage.contents.reference)
             }
 
             override fun getStack(t: ItemBarrelBlockEntity, slot: Int): ItemStack {

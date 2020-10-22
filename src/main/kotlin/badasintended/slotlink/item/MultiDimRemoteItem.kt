@@ -2,7 +2,7 @@ package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.gui.screen.RemoteScreenHandler
+import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.util.*
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
@@ -94,6 +94,8 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {
         super.appendTooltip(stack, world, tooltip, context)
 
+        tooltip.add(TranslatableText("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
+
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
         if (masterPosTag != CompoundTag()) {
             val masterPos = masterPosTag.toPos()
@@ -107,22 +109,25 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     }
 
     class ScreenHandlerFactory(
-        private val masterWorld: World,
+        masterWorld: World,
         private val master: MasterBlockEntity,
         private val lastSort: Sort,
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getLinkedInventories(masterWorld, true)
+        private val inventories = master.getInventories(masterWorld, true)
+        //private val inventories = master.getLinkedInventories(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-            val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, offHand, masterWorld, master)
+            val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, master, offHand)
+            //val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, offHand, masterWorld, master)
             master.watchers.add(handler)
+            master.markForcedChunks()
             return handler
         }
 
         override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-            buf.writeBlockPos(BlockPos.ORIGIN)
+            //buf.writeBlockPos(BlockPos.ORIGIN)
             buf.writeVarInt(lastSort.ordinal)
             buf.writeBoolean(offHand)
         }

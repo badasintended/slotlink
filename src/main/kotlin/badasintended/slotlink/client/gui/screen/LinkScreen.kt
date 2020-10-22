@@ -1,82 +1,88 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.client.gui.widget.*
-import badasintended.slotlink.gui.screen.LinkScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.client.gui.widget.ButtonWidget
+import badasintended.slotlink.client.gui.widget.FilterSlotWidget
+import badasintended.slotlink.init.Networks.LINK_SETTINGS
+import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import sbinnery.widget.*
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
-open class LinkScreen<H : LinkScreenHandler>(c: H) : ModScreen<H>(c) {
+open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, title: Text) : ModScreen<H>(h, inventory, title) {
 
-    protected val main: WPanel
+    private var priority = handler.priority
+    private var blacklist = handler.blacklist
 
-    protected val filterButton: WSlotButton
+    override val baseTlKey: String
+        get() = "container.slotlink.cable"
 
-    init {
-        main = root.createChild(::WPanel, positionOf(0, 0, 0), sizeOf(176, 166))
-        main.setParent<WAbstractWidget>(root)
-        main.setOnAlign(WAbstractWidget::center)
-        main.center()
-        root.add(main)
+    override fun init() {
+        super.init()
 
-        val label = main.createChild(
-            { WTranslatableLabel("container.slotlink.cable", c.pos.x, c.pos.y, c.pos.z) }, positionOf(main, 0, 6)
-        )
-        label.centerX()
-
-        main.createChild({ WHelpTooltip("container.slotlink.cable", 12) }, positionOf(main, 160, 6), sizeOf(8))
+        val x = x + 7
+        val y = y + titleY + 11
 
         for (i in 0 until 9) {
-            val slot = main.createChild(
-                { WFilterSlot { c.filter.set(i, it) } }, positionOf(main, (((i % 3) * 18) + 61), (((i / 3) * 18) + 16)),
-                sizeOf(18)
-            )
-            slot.setNumber<WSlot>(1, i)
-            slot.setStack<WSlot>(c.filter[i])
+            addButton(FilterSlotWidget(handler, i, x + 3 * 18 + (i % 3) * 18, y + (i / 3) * 18))
         }
 
-        val priorityUp = main.createChild({
-            WSlotButton()
-                .tlKey("container.slotlink.cable.priority")
-                .texture(tex("gui/triangle_up"))
-                .onClick { c.priority += 1 }
-        }, positionOf(main, 43, 18), sizeOf(14))
-
-        main.createChild({ WDynamicLabel { "${c.priority}" } }, positionOf(priorityUp, 0, 23))
-
-        main.createChild({
-            WSlotButton()
-                .tlKey("container.slotlink.cable.priority")
-                .texture(tex("gui/triangle_down"))
-                .onClick { c.priority -= 1 }
-        }, positionOf(priorityUp, 0, 36), sizeOf(14))
-
-        filterButton = main.createChild({
-            WSlotButton()
-                .tlKey { "container.slotlink.cable.filter.${if (c.isBlacklist) "black" else "white"}list" }
-                .texture { tex("gui/filter_${if (c.isBlacklist) "black" else "white"}list") }
-                .onClick { c.isBlacklist = !c.isBlacklist }
-        }, positionOf(main, 119, 36), sizeOf(14))
-
-        val playerInvLabel = main.createChild(
-            { WTranslatableLabel("container.inventory") }, positionOf(main, 8, 72)
-        )
-
-        for (i in 0 until 27) {
-            val slot = main.createChild(
-                ::WSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), (((i / 9) * 18) + 11)), sizeOf(18)
-            )
-            slot.setNumber<WSlot>(0, i + 9)
+        addButton(ButtonWidget(x + 2 * 18, y + 2, 14, 14, tl("priority.up"))).apply {
+            u = { 242 }
+            v = { 0 }
+            onPressed = {
+                priority++
+                sync()
+            }
         }
 
-        for (i in 0 until 9) {
-            val slot = main.createChild(
-                ::WSlot, positionOf(playerInvLabel, (((i % 9) * 18) - 1), 69), sizeOf(18)
-            )
-            slot.setNumber<WSlot>(0, i)
+        addButton(ButtonWidget(x + 2 * 18, y + 2 + 2 * 18, 14, 14, tl("priority.down"))).apply {
+            u = { 242 }
+            v = { 14 }
+            onPressed = {
+                priority--
+                sync()
+            }
         }
+
+        addButton(ButtonWidget(x + 6 * 18 + 4, y + 20, 14, 14, tl("blacklist"))).apply {
+            u = { 228 }
+            v = { if (blacklist) 14 else 0 }
+            onPressed = {
+                blacklist = !blacklist
+                sync()
+            }
+            onHovered = { matrices, x, y ->
+                renderTooltip(matrices, tl("blacklist.$blacklist"), x, y)
+            }
+        }
+
+    }
+
+    protected open fun sync() {
+        val buf = buf().apply {
+            writeVarInt(handler.syncId)
+            writeVarInt(priority)
+            writeBoolean(blacklist)
+        }
+        c2s(LINK_SETTINGS, buf)
+    }
+
+    override fun init(client: MinecraftClient, width: Int, height: Int) {
+        super.init(client, width, height)
+
+        titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2
+    }
+
+    override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+        super.drawForeground(matrices, mouseX, mouseY)
+
+        textRenderer.draw(matrices, "$priority", 7 + 2 * 18f, titleY + 31f, 4210752)
     }
 
 }

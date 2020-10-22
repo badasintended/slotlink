@@ -1,24 +1,19 @@
 package badasintended.slotlink.client.compat
 
-import badasintended.slotlink.gui.screen.RequestScreenHandler
-import badasintended.slotlink.registry.BlockRegistry
-import badasintended.slotlink.registry.NetworkRegistry.CRAFT_PULL
+import badasintended.slotlink.init.Blocks
+import badasintended.slotlink.init.Networks.APPLY_RECIPE
+import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.*
-import com.google.common.collect.Lists
-import me.shedaniel.rei.api.AutoTransferHandler.Result
+import me.shedaniel.rei.api.AutoTransferHandler.Result.*
 import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeHelper
 import me.shedaniel.rei.api.plugins.REIPluginV0
 import me.shedaniel.rei.plugin.DefaultPlugin
-import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry.INSTANCE
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeType
-import java.util.*
 
 @Environment(EnvType.CLIENT)
 class SlotlinkReiPlugin : REIPluginV0 {
@@ -26,54 +21,30 @@ class SlotlinkReiPlugin : REIPluginV0 {
     override fun getPluginIdentifier() = modId("rei")
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
-        recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(BlockRegistry.REQUEST))
+        recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(Blocks.REQUEST))
 
-        recipeHelper.registerAutoCraftingHandler r@{ context ->
-            val container = context.container
-            if (container !is RequestScreenHandler) return@r Result.createNotApplicable()
+        recipeHelper.registerAutoCraftingHandler r@{ ctx ->
+            val handler = ctx.container
+            val display = ctx.recipe
+            if (handler is RequestScreenHandler) if (display is DefaultCraftingDisplay) if (display.optionalRecipe.isPresent) {
+                val recipe = display.optionalRecipe.get()
+                if (recipe.type != RecipeType.CRAFTING) return@r createNotApplicable()
 
-            val display = context.recipe
+                if (!INSTANCE.canServerReceive(APPLY_RECIPE)) return@r createFailed("error.rei.not.on.server")
+                if (!ctx.isActuallyCrafting) return@r createSuccessful()
 
-            if (display !is DefaultCraftingDisplay) return@r Result.createNotApplicable()
-            if (!display.optionalRecipe.isPresent) return@r Result.createNotApplicable()
-
-            val recipe = display.optionalRecipe.get()
-            if (recipe.type != RecipeType.CRAFTING) return@r Result.createNotApplicable()
-
-            val input = Lists.newArrayListWithCapacity<List<EntryStack>>(9)
-            for (i in 0 until 9) input.add(Collections.emptyList())
-            display.inputEntries.forEachIndexed { i, entry ->
-                input[DefaultCraftingCategory.getSlotWithSize(display, i, 3)] = entry
-            }
-
-            if (!INSTANCE.canServerReceive(CRAFT_PULL)) return@r Result.createFailed("error.rei.not.on.server")
-            if (!context.isActuallyCrafting) return@r Result.createSuccessful()
-
-            val outside = arrayListOf<ArrayList<Item>>()
-            input.forEach { entry ->
-                val inside = arrayListOf<Item>()
-                entry.forEach { inside.add(it.item) }
-                outside.add(inside)
-            }
-
-            val buf = buf()
-            buf.apply {
-                writeInt(outside.size)
-                outside.forEach { inside ->
-                    writeInt(inside.size)
-                    inside.forEach { item ->
-                        writeItemStack(ItemStack(item))
-                    }
+                val buf = buf().apply {
+                    writeVarInt(handler.syncId)
+                    writeIdentifier(recipe.id)
                 }
+
+                ctx.minecraft.openScreen(ctx.containerScreen)
+                c2s(APPLY_RECIPE, buf)
+                return@r createSuccessful()
             }
-
-            context.minecraft.openScreen(context.containerScreen)
-
-            container.pullInput(outside)
-            c2s(CRAFT_PULL, buf)
-
-            return@r Result.createSuccessful()
+            return@r createNotApplicable()
         }
+
     }
 
 }

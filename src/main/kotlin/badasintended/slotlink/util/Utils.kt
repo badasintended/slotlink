@@ -10,53 +10,25 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.fabricmc.fabric.api.tag.TagRegistry
 import net.minecraft.block.Block
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.DrawableHelper
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
-import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.tag.Tag
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
-import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import sbinnery.common.handler.BaseScreenHandler
-import sbinnery.common.registry.NetworkRegistry.SLOT_CLICK_PACKET
-import sbinnery.common.registry.NetworkRegistry.createSlotClickPacket
-import sbinnery.common.utility.StackUtilities
-import sbinnery.widget.api.*
-
-fun spinneryId(id: String) = Identifier("spinnery", id)
-
-/**
- * I just want ints on my gui
- */
-@Environment(EnvType.CLIENT)
-fun positionOf(x: Int, y: Int, z: Int): Position = Position.of(x.toFloat(), y.toFloat(), z.toFloat())
-
-@Environment(EnvType.CLIENT)
-fun positionOf(anchor: WPositioned, x: Int, y: Int, z: Int = 0): Position {
-    return Position.of(anchor, x.toFloat(), y.toFloat(), z.toFloat())
-}
-
-@Environment(EnvType.CLIENT)
-fun sizeOf(x: Int, y: Int): Size = Size.of(x.toFloat(), y.toFloat())
-
-@Environment(EnvType.CLIENT)
-fun sizeOf(s: Int): Size = Size.of(s.toFloat())
-
-@Environment(EnvType.CLIENT)
-fun slotAction(container: BaseScreenHandler, slotN: Int, invN: Int, button: Int, action: Action, player: PlayerEntity) {
-    container.onSlotAction(slotN, invN, button, action, player)
-    c2s(SLOT_CLICK_PACKET, createSlotClickPacket(container.syncId, slotN, invN, button, action))
-}
+import kotlin.math.min
 
 fun BlockPos.toTag(): CompoundTag {
     val tag = CompoundTag()
@@ -121,43 +93,20 @@ fun Direction.next(): Direction {
     return Direction.byId(id + 1)
 }
 
-fun Direction.tlKey(): String {
-    return "container.slotlink.cable.side.${asString()}"
-}
-
-fun Inventory.mergeStack(slot: Int, source: ItemStack, side: Direction) {
-    var target = getStack(slot)
-    while ((target.count < target.maxCount) and !source.isEmpty) {
-        val one = source.copy()
-        one.count = 1
-        if (!isValid(slot, one)) return
-        if (this is SidedInventory) if (!canInsert(slot, one, side)) return
-        if (target.isEmpty) {
-            setStack(slot, one)
-            source.decrement(1)
-            target = getStack(slot)
-        } else {
-            if (!StackUtilities.equalItemAndTag(source, target)) return
-            target.increment(1)
-            source.decrement(1)
-        }
+fun PacketByteBuf.writeFilter(filter: List<Pair<ItemStack, Boolean>>) {
+    filter.forEach {
+        writeItemStack(it.first)
+        writeBoolean(it.second)
     }
 }
 
-fun PacketByteBuf.writeInventory(stacks: DefaultedList<ItemStack>) {
-    writeVarInt(stacks.size)
-    stacks.forEach { writeItemStack(it) }
-}
-
-fun PacketByteBuf.readInventory(): DefaultedList<ItemStack> {
-    val stack = DefaultedList.ofSize(readVarInt(), ItemStack.EMPTY)
-    for (i in 0 until stack.size) {
-        stack[i] = readItemStack()
+fun PacketByteBuf.readFilter(size: Int = 9): MutableList<Pair<ItemStack, Boolean>> {
+    val list = arrayListOf<Pair<ItemStack, Boolean>>()
+    for (i in 0 until size) {
+        list.add(readItemStack() to readBoolean())
     }
-    return stack
+    return list
 }
-
-fun tex(path: String) = modId("textures/${path}.png")
 
 fun modId(path: String) = Identifier(Slotlink.ID, path)
 
@@ -175,4 +124,86 @@ fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf) {
     ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf)
 }
 
+fun s2c(player: PlayerEntity, packet: Packet<*>) {
+    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packet)
+}
+
 val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))
+
+fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
+    return ItemStack.areTagsEqual(this, other) and ItemStack.areItemsEqual(this, other)
+}
+
+fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
+    val f = from.copy()
+    val t = this.copy()
+
+    if (isEmpty) return f to ItemStack.EMPTY
+    if (!isItemAndTagEqual(f) or (count >= maxCount) or f.isEmpty) return t to f
+
+    val max = (maxCount - count).coerceAtLeast(0)
+    val added = min(max, f.count)
+
+    t.increment(added)
+    f.decrement(added)
+
+    return t to f
+}
+
+val guiTexture = modId("textures/gui/gui.png")
+
+@Environment(EnvType.CLIENT)
+fun bindGuiTexture() {
+    getClient().textureManager.bindTexture(guiTexture)
+}
+
+private typealias DH = DrawableHelper
+
+fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Float, v: Float, ltrb: Int, cm: Int) {
+    drawNinePatch(matrices, x, y, w, h, u, v, ltrb, cm, ltrb)
+}
+
+fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Float, v: Float, lt: Int, cm: Int, rb: Int) {
+    drawNinePatch(matrices, x, y, w, h, u, v, lt, cm, rb, lt, cm, rb)
+}
+
+/**
+ * Wed Oct 14 01:43:12 PM UTC 2020
+ * well i managed to write this shit
+ *
+ * @param x square x position
+ * @param y square y position
+ * @param w square width
+ * @param h square height
+ * @param u texture left position (in pixel)
+ * @param v texture top position (in pixel)
+ * @param l nine-patch left size
+ * @param c nine-patch center size
+ * @param r nine-patch right size
+ * @param t nine-patch top size
+ * @param m nine-patch middle size
+ * @param b nine-patch bottom size
+ */
+@Environment(EnvType.CLIENT)
+fun drawNinePatch(
+    matrices: MatrixStack,
+    x: Int, y: Int, w: Int, h: Int,
+    u: Float, v: Float,
+    l: Int, c: Int, r: Int, t: Int, m: Int, b: Int
+) {
+    DH.drawTexture(matrices, x, y, l, t, u, v, l, t, 256, 256)
+    DH.drawTexture(matrices, x + l, y, w - l - r, t, u + l, v, c, t, 256, 256)
+    DH.drawTexture(matrices, x + w - r, y, r, t, u + l + c, v, r, t, 256, 256)
+
+    DH.drawTexture(matrices, x, y + t, l, h - t - b, u, v + t, l, m, 256, 256)
+    DH.drawTexture(matrices, x + l, y + t, w - l - r, h - t - b, u + l, v + t, c, m, 256, 256)
+    DH.drawTexture(matrices, x + w - r, y + t, r, h - t - b, u + l + c, v + t, r, m, 256, 256)
+
+    DH.drawTexture(matrices, x, y + h - b, l, b, u, v + t + m, l, b, 256, 256)
+    DH.drawTexture(matrices, x + l, y + h - b, w - l - r, b, u + l, v + t + m, c, b, 256, 256)
+    DH.drawTexture(matrices, x + w - r, y + h - b, r, b, u + l + c, v + t + m, r, b, 256, 256)
+}
+
+var Pair<Inventory, Int>.stack: ItemStack
+    get() = first.getStack(second)
+    set(value) = first.setStack(second, value)

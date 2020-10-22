@@ -3,8 +3,17 @@
   "pools": [
     {
       "rolls"     : 1,
-      "entries"   : [{"type": "minecraft:item", "name": "slotlink:export_cable"}],
-      "conditions": [{"condition": "minecraft:survives_explosion"}]
+      "entries"   : [
+        {
+          "type": "minecraft:item",
+          "name": "slotlink:export_cable"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

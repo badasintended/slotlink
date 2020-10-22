@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ModBlock
-import badasintended.slotlink.gui.screen.TransferScreenHandler
+import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.RedstoneMode.*
 import net.minecraft.block.Block
@@ -10,10 +10,10 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
@@ -36,18 +36,6 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
         return transferInternal(world, master)
     }
 
-    protected fun ItemStack?.isValid(): Boolean {
-        if (this == null) return false
-        if (isEmpty) return false
-        if (filter.all { it.isEmpty }) return true
-        if (isBlackList) {
-            if (filter.any { it.item == item }) return false
-        } else {
-            if (filter.none { it.item == item }) return false
-        }
-        return true
-    }
-
     override fun Block.isIgnored() = this is ModBlock
 
     override fun fromTag(state: BlockState, tag: CompoundTag) {
@@ -67,13 +55,15 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-        return TransferScreenHandler(syncId, inv, pos, priority, isBlackList, filter, side, redstone)
+        return TransferScreenHandler(syncId, inv, priority, isBlackList, filter, side, redstone, ScreenHandlerContext.create(world, pos))
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
         super.writeScreenOpeningData(player, buf)
-        buf.writeVarInt(side.id)
-        buf.writeVarInt(redstone.ordinal)
+        buf.apply {
+            writeVarInt(side.id)
+            writeVarInt(redstone.ordinal)
+        }
     }
 
 }

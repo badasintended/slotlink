@@ -6,10 +6,20 @@
     "SDS"
   ],
   "key"    : {
-    "S": {"tag": "c:redstone_dusts"},
-    "R": {"item": "slotlink:request"},
-    "G": {"tag": "c:gold_ingots"},
-    "D": {"tag": "c:diamonds"}
+    "S": {
+      "tag": "c:redstone_dusts"
+    },
+    "R": {
+      "item": "slotlink:request"
+    },
+    "G": {
+      "tag": "c:gold_ingots"
+    },
+    "D": {
+      "tag": "c:diamonds"
+    }
   },
-  "result" : {"item": "slotlink:limited_remote"}
+  "result" : {
+    "item": "slotlink:limited_remote"
+  }
 }

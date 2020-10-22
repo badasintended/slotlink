@@ -1,16 +1,17 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
+import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.util.toPos
-import badasintended.slotlink.util.writeInventory
+import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.*
 import net.minecraft.block.entity.*
-import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
@@ -20,8 +21,7 @@ import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type),
-    ExtendedScreenHandlerFactory {
+abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type), ExtendedScreenHandlerFactory {
 
     var linkedPos = CompoundTag()
 
@@ -29,16 +29,17 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     var isBlackList = false
 
-    var filter: DefaultedList<ItemStack> = DefaultedList.ofSize(9, ItemStack.EMPTY)
+    var filter: DefaultedList<Pair<ItemStack, Boolean>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
 
-    fun getLinkedInventory(
-        world: WorldAccess, master: MasterBlockEntity? = null, forceLoad: Boolean = false, compat: Boolean = false
-    ): Pair<Inventory?, Pair<Boolean, Set<Item>>>? {
-        if (world !is World) return null
-        if (linkedPos == CompoundTag()) return null
+    private val filtered = FilteredInventory(filter) { isBlackList }
+
+    fun getInventory(world: WorldAccess, master: MasterBlockEntity? = null, request: Boolean = false): FilteredInventory {
+        if (world !is World) return filtered.none
+        if (linkedPos == CompoundTag()) return filtered.none
+
         val linkedPos = linkedPos.toPos()
 
-        if (!world.isClient and (master != null) and forceLoad) {
+        if (!world.isClient and (master != null) and request) {
             world as ServerWorld
             val chunkPos = ChunkPos(pos)
             if (!world.forcedChunks.contains(chunkPos.toLong())) {
@@ -50,33 +51,27 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         val linkedBlock = linkedState.block
         val linkedBlockEntity = world.getBlockEntity(linkedPos)
 
-        if (compat) {
+        if (request) {
             val registered = Compat.getRegisteredClass(linkedBlockEntity)
             if (registered != null) {
-                return Compat.getHandler(registered, linkedBlockEntity) to (isBlackList to filter
-                    .filterNot { it.isEmpty }
-                    .map { it.item }
-                    .toSet())
+                return filtered.with(Compat.getHandler(registered, linkedBlockEntity))
             }
         }
 
         if (!linkedBlock.isIgnored()) when {
             (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
                 linkedBlock as ChestBlock
-                val inv = ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true) ?: return null
-                return inv to (isBlackList to filter.filterNot { it.isEmpty }.map { it.item }.toSet())
+                return filtered.with(ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true))
             }
             linkedBlock is InventoryProvider -> {
-                return linkedBlock.getInventory(linkedState, world, linkedPos) to (isBlackList to filter
-                    .filterNot { it.isEmpty }
-                    .map { it.item }
-                    .toSet())
+                return filtered.with(linkedBlock.getInventory(linkedState, world, linkedPos))
             }
             linkedBlockEntity is Inventory -> {
-                return linkedBlockEntity to (isBlackList to filter.filterNot { it.isEmpty }.map { it.item }.toSet())
+                return filtered.with(linkedBlockEntity)
             }
         }
-        return null
+
+        return filtered.none
     }
 
     protected abstract fun Block.isIgnored(): Boolean
@@ -87,7 +82,20 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         tag.putInt("priority", priority)
         tag.put("linkedPos", linkedPos)
         tag.putBoolean("isBlacklist", isBlackList)
-        tag.put("filter", Inventories.toTag(CompoundTag(), filter))
+
+        val filterTag = CompoundTag()
+        val list = ListTag()
+        filter.forEachIndexed { i, pair ->
+            if (!pair.first.isEmpty) {
+                val compound = CompoundTag()
+                compound.putByte("Slot", i.toByte())
+                compound.putBoolean("matchNbt", pair.second)
+                pair.first.toTag(compound)
+                list.add(compound)
+            }
+        }
+        filterTag.put("Items", list)
+        tag.put("filter", filterTag)
 
         return tag
     }
@@ -98,25 +106,38 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         priority = tag.getInt("priority")
         linkedPos = tag.getCompound("linkedPos")
         isBlackList = tag.getBoolean("isBlacklist")
-        Inventories.fromTag(tag.getCompound("filter"), filter)
+
+        val filterTag = tag.getCompound("filter")
+        val list = filterTag.getList("Items", NbtType.COMPOUND)
+
+        list.forEach {
+            it as CompoundTag
+            val slot = it.getByte("Slot").toInt()
+            val nbt = it.getBoolean("matchNbt")
+            if (slot in 0 until 9) {
+                val stack = ItemStack.fromTag(it)
+                filter[slot] = stack to nbt
+            }
+        }
     }
 
     override fun markRemoved() {
         super.markRemoved()
 
         if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos.toPos())
+            val master = world?.getBlockEntity(masterPos)
             if (master is MasterBlockEntity) master.markDirty()
         }
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-        buf.writeBlockPos(pos)
-        buf.writeVarInt(priority)
-        buf.writeBoolean(isBlackList)
-        buf.writeInventory(filter)
+        buf.apply {
+            writeVarInt(priority)
+            writeBoolean(isBlackList)
+            writeFilter(filter)
+        }
     }
 
-    override fun getDisplayName() = TranslatableText("container.slotlink.cable")
+    override fun getDisplayName() = TranslatableText("container.slotlink.cable", pos.x, pos.y, pos.z)
 
 }

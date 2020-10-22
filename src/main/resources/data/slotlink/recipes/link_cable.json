@@ -6,8 +6,15 @@
     " C "
   ],
   "key"    : {
-    "H": {"tag": "c:chests"},
-    "C": {"item": "slotlink:cable"}
+    "H": {
+      "tag": "c:chests"
+    },
+    "C": {
+      "item": "slotlink:cable"
+    }
   },
-  "result" : {"item": "slotlink:link_cable", "count": 4}
+  "result" : {
+    "item" : "slotlink:link_cable",
+    "count": 4
+  }
 }

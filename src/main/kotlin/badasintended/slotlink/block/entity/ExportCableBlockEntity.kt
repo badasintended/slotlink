@@ -1,29 +1,28 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.util.*
-import net.minecraft.inventory.SidedInventory
+import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.util.toTag
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.EXPORT_CABLE) {
+class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE) {
 
     override var side = Direction.UP
 
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
-        val target = getLinkedInventory(world)?.first ?: return false
+        val target = getInventory(world)
+        if (target.isNull) return false
 
-        val targetSlots = if (target is SidedInventory) target.getAvailableSlots(side).toList()
-        else (0 until target.size()).toList()
-
-        val inventories = master.getLinkedInventories(world).keys
+        val targetSlots = target.getAvailableSlots(side)
+        val inventories = master.getInventories(world)
 
         for (source in inventories) {
             for (j in 0 until source.size()) {
                 val sourceStack = source.getStack(j)
-                if (!sourceStack.isValid()) continue
+                if (sourceStack.isEmpty) continue
+                if (!target.isValid(j, sourceStack)) continue
                 for (k in targetSlots) {
-                    target.mergeStack(k, sourceStack, side)
+                    target.merge(k, sourceStack, side)
                     source.markDirty()
                     target.markDirty()
                     if (sourceStack.isEmpty) return true
@@ -38,7 +37,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypeRegistry.
         super.markDirty()
 
         if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos.toPos())
+            val master = world?.getBlockEntity(masterPos)
 
             if (master is MasterBlockEntity) {
                 master.exportCables.add(pos.toTag())

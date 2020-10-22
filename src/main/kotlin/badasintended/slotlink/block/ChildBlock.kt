@@ -2,16 +2,19 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.util.toTag
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.client.item.TooltipContext
+import net.minecraft.item.ItemStack
+import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
 abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity, settings: Settings = SETTINGS) :
-    ModBlock(id, settings),
-    BlockEntityProvider {
+    ModBlock(id, settings), BlockEntityProvider {
 
     // TODO: Optimize this part
     override fun neighborUpdate(
@@ -47,8 +50,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
             }
         } else if (neighborBlockEntity is MasterBlockEntity) {
             if (!currentlyHasMaster) {
-                val masterPos = neighborPos.toTag()
-                blockEntity.masterPos = masterPos
+                blockEntity.masterPos = neighborPos
                 blockEntity.hasMaster = true
                 blockEntity.markDirty()
                 world.updateNeighbors(pos, block)
@@ -61,5 +63,10 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
     }
 
     override fun createBlockEntity(world: BlockView) = blockEntity.invoke()
+
+    override fun appendTooltip(stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+        super.appendTooltip(stack, world, tooltip, options)
+        tooltip.add(TranslatableText("block.slotlink.child.tooltip").formatted(Formatting.GRAY))
+    }
 
 }

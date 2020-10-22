@@ -24,7 +24,6 @@ import net.minecraft.world.*
 abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
 
     companion object {
-
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
     }
 
@@ -51,7 +50,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         if (!neighbor.isIgnored()) {
             if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
                 val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getLinkedInventory(world) == null) or (blockEntity.linkedPos.toPos() == neighborPos)) {
+                if ((blockEntity.getInventory(world).isNull) or (blockEntity.linkedPos.toPos() == neighborPos)) {
                     blockEntity.linkedPos = neighborPos.toTag()
                     blockEntity.markDirty()
                     return state.with(propertyMap[facing], true)
@@ -118,9 +117,9 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     }
 
     override fun appendTooltip(
-        stack: ItemStack, view: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
+        stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
     ) {
-        super.appendTooltip(stack, view, tooltip, options)
+        super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
     }
 

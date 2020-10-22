@@ -1,33 +1,26 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.gui.screen.RequestScreenHandler
-import badasintended.slotlink.registry.BlockEntityTypeRegistry
+import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.Sort
-import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.Item
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.math.BlockPos
 
-class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), ExtendedScreenHandlerFactory {
+class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), ExtendedScreenHandlerFactory {
 
-    var lastSort = 0
-
-    private var inventories = emptyMap<Inventory, Pair<Boolean, Set<Item>>>()
-    private var _masterPos = BlockPos.ORIGIN
+    var lastSort = Sort.NAME
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
-        tag.putInt("lastSort", lastSort)
+        tag.putInt("lastSort", lastSort.ordinal)
 
         return tag
     }
@@ -35,24 +28,22 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypeRegistry.REQUEST), Ex
     override fun fromTag(state: BlockState, tag: CompoundTag) {
         super.fromTag(state, tag)
 
-        lastSort = tag.getInt("lastSort")
+        lastSort = Sort.of(tag.getInt("lastSort"))
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
         val world = getWorld() ?: return null
         if (!hasMaster) return null
-        _masterPos = masterPos.toPos()
-        val master = world.getBlockEntity(_masterPos) ?: return null
+        val master = world.getBlockEntity(masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
-        inventories = master.getLinkedInventories(world, true)
-        val handler = RequestScreenHandler(syncId, inv, pos, inventories, Sort.of(lastSort), world, master)
+        val handler = RequestScreenHandler(syncId, inv, master.getInventories(world, true), lastSort, this, master)
         master.watchers.add(handler)
+        master.markForcedChunks()
         return handler
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-        buf.writeBlockPos(pos)
-        buf.writeVarInt(lastSort)
+        buf.writeVarInt(lastSort.ordinal)
     }
 
     override fun getDisplayName() = TranslatableText("container.slotlink.request")

@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 
 plugins {
     id "org.jetbrains.kotlin.jvm" version '1.4.0'
-    id 'fabric-loom' version '0.4-SNAPSHOT'
+    id 'fabric-loom' version '0.5-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -13,7 +13,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 archivesBaseName = project.archives_base_name
-version = "${project.mod_version}+minecraft-${project.minecraft_version}"
+version = "${project.mod_version}+${project.minecraft_version}"
 group = project.maven_group
 
 repositories {
@@ -28,11 +28,6 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
-
-    modCompile "com.github.badasintended:spinnery:${project.spinnery}"
-    include "com.github.badasintended:spinnery:${project.spinnery}"
-
-    //modImplementation "io.github.prospector:modmenu:${project.modmenu}"
 
     modCompile "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 }
@@ -75,7 +70,7 @@ processResources {
 
     doLast {
         fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
-            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
+            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file, "UTF-8"))
         }
     }
 }

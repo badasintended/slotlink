@@ -2,15 +2,17 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
 import badasintended.slotlink.block.ModBlock
-import badasintended.slotlink.gui.screen.LinkScreenHandler
-import badasintended.slotlink.registry.BlockEntityTypeRegistry
-import badasintended.slotlink.util.*
+import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.util.ignoredTag
+import badasintended.slotlink.util.toTag
 import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
+import net.minecraft.screen.ScreenHandlerContext
 
-class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.LINK_CABLE) {
+class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypes.LINK_CABLE) {
 
     override fun Block.isIgnored(): Boolean {
         if ((this is ModBlock) or Compat.isBlacklisted(this)) return true
@@ -21,7 +23,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.L
         super.markDirty()
 
         if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos.toPos())
+            val master = world?.getBlockEntity(masterPos)
 
             if (master is MasterBlockEntity) {
                 master.linkCables.add(pos.toTag())
@@ -31,7 +33,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypeRegistry.L
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-        return LinkScreenHandler(syncId, inv, pos, priority, isBlackList, filter)
+        return LinkScreenHandler(syncId, inv, priority, isBlackList, filter, ScreenHandlerContext.create(world, pos))
     }
 
 }

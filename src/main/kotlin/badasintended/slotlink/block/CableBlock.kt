@@ -20,7 +20,6 @@ import net.minecraft.world.WorldAccess
 open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlockEntity) : ChildBlock(id, be, SETTINGS) {
 
     companion object {
-
         val SETTINGS: Settings =
             FabricBlockSettings.of(Material.GLASS).breakByHand(true).breakByTool(FabricToolTags.PICKAXES).hardness(3f)
 
