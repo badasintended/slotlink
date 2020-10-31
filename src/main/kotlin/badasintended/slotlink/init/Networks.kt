@@ -32,7 +32,7 @@ object Networks : Initializer {
         s(SORT) { context, buf ->
             val syncId = buf.readVarInt()
             val sort = Sort.of(buf.readVarInt())
-            val filter = buf.readString()
+            val filter = buf.readString(32767)
 
             context.taskQueue.execute {
                 val handler = context.player.currentScreenHandler
