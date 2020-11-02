@@ -1,7 +1,6 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
-import badasintended.slotlink.util.toTag
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
@@ -40,7 +39,7 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.EXPORT_
             val master = world?.getBlockEntity(masterPos)
 
             if (master is MasterBlockEntity) {
-                master.exportCables.add(pos.toTag())
+                master.exportPos.add(pos)
                 master.markDirty()
             }
         }

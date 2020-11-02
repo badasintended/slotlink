@@ -3,39 +3,41 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.DoubleInventoryAccessor
-import badasintended.slotlink.util.MasterWatcher
-import badasintended.slotlink.util.toPos
+import badasintended.slotlink.util.*
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.inventory.DoubleInventory
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Tickable
 import net.minecraft.world.World
 
 class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
 
-    var linkCables = ListTag()
-    var importCables = ListTag()
-    var exportCables = ListTag()
+    val linkPos = BlockPosList()
+    val importPos = BlockPosList()
+    val exportPos = BlockPosList()
     var watchers = hashSetOf<MasterWatcher>()
+
+    private val linkCables = arrayListOf<LinkCableBlockEntity>()
+    private val importCables = arrayListOf<ImportCableBlockEntity>()
+    private val exportCables = arrayListOf<ExportCableBlockEntity>()
 
     private var tick = 0
     val forcedChunks = hashSetOf<Pair<Int, Int>>()
 
     fun getInventories(world: World, request: Boolean = false): List<FilteredInventory> {
         val list = arrayListOf<FilteredInventory>()
-        val cables = arrayListOf<LinkCableBlockEntity>()
 
-        linkCables.forEach { tag ->
-            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-            if (blockEntity is LinkCableBlockEntity) cables.add(blockEntity)
+        linkCables.clear()
+        linkPos.forEach { tag ->
+            val blockEntity = world.getBlockEntity(tag)
+            if (blockEntity is LinkCableBlockEntity) linkCables.add(blockEntity)
         }
 
-        cables.sortByDescending { it.priority }
-        for (cable in cables) {
+        linkCables.sortByDescending { it.priority }
+        for (cable in linkCables) {
             val filteredInventory = cable.getInventory(world, this, request)
             val inventory = filteredInventory.inventory
             if (inventory is DoubleInventory) {
@@ -74,49 +76,43 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
     }
 
     private fun validateCables(world: World) {
-        val linkCableSet = linkedSetOf<CompoundTag>()
-        linkCables.forEach { tag ->
-            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-            if (blockEntity is LinkCableBlockEntity) {
-                if (blockEntity.hasMaster and (blockEntity.masterPos == pos)) {
-                    linkCableSet.add(tag)
+        linkPos.removeIf r@{
+            val be = world.getBlockEntity(it)
+            if (be is LinkCableBlockEntity) {
+                if (be.hasMaster and (be.masterPos == pos)) {
+                    return@r false
                 }
             }
+            return@r true
         }
-        linkCables.clear()
-        linkCables.addAll(linkCableSet)
 
-        val importCableSet = linkedSetOf<CompoundTag>()
-        importCables.forEach { tag ->
-            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-            if (blockEntity is ImportCableBlockEntity) {
-                if (blockEntity.hasMaster and (blockEntity.masterPos == pos)) {
-                    importCableSet.add(tag)
+        importPos.removeIf r@{
+            val be = world.getBlockEntity(it)
+            if (be is ImportCableBlockEntity) {
+                if (be.hasMaster and (be.masterPos == pos)) {
+                    return@r false
                 }
             }
+            return@r true
         }
-        importCables.clear()
-        importCables.addAll(importCableSet)
 
-        val exportCableSet = linkedSetOf<CompoundTag>()
-        exportCables.forEach { tag ->
-            val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-            if (blockEntity is ExportCableBlockEntity) {
-                if (blockEntity.hasMaster and (blockEntity.masterPos == pos)) {
-                    exportCableSet.add(tag)
+        exportPos.removeIf r@{
+            val be = world.getBlockEntity(it)
+            if (be is ExportCableBlockEntity) {
+                if (be.hasMaster and (be.masterPos == pos)) {
+                    return@r false
                 }
             }
+            return@r true
         }
-        exportCables.clear()
-        exportCables.addAll(exportCableSet)
     }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
-        tag.put("linkCables", linkCables)
-        tag.put("exportCables", exportCables)
-        tag.put("importCables", importCables)
+        tag.put("linkCables", linkPos.toTag())
+        tag.put("exportCables", exportPos.toTag())
+        tag.put("importCables", importPos.toTag())
 
         return tag
     }
@@ -124,9 +120,9 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
     override fun fromTag(state: BlockState, tag: CompoundTag) {
         super.fromTag(state, tag)
 
-        linkCables = tag.getList("linkCables", NbtType.COMPOUND)
-        exportCables = tag.getList("exportCables", NbtType.COMPOUND)
-        importCables = tag.getList("importCables", NbtType.COMPOUND)
+        linkPos.fromTag(tag.getList("linkCables", NbtType.COMPOUND))
+        exportPos.fromTag(tag.getList("exportCables", NbtType.COMPOUND))
+        importPos.fromTag(tag.getList("importCables", NbtType.COMPOUND))
     }
 
     override fun markDirty() {
@@ -144,26 +140,26 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
     override fun tick() {
         tick++
         if (tick == 10) {
+            importCables.clear()
             val world = getWorld() ?: return
-            val cables = arrayListOf<ImportCableBlockEntity>()
-            importCables.forEach { tag ->
-                val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-                if (blockEntity is ImportCableBlockEntity) cables.add(blockEntity)
+            importPos.forEach {
+                val blockEntity = world.getBlockEntity(it)
+                if (blockEntity is ImportCableBlockEntity) importCables.add(blockEntity)
             }
-            cables.sortByDescending { it.priority }
-            for (cable in cables) {
+            importCables.sortByDescending { it.priority }
+            for (cable in importCables) {
                 if (cable.transfer(world, this)) break
             }
         } else if (tick == 20) {
             tick = 0
+            exportCables.clear()
             val world = getWorld() ?: return
-            val cables = arrayListOf<ExportCableBlockEntity>()
-            exportCables.forEach { tag ->
-                val blockEntity = world.getBlockEntity((tag as CompoundTag).toPos())
-                if (blockEntity is ExportCableBlockEntity) cables.add(blockEntity)
+            exportPos.forEach {
+                val blockEntity = world.getBlockEntity(it)
+                if (blockEntity is ExportCableBlockEntity) exportCables.add(blockEntity)
             }
-            cables.sortByDescending { it.priority }
-            for (cable in cables) {
+            exportCables.sortByDescending { it.priority }
+            for (cable in exportCables) {
                 if (cable.transfer(world, this)) break
             }
         }

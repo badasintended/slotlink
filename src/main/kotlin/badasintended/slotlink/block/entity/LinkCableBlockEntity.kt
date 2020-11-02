@@ -5,7 +5,6 @@ import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.screen.LinkScreenHandler
 import badasintended.slotlink.util.ignoredTag
-import badasintended.slotlink.util.toTag
 import net.minecraft.block.Block
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -26,7 +25,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypes.LINK_CAB
             val master = world?.getBlockEntity(masterPos)
 
             if (master is MasterBlockEntity) {
-                master.linkCables.add(pos.toTag())
+                master.linkPos.add(pos)
                 master.markDirty()
             }
         }

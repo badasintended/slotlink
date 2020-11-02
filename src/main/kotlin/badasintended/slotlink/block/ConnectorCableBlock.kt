@@ -1,7 +1,8 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.around
+import badasintended.slotlink.util.bbCuboid
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
@@ -34,7 +35,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
      *
      * - Dominant direction (from most to least):
      *   NORTH, SOUTH, EAST, WEST, UP, DOWN.
-     *   (Based on [CableBlock.propertyMap].)
+     *   (Based on [CableBlock.properties].)
      *
      * - It will connect to the most dominant direction first, and remains connected
      *   even when more dominant direction is placed after.
@@ -43,17 +44,15 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
      *
      * TODO: Optimize, maybe.
      */
-    private fun checkLink(
-        world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos
-    ): BlockState {
+    private fun checkLink(world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (!neighbor.isIgnored()) {
             if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
                 val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getInventory(world).isNull) or (blockEntity.linkedPos.toPos() == neighborPos)) {
-                    blockEntity.linkedPos = neighborPos.toTag()
+                if ((blockEntity.getInventory(world).isNull) or (blockEntity.linkedPos == neighborPos)) {
+                    blockEntity.linkedPos = neighborPos
                     blockEntity.markDirty()
-                    return state.with(propertyMap[facing], true)
+                    return state.with(properties[facing], true)
                 }
             }
         }
@@ -75,7 +74,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         val pos = ctx.blockPos.offset(face)
         val block = world.getBlockState(pos).block
         return if (!block.isIgnored() and ((world.getBlockEntity(pos) is Inventory) or (block is InventoryProvider))) {
-            state?.with(propertyMap[face], true)
+            state?.with(properties[face], true)
         } else {
             state
         }
@@ -85,7 +84,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         super.onPlaced(world, pos, state, placer, itemStack)
 
         var updatedState = state
-        propertyMap.entries.sortedByDescending { state[it.value] }.forEach {
+        properties.entries.sortedByDescending { state[it.value] }.forEach {
             updatedState = checkLink(world, pos, it.key, updatedState, pos.offset(it.key))
         }
         world.setBlockState(pos, updatedState)
@@ -102,12 +101,9 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     ): BlockState {
         val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
-        if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos.toPos()) {
+        if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos) {
             val neighbor = neighborState.block
-            if (neighbor.isIgnored() and ((world.getBlockEntity(
-                    neighborPos
-                ) !is Inventory) and (neighbor !is InventoryProvider))
-            ) {
+            if (neighbor.isIgnored() and ((world.getBlockEntity(neighborPos) !is Inventory) and (neighbor !is InventoryProvider))) {
                 pos.around().forEach { (facingAround, posAround) ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
                 }
@@ -116,16 +112,12 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return updatedState
     }
 
-    override fun appendTooltip(
-        stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext
-    ) {
+    override fun appendTooltip(stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
     }
 
-    override fun onUse(
-        state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult
-    ): ActionResult {
+    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
         if (player.mainHandStack.isEmpty) {
             player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
             return ActionResult.SUCCESS
@@ -133,9 +125,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return ActionResult.PASS
     }
 
-    override fun createScreenHandlerFactory(
-        state: BlockState, world: World, pos: BlockPos
-    ): NamedScreenHandlerFactory? {
+    override fun createScreenHandlerFactory(state: BlockState, world: World, pos: BlockPos): NamedScreenHandlerFactory? {
         val blockEntity = world.getBlockEntity(pos) ?: return null
         if (blockEntity !is ConnectorCableBlockEntity) return null
         return blockEntity

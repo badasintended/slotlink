@@ -2,8 +2,7 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.util.toPos
-import badasintended.slotlink.util.writeFilter
+import badasintended.slotlink.util.*
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.*
@@ -17,13 +16,14 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.collection.DefaultedList
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
 abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type), ExtendedScreenHandlerFactory {
 
-    var linkedPos = CompoundTag()
+    var linkedPos: BlockPos = BlockPos.ORIGIN
 
     var priority = 0
 
@@ -36,8 +36,6 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
     fun getInventory(world: WorldAccess, master: MasterBlockEntity? = null, request: Boolean = false): FilteredInventory {
         if (world !is World) return filtered.none
         if (linkedPos == CompoundTag()) return filtered.none
-
-        val linkedPos = linkedPos.toPos()
 
         if (!world.isClient and (master != null) and request) {
             world as ServerWorld
@@ -80,7 +78,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         super.toTag(tag)
 
         tag.putInt("priority", priority)
-        tag.put("linkedPos", linkedPos)
+        tag.put("linkedPos", linkedPos.toTag())
         tag.putBoolean("isBlacklist", isBlackList)
 
         val filterTag = CompoundTag()
@@ -104,7 +102,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         super.fromTag(state, tag)
 
         priority = tag.getInt("priority")
-        linkedPos = tag.getCompound("linkedPos")
+        linkedPos = tag.getCompound("linkedPos").toPos()
         isBlackList = tag.getBoolean("isBlacklist")
 
         val filterTag = tag.getCompound("filter")

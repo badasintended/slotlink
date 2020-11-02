@@ -1,6 +1,7 @@
 package badasintended.slotlink.client.compat
 
 import badasintended.slotlink.init.Blocks
+import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Networks.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.*
@@ -22,6 +23,10 @@ class SlotlinkReiPlugin : REIPluginV0 {
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
         recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(Blocks.REQUEST))
+        recipeHelper.registerWorkingStations(
+            DefaultPlugin.CRAFTING,
+            EntryStack.ofItems(listOf(Items.LIMITED_REMOTE, Items.UNLIMITED_REMOTE, Items.MULTI_DIM_REMOTE))
+        )
 
         recipeHelper.registerAutoCraftingHandler r@{ ctx ->
             val handler = ctx.container

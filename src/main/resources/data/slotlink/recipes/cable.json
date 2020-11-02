@@ -6,12 +6,8 @@
     "SSS"
   ],
   "key"    : {
-    "I": {
-      "tag": "c:iron_ingots"
-    },
-    "S": {
-      "item": "minecraft:stone_slab"
-    }
+    "I": {"tag": "c:iron_ingots"},
+    "S": {"item": "minecraft:stone_slab"}
   },
   "result" : {
     "item" : "slotlink:cable",

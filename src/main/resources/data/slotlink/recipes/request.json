@@ -6,15 +6,9 @@
     "TCT"
   ],
   "key"    : {
-    "G": {
-      "tag": "c:gold_ingots"
-    },
-    "T": {
-      "item": "minecraft:crafting_table"
-    },
-    "C": {
-      "item": "slotlink:link_cable"
-    }
+    "G": {"tag": "c:gold_ingots"},
+    "T": {"item": "minecraft:crafting_table"},
+    "C": {"item": "slotlink:link_cable"}
   },
   "result" : {
     "item": "slotlink:request"

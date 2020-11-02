@@ -116,18 +116,15 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     ) : ExtendedScreenHandlerFactory {
 
         private val inventories = master.getInventories(masterWorld, true)
-        //private val inventories = master.getLinkedInventories(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
             val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, master, offHand)
-            //val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, offHand, masterWorld, master)
             master.watchers.add(handler)
             master.markForcedChunks()
             return handler
         }
 
         override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-            //buf.writeBlockPos(BlockPos.ORIGIN)
             buf.writeVarInt(lastSort.ordinal)
             buf.writeBoolean(offHand)
         }

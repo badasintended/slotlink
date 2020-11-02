@@ -16,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -207,3 +208,12 @@ fun drawNinePatch(
 var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
+
+typealias BlockPosList = ArrayList<BlockPos>
+
+fun BlockPosList.toTag() = mapTo(ListTag(), BlockPos::toTag)
+
+fun BlockPosList.fromTag(tag: ListTag) {
+    clear()
+    tag.mapTo(this) { (it as CompoundTag).toPos() }
+}

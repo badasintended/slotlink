@@ -6,15 +6,9 @@
     "QCQ"
   ],
   "key"    : {
-    "D": {
-      "tag": "c:diamonds"
-    },
-    "Q": {
-      "tag": "c:quartz_blocks"
-    },
-    "C": {
-      "item": "slotlink:cable"
-    }
+    "D": {"tag": "c:diamonds"},
+    "Q": {"tag": "c:quartz_blocks"},
+    "C": {"item": "slotlink:cable"}
   },
   "result" : {
     "item": "slotlink:master"

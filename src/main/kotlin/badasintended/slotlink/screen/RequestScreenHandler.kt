@@ -208,7 +208,9 @@ open class RequestScreenHandler(
 
                 val remainingStacks = player.world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
 
-                remainingStacks.forEachIndexed { i, remainingStack ->
+                var finished = false
+                for (i in remainingStacks.indices) {
+                    val remainingStack = remainingStacks[i]
                     val inputStack = input.getStack(i)
                     if (!inputStack.isEmpty) {
                         if (remainingStack.isEmpty) {
@@ -218,6 +220,8 @@ open class RequestScreenHandler(
                                 val slot = filledSlots.firstOrNull { it.stack.isItemAndTagEqual(inputStack) }
                                 if (slot == null) {
                                     inputStack.decrement(1)
+                                    finished = true
+                                    break
                                 } else {
                                     slot.first.removeStack(slot.second, 1)
                                 }
@@ -230,7 +234,7 @@ open class RequestScreenHandler(
                 result.unlockLastRecipe(player)
                 result.setStack(0, ItemStack.EMPTY)
                 onContentChanged(input)
-                if (!quickMove) break
+                if (!quickMove or finished) break
             }
             if (quickMove) {
                 insertItem(cursor, 10, 46, true)

@@ -1,0 +1,30 @@
+{
+  "values": [
+    "minecraft:chest",
+    "minecraft:trapped_chest",
+    {"id": "charm:acacia_chest", "required": false},
+    {"id": "charm:acacia_trapped_chest", "required": false},
+    {"id": "charm:birch_chest", "required": false},
+    {"id": "charm:birch_trapped_chest", "required": false},
+    {"id": "charm:crimson_chest", "required": false},
+    {"id": "charm:crimson_trapped_chest", "required": false},
+    {"id": "charm:dark_oak_chest", "required": false},
+    {"id": "charm:dark_oak_trapped_chest", "required": false},
+    {"id": "charm:jungle_chest", "required": false},
+    {"id": "charm:jungle_trapped_chest", "required": false},
+    {"id": "charm:oak_chest", "required": false},
+    {"id": "charm:oak_trapped_chest", "required": false},
+    {"id": "charm:spruce_chest", "required": false},
+    {"id": "charm:spruce_trapped_chest", "required": false},
+    {"id": "charm:warped_chest", "required": false},
+    {"id": "charm:warped_trapped_chest", "required": false},
+    {"id": "packed:oak_chest_default", "required": false},
+    {"id": "packed:spruce_chest_default", "required": false},
+    {"id": "packed:birch_chest_default", "required": false},
+    {"id": "packed:acacia_chest_default", "required": false},
+    {"id": "packed:jungle_chest_default", "required": false},
+    {"id": "packed:dark_oak_chest_default", "required": false},
+    {"id": "packed:crimson_chest_default", "required": false},
+    {"id": "packed:warped_chest_default", "required": false}
+  ]
+}

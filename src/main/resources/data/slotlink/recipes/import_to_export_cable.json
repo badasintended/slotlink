@@ -1,9 +1,7 @@
 {
   "type"       : "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "slotlink:import_cable"
-    }
+    {"item": "slotlink:import_cable"}
   ],
   "result"     : {
     "item": "slotlink:export_cable"

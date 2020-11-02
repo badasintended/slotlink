@@ -6,12 +6,8 @@
     " C "
   ],
   "key"    : {
-    "H": {
-      "tag": "c:chests"
-    },
-    "C": {
-      "item": "slotlink:cable"
-    }
+    "H": {"tag": "c:wooden_chests"},
+    "C": {"item": "slotlink:cable"}
   },
   "result" : {
     "item" : "slotlink:link_cable",
