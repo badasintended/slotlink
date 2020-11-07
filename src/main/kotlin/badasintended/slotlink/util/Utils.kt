@@ -209,11 +209,11 @@ var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
 
-typealias BlockPosList = ArrayList<BlockPos>
+typealias BlockPosSet = HashSet<BlockPos>
 
-fun BlockPosList.toTag() = mapTo(ListTag(), BlockPos::toTag)
+fun BlockPosSet.toTag() = mapTo(ListTag(), BlockPos::toTag)
 
-fun BlockPosList.fromTag(tag: ListTag) {
+fun BlockPosSet.fromTag(tag: ListTag) {
     clear()
     tag.mapTo(this) { (it as CompoundTag).toPos() }
 }

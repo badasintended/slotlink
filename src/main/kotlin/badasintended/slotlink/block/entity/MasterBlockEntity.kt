@@ -15,9 +15,9 @@ import net.minecraft.world.World
 
 class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
 
-    val linkPos = BlockPosList()
-    val importPos = BlockPosList()
-    val exportPos = BlockPosList()
+    val linkPos = BlockPosSet()
+    val importPos = BlockPosSet()
+    val exportPos = BlockPosSet()
     var watchers = hashSetOf<MasterWatcher>()
 
     private val linkCables = arrayListOf<LinkCableBlockEntity>()

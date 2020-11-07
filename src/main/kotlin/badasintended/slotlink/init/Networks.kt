@@ -25,7 +25,7 @@ object Networks : Initializer {
     val TRANSFER_SETTINGS = modId("transfer_settings")
 
     val UPDATE_VIEWED_STACK = modId("update_viewed_stack")
-    val UPDATE_MAX_SCROLL = modId("update_stack_size")
+    val UPDATE_MAX_SCROLL = modId("update_max_scroll")
     val UPDATE_CURSOR = modId("update_cursor")
 
     override fun main() {

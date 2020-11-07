@@ -5,11 +5,9 @@ import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Networks.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.*
+import me.shedaniel.rei.api.*
 import me.shedaniel.rei.api.AutoTransferHandler.Result.*
-import me.shedaniel.rei.api.EntryStack
-import me.shedaniel.rei.api.RecipeHelper
 import me.shedaniel.rei.api.plugins.REIPluginV0
-import me.shedaniel.rei.plugin.DefaultPlugin
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -22,9 +20,9 @@ class SlotlinkReiPlugin : REIPluginV0 {
     override fun getPluginIdentifier() = modId("rei")
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
-        recipeHelper.registerWorkingStations(DefaultPlugin.CRAFTING, EntryStack.create(Blocks.REQUEST))
+        recipeHelper.registerWorkingStations(BuiltinPlugin.CRAFTING, EntryStack.create(Blocks.REQUEST))
         recipeHelper.registerWorkingStations(
-            DefaultPlugin.CRAFTING,
+            BuiltinPlugin.CRAFTING,
             EntryStack.ofItems(listOf(Items.LIMITED_REMOTE, Items.UNLIMITED_REMOTE, Items.MULTI_DIM_REMOTE))
         )
 
