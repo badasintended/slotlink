@@ -1,6 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.bindGuiTexture
+import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.util.getClient
 import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory

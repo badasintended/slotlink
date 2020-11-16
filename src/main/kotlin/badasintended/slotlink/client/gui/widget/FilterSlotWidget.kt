@@ -2,7 +2,9 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.init.Networks
 import badasintended.slotlink.screen.LinkScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
+import badasintended.slotlink.util.getClient
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack

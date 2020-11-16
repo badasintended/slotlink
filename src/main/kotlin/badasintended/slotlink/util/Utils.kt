@@ -1,8 +1,8 @@
 package badasintended.slotlink.util
 
 import badasintended.slotlink.Slotlink
-import com.google.common.collect.ImmutableMap
 import io.netty.buffer.Unpooled
+import kotlin.math.min
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -29,7 +29,6 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import kotlin.math.min
 
 fun BlockPos.toTag(): CompoundTag {
     val tag = CompoundTag()
@@ -73,16 +72,11 @@ fun bbCuboid(xPos: Int, yPos: Int, zPos: Int, xSize: Int, ySize: Int, zSize: Int
     return VoxelShapes.cuboid(xMin, yMin, zMin, xMax, yMax, zMax)
 }
 
-fun BlockPos.around(): ImmutableMap<Direction, BlockPos> {
-    return ImmutableMap
-        .builder<Direction, BlockPos>()
-        .put(Direction.NORTH, north())
-        .put(Direction.SOUTH, south())
-        .put(Direction.EAST, east())
-        .put(Direction.WEST, west())
-        .put(Direction.UP, up())
-        .put(Direction.DOWN, down())
-        .build()
+fun BlockPos.around(consumer: (Direction, BlockPos) -> Unit) {
+    val mutable = mutableCopy()
+    Direction.values().forEach {
+        consumer.invoke(it, mutable.offset(it))
+    }
 }
 
 @Environment(EnvType.CLIENT)

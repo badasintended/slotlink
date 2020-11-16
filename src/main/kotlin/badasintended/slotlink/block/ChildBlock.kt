@@ -2,7 +2,9 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import net.minecraft.block.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockEntityProvider
+import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack

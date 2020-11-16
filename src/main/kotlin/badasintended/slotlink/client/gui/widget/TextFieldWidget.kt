@@ -1,6 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.bindGuiTexture
+import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.util.getClient
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.TextFieldWidget

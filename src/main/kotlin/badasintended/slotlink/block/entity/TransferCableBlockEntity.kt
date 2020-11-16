@@ -3,7 +3,10 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
-import badasintended.slotlink.util.RedstoneMode.*
+import badasintended.slotlink.util.RedstoneMode.NEGATIVE
+import badasintended.slotlink.util.RedstoneMode.OFF
+import badasintended.slotlink.util.RedstoneMode.ON
+import badasintended.slotlink.util.RedstoneMode.POSITIVE
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity

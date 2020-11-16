@@ -1,27 +1,19 @@
 {
   "itemGroup.slotlink.group"                  : "slotlink",
-
   "block.slotlink.master"                     : "网络主机",
   "block.slotlink.master.tooltip"             : "存储链接的核心。§5每个存储网络都需要一个。",
   "block.slotlink.master.use1"                : "网络(%d, %d, %d):",
   "block.slotlink.master.use2"                : "- 已链接的库存：%d",
   "block.slotlink.master.use3"                : "- 总槽位数：%d",
   "block.slotlink.master.use4"                : "- 最大可存储数量：%d",
-
   "block.slotlink.child.tooltip"              : "Needs to be connected to master block to work.",
-
   "block.slotlink.request"                    : "存储请求器",
   "block.slotlink.request.hasNoMaster"        : "你需要将它与一个网络主机相链接。",
-
   "block.slotlink.cable"                      : "线缆",
   "block.slotlink.cable.tooltipFilter"        : "空手右击以设置过滤器",
-
   "block.slotlink.link_cable"                 : "链接线缆",
-
   "block.slotlink.import_cable"               : "输入线缆",
-
   "block.slotlink.export_cable"               : "输出线缆",
-
   "container.slotlink.request"                : "存储请求器",
   "container.slotlink.request.search"         : "搜索...",
   "container.slotlink.request.search.tip1"    : "@：以标识符搜索",
@@ -37,7 +29,6 @@
   "container.slotlink.request.sort.id_desc"   : "Sort by Identifier (Descending)",
   "container.slotlink.request.sort.count"     : "Sort by Count (Ascending)",
   "container.slotlink.request.sort.count_desc": "Sort by Count (Descending)",
-
   "container.slotlink.cable"                  : "坐标(%d, %d, %d)的过滤器",
   "container.slotlink.cable.priority"         : "优先级",
   "container.slotlink.cable.priority.up"      : "Priority Up",
@@ -54,7 +45,6 @@
   "container.slotlink.cable.side.south"       : "侧面：南",
   "container.slotlink.cable.side.west"        : "侧面：西",
   "container.slotlink.cable.side.east"        : "侧面：东",
-
   "item.slotlink.remote.hasNoMaster"          : "这个远程存储访问器未与任一存储网络相链接。",
   "item.slotlink.remote.masterNotFound"       : "无法找到网络主机。",
   "item.slotlink.remote.invalidDimension"     : "这个存储网络不在一个合法的维度中，请检查你的模组。",
@@ -62,15 +52,11 @@
   "item.slotlink.remote.tooFarFromMaster"     : "你离网络主机太远了。",
   "item.slotlink.remote.info"                 : "与在%s，位置为(%d, %d, %d)的存储网络链接。",
   "item.slotlink.remote.linked"               : "成功与在%s，位置为(%d, %d, %d)的存储网络链接。",
-
   "item.slotlink.limited_remote"              : "受限远程存储访问器",
   "item.slotlink.limited_remote.tooltip"      : "可以在 512 米以内访问存储网络。",
-
   "item.slotlink.unlimited_remote"            : "无限制远程存储访问器",
   "item.slotlink.unlimited_remote.tooltip"    : "可以访问任意距离的同一维度的存储网络。",
-
   "item.slotlink.multi_dim_remote"            : "多维度远程存储访问器",
   "item.slotlink.multi_dim_remote.tooltip"    : "可以访问任意距离，任意维度的存储网路。",
-
   "item.slotlink.remote.useTooltip"           : "Use on master block while sneaking to connect to it."
 }

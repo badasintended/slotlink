@@ -3,7 +3,10 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.DoubleInventoryAccessor
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.BlockPosSet
+import badasintended.slotlink.util.MasterWatcher
+import badasintended.slotlink.util.fromTag
+import badasintended.slotlink.util.toTag
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -24,12 +27,13 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
     private val importCables = arrayListOf<ImportCableBlockEntity>()
     private val exportCables = arrayListOf<ExportCableBlockEntity>()
 
+    private val invList = arrayListOf<FilteredInventory>()
+
     private var tick = 0
     val forcedChunks = hashSetOf<Pair<Int, Int>>()
 
     fun getInventories(world: World, request: Boolean = false): List<FilteredInventory> {
-        val list = arrayListOf<FilteredInventory>()
-
+        invList.clear()
         linkCables.clear()
         linkPos.forEach { tag ->
             val blockEntity = world.getBlockEntity(tag)
@@ -42,7 +46,7 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
             val inventory = filteredInventory.inventory
             if (inventory is DoubleInventory) {
                 inventory as DoubleInventoryAccessor
-                if (list.any {
+                if (invList.any {
                         val inv = it.inventory
                         if (inv is DoubleInventory) {
                             inv.isPart(inventory.first) or inv.isPart(inventory.second)
@@ -50,10 +54,10 @@ class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
                     }
                 ) continue
             }
-            list.add(filteredInventory)
+            invList.add(filteredInventory)
         }
 
-        return list
+        return invList
     }
 
     fun unmarkForcedChunks() = world?.let { world ->

@@ -2,7 +2,11 @@
 
 package badasintended.slotlink
 
-import badasintended.slotlink.init.*
+import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.init.Blocks
+import badasintended.slotlink.init.Items
+import badasintended.slotlink.init.Networks
+import badasintended.slotlink.init.Screens
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 

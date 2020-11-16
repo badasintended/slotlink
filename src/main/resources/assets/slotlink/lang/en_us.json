@@ -1,27 +1,19 @@
 {
   "itemGroup.slotlink.group"                  : "slotlink",
-
   "block.slotlink.master"                     : "Network Master",
   "block.slotlink.master.tooltip"             : "Heart of the storage connection. §5One per connection.",
   "block.slotlink.master.use1"                : "Network (%d, %d, %d):",
   "block.slotlink.master.use2"                : "- Linked storage: %d",
   "block.slotlink.master.use3"                : "- Total slot: %d",
   "block.slotlink.master.use4"                : "- Maximum item possible: %d",
-
   "block.slotlink.child.tooltip"              : "Needs to be connected to master block to work.",
-
   "block.slotlink.request"                    : "Storage Request",
   "block.slotlink.request.hasNoMaster"        : "You need to connect it to a master block",
-
   "block.slotlink.cable"                      : "Cable",
   "block.slotlink.cable.tooltipFilter"        : "Right click with empty hand to set its filter.",
-
   "block.slotlink.link_cable"                 : "Link Cable",
-
   "block.slotlink.import_cable"               : "Import Cable",
-
   "block.slotlink.export_cable"               : "Export Cable",
-
   "container.slotlink.request"                : "Storage Request",
   "container.slotlink.request.search"         : "Search...",
   "container.slotlink.request.search.tip1"    : "@: Search via identifier",
@@ -37,7 +29,6 @@
   "container.slotlink.request.sort.id_desc"   : "Sort by Identifier (Descending)",
   "container.slotlink.request.sort.count"     : "Sort by Count (Ascending)",
   "container.slotlink.request.sort.count_desc": "Sort by Count (Descending)",
-
   "container.slotlink.cable"                  : "Filter for (%d, %d, %d)",
   "container.slotlink.cable.priority"         : "Priority",
   "container.slotlink.cable.priority.up"      : "Priority Up",
@@ -54,7 +45,6 @@
   "container.slotlink.cable.side.south"       : "Side: South",
   "container.slotlink.cable.side.west"        : "Side: West",
   "container.slotlink.cable.side.east"        : "Side: East",
-
   "item.slotlink.remote.useTooltip"           : "Use on master block while sneaking to connect to it.",
   "item.slotlink.remote.hasNoMaster"          : "This remote is not connected to any network.",
   "item.slotlink.remote.masterNotFound"       : "Unable to find master block.",
@@ -63,14 +53,10 @@
   "item.slotlink.remote.tooFarFromMaster"     : "You are too far from master block.",
   "item.slotlink.remote.info"                 : "Connected to (%d, %d, %d) in %s",
   "item.slotlink.remote.linked"               : "Successfully linked to (%d, %d, %d) in %s",
-
   "item.slotlink.limited_remote"              : "Limited Storage Remote",
   "item.slotlink.limited_remote.tooltip"      : "Remote that works from 512 meters away.",
-
   "item.slotlink.unlimited_remote"            : "Unlimited Storage Remote",
   "item.slotlink.unlimited_remote.tooltip"    : "Remote that works on any distance on same dimension",
-
   "item.slotlink.multi_dim_remote"            : "Multi Dimensional Remote",
   "item.slotlink.multi_dim_remote.tooltip"    : "Remote that works on any distance on any dimension"
-
 }

@@ -12,6 +12,9 @@ abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockE
 
     var hasMaster = false
     var masterPos: BlockPos = BlockPos.ORIGIN
+        set(value) {
+            field = value.toImmutable()
+        }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)

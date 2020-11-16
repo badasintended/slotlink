@@ -2,11 +2,18 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.toPos
+import badasintended.slotlink.util.toTag
+import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.util.NbtType
-import net.minecraft.block.*
-import net.minecraft.block.entity.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockState
+import net.minecraft.block.ChestBlock
+import net.minecraft.block.InventoryProvider
+import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.block.entity.ChestBlockEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
@@ -24,6 +31,9 @@ import net.minecraft.world.WorldAccess
 abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type), ExtendedScreenHandlerFactory {
 
     var linkedPos: BlockPos = BlockPos.ORIGIN
+        set(value) {
+            field = value.toImmutable()
+        }
 
     var priority = 0
 
@@ -35,7 +45,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     fun getInventory(world: WorldAccess, master: MasterBlockEntity? = null, request: Boolean = false): FilteredInventory {
         if (world !is World) return filtered.none
-        if (linkedPos == CompoundTag()) return filtered.none
+        if (!hasMaster) return filtered.none
 
         if (!world.isClient and (master != null) and request) {
             world as ServerWorld

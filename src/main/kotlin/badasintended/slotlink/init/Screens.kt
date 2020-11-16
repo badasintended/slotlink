@@ -1,7 +1,12 @@
 package badasintended.slotlink.init
 
-import badasintended.slotlink.client.gui.screen.*
-import badasintended.slotlink.screen.*
+import badasintended.slotlink.client.gui.screen.LinkScreen
+import badasintended.slotlink.client.gui.screen.RequestScreen
+import badasintended.slotlink.client.gui.screen.TransferScreen
+import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.RemoteScreenHandler
+import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.modId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment

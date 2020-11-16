@@ -3,7 +3,9 @@ package badasintended.slotlink.block
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.util.chat
 import badasintended.slotlink.util.toTag
-import net.minecraft.block.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockEntityProvider
+import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity

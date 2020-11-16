@@ -3,7 +3,10 @@ package badasintended.slotlink.block
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.util.around
 import badasintended.slotlink.util.bbCuboid
-import net.minecraft.block.*
+import net.minecraft.block.Block
+import net.minecraft.block.BlockState
+import net.minecraft.block.InventoryProvider
+import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
@@ -14,13 +17,17 @@ import net.minecraft.item.ItemStack
 import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.*
+import net.minecraft.util.ActionResult
+import net.minecraft.util.Formatting
+import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import net.minecraft.world.*
+import net.minecraft.world.BlockView
+import net.minecraft.world.World
+import net.minecraft.world.WorldAccess
 
 abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
 
@@ -104,7 +111,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos) {
             val neighbor = neighborState.block
             if (neighbor.isIgnored() and ((world.getBlockEntity(neighborPos) !is Inventory) and (neighbor !is InventoryProvider))) {
-                pos.around().forEach { (facingAround, posAround) ->
+                pos.around { facingAround, posAround ->
                     updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
                 }
             }

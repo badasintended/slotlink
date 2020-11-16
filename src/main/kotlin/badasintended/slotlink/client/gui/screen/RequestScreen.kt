@@ -1,12 +1,17 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.client.gui.widget.*
+import badasintended.slotlink.client.gui.widget.ButtonWidget
+import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
+import badasintended.slotlink.client.gui.widget.MultiSlotWidget
+import badasintended.slotlink.client.gui.widget.ScrollBarWidget
+import badasintended.slotlink.client.gui.widget.TextFieldWidget
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
+import badasintended.slotlink.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
@@ -47,7 +52,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         addButton(CraftingResultSlotWidget(handler, x + 112, y + viewedHeight * 18 + 36))
 
         scrollBar = addButton(ScrollBarWidget(x + 4 + 8 * 18, y, viewedHeight * 18)).apply {
-            hasKnob = { maxScroll > 1 }
+            hasKnob = { maxScroll > 0 }
             onUpdated = {
                 val scroll = (it * maxScroll + 0.5).toInt()
                 if (scroll != lastScroll) c2s(N.SCROLL, buf().writeVarInt(syncId).writeVarInt(scroll))
@@ -181,7 +186,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
-        if ((maxScroll > 1) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
+        if ((maxScroll > 0) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
             c2s(N.SCROLL, buf().writeVarInt(syncId).writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt()))
             return true

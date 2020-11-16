@@ -3,7 +3,9 @@ package badasintended.slotlink.client.gui.screen
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.init.Networks
 import badasintended.slotlink.screen.TransferScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
+import badasintended.slotlink.util.next
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerInventory

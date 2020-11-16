@@ -10,8 +10,14 @@ targetCompatibility = JavaVersion.VERSION_1_8
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 archivesBaseName = project.archives_base_name
-version = "${project.mod_version}+${project.minecraft_version}"
 group = project.maven_group
+
+def versionEnv = System.getenv("MOD_VERSION")
+if (versionEnv == null || versionEnv.isBlank()) {
+    versionEnv = "SNAPSHOT"
+}
+
+version = "${versionEnv}+${project.minecraft_version}"
 
 repositories {
     maven { url 'https://jitpack.io' }

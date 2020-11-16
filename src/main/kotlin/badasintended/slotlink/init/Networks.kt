@@ -1,10 +1,17 @@
 package badasintended.slotlink.init
 
-import badasintended.slotlink.screen.*
-import badasintended.slotlink.util.*
+import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.util.RedstoneMode
+import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.modId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.*
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
+import net.fabricmc.fabric.api.network.PacketConsumer
+import net.fabricmc.fabric.api.network.PacketContext
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction

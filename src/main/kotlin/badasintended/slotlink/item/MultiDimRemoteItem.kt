@@ -3,7 +3,10 @@ package badasintended.slotlink.item
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.screen.RemoteScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.actionBar
+import badasintended.slotlink.util.toPos
+import badasintended.slotlink.util.toTag
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
@@ -16,9 +19,13 @@ import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.*
+import net.minecraft.util.ActionResult
+import net.minecraft.util.Formatting
+import net.minecraft.util.Hand
 import net.minecraft.util.Hand.MAIN_HAND
 import net.minecraft.util.Hand.OFF_HAND
+import net.minecraft.util.Identifier
+import net.minecraft.util.TypedActionResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.RegistryKey

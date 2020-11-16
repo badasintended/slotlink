@@ -2,15 +2,21 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.init.Networks
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.buf
+import badasintended.slotlink.util.c2s
+import badasintended.slotlink.util.getClient
+import kotlin.math.ceil
+import kotlin.math.ln
+import kotlin.math.pow
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
-import net.minecraft.text.*
+import net.minecraft.text.LiteralText
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
 import net.minecraft.util.Formatting
-import kotlin.math.*
 
 /**
  * [MultiSlotWidget] is an impostor.

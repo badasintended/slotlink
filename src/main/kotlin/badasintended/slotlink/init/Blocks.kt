@@ -1,6 +1,12 @@
 package badasintended.slotlink.init
 
-import badasintended.slotlink.block.*
+import badasintended.slotlink.block.CableBlock
+import badasintended.slotlink.block.ExportCableBlock
+import badasintended.slotlink.block.ImportCableBlock
+import badasintended.slotlink.block.LinkCableBlock
+import badasintended.slotlink.block.MasterBlock
+import badasintended.slotlink.block.ModBlock
+import badasintended.slotlink.block.RequestBlock
 import badasintended.slotlink.item.ModItem
 import net.minecraft.item.BlockItem
 import net.minecraft.util.registry.Registry

@@ -1,6 +1,9 @@
 package badasintended.slotlink.init
 
-import badasintended.slotlink.item.*
+import badasintended.slotlink.item.LimitedRemoteItem
+import badasintended.slotlink.item.ModItem
+import badasintended.slotlink.item.MultiDimRemoteItem
+import badasintended.slotlink.item.UnlimitedRemoteItem
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.registry.Registry.ITEM
 

@@ -1,6 +1,8 @@
 package badasintended.slotlink.compat
 
-import badasintended.slotlink.api.*
+import badasintended.slotlink.api.Compat
+import badasintended.slotlink.api.InventoryHandler
+import badasintended.slotlink.api.SlotlinkCompatInitializer
 import badasintended.slotlink.util.isItemAndTagEqual
 import me.branchpanic.mods.stockpile.content.block.TrashCanBlock
 import me.branchpanic.mods.stockpile.content.blockentity.ItemBarrelBlockEntity
