@@ -32,7 +32,9 @@ import net.minecraft.world.WorldAccess
 abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
 
     companion object {
+
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
+
     }
 
     /**

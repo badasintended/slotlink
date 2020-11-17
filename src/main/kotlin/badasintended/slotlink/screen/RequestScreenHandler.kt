@@ -1,5 +1,9 @@
 package badasintended.slotlink.screen
 
+import java.util.Optional
+import kotlin.collections.set
+import kotlin.math.ceil
+import kotlin.math.min
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.init.Networks.UPDATE_CURSOR
@@ -16,10 +20,6 @@ import badasintended.slotlink.util.isItemAndTagEqual
 import badasintended.slotlink.util.merge
 import badasintended.slotlink.util.s2c
 import badasintended.slotlink.util.stack
-import java.util.Optional
-import kotlin.collections.set
-import kotlin.math.ceil
-import kotlin.math.min
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory

@@ -1,5 +1,6 @@
 package badasintended.slotlink.init
 
+import java.util.function.Supplier
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.block.entity.CableBlockEntity
 import badasintended.slotlink.block.entity.ExportCableBlockEntity
@@ -7,7 +8,6 @@ import badasintended.slotlink.block.entity.ImportCableBlockEntity
 import badasintended.slotlink.block.entity.LinkCableBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import java.util.function.Supplier
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.util.registry.Registry

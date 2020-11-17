@@ -1,8 +1,8 @@
 package badasintended.slotlink.util
 
+import kotlin.math.min
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
-import kotlin.math.min
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry

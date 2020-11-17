@@ -18,8 +18,10 @@ enum class Sort(
     COUNT_DESC("count_desc", { it -> it.sortByDescending { it.count } });
 
     companion object {
+
         val values = values()
         fun of(i: Int) = values[i.coerceIn(0, 5)]
+
     }
 
     fun next(): Sort {

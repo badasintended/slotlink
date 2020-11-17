@@ -10,8 +10,10 @@ enum class RedstoneMode(
     OFF("off");
 
     companion object {
+
         val values = values()
         fun of(i: Int) = values[i.coerceIn(0, 3)]
+
     }
 
     fun next(): RedstoneMode {

@@ -1,13 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
+import kotlin.math.ceil
+import kotlin.math.ln
+import kotlin.math.pow
 import badasintended.slotlink.init.Networks
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.getClient
-import kotlin.math.ceil
-import kotlin.math.ln
-import kotlin.math.pow
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen

@@ -45,14 +45,16 @@ public final class Compat implements ModInitializer {
     @ApiStatus.Internal
     @SuppressWarnings("unchecked")
     public static <T extends BlockEntity> Class<? extends BlockEntity> getRegisteredClass(@Nullable T t) {
-        if (t == null) return null;
+        if (t == null)
+            return null;
         Class<?> clazz = t.getClass();
         boolean containsKey = instance.handlers.containsKey(clazz);
 
-        if (!containsKey) do {
-            clazz = clazz.getSuperclass();
-            containsKey = instance.handlers.containsKey(clazz);
-        } while (!containsKey && clazz != BlockEntity.class);
+        if (!containsKey)
+            do {
+                clazz = clazz.getSuperclass();
+                containsKey = instance.handlers.containsKey(clazz);
+            } while (!containsKey && clazz != BlockEntity.class);
 
         if (containsKey) {
             instance.handlers.putIfAbsent(t.getClass(), instance.handlers.get(clazz));

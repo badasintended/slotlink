@@ -16,9 +16,11 @@ abstract class ModItem(id: String, settings: Settings = SETTINGS) : Item(setting
     val id = modId(id)
 
     companion object {
+
         private val GROUP = FabricItemGroupBuilder.build(modId("group")) { ItemStack(Blocks.MASTER) }
 
         val SETTINGS: Settings get() = Settings().group(GROUP)
+
     }
 
     override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {

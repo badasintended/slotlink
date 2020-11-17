@@ -22,6 +22,7 @@ import net.minecraft.world.WorldAccess
 open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlockEntity) : ChildBlock(id, be, SETTINGS) {
 
     companion object {
+
         val SETTINGS: Settings = FabricBlockSettings
             .of(Material.GLASS)
             .breakByHand(true)
@@ -54,6 +55,7 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
             UP to bbCuboid(6, 6, 6, 4, 10, 4),
             DOWN to bbCuboid(6, 0, 6, 4, 10, 4)
         )
+
     }
 
     protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
