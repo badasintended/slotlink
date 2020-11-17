@@ -9,14 +9,13 @@ import badasintended.slotlink.util.fromTag
 import badasintended.slotlink.util.toTag
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.inventory.DoubleInventory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Tickable
 import net.minecraft.world.World
 
-class MasterBlockEntity : BlockEntity(BlockEntityTypes.MASTER), Tickable {
+class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
 
     val linkPos = BlockPosSet()
     val importPos = BlockPosSet()

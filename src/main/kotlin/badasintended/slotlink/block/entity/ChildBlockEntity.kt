@@ -8,7 +8,7 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 
-abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : BlockEntity(type) {
+abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>) : ModBlockEntity(type) {
 
     var hasMaster = false
     var masterPos: BlockPos = BlockPos.ORIGIN

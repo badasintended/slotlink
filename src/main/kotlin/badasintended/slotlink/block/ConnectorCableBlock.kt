@@ -1,7 +1,6 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
-import badasintended.slotlink.util.around
 import badasintended.slotlink.util.bbCuboid
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -105,9 +104,9 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
         if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos) {
             val neighbor = neighborState.block
-            if (neighbor.isIgnored() and ((world.getBlockEntity(neighborPos) !is Inventory) and (neighbor !is InventoryProvider))) {
-                pos.around { facingAround, posAround ->
-                    updatedState = checkLink(world, pos, facingAround, updatedState, posAround)
+            if (neighbor.isIgnored() or !((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider))) {
+                properties.keys.forEach {
+                    updatedState = checkLink(world, pos, it, updatedState, pos.offset(it))
                 }
             }
         }

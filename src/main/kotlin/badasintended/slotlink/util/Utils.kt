@@ -73,13 +73,6 @@ fun bbCuboid(xPos: Int, yPos: Int, zPos: Int, xSize: Int, ySize: Int, zSize: Int
     return VoxelShapes.cuboid(xMin, yMin, zMin, xMax, yMax, zMax)
 }
 
-fun BlockPos.around(consumer: (Direction, BlockPos) -> Unit) {
-    val mutable = mutableCopy()
-    Direction.values().forEach {
-        consumer.invoke(it, mutable.offset(it))
-    }
-}
-
 @Environment(EnvType.CLIENT)
 fun Direction.texture(): Identifier {
     return modId("textures/gui/side_${asString()}.png")
@@ -215,4 +208,4 @@ fun BlockPosSet.fromTag(tag: ListTag) {
 
 fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
 
-fun PacketByteBuf.readStr() = readString(32767)
+fun PacketByteBuf.readStr(): String = readString(32767)

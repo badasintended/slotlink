@@ -7,8 +7,8 @@ import badasintended.slotlink.block.entity.ExportCableBlockEntity
 import badasintended.slotlink.block.entity.ImportCableBlockEntity
 import badasintended.slotlink.block.entity.LinkCableBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
+import badasintended.slotlink.block.entity.ModBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.util.registry.Registry
 
@@ -26,16 +26,16 @@ object BlockEntityTypes : Initializer {
     lateinit var EXPORT_CABLE: T
 
     override fun main() {
-        MASTER = r(Blocks.MASTER, ::MasterBlockEntity)
-        REQUEST = r(Blocks.REQUEST, ::RequestBlockEntity)
+        MASTER = r(B.MASTER, ::MasterBlockEntity)
+        REQUEST = r(B.REQUEST, ::RequestBlockEntity)
 
-        CABLE = r(Blocks.CABLE, ::CableBlockEntity)
-        LINK_CABLE = r(Blocks.LINK_CABLE, ::LinkCableBlockEntity)
-        IMPORT_CABLE = r(Blocks.IMPORT_CABLE, ::ImportCableBlockEntity)
-        EXPORT_CABLE = r(Blocks.EXPORT_CABLE, ::ExportCableBlockEntity)
+        CABLE = r(B.CABLE, ::CableBlockEntity)
+        LINK_CABLE = r(B.LINK_CABLE, ::LinkCableBlockEntity)
+        IMPORT_CABLE = r(B.IMPORT_CABLE, ::ImportCableBlockEntity)
+        EXPORT_CABLE = r(B.EXPORT_CABLE, ::ExportCableBlockEntity)
     }
 
-    private fun <E : BlockEntity> r(block: ModBlock, function: () -> E): BlockEntityType<E> {
+    private fun <E : ModBlockEntity> r(block: ModBlock, function: () -> E): BlockEntityType<E> {
         return Registry.register(
             Registry.BLOCK_ENTITY_TYPE, block.id, BlockEntityType.Builder.create(Supplier(function), block).build(null)
         )
