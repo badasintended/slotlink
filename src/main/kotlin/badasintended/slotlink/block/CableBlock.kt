@@ -58,10 +58,14 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
 
     }
 
+    private val voxelCache = hashMapOf<String, VoxelShape>()
+
     protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
         val block = world.getBlockState(neighborPos).block
         return block is ModBlock
     }
+
+    protected open fun center() = center
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
         builder.add(NORTH, SOUTH, EAST, WEST, UP, DOWN)
@@ -92,7 +96,11 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
     }
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        return VoxelShapes.union(center, *shapes.filter { state[it.key] }.values.toTypedArray())
+        var str = ""
+        shapes.keys.forEach { str += if (state[it]) "1" else "0" }
+        return voxelCache.computeIfAbsent(str) {
+            VoxelShapes.union(center(), *shapes.filter { state[it.key] }.values.toTypedArray())
+        }
     }
 
 }

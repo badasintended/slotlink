@@ -6,7 +6,6 @@ import badasintended.slotlink.util.bbCuboid
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.InventoryProvider
-import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
@@ -23,8 +22,6 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
-import net.minecraft.util.shape.VoxelShape
-import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
@@ -70,11 +67,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
 
     protected abstract fun Block.isIgnored(): Boolean
 
-    @Suppress("DEPRECATION")
-    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        val result = super.getOutlineShape(state, view, pos, ctx)
-        return VoxelShapes.union(result, end)
-    }
+    override fun center() = end
 
     override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
         val state = super.getPlacementState(ctx)
