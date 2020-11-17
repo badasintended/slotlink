@@ -18,6 +18,7 @@
   "container.slotlink.request.search"         : "Search...",
   "container.slotlink.request.search.tip1"    : "@: Search via identifier",
   "container.slotlink.request.search.tip2"    : "#: Search via item tag",
+  "container.slotlink.request.search.tip3"    : "You can combine it!",
   "container.slotlink.request.craft.clear"    : "Clear",
   "container.slotlink.request.move.all"       : "Move all to network",
   "container.slotlink.request.move.type"      : "Move this type to network",

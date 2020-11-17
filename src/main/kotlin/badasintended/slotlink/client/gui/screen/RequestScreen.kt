@@ -9,6 +9,8 @@ import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.util.hasMod
+import me.shedaniel.rei.api.REIHelper
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
@@ -24,6 +26,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     private val syncId get() = handler.syncId
     private val viewedHeight get() = handler.viewedHeight
     private val maxScroll get() = handler.maxScroll
+
+    private val hasRei = hasMod("roughlyenoughitems")
 
     private var sort = handler.lastSort
     private var filter = ""
@@ -120,13 +124,16 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         searchBar = addButton(TextFieldWidget(x, y + 4 + viewedHeight * 18, 144, 14, tl("search"))).apply {
             setMaxLength(50)
             placeholder = tl("search")
+            text = filter
             tooltip.add(tl("search.tip1"))
             tooltip.add(tl("search.tip2"))
+            tooltip.add(tl("search.tip3"))
             setChangedListener {
                 if (it != filter) {
                     c2s(N.SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(it))
                     scrollBar.knob = 0f
                     filter = it
+                    if (hasRei) REIHelper.getInstance().searchTextField?.text = filter
                 }
             }
         }

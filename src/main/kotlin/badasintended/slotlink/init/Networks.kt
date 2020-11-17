@@ -6,6 +6,7 @@ import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.modId
+import badasintended.slotlink.util.readStr
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -39,7 +40,7 @@ object Networks : Initializer {
         s(SORT) { context, buf ->
             val syncId = buf.readVarInt()
             val sort = Sort.of(buf.readVarInt())
-            val filter = buf.readString(32767)
+            val filter = buf.readStr()
 
             context.taskQueue.execute {
                 val handler = context.player.currentScreenHandler

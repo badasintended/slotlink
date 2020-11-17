@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.fabricmc.fabric.api.tag.TagRegistry
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
@@ -211,3 +212,7 @@ fun BlockPosSet.fromTag(tag: ListTag) {
     clear()
     tag.mapTo(this) { (it as CompoundTag).toPos() }
 }
+
+fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
+
+fun PacketByteBuf.readStr() = readString(32767)

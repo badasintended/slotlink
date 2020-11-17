@@ -123,20 +123,26 @@ open class RequestScreenHandler(
             }
         }
 
-        val trimmedFilter = filter.trim()
+        var trimmedFilter = filter.trim()
 
-        if (trimmedFilter.isNotBlank()) {
-            when (trimmedFilter.first()) {
-                '@' -> filledSlots.removeIf {
-                    !Registry.ITEM.getId(it.stack.item).toString().contains(trimmedFilter.drop(1), true)
+        while (trimmedFilter.isNotBlank()) {
+            if (trimmedFilter.first() in "@#") {
+                val nameId = trimmedFilter.indexOfFirst(Char::isWhitespace)
+                val value = if (nameId > -1) trimmedFilter.substring(1, nameId) else trimmedFilter.drop(1)
+                when (trimmedFilter.first()) {
+                    '@' -> filledSlots.removeIf {
+                        !Registry.ITEM.getId(it.stack.item).toString().contains(value, true)
+                    }
+                    '#' -> filledSlots.removeIf r@{ entry ->
+                        val tags = player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
+                        if (tags.isEmpty() and value.isBlank()) return@r false
+                        else return@r tags.none { it.toString().contains(value, true) }
+                    }
                 }
-                '#' -> filledSlots.removeIf r@{ entry ->
-                    val tag = trimmedFilter.drop(1)
-                    val tags = player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
-                    if (tags.isEmpty() and tag.isBlank()) return@r false
-                    else return@r tags.none { it.toString().contains(tag, true) }
-                }
-                else -> filledSlots.removeIf { !it.stack.name.string.contains(trimmedFilter.trim(), true) }
+                trimmedFilter = trimmedFilter.drop(1).removePrefix(value).trim()
+            } else {
+                filledSlots.removeIf { !it.stack.name.string.contains(trimmedFilter.trim(), true) }
+                trimmedFilter = ""
             }
         }
 
