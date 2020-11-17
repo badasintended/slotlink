@@ -4,7 +4,7 @@ end_of_line = crlf
 indent_size = 4
 indent_style = space
 insert_final_newline = false
-max_line_length = 120
+max_line_length = 150
 tab_width = 4
 ij_continuation_indent_size = 8
 ij_formatter_off_tag = @formatter:off
@@ -14,7 +14,6 @@ ij_smart_tabs = false
 ij_wrap_on_typing = false
 
 [*.java]
-max_line_length = 150
 ij_continuation_indent_size = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
@@ -246,7 +245,6 @@ ij_java_wrap_first_method_in_call_chain = false
 ij_java_wrap_long_lines = false
 
 [*.nbtt]
-max_line_length = 150
 ij_continuation_indent_size = 4
 ij_nbtt_keep_indents_on_empty_lines = false
 ij_nbtt_space_after_colon = true
@@ -299,7 +297,6 @@ ij_shell_redirect_followed_by_space = false
 ij_shell_switch_cases_indented = false
 
 [{*.gant,*.gradle,*.groovy,*.gy}]
-max_line_length = 150
 ij_continuation_indent_size = 4
 ij_groovy_align_group_field_declarations = false
 ij_groovy_align_multiline_array_initializer_expression = false
@@ -481,7 +478,6 @@ ij_groovy_wrap_long_lines = false
 
 [{*.har,*.json}]
 indent_size = 2
-max_line_length = 150
 tab_width = 2
 ij_continuation_indent_size = 2
 ij_json_keep_blank_lines_in_code = 1
@@ -496,7 +492,6 @@ ij_json_spaces_within_brackets = false
 ij_json_wrap_long_lines = false
 
 [{*.htm,*.html,*.sht,*.shtm,*.shtml}]
-max_line_length = 150
 ij_continuation_indent_size = 4
 ij_html_add_new_line_before_tags = body,div,p,form,h1,h2,h3
 ij_html_align_attributes = true
@@ -526,7 +521,6 @@ ij_html_text_wrap = normal
 ij_html_uniform_ident = false
 
 [{*.kt,*.kts,*.main.kts}]
-max_line_length = 150
 ij_continuation_indent_size = 4
 ij_kotlin_align_in_columns_case_branch = false
 ij_kotlin_align_multiline_binary_operation = false
@@ -606,9 +600,6 @@ ij_kotlin_while_on_new_line = false
 ij_kotlin_wrap_elvis_expressions = 1
 ij_kotlin_wrap_expression_body_functions = 0
 ij_kotlin_wrap_first_method_in_call_chain = true
-
-[{*.markdown,*.md}]
-max_line_length = 150
 
 [{*.yaml,*.yml}]
 indent_size = 2
