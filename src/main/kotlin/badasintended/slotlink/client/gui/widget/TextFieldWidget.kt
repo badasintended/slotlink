@@ -43,7 +43,7 @@ class TextFieldWidget(
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (isVisible and (button == 1)) text = ""
+        if (hovered and isVisible and (button == 1)) text = ""
         return super.mouseClicked(mouseX, mouseY, button)
     }
 
