@@ -15,6 +15,7 @@ import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.mixin.SlotAccessor
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.allEmpty
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.isItemAndTagEqual
 import badasintended.slotlink.util.merge
@@ -224,7 +225,7 @@ open class RequestScreenHandler(
         } else {
             while (true) {
                 val merged = cursor.merge(resultStack)
-                if (!merged.second.isEmpty) break
+                if (!merged.second.isEmpty or merged.allEmpty()) break
 
                 cursor = merged.first
                 resultStack.onCraft(player.world, player, resultStack.count)
@@ -244,7 +245,7 @@ open class RequestScreenHandler(
                                 if (slot == null) {
                                     inputStack.decrement(1)
                                     finished = true
-                                    break
+                                    continue
                                 } else {
                                     slot.first.removeStack(slot.second, 1)
                                 }

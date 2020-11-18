@@ -139,6 +139,8 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
     return t to f
 }
 
+fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty and second.isEmpty
+
 val guiTexture = modId("textures/gui/gui.png")
 
 @Environment(EnvType.CLIENT)
