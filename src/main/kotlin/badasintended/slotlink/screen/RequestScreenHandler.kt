@@ -15,6 +15,7 @@ import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.mixin.SlotAccessor
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.isItemAndTagEqual
@@ -501,7 +502,10 @@ open class RequestScreenHandler(
     }
 
     override fun onMasterRemoved() {
-        if (player is ServerPlayerEntity) s2c(player, CloseScreenS2CPacket(syncId))
+        if (player is ServerPlayerEntity) {
+            s2c(player, CloseScreenS2CPacket(syncId))
+            player.actionBar("container.slotlink.request.brokenMaster")
+        }
     }
 
 }
