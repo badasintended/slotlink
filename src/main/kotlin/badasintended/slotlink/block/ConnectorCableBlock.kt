@@ -34,19 +34,6 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     }
 
     /**
-     * - Checks linked block (e.g. chest) and update block state accordingly.
-     *   If the current linked block doesn't have [Inventory], update it.
-     *   Otherwise, keep it and ignore other block.
-     *
-     * - Dominant direction (from most to least):
-     *   NORTH, SOUTH, EAST, WEST, UP, DOWN.
-     *   (Based on [CableBlock.properties].)
-     *
-     * - It will connect to the most dominant direction first, and remains connected
-     *   even when more dominant direction is placed after.
-     *   **Example**: when cable already connected to WEST, it will remains
-     *   connected to WEST even when we place on SOUTH later on.
-     *
      * TODO: Optimize, maybe.
      */
     private fun checkLink(world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos): BlockState {
