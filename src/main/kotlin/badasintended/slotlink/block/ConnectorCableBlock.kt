@@ -102,7 +102,8 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     ): BlockState {
         val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
         var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
-        if (neighborPos == (world.getBlockEntity(pos) as ConnectorCableBlockEntity).linkedPos) {
+        val blockEntity = world.getBlockEntity(pos)
+        if (blockEntity is ConnectorCableBlockEntity) if (neighborPos == blockEntity.linkedPos) {
             val neighbor = neighborState.block
             if (neighbor.isIgnored() or !((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider))) {
                 properties.keys.forEach {
