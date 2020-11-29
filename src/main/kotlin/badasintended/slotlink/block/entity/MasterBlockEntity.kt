@@ -7,6 +7,7 @@ import badasintended.slotlink.util.BlockPosSet
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.fromTag
 import badasintended.slotlink.util.toTag
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.inventory.DoubleInventory
@@ -22,9 +23,9 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
     val exportPos = BlockPosSet()
     var watchers = hashSetOf<MasterWatcher>()
 
-    private val linkCables = arrayListOf<LinkCableBlockEntity>()
-    private val importCables = arrayListOf<ImportCableBlockEntity>()
-    private val exportCables = arrayListOf<ExportCableBlockEntity>()
+    private val linkCables = ObjectArrayList<LinkCableBlockEntity>()
+    private val importCables = ObjectArrayList<ImportCableBlockEntity>()
+    private val exportCables = ObjectArrayList<ExportCableBlockEntity>()
 
     private val invList = arrayListOf<FilteredInventory>()
 

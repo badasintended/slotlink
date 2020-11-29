@@ -1,7 +1,9 @@
 package badasintended.slotlink.block
 
+import java.util.function.IntFunction
 import badasintended.slotlink.block.entity.CableBlockEntity
 import badasintended.slotlink.util.bbCuboid
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
@@ -58,7 +60,7 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
 
     }
 
-    private val voxelCache = hashMapOf<String, VoxelShape>()
+    private val voxelCache = Int2ObjectOpenHashMap<VoxelShape>()
 
     protected open fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
         val block = world.getBlockState(neighborPos).block
@@ -96,11 +98,11 @@ open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlock
     }
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
-        var str = ""
-        shapes.keys.forEach { str += if (state[it]) "1" else "0" }
-        return voxelCache.computeIfAbsent(str) {
+        var key = 0
+        shapes.keys.forEach { key = (key shl 1) + if (state[it]) 1 else 0 }
+        return voxelCache.computeIfAbsent(key, IntFunction {
             VoxelShapes.union(center(), *shapes.filter { state[it.key] }.values.toTypedArray())
-        }
+        })
     }
 
 }

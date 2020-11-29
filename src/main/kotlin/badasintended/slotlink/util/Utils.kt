@@ -3,6 +3,7 @@ package badasintended.slotlink.util
 import kotlin.math.min
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -199,7 +200,7 @@ var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
 
-typealias BlockPosSet = HashSet<BlockPos>
+typealias BlockPosSet = ObjectOpenHashSet<BlockPos>
 
 fun BlockPosSet.toTag() = mapTo(ListTag(), BlockPos::toTag)
 
