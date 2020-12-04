@@ -204,7 +204,7 @@ open class RequestScreenHandler(
                         cursor = merged.second
                     }
             } else if (button == 2) {
-                cursor = viewedStacks[i].first.copy().apply { count = maxCount }
+                if (player.abilities.creativeMode and cursor.isEmpty) cursor = viewedStacks[i].first.copy().apply { count = maxCount }
             }
         } else if (button == 0) {
             cursor = moveStack(cursor)
@@ -222,7 +222,7 @@ open class RequestScreenHandler(
         val resultStack = result.getStack(0)
 
         if (button == 2) {
-            cursor = resultStack.copy().apply { count = maxCount }
+            if (player.abilities.creativeMode and cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
         } else {
             while (true) {
                 val merged = cursor.merge(resultStack)
