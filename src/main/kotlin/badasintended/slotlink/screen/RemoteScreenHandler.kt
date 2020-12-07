@@ -22,7 +22,7 @@ class RemoteScreenHandler : RequestScreenHandler {
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        inventories: List<FilteredInventory>,
+        inventories: Set<FilteredInventory>,
         lastSort: Sort,
         master: MasterBlockEntity,
         offHand: Boolean

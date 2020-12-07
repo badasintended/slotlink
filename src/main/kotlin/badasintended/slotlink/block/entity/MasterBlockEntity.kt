@@ -1,16 +1,16 @@
 package badasintended.slotlink.block.entity
 
+import java.util.SortedSet
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.mixin.DoubleInventoryAccessor
 import badasintended.slotlink.util.BlockPosSet
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.fromTag
 import badasintended.slotlink.util.toTag
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
-import net.minecraft.inventory.DoubleInventory
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Tickable
@@ -27,13 +27,13 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
     private val importCables = ObjectArrayList<ImportCableBlockEntity>()
     private val exportCables = ObjectArrayList<ExportCableBlockEntity>()
 
-    private val invList = arrayListOf<FilteredInventory>()
+    private val invSet = ObjectLinkedOpenHashSet<FilteredInventory>()
 
     private var tick = 0
     val forcedChunks = hashSetOf<Pair<Int, Int>>()
 
-    fun getInventories(world: World, request: Boolean = false): List<FilteredInventory> {
-        invList.clear()
+    fun getInventories(world: World, request: Boolean = false): SortedSet<FilteredInventory> {
+        invSet.clear()
         linkCables.clear()
         linkPos.forEach { tag ->
             val blockEntity = world.getBlockEntity(tag)
@@ -41,23 +41,9 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         }
 
         linkCables.sortByDescending { it.priority }
-        for (cable in linkCables) {
-            val filteredInventory = cable.getInventory(world, this, request)
-            val inventory = filteredInventory.inventory
-            if (inventory is DoubleInventory) {
-                inventory as DoubleInventoryAccessor
-                if (invList.any {
-                        val inv = it.inventory
-                        if (inv is DoubleInventory) {
-                            inv.isPart(inventory.first) or inv.isPart(inventory.second)
-                        } else false
-                    }
-                ) continue
-            }
-            invList.add(filteredInventory)
-        }
+        linkCables.forEach { invSet.add(it.getInventory(world, this, request)) }
 
-        return invList
+        return invSet
     }
 
     fun unmarkForcedChunks() = world?.let { world ->

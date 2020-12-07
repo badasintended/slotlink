@@ -51,7 +51,7 @@ import net.minecraft.util.registry.Registry
 open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
-    private val inventories: List<FilteredInventory>,
+    private val inventories: Set<FilteredInventory>,
     var lastSort: Sort,
 ) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, RecipeGridAligner<Ingredient> {
 
@@ -78,14 +78,14 @@ open class RequestScreenHandler(
 
     /** Client side **/
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
-        syncId, playerInventory, emptyList(), Sort.of(buf.readVarInt())
+        syncId, playerInventory, emptySet(), Sort.of(buf.readVarInt())
     )
 
     /** Server side **/
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        inventories: List<FilteredInventory>,
+        inventories: Set<FilteredInventory>,
         lastSort: Sort,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
