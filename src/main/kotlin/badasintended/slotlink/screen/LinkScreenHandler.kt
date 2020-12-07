@@ -42,6 +42,28 @@ open class LinkScreenHandler(
         filter[i] = stack to ((button == 1) and !playerInv.cursorStack.isEmpty)
     }
 
+    override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {
+        var itemStack = ItemStack.EMPTY
+        val slot = slots[index]
+        if (slot != null && slot.hasStack()) {
+            val itemStack2 = slot.stack
+            itemStack = itemStack2.copy()
+            if (!insertItem(itemStack2, 0, 36, true)) {
+                return ItemStack.EMPTY
+            }
+            if (itemStack2.isEmpty) {
+                slot.stack = ItemStack.EMPTY
+            } else {
+                slot.markDirty()
+            }
+            if (itemStack2.count == itemStack.count) {
+                return ItemStack.EMPTY
+            }
+            slot.onTakeItem(player, itemStack2)
+        }
+        return itemStack
+    }
+
     override fun close(player: PlayerEntity) {
         super.close(player)
         context.run { world, pos ->
