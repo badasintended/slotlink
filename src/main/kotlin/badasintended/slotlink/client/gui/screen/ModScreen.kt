@@ -45,4 +45,18 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
         }
     }
 
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        isDragging = false
+        val element = hoveredElement(mouseX, mouseY).filter { it.mouseReleased(mouseX, mouseY, button) }
+        if (!element.isPresent) {
+            return super.mouseReleased(mouseX, mouseY, button)
+        }
+        return true
+    }
+
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+        focused?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+    }
+
 }

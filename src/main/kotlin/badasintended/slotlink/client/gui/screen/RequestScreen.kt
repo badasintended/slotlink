@@ -178,20 +178,6 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        isDragging = false
-        val element = hoveredElement(mouseX, mouseY).filter { it.mouseReleased(mouseX, mouseY, button) }
-        if (!element.isPresent) {
-            return super.mouseReleased(mouseX, mouseY, button)
-        }
-        return true
-    }
-
-    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
-        focused?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
-    }
-
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
         if ((maxScroll > 0) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
