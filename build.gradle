@@ -38,12 +38,13 @@ dependencies {
 if (project.enable_compat.toBoolean()) {
     repositories {
         maven {
-            url = "https://www.cursemaven.com"
+            url "https://www.cursemaven.com"
+            content { includeGroup "curse.maven" }
         }
     }
 
     dependencies {
-        modCompileOnly "curse.maven:stockpile:3018405"
+        modCompileOnly "curse.maven:stockpile-299913:3018405"
     }
 }
 
