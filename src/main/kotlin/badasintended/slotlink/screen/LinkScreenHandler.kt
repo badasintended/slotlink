@@ -44,11 +44,13 @@ open class LinkScreenHandler(
 
     override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {
         var itemStack = ItemStack.EMPTY
-        val slot = slots[index]
-        if (slot != null && slot.hasStack()) {
+        val slot = slots[index] ?: return itemStack
+        if (slot.hasStack()) {
             val itemStack2 = slot.stack
             itemStack = itemStack2.copy()
-            if (!insertItem(itemStack2, 0, 36, true)) {
+            val s = if (index < 27) 27 else 0
+            val e = if (index < 27) 36 else 27
+            if (!insertItem(itemStack2, s, e, false)) {
                 return ItemStack.EMPTY
             }
             if (itemStack2.isEmpty) {
