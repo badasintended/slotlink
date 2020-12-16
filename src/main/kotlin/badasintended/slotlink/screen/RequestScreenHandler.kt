@@ -14,6 +14,7 @@ import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.mixin.SlotAccessor
+import badasintended.slotlink.util.BlockEntityWatcher
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.actionBar
@@ -54,7 +55,7 @@ open class RequestScreenHandler(
     val playerInventory: PlayerInventory,
     private val inventories: Set<FilteredInventory>,
     var lastSort: Sort,
-) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, RecipeGridAligner<Ingredient> {
+) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, BlockEntityWatcher<RequestBlockEntity>, RecipeGridAligner<Ingredient> {
 
     val player: PlayerEntity = playerInventory.player
     private val emptySlots = arrayListOf<Pair<Inventory, Int>>()
@@ -394,6 +395,13 @@ open class RequestScreenHandler(
         return stack
     }
 
+    private fun onRemoved(key: String) {
+        if (player is ServerPlayerEntity) {
+            s2c(player, CloseScreenS2CPacket(syncId))
+            player.actionBar("container.slotlink.request.$key")
+        }
+    }
+
     override fun onSlotClick(i: Int, j: Int, actionType: SlotActionType, playerEntity: PlayerEntity): ItemStack {
         if (playerEntity !is ServerPlayerEntity) return ItemStack.EMPTY
         val result = super.onSlotClick(i, j, actionType, playerEntity)
@@ -510,16 +518,14 @@ open class RequestScreenHandler(
         }
         dropInventory(player, player.world, input)
         request?.lastSort = lastSort
+        request?.watchers?.remove(this)
         request?.markDirty()
         master?.watchers?.remove(this)
         master?.unmarkForcedChunks()
     }
 
-    override fun onMasterRemoved() {
-        if (player is ServerPlayerEntity) {
-            s2c(player, CloseScreenS2CPacket(syncId))
-            player.actionBar("container.slotlink.request.brokenMaster")
-        }
-    }
+    override fun onMasterRemoved() = onRemoved("brokenMaster")
+
+    override fun onRemoved() = onRemoved("brokenSelf")
 
 }

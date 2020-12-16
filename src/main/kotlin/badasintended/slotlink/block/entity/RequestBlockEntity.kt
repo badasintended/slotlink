@@ -2,7 +2,9 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.util.BlockEntityWatcher
 import badasintended.slotlink.util.Sort
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -16,6 +18,7 @@ import net.minecraft.text.TranslatableText
 class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), ExtendedScreenHandlerFactory {
 
     var lastSort = Sort.NAME
+    val watchers = ObjectOpenHashSet<BlockEntityWatcher<RequestBlockEntity>>()
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
@@ -31,12 +34,18 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), ExtendedS
         lastSort = Sort.of(tag.getInt("lastSort"))
     }
 
+    override fun markRemoved() {
+        super.markRemoved()
+        watchers.forEach { it.onRemoved() }
+    }
+
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
         val world = getWorld() ?: return null
         if (!hasMaster) return null
         val master = world.getBlockEntity(masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
         val handler = RequestScreenHandler(syncId, inv, master.getInventories(world, true), lastSort, this, master)
+        watchers.add(handler)
         master.watchers.add(handler)
         master.markForcedChunks()
         return handler

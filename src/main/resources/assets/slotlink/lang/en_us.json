@@ -17,6 +17,7 @@
   "container.slotlink.request"                : "Storage Request",
   "container.slotlink.request.slotCount"      : "%d/%d Slots filled",
   "container.slotlink.request.brokenMaster"   : "Master block is broken",
+  "container.slotlink.request.brokenSelf"     : "Request block is broken",
   "container.slotlink.request.search"         : "Search...",
   "container.slotlink.request.search.tip1"    : "@: Search via identifier",
   "container.slotlink.request.search.tip2"    : "#: Search via item tag",
