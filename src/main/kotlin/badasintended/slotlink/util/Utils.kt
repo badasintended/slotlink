@@ -1,6 +1,8 @@
 package badasintended.slotlink.util
 
+import kotlin.math.ln
 import kotlin.math.min
+import kotlin.math.pow
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
@@ -212,3 +214,11 @@ fun BlockPosSet.fromTag(tag: ListTag) {
 fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
 
 fun PacketByteBuf.readStr(): String = readString(32767)
+
+fun Int.toFormattedString(): String = when {
+    this < 1000 -> "$this"
+    else -> {
+        val exp = (ln(this.toDouble()) / ln(1000.0)).toInt()
+        String.format("%.1f%c", this / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
+    }
+}

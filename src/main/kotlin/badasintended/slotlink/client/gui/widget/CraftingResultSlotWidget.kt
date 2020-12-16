@@ -1,12 +1,15 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.init.Networks
+import badasintended.slotlink.init.Packets
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
 
+@Environment(EnvType.CLIENT)
 class CraftingResultSlotWidget(
     private val handler: RequestScreenHandler,
     x: Int, y: Int
@@ -18,7 +21,7 @@ class CraftingResultSlotWidget(
             writeVarInt(button)
             writeBoolean(Screen.hasShiftDown())
         }
-        c2s(Networks.CRAFTING_RESULT_SLOT_CLICK, buf)
+        c2s(Packets.CRAFTING_RESULT_SLOT_CLICK, buf)
     }
 
 }

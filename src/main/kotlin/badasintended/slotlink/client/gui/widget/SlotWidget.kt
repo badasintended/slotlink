@@ -3,6 +3,8 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.util.bindGuiTexture
 import badasintended.slotlink.util.drawNinePatch
 import badasintended.slotlink.util.getClient
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
@@ -10,6 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 
+@Environment(EnvType.CLIENT)
 abstract class SlotWidget(
     x: Int, y: Int, s: Int,
     private val playerInventory: PlayerInventory,

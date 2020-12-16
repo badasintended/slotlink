@@ -1,13 +1,12 @@
 package badasintended.slotlink.client.gui.widget
 
 import kotlin.math.ceil
-import kotlin.math.ln
-import kotlin.math.pow
-import badasintended.slotlink.init.Networks
+import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.getClient
+import badasintended.slotlink.util.toFormattedString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
@@ -37,14 +36,7 @@ class MultiSlotWidget(
             val factor = window.scaleFactor.toFloat()
             val scale = (1 / factor) * ceil(factor / 2)
 
-            val countText = when {
-                count <= 1 -> ""
-                count < 1000 -> "$count"
-                else -> {
-                    val exp = (ln(count.toDouble()) / ln(1000.0)).toInt()
-                    String.format("%.1f%c", count / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
-                }
-            }
+            val countText = if (count <= 1) "" else count.toFormattedString()
 
             matrices.push()
             matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
@@ -68,7 +60,7 @@ class MultiSlotWidget(
             writeVarInt(button)
             writeBoolean(Screen.hasShiftDown())
         }
-        c2s(Networks.MULTI_SLOT_CLICK, buf)
+        c2s(Packets.MULTI_SLOT_CLICK, buf)
     }
 
 }

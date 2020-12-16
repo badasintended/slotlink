@@ -2,7 +2,7 @@ package badasintended.slotlink.client.compat
 
 import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
-import badasintended.slotlink.init.Networks.APPLY_RECIPE
+import badasintended.slotlink.init.Packets.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s

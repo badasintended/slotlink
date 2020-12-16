@@ -64,8 +64,12 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
             player.chat("")
             player.chat("$translationKey.use1", pos.x, pos.y, pos.z)
             player.chat("$translationKey.use2", inventories.size)
-            player.chat("$translationKey.use3", inventories.stream().mapToInt { it.size() }.sum())
-            player.chat("$translationKey.use4", inventories.stream().mapToInt { it.size() * it.maxCountPerStack }.sum())
+            player.chat(
+                "$translationKey.use3",
+                inventories.map { it.size() }.sum(),
+                inventories.map { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }.sum()
+            )
+            player.chat("$translationKey.use4", inventories.map { it.size() * it.maxCountPerStack }.sum())
         }
         return ActionResult.SUCCESS
     }

@@ -2,7 +2,7 @@ package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.FilterSlotWidget
-import badasintended.slotlink.init.Networks.LINK_SETTINGS
+import badasintended.slotlink.init.Packets.LINK_SETTINGS
 import badasintended.slotlink.screen.LinkScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s

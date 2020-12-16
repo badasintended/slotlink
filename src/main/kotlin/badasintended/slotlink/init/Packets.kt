@@ -17,8 +17,9 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
 
-object Networks : Initializer {
+object Packets : Initializer {
 
+    // C2S
     val RESIZE = modId("resize")
     val SORT = modId("sort")
     val SCROLL = modId("scroll")
@@ -32,6 +33,8 @@ object Networks : Initializer {
     val LINK_SETTINGS = modId("link_cable_settings")
     val TRANSFER_SETTINGS = modId("transfer_settings")
 
+    // S2C
+    val UPDATE_SLOT_NUMBERS = modId("update_slot_numbers")
     val UPDATE_VIEWED_STACK = modId("update_viewed_stack")
     val UPDATE_MAX_SCROLL = modId("update_max_scroll")
     val UPDATE_CURSOR = modId("update_cursor")
@@ -185,6 +188,20 @@ object Networks : Initializer {
 
     @Environment(EnvType.CLIENT)
     override fun client() {
+        c(UPDATE_SLOT_NUMBERS) { context, buf ->
+            val syncId = buf.readVarInt()
+            val total = buf.readVarInt()
+            val filled = buf.readVarInt()
+
+            context.taskQueue.execute {
+                val handler = context.player.currentScreenHandler
+                if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
+                    handler.totalSlotSize = total
+                    handler.filledSlotSize = filled
+                }
+            }
+        }
+
         c(UPDATE_CURSOR) { context, buf ->
             val stack = buf.readItemStack()
 

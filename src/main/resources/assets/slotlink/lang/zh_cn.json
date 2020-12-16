@@ -4,7 +4,7 @@
   "block.slotlink.master.tooltip"             : "存储链接的核心。§5每个存储网络都需要一个。",
   "block.slotlink.master.use1"                : "网络(%d, %d, %d):",
   "block.slotlink.master.use2"                : "- 已链接的库存：%d",
-  "block.slotlink.master.use3"                : "- 总槽位数：%d",
+  "block.slotlink.master.use3"                : "- 总槽位数：%d (%d empty)",
   "block.slotlink.master.use4"                : "- 最大可存储数量：%d",
   "block.slotlink.child.tooltip"              : "Needs to be connected to master block to work.",
   "block.slotlink.request"                    : "存储请求器",

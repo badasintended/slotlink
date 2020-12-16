@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.ButtonWidget
-import badasintended.slotlink.init.Networks
+import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
@@ -56,7 +56,7 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
             writeVarInt(redstone.ordinal)
             writeVarInt(side.id)
         }
-        c2s(Networks.TRANSFER_SETTINGS, buf)
+        c2s(Packets.TRANSFER_SETTINGS, buf)
     }
 
 }

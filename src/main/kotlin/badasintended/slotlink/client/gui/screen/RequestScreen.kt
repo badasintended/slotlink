@@ -4,7 +4,14 @@ import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
 import badasintended.slotlink.client.gui.widget.ScrollBarWidget
+import badasintended.slotlink.client.gui.widget.SlotCountWidget
 import badasintended.slotlink.client.gui.widget.TextFieldWidget
+import badasintended.slotlink.init.Packets.CLEAR_CRAFTING_GRID
+import badasintended.slotlink.init.Packets.MOVE
+import badasintended.slotlink.init.Packets.RESIZE
+import badasintended.slotlink.init.Packets.RESTOCK
+import badasintended.slotlink.init.Packets.SCROLL
+import badasintended.slotlink.init.Packets.SORT
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
@@ -18,7 +25,6 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 import org.lwjgl.glfw.GLFW
-import badasintended.slotlink.init.Networks as N
 
 @Environment(EnvType.CLIENT)
 class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) : ModScreen<H>(handler, inv, title) {
@@ -26,6 +32,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     private val syncId get() = handler.syncId
     private val viewedHeight get() = handler.viewedHeight
     private val maxScroll get() = handler.maxScroll
+    private val totalSlots get() = handler.totalSlotSize
+    private val filledSlots get() = handler.filledSlotSize
 
     private val hasRei = hasMod("roughlyenoughitems")
 
@@ -46,6 +54,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         playerInventoryTitleX = Int.MIN_VALUE
         playerInventoryTitleY = Int.MIN_VALUE
 
+        addButton(SlotCountWidget(x, y + titleY, backgroundWidth, this::totalSlots, this::filledSlots))
+
         val x = x + 7
         val y = y + titleY + 11
 
@@ -59,7 +69,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             hasKnob = { maxScroll > 0 }
             onUpdated = {
                 val scroll = (it * maxScroll + 0.5).toInt()
-                if (scroll != lastScroll) c2s(N.SCROLL, buf().writeVarInt(syncId).writeVarInt(scroll))
+                if (scroll != lastScroll) c2s(SCROLL, buf().writeVarInt(syncId).writeVarInt(scroll))
                 lastScroll = scroll
             }
         }
@@ -70,7 +80,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             onPressed = {
                 sort = sort.next()
                 scrollBar.knob = 0f
-                c2s(N.SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
+                c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
             }
             onHovered = { matrices, x, y ->
                 renderTooltip(matrices, tl("sort.$sort"), x, y)
@@ -82,7 +92,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 16 }
             v = { 46 }
             onPressed = {
-                c2s(N.CLEAR_CRAFTING_GRID, buf().writeVarInt(syncId))
+                c2s(CLEAR_CRAFTING_GRID, buf().writeVarInt(syncId))
             }
             onHovered = { matrices, x, y ->
                 renderTooltip(matrices, tl("craft.clear"), x, y)
@@ -94,7 +104,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 0 }
             v = { 46 }
             onPressed = {
-                c2s(N.MOVE, buf().writeVarInt(syncId))
+                c2s(MOVE, buf().writeVarInt(syncId))
             }
             onHovered = { matrices, x, y ->
                 if (playerInventory.cursorStack.isEmpty) {
@@ -110,7 +120,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 8 }
             v = { 46 }
             onPressed = {
-                c2s(N.RESTOCK, buf().writeVarInt(syncId))
+                c2s(RESTOCK, buf().writeVarInt(syncId))
             }
             onHovered = { matrices, x, y ->
                 if (playerInventory.cursorStack.isEmpty) {
@@ -130,7 +140,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             tooltip.add(tl("search.tip3"))
             setChangedListener {
                 if (it != filter) {
-                    c2s(N.SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(it))
+                    c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(it))
                     scrollBar.knob = 0f
                     filter = it
                     if (hasRei) REIHelper.getInstance().searchTextField?.text = filter
@@ -138,7 +148,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             }
         }
 
-        c2s(N.SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
+        c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
     }
 
     /**
@@ -152,7 +162,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         backgroundHeight = viewedHeight * 18 + 180
 
         handler.resize(viewedHeight)
-        c2s(N.RESIZE, buf().writeVarInt(handler.syncId).writeVarInt(viewedHeight))
+        c2s(RESIZE, buf().writeVarInt(handler.syncId).writeVarInt(viewedHeight))
 
         super.init(client, width, height)
     }
@@ -181,7 +191,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
         if ((maxScroll > 0) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
-            c2s(N.SCROLL, buf().writeVarInt(syncId).writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt()))
+            c2s(SCROLL, buf().writeVarInt(syncId).writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt()))
             return true
         }
         return super.mouseScrolled(mouseX, mouseY, amount)

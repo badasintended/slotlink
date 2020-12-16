@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.init.Networks
+import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.LinkScreenHandler
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
@@ -42,7 +42,7 @@ class FilterSlotWidget(
             writeVarInt(button)
         }
         handler.filterSlotClick(index, button)
-        c2s(Networks.FILTER_SLOT_CLICK, buf)
+        c2s(Packets.FILTER_SLOT_CLICK, buf)
     }
 
 }

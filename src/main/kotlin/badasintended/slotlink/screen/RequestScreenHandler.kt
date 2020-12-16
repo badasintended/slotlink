@@ -6,9 +6,10 @@ import kotlin.math.ceil
 import kotlin.math.min
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
-import badasintended.slotlink.init.Networks.UPDATE_CURSOR
-import badasintended.slotlink.init.Networks.UPDATE_MAX_SCROLL
-import badasintended.slotlink.init.Networks.UPDATE_VIEWED_STACK
+import badasintended.slotlink.init.Packets.UPDATE_CURSOR
+import badasintended.slotlink.init.Packets.UPDATE_MAX_SCROLL
+import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
+import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
@@ -76,6 +77,9 @@ open class RequestScreenHandler(
 
     private val cache = hashMapOf<Inventory, DefaultedList<ItemStack>>()
 
+    var totalSlotSize = 0
+    var filledSlotSize = 0
+
     /** Client side **/
     constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
         syncId, playerInventory, emptySet(), Sort.of(buf.readVarInt())
@@ -113,14 +117,18 @@ open class RequestScreenHandler(
     fun sort(sort: Sort, filter: String) {
         emptySlots.clear()
         filledSlots.clear()
+        totalSlotSize = 0
+        filledSlotSize = 0
 
         inventories.forEach { inv ->
             for (slot in 0 until inv.size()) {
+                totalSlotSize++
                 val stack = inv.getStack(slot)
                 if (stack.isEmpty) {
                     emptySlots.add(inv to slot)
                 } else {
                     filledSlots.add(inv to slot)
+                    filledSlotSize++
                 }
             }
         }
@@ -165,6 +173,12 @@ open class RequestScreenHandler(
 
         lastSort = sort
         lastFilter = filter
+
+        s2c(player, UPDATE_SLOT_NUMBERS, buf().apply {
+            writeVarInt(syncId)
+            writeVarInt(totalSlotSize)
+            writeVarInt(filledSlotSize)
+        })
     }
 
     fun scroll(amount: Int) {
