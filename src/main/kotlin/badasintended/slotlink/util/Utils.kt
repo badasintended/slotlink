@@ -8,8 +8,8 @@ import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.tag.TagRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
@@ -108,16 +108,18 @@ val log: Logger = LogManager.getLogger(Slotlink.ID)
 fun getClient(): MinecraftClient = MinecraftClient.getInstance()
 
 @Environment(EnvType.CLIENT)
-fun c2s(id: Identifier, buf: PacketByteBuf) {
-    ClientSidePacketRegistry.INSTANCE.sendToServer(id, buf)
+fun c2s(id: Identifier, buf: PacketByteBuf.() -> Unit) {
+    ClientPlayNetworking.send(id, buf().apply(buf))
 }
 
-fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf) {
-    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf)
+fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
+    player as ServerPlayerEntity
+    ServerPlayNetworking.send(player, id, buf().apply(buf))
 }
 
 fun s2c(player: PlayerEntity, packet: Packet<*>) {
-    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packet)
+    player as ServerPlayerEntity
+    ServerPlayNetworking.getSender(player).sendPacket(packet)
 }
 
 val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))

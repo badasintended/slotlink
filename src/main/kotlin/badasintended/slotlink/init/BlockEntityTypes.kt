@@ -1,6 +1,5 @@
 package badasintended.slotlink.init
 
-import java.util.function.Supplier
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.block.entity.CableBlockEntity
 import badasintended.slotlink.block.entity.ExportCableBlockEntity
@@ -11,9 +10,9 @@ import badasintended.slotlink.block.entity.ModBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.util.registry.Registry
+import badasintended.slotlink.init.Blocks as B
 
-typealias T = BlockEntityType<*>
-typealias B = Blocks
+private typealias T = BlockEntityType<*>
 
 object BlockEntityTypes : Initializer {
 
@@ -37,7 +36,7 @@ object BlockEntityTypes : Initializer {
 
     private fun <E : ModBlockEntity> r(block: ModBlock, function: () -> E): BlockEntityType<E> {
         return Registry.register(
-            Registry.BLOCK_ENTITY_TYPE, block.id, BlockEntityType.Builder.create(Supplier(function), block).build(null)
+            Registry.BLOCK_ENTITY_TYPE, block.id, BlockEntityType.Builder.create(function, block).build(null)
         )
     }
 

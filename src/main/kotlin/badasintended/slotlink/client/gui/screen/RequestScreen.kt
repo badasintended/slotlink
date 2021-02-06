@@ -13,7 +13,6 @@ import badasintended.slotlink.init.Packets.RESTOCK
 import badasintended.slotlink.init.Packets.SCROLL
 import badasintended.slotlink.init.Packets.SORT
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.drawNinePatch
 import badasintended.slotlink.util.hasMod
@@ -69,7 +68,10 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             hasKnob = { maxScroll > 0 }
             onUpdated = {
                 val scroll = (it * maxScroll + 0.5).toInt()
-                if (scroll != lastScroll) c2s(SCROLL, buf().writeVarInt(syncId).writeVarInt(scroll))
+                if (scroll != lastScroll) c2s(SCROLL) {
+                    writeVarInt(syncId)
+                    writeVarInt(scroll)
+                }
                 lastScroll = scroll
             }
         }
@@ -80,7 +82,11 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             onPressed = {
                 sort = sort.next()
                 scrollBar.knob = 0f
-                c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
+                c2s(SORT) {
+                    writeVarInt(syncId)
+                    writeVarInt(sort.ordinal)
+                    writeString(filter)
+                }
             }
             onHovered = { matrices, x, y ->
                 renderTooltip(matrices, tl("sort.$sort"), x, y)
@@ -92,7 +98,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 16 }
             v = { 46 }
             onPressed = {
-                c2s(CLEAR_CRAFTING_GRID, buf().writeVarInt(syncId))
+                c2s(CLEAR_CRAFTING_GRID) {
+                    writeVarInt(syncId)
+                }
             }
             onHovered = { matrices, x, y ->
                 renderTooltip(matrices, tl("craft.clear"), x, y)
@@ -104,7 +112,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 0 }
             v = { 46 }
             onPressed = {
-                c2s(MOVE, buf().writeVarInt(syncId))
+                c2s(MOVE) {
+                    writeVarInt(syncId)
+                }
             }
             onHovered = { matrices, x, y ->
                 if (playerInventory.cursorStack.isEmpty) {
@@ -120,7 +130,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 8 }
             v = { 46 }
             onPressed = {
-                c2s(RESTOCK, buf().writeVarInt(syncId))
+                c2s(RESTOCK) {
+                    writeVarInt(syncId)
+                }
             }
             onHovered = { matrices, x, y ->
                 if (playerInventory.cursorStack.isEmpty) {
@@ -140,7 +152,11 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             tooltip.add(tl("search.tip3"))
             setChangedListener {
                 if (it != filter) {
-                    c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(it))
+                    c2s(SORT) {
+                        writeVarInt(syncId)
+                        writeVarInt(sort.ordinal)
+                        writeString(it)
+                    }
                     scrollBar.knob = 0f
                     filter = it
                     if (hasRei) REIHelper.getInstance().searchTextField?.text = filter
@@ -148,7 +164,11 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             }
         }
 
-        c2s(SORT, buf().writeVarInt(syncId).writeVarInt(sort.ordinal).writeString(filter))
+        c2s(SORT) {
+            writeVarInt(syncId)
+            writeVarInt(sort.ordinal)
+            writeString(filter)
+        }
     }
 
     /**
@@ -162,7 +182,10 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         backgroundHeight = viewedHeight * 18 + 180
 
         handler.resize(viewedHeight)
-        c2s(RESIZE, buf().writeVarInt(handler.syncId).writeVarInt(viewedHeight))
+        c2s(RESIZE) {
+            writeVarInt(handler.syncId)
+            writeVarInt(viewedHeight)
+        }
 
         super.init(client, width, height)
     }
@@ -191,7 +214,10 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
         if ((maxScroll > 0) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
-            c2s(SCROLL, buf().writeVarInt(syncId).writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt()))
+            c2s(SCROLL) {
+                writeVarInt(syncId)
+                writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt())
+            }
             return true
         }
         return super.mouseScrolled(mouseX, mouseY, amount)

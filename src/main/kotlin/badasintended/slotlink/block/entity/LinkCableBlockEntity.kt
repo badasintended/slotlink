@@ -31,7 +31,7 @@ class LinkCableBlockEntity : ConnectorCableBlockEntity(BlockEntityTypes.LINK_CAB
         }
     }
 
-    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
+    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
         return LinkScreenHandler(syncId, inv, priority, isBlackList, filter, ScreenHandlerContext.create(world, pos))
     }
 

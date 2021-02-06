@@ -9,11 +9,15 @@ import badasintended.slotlink.util.modId
 import badasintended.slotlink.util.readStr
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.fabricmc.fabric.api.network.PacketConsumer
-import net.fabricmc.fabric.api.network.PacketContext
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.fabricmc.fabric.api.networking.v1.PacketSender
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayNetworkHandler
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
 
@@ -40,130 +44,136 @@ object Packets : Initializer {
     val UPDATE_CURSOR = modId("update_cursor")
 
     override fun main() {
-        s(SORT) { context, buf ->
+        s(SORT) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val sort = Sort.of(buf.readVarInt())
             val filter = buf.readStr()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.sort(sort, filter)
                 }
             }
         }
 
-        s(SCROLL) { context, buf ->
+        s(SCROLL) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val amount = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.scroll(amount)
                 }
             }
         }
 
-        s(MULTI_SLOT_CLICK) { context, buf ->
+        s(MULTI_SLOT_CLICK) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val index = buf.readVarInt()
             val button = buf.readVarInt()
             val quickMove = buf.readBoolean()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.multiSlotClick(index, button, quickMove)
                 }
             }
         }
 
-        s(APPLY_RECIPE) { context, buf ->
+        s(APPLY_RECIPE) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val recipeId = buf.readIdentifier()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    val recipe = context.player.world.recipeManager.get(recipeId)
+                    val recipe = player.world.recipeManager.get(recipeId)
                     if (recipe.isPresent) handler.applyRecipe(recipe.get())
                 }
             }
         }
 
-        s(CRAFTING_RESULT_SLOT_CLICK) { context, buf ->
+        s(CRAFTING_RESULT_SLOT_CLICK) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val button = buf.readVarInt()
             val quickMove = buf.readBoolean()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.craftingResultSlotClick(button, quickMove)
                 }
             }
         }
 
-        s(RESIZE) { context, buf ->
+        s(RESIZE) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val viewedHeight = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.resize(viewedHeight)
                 }
             }
         }
 
-        s(CLEAR_CRAFTING_GRID) { context, buf ->
+        s(CLEAR_CRAFTING_GRID) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
 
-            val handler = context.player.currentScreenHandler
-            if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                handler.clearCraftingGrid(true)
+            server.execute {
+                val handler = player.currentScreenHandler
+                if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
+                    handler.clearCraftingGrid(true)
+                }
             }
         }
 
-        s(MOVE) { context, buf ->
+        s(MOVE) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
 
-            val handler = context.player.currentScreenHandler
-            if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                handler.move()
+            server.execute {
+                val handler = player.currentScreenHandler
+                if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
+                    handler.move()
+                }
             }
         }
 
-        s(RESTOCK) { context, buf ->
+        s(RESTOCK) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
 
-            val handler = context.player.currentScreenHandler
-            if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                handler.restock()
+            server.execute {
+                val handler = player.currentScreenHandler
+                if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
+                    handler.restock()
+                }
             }
         }
 
-        s(FILTER_SLOT_CLICK) { context, buf ->
+        s(FILTER_SLOT_CLICK) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val index = buf.readVarInt()
             val button = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is LinkScreenHandler) {
                     handler.filterSlotClick(index, button)
                 }
             }
         }
 
-        s(LINK_SETTINGS) { context, buf ->
+        s(LINK_SETTINGS) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val priority = buf.readVarInt()
             val blacklist = buf.readBoolean()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is LinkScreenHandler) {
                     handler.priority = priority
                     handler.blacklist = blacklist
@@ -171,13 +181,13 @@ object Packets : Initializer {
             }
         }
 
-        s(TRANSFER_SETTINGS) { context, buf ->
+        s(TRANSFER_SETTINGS) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val redstone = RedstoneMode.of(buf.readVarInt())
             val side = Direction.byId(buf.readVarInt())
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            server.execute {
+                val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is TransferScreenHandler) {
                     handler.side = side
                     handler.redstone = redstone
@@ -188,13 +198,13 @@ object Packets : Initializer {
 
     @Environment(EnvType.CLIENT)
     override fun client() {
-        c(UPDATE_SLOT_NUMBERS) { context, buf ->
+        c(UPDATE_SLOT_NUMBERS) { client, _, buf, _ ->
             val syncId = buf.readVarInt()
             val total = buf.readVarInt()
             val filled = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            client.execute {
+                val handler = client.player!!.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.totalSlotSize = total
                     handler.filledSlotSize = filled
@@ -202,34 +212,34 @@ object Packets : Initializer {
             }
         }
 
-        c(UPDATE_CURSOR) { context, buf ->
+        c(UPDATE_CURSOR) { client, _, buf, _ ->
             val stack = buf.readItemStack()
 
-            context.taskQueue.execute {
-                context.player.inventory.cursorStack = stack
+            client.execute {
+                client.player!!.inventory.cursorStack = stack
             }
         }
 
-        c(UPDATE_MAX_SCROLL) { context, buf ->
+        c(UPDATE_MAX_SCROLL) { client, _, buf, _ ->
             val syncId = buf.readVarInt()
             val maxScroll = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            client.execute {
+                val handler = client.player!!.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.maxScroll = maxScroll
                 }
             }
         }
 
-        c(UPDATE_VIEWED_STACK) { context, buf ->
+        c(UPDATE_VIEWED_STACK) { client, _, buf, _ ->
             val syncId = buf.readVarInt()
             val index = buf.readVarInt()
             val stack = buf.readItemStack()
             val count = buf.readVarInt()
 
-            context.taskQueue.execute {
-                val handler = context.player.currentScreenHandler
+            client.execute {
+                val handler = client.player!!.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
                     handler.viewedStacks[index] = stack to count
                 }
@@ -237,13 +247,13 @@ object Packets : Initializer {
         }
     }
 
-    private fun s(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
-        ServerSidePacketRegistry.INSTANCE.register(id, PacketConsumer(function))
+    private fun s(id: Identifier, function: (MinecraftServer, ServerPlayerEntity, ServerPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit) {
+        ServerPlayNetworking.registerGlobalReceiver(id, function)
     }
 
     @Environment(EnvType.CLIENT)
-    private fun c(id: Identifier, function: (PacketContext, PacketByteBuf) -> Unit) {
-        ClientSidePacketRegistry.INSTANCE.register(id, PacketConsumer(function))
+    private fun c(id: Identifier, function: (MinecraftClient, ClientPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit) {
+        ClientPlayNetworking.registerGlobalReceiver(id, function)
     }
 
 }

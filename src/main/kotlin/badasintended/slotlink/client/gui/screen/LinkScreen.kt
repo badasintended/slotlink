@@ -4,7 +4,6 @@ import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.FilterSlotWidget
 import badasintended.slotlink.init.Packets.LINK_SETTINGS
 import badasintended.slotlink.screen.LinkScreenHandler
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -65,12 +64,11 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
     }
 
     protected open fun sync() {
-        val buf = buf().apply {
+        c2s(LINK_SETTINGS) {
             writeVarInt(handler.syncId)
             writeVarInt(priority)
             writeBoolean(blacklist)
         }
-        c2s(LINK_SETTINGS, buf)
     }
 
     override fun init(client: MinecraftClient, width: Int, height: Int) {

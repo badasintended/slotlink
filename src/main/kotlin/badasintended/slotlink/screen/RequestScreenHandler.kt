@@ -19,7 +19,6 @@ import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.isItemAndTagEqual
 import badasintended.slotlink.util.merge
 import badasintended.slotlink.util.s2c
@@ -175,11 +174,11 @@ open class RequestScreenHandler(
         lastSort = sort
         lastFilter = filter
 
-        s2c(player, UPDATE_SLOT_NUMBERS, buf().apply {
+        s2c(player, UPDATE_SLOT_NUMBERS) {
             writeVarInt(syncId)
             writeVarInt(totalSlotSize)
             writeVarInt(filledSlotSize)
-        })
+        }
     }
 
     fun scroll(amount: Int) {
@@ -354,7 +353,9 @@ open class RequestScreenHandler(
 
     private fun updateCursor(stack: ItemStack) {
         playerInventory.cursorStack = stack
-        s2c(player, UPDATE_CURSOR, buf().writeItemStack(stack))
+        s2c(player, UPDATE_CURSOR) {
+            writeItemStack(stack)
+        }
     }
 
     private fun moveStack(stack: ItemStack): ItemStack {
@@ -405,7 +406,9 @@ open class RequestScreenHandler(
     override fun onSlotClick(i: Int, j: Int, actionType: SlotActionType, playerEntity: PlayerEntity): ItemStack {
         if (playerEntity !is ServerPlayerEntity) return ItemStack.EMPTY
         val result = super.onSlotClick(i, j, actionType, playerEntity)
-        s2c(playerEntity, UPDATE_CURSOR, buf().writeItemStack(playerEntity.inventory.cursorStack))
+        s2c(playerEntity, UPDATE_CURSOR) {
+            writeItemStack(playerEntity.inventory.cursorStack)
+        }
         return result
     }
 
@@ -488,20 +491,22 @@ open class RequestScreenHandler(
         viewedStacks.forEachIndexed { i, after ->
             val before = trackedStacks[i]
             if (!before.first.isItemAndTagEqual(after.first) or (before.second != after.second)) {
-                val buf = buf().apply {
+                s2c(player, UPDATE_VIEWED_STACK) {
                     writeVarInt(syncId)
                     writeVarInt(i)
                     writeItemStack(after.first)
                     writeVarInt(after.second)
                 }
-                s2c(player, UPDATE_VIEWED_STACK, buf)
                 trackedStacks[i] = after.first.copy() to after.second
             }
         }
 
         val max = ceil((filledStacks.size / 8f) - viewedHeight).toInt().coerceAtLeast(0)
         if (maxScroll != max) {
-            s2c(player, UPDATE_MAX_SCROLL, buf().writeVarInt(syncId).writeVarInt(max))
+            s2c(player, UPDATE_MAX_SCROLL) {
+                writeVarInt(syncId)
+                writeVarInt(max)
+            }
             maxScroll = max
             scroll(0)
         }

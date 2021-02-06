@@ -3,7 +3,6 @@ package badasintended.slotlink.client.gui.widget
 import kotlin.math.ceil
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.getClient
 import badasintended.slotlink.util.toFormattedString
@@ -54,13 +53,12 @@ class MultiSlotWidget(
     }
 
     override fun onClick(button: Int) {
-        val buf = buf().apply {
+        c2s(Packets.MULTI_SLOT_CLICK) {
             writeVarInt(handler.syncId)
             writeVarInt(index)
             writeVarInt(button)
             writeBoolean(Screen.hasShiftDown())
         }
-        c2s(Packets.MULTI_SLOT_CLICK, buf)
     }
 
 }

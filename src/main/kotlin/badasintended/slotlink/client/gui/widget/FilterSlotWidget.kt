@@ -2,7 +2,6 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.LinkScreenHandler
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.getClient
 import net.fabricmc.api.EnvType
@@ -36,13 +35,12 @@ class FilterSlotWidget(
     }
 
     override fun onClick(button: Int) {
-        val buf = buf().apply {
+        handler.filterSlotClick(index, button)
+        c2s(Packets.FILTER_SLOT_CLICK) {
             writeVarInt(handler.syncId)
             writeVarInt(index)
             writeVarInt(button)
         }
-        handler.filterSlotClick(index, button)
-        c2s(Packets.FILTER_SLOT_CLICK, buf)
     }
 
 }

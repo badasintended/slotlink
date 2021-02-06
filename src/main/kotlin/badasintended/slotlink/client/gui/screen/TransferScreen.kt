@@ -3,7 +3,6 @@ package badasintended.slotlink.client.gui.screen
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.TransferScreenHandler
-import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.next
 import net.fabricmc.api.EnvType
@@ -51,12 +50,11 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
 
     override fun sync() {
         super.sync()
-        val buf = buf().apply {
+        c2s(Packets.TRANSFER_SETTINGS) {
             writeVarInt(handler.syncId)
             writeVarInt(redstone.ordinal)
             writeVarInt(side.id)
         }
-        c2s(Packets.TRANSFER_SETTINGS, buf)
     }
 
 }
