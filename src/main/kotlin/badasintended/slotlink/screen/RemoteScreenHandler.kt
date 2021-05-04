@@ -38,12 +38,14 @@ class RemoteScreenHandler : RequestScreenHandler {
         super.resize(viewedHeight)
 
         if (!offHand) if (playerInventory.mainHandStack.item is MultiDimRemoteItem) playerInventory.apply {
-            slots[37 + selectedSlot] = object : Slot(this, selectedSlot, -999999, -999999) {
-                override fun canInsert(stack: ItemStack) = false
-                override fun canTakeItems(playerEntity: PlayerEntity) = false
+            slots.forEachIndexed { i, slot ->
+                if (slot.stack == mainHandStack) slots[i] = object : Slot(this, selectedSlot, -999999, -999999) {
+                    override fun canInsert(stack: ItemStack) = false
+                    override fun canTakeItems(playerEntity: PlayerEntity) = false
 
-                @Environment(EnvType.CLIENT)
-                override fun doDrawHoveringEffect() = false
+                    @Environment(EnvType.CLIENT)
+                    override fun doDrawHoveringEffect() = false
+                }
             }
         }
     }
