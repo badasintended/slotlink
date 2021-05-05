@@ -20,6 +20,7 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
     abstract val baseTlKey: String
 
     private var clickedElement: Element? = null
+    var hoveredElement: Element? = null
 
     fun tl(key: String, vararg args: Any) = TranslatableText("$baseTlKey.$key", *args)
 
@@ -29,10 +30,8 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
         if (playerInventory.cursorStack.isEmpty && focusedSlot != null && focusedSlot!!.hasStack()) {
             this.renderTooltip(matrices, focusedSlot!!.stack, mouseX, mouseY)
         } else {
-            val hovered = hoveredElement(mouseX.toDouble(), mouseY.toDouble())
-            if (hovered.isPresent) {
-                (hovered.get() as? AbstractButtonWidget)?.renderToolTip(matrices, mouseX, mouseY)
-            }
+            hoveredElement = hoveredElement(mouseX.toDouble(), mouseY.toDouble()).orElse(null)
+            (hoveredElement as? AbstractButtonWidget)?.renderToolTip(matrices, mouseX, mouseY)
         }
     }
 

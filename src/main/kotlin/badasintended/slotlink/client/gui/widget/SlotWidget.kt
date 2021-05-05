@@ -19,6 +19,8 @@ abstract class SlotWidget(
     private val stackGetter: () -> ItemStack
 ) : AbstractButtonWidget(x, y, s, s, LiteralText.EMPTY) {
 
+    val stack get() = stackGetter.invoke()
+
     private val stackX = x - 8 + width / 2
     private val stackY = y - 8 + height / 2
 
@@ -38,8 +40,6 @@ abstract class SlotWidget(
 
         drawNinePatch(matrices, x, y, width, height, 16f, 0f, 1, 14)
 
-        val stack = stackGetter.invoke()
-
         client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
         renderOverlay(matrices, stack)
     }
@@ -50,8 +50,6 @@ abstract class SlotWidget(
         val x = stackX
         val y = stackY
         fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
-
-        val stack = stackGetter.invoke()
 
         client.apply {
             if (playerInventory.cursorStack.isEmpty and !stack.isEmpty) {

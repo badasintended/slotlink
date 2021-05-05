@@ -1,6 +1,8 @@
 package badasintended.slotlink.client.compat
 
+import badasintended.slotlink.client.gui.screen.RequestScreen
 import badasintended.slotlink.client.gui.screen.reiSearchHandler
+import badasintended.slotlink.client.gui.widget.MultiSlotWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
@@ -18,6 +20,7 @@ import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.recipe.RecipeType
+import net.minecraft.util.TypedActionResult
 
 @Environment(EnvType.CLIENT)
 class SlotlinkReiPlugin : REIPluginV0 {
@@ -51,6 +54,16 @@ class SlotlinkReiPlugin : REIPluginV0 {
         }
 
         reiSearchHandler = { REIHelper.getInstance().searchTextField?.text = it }
+
+        recipeHelper.registerFocusedStackProvider r@{ screen ->
+            if (screen is RequestScreen<*>) {
+                val element = screen.hoveredElement
+                if (element is MultiSlotWidget) {
+                    return@r TypedActionResult.success(EntryStack.create(element.stack))
+                }
+            }
+            TypedActionResult.fail(EntryStack.empty())
+        }
     }
 
 }
