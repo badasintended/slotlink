@@ -1,6 +1,5 @@
 package badasintended.slotlink.block.entity
 
-import java.util.SortedSet
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.util.BlockPosSet
@@ -9,6 +8,7 @@ import badasintended.slotlink.util.fromTag
 import badasintended.slotlink.util.toTag
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
+import java.util.SortedSet
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.nbt.CompoundTag

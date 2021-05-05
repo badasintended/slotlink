@@ -3,6 +3,9 @@ package badasintended.slotlink.util
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
+import kotlin.math.ln
+import kotlin.math.min
+import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.tag.TagRegistry
 import net.fabricmc.loader.api.FabricLoader
@@ -24,9 +27,6 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import kotlin.math.ln
-import kotlin.math.min
-import kotlin.math.pow
 
 fun BlockPos.toTag(): CompoundTag {
     val tag = CompoundTag()

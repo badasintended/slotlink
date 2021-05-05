@@ -11,7 +11,19 @@ import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.mixin.SlotAccessor
 import badasintended.slotlink.screen.slot.DisabledSlot
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.BlockEntityWatcher
+import badasintended.slotlink.util.MasterWatcher
+import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.actionBar
+import badasintended.slotlink.util.allEmpty
+import badasintended.slotlink.util.isItemAndTagEqual
+import badasintended.slotlink.util.merge
+import badasintended.slotlink.util.s2c
+import badasintended.slotlink.util.stack
+import java.util.Optional
+import kotlin.collections.set
+import kotlin.math.ceil
+import kotlin.math.min
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
@@ -20,7 +32,11 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.*
+import net.minecraft.recipe.CraftingRecipe
+import net.minecraft.recipe.Ingredient
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeGridAligner
+import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
@@ -31,10 +47,6 @@ import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
-import java.util.*
-import kotlin.collections.set
-import kotlin.math.ceil
-import kotlin.math.min
 
 @Suppress("LeakingThis")
 open class RequestScreenHandler(

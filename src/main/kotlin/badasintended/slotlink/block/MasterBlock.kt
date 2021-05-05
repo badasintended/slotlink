@@ -35,7 +35,14 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
     }
 
     @Suppress("DEPRECATION")
-    override fun neighborUpdate(state: BlockState, world: World, pos: BlockPos, block: Block, neighborPos: BlockPos, moved: Boolean) {
+    override fun neighborUpdate(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        block: Block,
+        neighborPos: BlockPos,
+        moved: Boolean
+    ) {
         super.neighborUpdate(state, world, pos, block, neighborPos, moved)
 
         val neighborState = world.getBlockState(neighborPos)
@@ -56,7 +63,14 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
         }
     }
 
-    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+    override fun onUse(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        player: PlayerEntity,
+        hand: Hand,
+        hit: BlockHitResult
+    ): ActionResult {
         if (!world.isClient) {
             val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
             val inventories = blockEntity.getInventories(world, true)

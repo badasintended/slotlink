@@ -1,9 +1,9 @@
 package badasintended.slotlink.block
 
-import java.util.function.IntFunction
 import badasintended.slotlink.block.entity.CableBlockEntity
 import badasintended.slotlink.util.bbCuboid
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import java.util.function.IntFunction
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block

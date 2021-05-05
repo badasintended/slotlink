@@ -34,7 +34,18 @@ fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Floa
     drawNinePatch(matrices, x, y, w, h, u, v, ltrb, cm, ltrb)
 }
 
-fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Float, v: Float, lt: Int, cm: Int, rb: Int) {
+fun drawNinePatch(
+    matrices: MatrixStack,
+    x: Int,
+    y: Int,
+    w: Int,
+    h: Int,
+    u: Float,
+    v: Float,
+    lt: Int,
+    cm: Int,
+    rb: Int
+) {
     drawNinePatch(matrices, x, y, w, h, u, v, lt, cm, rb, lt, cm, rb)
 }
 

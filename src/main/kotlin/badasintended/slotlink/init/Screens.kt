@@ -52,7 +52,10 @@ object Screens : Initializer {
     }
 
     @Environment(EnvType.CLIENT)
-    private fun <H : ScreenHandler, S : HandledScreen<H>> s(type: ScreenHandlerType<H>, function: (H, PlayerInventory, Text) -> S) {
+    private fun <H : ScreenHandler, S : HandledScreen<H>> s(
+        type: ScreenHandlerType<H>,
+        function: (H, PlayerInventory, Text) -> S
+    ) {
         ScreenRegistry.register(type, ScreenRegistry.Factory(function))
     }
 

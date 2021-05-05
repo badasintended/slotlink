@@ -5,6 +5,7 @@ import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.toFormattedString
+import kotlin.math.ceil
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
@@ -14,7 +15,6 @@ import net.minecraft.text.LiteralText
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
-import kotlin.math.ceil
 
 /**
  * [MultiSlotWidget] is an impostor.

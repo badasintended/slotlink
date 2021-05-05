@@ -36,7 +36,13 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     /**
      * TODO: Optimize, maybe.
      */
-    private fun checkLink(world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos): BlockState {
+    private fun checkLink(
+        world: WorldAccess,
+        pos: BlockPos,
+        facing: Direction,
+        state: BlockState,
+        neighborPos: BlockPos
+    ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (!neighbor.isIgnored()) {
             if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
@@ -101,12 +107,24 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return updatedState
     }
 
-    override fun appendTooltip(stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+    override fun appendTooltip(
+        stack: ItemStack,
+        world: BlockView?,
+        tooltip: MutableList<Text>,
+        options: TooltipContext
+    ) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
     }
 
-    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+    override fun onUse(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        player: PlayerEntity,
+        hand: Hand,
+        hit: BlockHitResult
+    ): ActionResult {
         if (player.mainHandStack.isEmpty) {
             player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
             return ActionResult.SUCCESS
@@ -114,7 +132,11 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return ActionResult.PASS
     }
 
-    override fun createScreenHandlerFactory(state: BlockState, world: World, pos: BlockPos): NamedScreenHandlerFactory? {
+    override fun createScreenHandlerFactory(
+        state: BlockState,
+        world: World,
+        pos: BlockPos
+    ): NamedScreenHandlerFactory? {
         val blockEntity = world.getBlockEntity(pos) ?: return null
         if (blockEntity !is ConnectorCableBlockEntity) return null
         return blockEntity

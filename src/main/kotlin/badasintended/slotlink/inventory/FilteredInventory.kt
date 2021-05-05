@@ -93,7 +93,8 @@ class FilteredInventory(
 
     override fun getStack(slot: Int): ItemStack = inventory?.getStack(slot) ?: ItemStack.EMPTY
 
-    override fun removeStack(slot: Int, amount: Int): ItemStack = inventory?.removeStack(slot, amount) ?: ItemStack.EMPTY
+    override fun removeStack(slot: Int, amount: Int): ItemStack =
+        inventory?.removeStack(slot, amount) ?: ItemStack.EMPTY
 
     override fun removeStack(slot: Int): ItemStack = inventory?.removeStack(slot) ?: ItemStack.EMPTY
 

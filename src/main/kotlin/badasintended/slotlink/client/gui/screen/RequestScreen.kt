@@ -27,7 +27,8 @@ import org.lwjgl.glfw.GLFW
 var reiSearchHandler: ((String) -> Unit)? = null
 
 @Environment(EnvType.CLIENT)
-class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) : ModScreen<H>(handler, inv, title) {
+class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) :
+    ModScreen<H>(handler, inv, title) {
 
     private val syncId get() = handler.syncId
     private val viewedHeight get() = handler.viewedHeight

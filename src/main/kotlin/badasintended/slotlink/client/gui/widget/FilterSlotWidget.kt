@@ -28,7 +28,13 @@ class FilterSlotWidget(
             matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
             fill(matrices, x + 1, y + 1, x + 17, y + 17, if (nbt) 0x70aa27ba else 0x408b8b8b)
             if (nbt) {
-                textRenderer.drawWithShadow(matrices, "+", x + 17f - textRenderer.getWidth("+"), y + 17f - textRenderer.fontHeight, 0xaa27ba)
+                textRenderer.drawWithShadow(
+                    matrices,
+                    "+",
+                    x + 17f - textRenderer.getWidth("+"),
+                    y + 17f - textRenderer.fontHeight,
+                    0xaa27ba
+                )
             }
             matrices.pop()
         }

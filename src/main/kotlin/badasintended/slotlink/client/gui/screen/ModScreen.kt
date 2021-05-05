@@ -14,7 +14,8 @@ import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 
 @Environment(EnvType.CLIENT)
-abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, title: Text) : HandledScreen<H>(h, inventory, title) {
+abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
+    HandledScreen<H>(h, inventory, title) {
 
     abstract val baseTlKey: String
 
