@@ -20,6 +20,16 @@ if (versionEnv == null || versionEnv.isBlank()) {
 
 version = "${versionEnv}+${project.minecraft_version}"
 
+sourceSets {
+    dev {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
+
+tasks.runClient.classpath sourceSets.dev.runtimeClasspath
+tasks.runServer.classpath sourceSets.dev.runtimeClasspath
+
 repositories {
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases" }
@@ -37,6 +47,8 @@ dependencies {
     modImplementation "me.shedaniel:RoughlyEnoughItems:${project.rei}"
 
     modRuntime "com.terraformersmc:modmenu:${project.modmenu}"
+
+    devImplementation sourceSets.main.output
 }
 
 if (project.enable_compat.toBoolean()) {

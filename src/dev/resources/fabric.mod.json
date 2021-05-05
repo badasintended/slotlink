@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id"           : "slotlink_dev",
+  "version"      : "1",
+  "entrypoints"  : {
+    "main": [
+      {"adapter": "kotlin", "value": "badasintended.slotlink.dev.SlotlinkDev::main"}
+    ]
+  }
+}
