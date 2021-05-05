@@ -27,7 +27,7 @@ class SlotCountWidget(
     }
 
     override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        if ((textX < mouseX) and (mouseX < x + width - 7)) client.currentScreen?.apply {
+        if (textX < mouseX && mouseX < x + width - 7) client.currentScreen?.apply {
             renderTooltip(matrices, TranslatableText("container.slotlink.request.slotCount", filled.invoke(), total.invoke()), mouseX, mouseY)
         }
     }

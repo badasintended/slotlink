@@ -45,9 +45,9 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (!neighbor.isIgnored()) {
-            if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
+            if ((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider)) {
                 val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getInventory(world).isNull) or (blockEntity.linkedPos == neighborPos)) {
+                if ((blockEntity.getInventory(world).isNull) || (blockEntity.linkedPos == neighborPos)) {
                     blockEntity.linkedPos = neighborPos
                     blockEntity.markDirty()
                     return state.with(properties[facing], true)
@@ -67,7 +67,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         val face = ctx.side.opposite
         val pos = ctx.blockPos.offset(face)
         val block = world.getBlockState(pos).block
-        return if (!block.isIgnored() and ((world.getBlockEntity(pos) is Inventory) or (block is InventoryProvider))) {
+        return if (!block.isIgnored() && (world.getBlockEntity(pos) is Inventory || block is InventoryProvider)) {
             state?.with(properties[face], true)
         } else {
             state
@@ -98,7 +98,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         val blockEntity = world.getBlockEntity(pos)
         if (blockEntity is ConnectorCableBlockEntity) if (neighborPos == blockEntity.linkedPos) {
             val neighbor = neighborState.block
-            if (neighbor.isIgnored() or !((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider))) {
+            if (neighbor.isIgnored() || !((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider))) {
                 properties.keys.forEach {
                     updatedState = checkLink(world, pos, it, updatedState, pos.offset(it))
                 }

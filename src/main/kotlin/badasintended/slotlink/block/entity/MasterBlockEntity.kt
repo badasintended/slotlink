@@ -47,7 +47,7 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
     }
 
     fun unmarkForcedChunks() = world?.let { world ->
-        if (!world.isClient and watchers.isEmpty()) {
+        if (!world.isClient && watchers.isEmpty()) {
             world as ServerWorld
             forcedChunks.forEach {
                 world.setChunkForced(it.first, it.second, false)
@@ -57,7 +57,7 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
     }
 
     fun markForcedChunks() = world?.let { world ->
-        if (!world.isClient and watchers.isNotEmpty()) {
+        if (!world.isClient && watchers.isNotEmpty()) {
             world as ServerWorld
             forcedChunks.forEach {
                 world.setChunkForced(it.first, it.second, true)
@@ -69,7 +69,7 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         linkPos.removeIf r@{
             val be = world.getBlockEntity(it)
             if (be is LinkCableBlockEntity) {
-                if (be.hasMaster and (be.masterPos == pos)) {
+                if (be.hasMaster && be.masterPos == pos) {
                     return@r false
                 }
             }
@@ -79,7 +79,7 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         importPos.removeIf r@{
             val be = world.getBlockEntity(it)
             if (be is ImportCableBlockEntity) {
-                if (be.hasMaster and (be.masterPos == pos)) {
+                if (be.hasMaster && be.masterPos == pos) {
                     return@r false
                 }
             }
@@ -89,7 +89,7 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         exportPos.removeIf r@{
             val be = world.getBlockEntity(it)
             if (be is ExportCableBlockEntity) {
-                if (be.hasMaster and (be.masterPos == pos)) {
+                if (be.hasMaster && be.masterPos == pos) {
                     return@r false
                 }
             }

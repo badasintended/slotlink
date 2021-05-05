@@ -52,7 +52,7 @@ abstract class SlotWidget(
         fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
 
         client.apply {
-            if (playerInventory.cursorStack.isEmpty and !stack.isEmpty) {
+            if (playerInventory.cursorStack.isEmpty && !stack.isEmpty) {
                 val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
                 appendTooltip(tooltips)
                 currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
@@ -62,7 +62,7 @@ abstract class SlotWidget(
     }
 
     final override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (hovered and visible) {
+        if (hovered && visible) {
             onClick(button)
             return true
         }

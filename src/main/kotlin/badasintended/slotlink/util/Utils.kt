@@ -106,7 +106,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
 val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
-    return ItemStack.areTagsEqual(this, other) and ItemStack.areItemsEqual(this, other)
+    return ItemStack.areTagsEqual(this, other) && ItemStack.areItemsEqual(this, other)
 }
 
 fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
@@ -114,7 +114,7 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
     val t = this.copy()
 
     if (isEmpty) return f to ItemStack.EMPTY
-    if (!isItemAndTagEqual(f) or (count >= maxCount) or f.isEmpty) return t to f
+    if (!isItemAndTagEqual(f) || count >= maxCount || f.isEmpty) return t to f
 
     val max = (maxCount - count).coerceAtLeast(0)
     val added = min(max, f.count)
@@ -125,7 +125,7 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
     return t to f
 }
 
-fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty and second.isEmpty
+fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty && second.isEmpty
 
 var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)

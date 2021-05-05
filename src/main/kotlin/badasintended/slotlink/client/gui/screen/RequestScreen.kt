@@ -255,7 +255,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
-        if ((maxScroll > 0) and (mouseX >= (x + 7)) and (mouseX < (x + 169)) and (mouseY >= (y + 17)) and (mouseY < (y + 17 + viewedHeight * 18))) {
+        if (maxScroll > 0 && mouseX >= x + 7 && mouseX < x + 169 && mouseY >= y + 17 && mouseY < y + 17 + viewedHeight * 18) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
             c2s(SCROLL) {
                 writeVarInt(syncId)

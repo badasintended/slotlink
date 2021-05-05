@@ -35,7 +35,7 @@ class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         clicked = hasKnob.invoke()
-        return visible and isMouseOver(mouseX, mouseY)
+        return visible && isMouseOver(mouseX, mouseY)
     }
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
@@ -43,7 +43,7 @@ class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h
             knob = 1.0f - ((y + height - mouseY).toFloat() / height).coerceIn(0f, 1f)
             onUpdated.invoke(knob)
         }
-        return visible and isMouseOver(mouseX, mouseY)
+        return visible && isMouseOver(mouseX, mouseY)
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {

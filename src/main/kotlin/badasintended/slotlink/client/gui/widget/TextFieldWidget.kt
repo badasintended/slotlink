@@ -33,17 +33,17 @@ class TextFieldWidget(
 
         drawNinePatch(matrices, bgX, bgY, bgW, bgH, 16f, 0f, 1, 14)
 
-        if (text.isBlank() and !isActive) drawTextWithShadow(matrices, client.textRenderer, placeholder, x, y, 0xffffff)
+        if (text.isBlank() && !isActive) drawTextWithShadow(matrices, client.textRenderer, placeholder, x, y, 0xffffff)
 
         super.renderButton(matrices, mouseX, mouseY, delta)
     }
 
     override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        if (visible and !isActive) client.currentScreen?.renderTooltip(matrices, tooltip, mouseX, mouseY)
+        if (visible && !isActive) client.currentScreen?.renderTooltip(matrices, tooltip, mouseX, mouseY)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (hovered and isVisible and (button == 1)) text = ""
+        if (hovered && isVisible && button == 1) text = ""
         return super.mouseClicked(mouseX, mouseY, button)
     }
 

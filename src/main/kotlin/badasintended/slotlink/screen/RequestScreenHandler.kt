@@ -144,7 +144,7 @@ open class RequestScreenHandler(
                     }
                     '#' -> filledSlots.removeIf r@{ entry ->
                         val tags = player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
-                        if (tags.isEmpty() and value.isBlank()) return@r false
+                        if (tags.isEmpty() && value.isBlank()) return@r false
                         else return@r tags.none { it.toString().contains(value, true) }
                     }
                 }
@@ -168,7 +168,7 @@ open class RequestScreenHandler(
 
         sort.sorter.invoke(filledStacks)
 
-        if ((lastSort != sort) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
+        if (lastSort != sort || lastFilter != filter) scroll(0) else scroll(lastScroll)
 
         lastSort = sort
         lastFilter = filter
@@ -197,7 +197,7 @@ open class RequestScreenHandler(
     fun multiSlotClick(i: Int, button: Int, quickMove: Boolean) {
         var cursor = playerInventory.cursorStack
         if (cursor.isEmpty) {
-            if ((button == 0) or (button == 1)) {
+            if (button == 0 || button == 1) {
                 val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(viewedStacks[i].first) }
                 pairs.forEach {
                     if (cursor.count < cursor.maxCount) {
@@ -207,7 +207,7 @@ open class RequestScreenHandler(
                     }
                 }
                 if (quickMove) slots
-                    .filter { (it.inventory is PlayerInventory) and it.canInsert(cursor) }
+                    .filter { (it.inventory is PlayerInventory) && it.canInsert(cursor) }
                     .sortedBy { (it as SlotAccessor).index }
                     .sortedByDescending { it.stack.count }
                     .forEach {
@@ -217,7 +217,7 @@ open class RequestScreenHandler(
                         cursor = merged.second
                     }
             } else if (button == 2) {
-                if (player.abilities.creativeMode and cursor.isEmpty) cursor = viewedStacks[i].first.copy().apply { count = maxCount }
+                if (player.abilities.creativeMode && cursor.isEmpty) cursor = viewedStacks[i].first.copy().apply { count = maxCount }
             }
         } else if (button == 0) {
             cursor = moveStack(cursor)
@@ -235,11 +235,11 @@ open class RequestScreenHandler(
         val resultStack = result.getStack(0)
 
         if (button == 2) {
-            if (player.abilities.creativeMode and cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
+            if (player.abilities.creativeMode && cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
         } else {
             while (true) {
                 val merged = cursor.merge(resultStack)
-                if (!merged.second.isEmpty or merged.allEmpty()) break
+                if (!merged.second.isEmpty || merged.allEmpty()) break
 
                 cursor = merged.first
                 resultStack.onCraft(player.world, player, resultStack.count)
@@ -272,7 +272,7 @@ open class RequestScreenHandler(
                 result.unlockLastRecipe(player)
                 result.setStack(0, ItemStack.EMPTY)
                 onContentChanged(input)
-                if (!quickMove or finished) break
+                if (!quickMove || finished) break
             }
             if (quickMove) {
                 insertItem(cursor, 10, 46, true)
@@ -304,7 +304,7 @@ open class RequestScreenHandler(
     fun move() {
         var cursor = playerInventory.cursorStack
         slots
-            .filter { (it.inventory is PlayerInventory) and it.canTakeItems(player) and if (cursor.isEmpty) true else cursor.isItemEqual(it.stack) }
+            .filter { (it.inventory is PlayerInventory) && it.canTakeItems(player) && if (cursor.isEmpty) true else cursor.isItemEqual(it.stack) }
             .forEach { it.stack = moveStack(it.stack) }
 
         if (!cursor.isEmpty) {
@@ -361,7 +361,7 @@ open class RequestScreenHandler(
     private fun moveStack(stack: ItemStack): ItemStack {
         if (stack.isEmpty) return stack
         var result = stack
-        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(result) and (it.stack.count < it.stack.maxCount) }
+        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(result) && it.stack.count < it.stack.maxCount }
         pairs.forEach {
             val merged = it.stack.merge(result)
             if (it.first.isValid(it.second, merged.first)) {
@@ -369,7 +369,7 @@ open class RequestScreenHandler(
                 result = merged.second
             }
         }
-        if (!result.isEmpty or pairs.isEmpty()) {
+        if (!result.isEmpty || pairs.isEmpty()) {
             val pair = emptySlots.firstOrNull { it.first.isValid(it.second, result) }
             if (pair != null) {
                 pair.stack = result
@@ -440,7 +440,7 @@ open class RequestScreenHandler(
         val pair = filledSlots.firstOrNull { ingredient.test(it.stack) }
         val stack = if (pair == null) {
             slots
-                .firstOrNull { (it.inventory is PlayerInventory) and it.canTakeItems(player) and (ingredient.test(it.stack)) }
+                .firstOrNull { it.inventory is PlayerInventory && it.canTakeItems(player) && ingredient.test(it.stack) }
                 ?.takeStack(1) ?: return
         } else {
             pair.first.removeStack(pair.second, 1)
@@ -479,7 +479,7 @@ open class RequestScreenHandler(
             for (i in 0 until inventory.size()) {
                 val before = stacks[i]
                 val after = inventory.getStack(i)
-                if (!before.isItemAndTagEqual(after) or (before.count != after.count)) {
+                if (!before.isItemAndTagEqual(after) || before.count != after.count) {
                     resort = true
                     stacks[i] = after.copy()
                 }
@@ -490,7 +490,7 @@ open class RequestScreenHandler(
 
         viewedStacks.forEachIndexed { i, after ->
             val before = trackedStacks[i]
-            if (!before.first.isItemAndTagEqual(after.first) or (before.second != after.second)) {
+            if (!before.first.isItemAndTagEqual(after.first) || before.second != after.second) {
                 s2c(player, UPDATE_VIEWED_STACK) {
                     writeVarInt(syncId)
                     writeVarInt(i)

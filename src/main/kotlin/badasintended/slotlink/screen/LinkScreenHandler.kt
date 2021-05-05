@@ -39,7 +39,7 @@ open class LinkScreenHandler(
         if (button !in 0..1) return
         val stack = playerInv.cursorStack.copy().apply { count = 1 }
         if (button != 1) stack.tag = null
-        filter[i] = stack to ((button == 1) and !playerInv.cursorStack.isEmpty)
+        filter[i] = stack to (button == 1 && !playerInv.cursorStack.isEmpty)
     }
 
     override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {

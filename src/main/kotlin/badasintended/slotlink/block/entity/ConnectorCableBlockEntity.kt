@@ -47,11 +47,11 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         if (world !is World) return filtered.none
         if (!hasMaster) return filtered.none
 
-        if (!world.isClient and (master != null) and request) {
+        if (!world.isClient && master != null && request) {
             world as ServerWorld
             val chunkPos = ChunkPos(pos)
             if (!world.forcedChunks.contains(chunkPos.toLong())) {
-                master!!.forcedChunks.add(chunkPos.x to chunkPos.z)
+                master.forcedChunks.add(chunkPos.x to chunkPos.z)
             }
         }
 
@@ -67,8 +67,7 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         }
 
         if (!linkedBlock.isIgnored()) when {
-            (linkedBlock is ChestBlock) and (linkedBlockEntity is ChestBlockEntity) -> {
-                linkedBlock as ChestBlock
+            linkedBlock is ChestBlock && linkedBlockEntity is ChestBlockEntity -> {
                 return filtered.with(ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true))
             }
             linkedBlock is InventoryProvider -> {

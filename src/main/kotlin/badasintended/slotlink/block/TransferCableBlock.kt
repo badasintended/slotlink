@@ -12,7 +12,7 @@ abstract class TransferCableBlock(id: String, be: () -> BlockEntity) : Connector
 
     override fun canConnect(world: WorldAccess, neighborPos: BlockPos): Boolean {
         val block = world.getBlockState(neighborPos).block
-        return (block is ModBlock) or (block is LeverBlock)
+        return block is ModBlock || block is LeverBlock
     }
 
 }

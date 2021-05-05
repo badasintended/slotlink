@@ -38,7 +38,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
             val currentMasterPos = blockEntity.masterPos
             val neighborMasterPos = neighborBlockEntity.masterPos
 
-            if (currentlyHasMaster and !neighborHasMaster) {
+            if (currentlyHasMaster && !neighborHasMaster) {
                 if (currentMasterPos == neighborMasterPos) {
                     blockEntity.hasMaster = false
                     blockEntity.markDirty()
@@ -49,7 +49,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
                     neighborBlockEntity.markDirty()
                     world.updateNeighbors(neighborPos, neighborBlock)
                 }
-            } else if (!currentlyHasMaster and neighborHasMaster) {
+            } else if (!currentlyHasMaster && neighborHasMaster) {
                 blockEntity.hasMaster = true
                 blockEntity.masterPos = neighborMasterPos
                 blockEntity.markDirty()
