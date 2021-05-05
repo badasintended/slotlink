@@ -1,7 +1,8 @@
 plugins {
-    id "org.jetbrains.kotlin.jvm" version '1.4.30'
-    id 'fabric-loom' version '0.5-SNAPSHOT'
-    id 'maven-publish'
+    id "org.jetbrains.kotlin.jvm" version "1.4.31"
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.4.31"
+    id "fabric-loom" version "0.6-SNAPSHOT"
+    id "maven-publish"
 }
 
 
@@ -20,7 +21,8 @@ if (versionEnv == null || versionEnv.isBlank()) {
 version = "${versionEnv}+${project.minecraft_version}"
 
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://maven.terraformersmc.com/releases" }
 }
 
 dependencies {
@@ -33,6 +35,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
     modImplementation "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+
+    modRuntime "com.terraformersmc:modmenu:${project.modmenu}"
 }
 
 if (project.enable_compat.toBoolean()) {

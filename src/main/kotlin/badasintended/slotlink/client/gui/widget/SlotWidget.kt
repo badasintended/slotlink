@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.bindGuiTexture
-import badasintended.slotlink.util.drawNinePatch
-import badasintended.slotlink.util.getClient
+import badasintended.slotlink.client.util.bindGuiTexture
+import badasintended.slotlink.client.util.client
+import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.AbstractButtonWidget
@@ -27,7 +27,7 @@ abstract class SlotWidget(
     protected open fun appendTooltip(tooltip: MutableList<Text>) {}
 
     protected open fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
-        getClient().apply {
+        client.apply {
             itemRenderer.renderGuiItemOverlay(textRenderer, stack, stackX, stackY)
         }
     }
@@ -40,7 +40,7 @@ abstract class SlotWidget(
 
         val stack = stackGetter.invoke()
 
-        getClient().itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
+        client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
         renderOverlay(matrices, stack)
     }
 
@@ -53,7 +53,7 @@ abstract class SlotWidget(
 
         val stack = stackGetter.invoke()
 
-        getClient().apply {
+        client.apply {
             if (playerInventory.cursorStack.isEmpty and !stack.isEmpty) {
                 val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
                 appendTooltip(tooltips)

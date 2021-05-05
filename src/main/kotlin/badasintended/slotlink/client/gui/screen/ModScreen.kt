@@ -1,9 +1,10 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.util.bindGuiTexture
-import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.client.util.bindGuiTexture
+import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.gui.Element
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
@@ -16,6 +17,8 @@ import net.minecraft.text.TranslatableText
 abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, title: Text) : HandledScreen<H>(h, inventory, title) {
 
     abstract val baseTlKey: String
+
+    private var clickedElement: Element? = null
 
     fun tl(key: String, vararg args: Any) = TranslatableText("$baseTlKey.$key", *args)
 
@@ -45,13 +48,17 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
         }
     }
 
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
+        clickedElement = hoveredElement(mouseX, mouseY).orElse(null)
+        return result
+    }
+
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
         isDragging = false
-        val element = hoveredElement(mouseX, mouseY).filter { it.mouseReleased(mouseX, mouseY, button) }
-        if (!element.isPresent) {
-            return super.mouseReleased(mouseX, mouseY, button)
-        }
-        return true
+        val result = clickedElement?.mouseReleased(mouseX, mouseY, button) ?: false
+        clickedElement = null
+        return result || super.mouseReleased(mouseX, mouseY, button)
     }
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {

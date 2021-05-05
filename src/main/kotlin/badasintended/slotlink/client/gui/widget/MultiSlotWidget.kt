@@ -1,10 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
-import kotlin.math.ceil
+import badasintended.slotlink.client.util.c2s
+import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.c2s
-import badasintended.slotlink.util.getClient
 import badasintended.slotlink.util.toFormattedString
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -15,6 +14,7 @@ import net.minecraft.text.LiteralText
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
+import kotlin.math.ceil
 
 /**
  * [MultiSlotWidget] is an impostor.
@@ -29,7 +29,7 @@ class MultiSlotWidget(
     private val count get() = handler.viewedStacks[index].second
 
     override fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
-        getClient().apply {
+        client.apply {
             itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 1, y + 1, "")
 
             val factor = window.scaleFactor.toFloat()

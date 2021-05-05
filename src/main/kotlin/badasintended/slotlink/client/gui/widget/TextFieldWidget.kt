@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.bindGuiTexture
-import badasintended.slotlink.util.drawNinePatch
-import badasintended.slotlink.util.getClient
+import badasintended.slotlink.client.util.bindGuiTexture
+import badasintended.slotlink.client.util.client
+import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.TextFieldWidget
@@ -16,7 +16,7 @@ class TextFieldWidget(
     private val bgY: Int,
     private val bgW: Int,
     private val bgH: Int, text: Text
-) : TextFieldWidget(getClient().textRenderer, bgX + 3, bgY + 3, bgW - 5, bgH - 5, text) {
+) : TextFieldWidget(client.textRenderer, bgX + 3, bgY + 3, bgW - 5, bgH - 5, text) {
 
     var placeholder: Text = LiteralText.EMPTY
 
@@ -33,13 +33,13 @@ class TextFieldWidget(
 
         drawNinePatch(matrices, bgX, bgY, bgW, bgH, 16f, 0f, 1, 14)
 
-        if (text.isBlank() and !isActive) drawTextWithShadow(matrices, getClient().textRenderer, placeholder, x, y, 0xffffff)
+        if (text.isBlank() and !isActive) drawTextWithShadow(matrices, client.textRenderer, placeholder, x, y, 0xffffff)
 
         super.renderButton(matrices, mouseX, mouseY, delta)
     }
 
     override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        if (visible and !isActive) getClient().currentScreen?.renderTooltip(matrices, tooltip, mouseX, mouseY)
+        if (visible and !isActive) client.currentScreen?.renderTooltip(matrices, tooltip, mouseX, mouseY)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

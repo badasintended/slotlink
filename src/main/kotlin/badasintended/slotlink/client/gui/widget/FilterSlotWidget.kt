@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.client.util.c2s
+import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.LinkScreenHandler
-import badasintended.slotlink.util.c2s
-import badasintended.slotlink.util.getClient
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
@@ -21,7 +21,7 @@ class FilterSlotWidget(
     override fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
         super.renderOverlay(matrices, stack)
 
-        getClient().apply {
+        client.apply {
             itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 1, y + 1, "")
 
             matrices.push()

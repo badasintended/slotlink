@@ -1,9 +1,9 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.c2s
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen

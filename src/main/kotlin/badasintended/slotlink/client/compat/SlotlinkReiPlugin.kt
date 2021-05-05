@@ -1,15 +1,17 @@
 package badasintended.slotlink.client.compat
 
+import badasintended.slotlink.client.gui.screen.reiSearchHandler
+import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Packets.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.c2s
 import badasintended.slotlink.util.modId
 import me.shedaniel.rei.api.AutoTransferHandler.Result.createNotApplicable
 import me.shedaniel.rei.api.AutoTransferHandler.Result.createSuccessful
 import me.shedaniel.rei.api.BuiltinPlugin
 import me.shedaniel.rei.api.EntryStack
+import me.shedaniel.rei.api.REIHelper
 import me.shedaniel.rei.api.RecipeHelper
 import me.shedaniel.rei.api.plugins.REIPluginV0
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay
@@ -48,6 +50,7 @@ class SlotlinkReiPlugin : REIPluginV0 {
             return@r createNotApplicable()
         }
 
+        reiSearchHandler = { REIHelper.getInstance().searchTextField?.text = it }
     }
 
 }

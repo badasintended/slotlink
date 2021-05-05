@@ -112,11 +112,12 @@ object Packets : Initializer {
         s(RESIZE) { server, player, _, buf, _ ->
             val syncId = buf.readVarInt()
             val viewedHeight = buf.readVarInt()
+            val showCraftingGrid = buf.readBoolean()
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.resize(viewedHeight)
+                    handler.resize(viewedHeight, showCraftingGrid)
                 }
             }
         }

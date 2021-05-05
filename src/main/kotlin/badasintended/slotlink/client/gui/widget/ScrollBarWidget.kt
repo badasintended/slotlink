@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.bindGuiTexture
-import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.client.util.bindGuiTexture
+import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.AbstractButtonWidget

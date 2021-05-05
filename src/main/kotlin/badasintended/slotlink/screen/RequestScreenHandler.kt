@@ -1,9 +1,5 @@
 package badasintended.slotlink.screen
 
-import java.util.Optional
-import kotlin.collections.set
-import kotlin.math.ceil
-import kotlin.math.min
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.init.Packets.UPDATE_CURSOR
@@ -14,15 +10,8 @@ import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
 import badasintended.slotlink.mixin.SlotAccessor
-import badasintended.slotlink.util.BlockEntityWatcher
-import badasintended.slotlink.util.MasterWatcher
-import badasintended.slotlink.util.Sort
-import badasintended.slotlink.util.actionBar
-import badasintended.slotlink.util.allEmpty
-import badasintended.slotlink.util.isItemAndTagEqual
-import badasintended.slotlink.util.merge
-import badasintended.slotlink.util.s2c
-import badasintended.slotlink.util.stack
+import badasintended.slotlink.screen.slot.DisabledSlot
+import badasintended.slotlink.util.*
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
@@ -32,11 +21,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.CraftingRecipe
-import net.minecraft.recipe.Ingredient
-import net.minecraft.recipe.Recipe
-import net.minecraft.recipe.RecipeGridAligner
-import net.minecraft.recipe.RecipeType
+import net.minecraft.recipe.*
 import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
@@ -47,6 +32,10 @@ import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
+import java.util.*
+import kotlin.collections.set
+import kotlin.math.ceil
+import kotlin.math.min
 
 @Suppress("LeakingThis")
 open class RequestScreenHandler(
@@ -326,26 +315,27 @@ open class RequestScreenHandler(
         updateCursor(cursor)
     }
 
-    open fun resize(viewedHeight: Int) {
+    open fun resize(viewedHeight: Int, craft: Boolean) {
         this as CraftingScreenHandlerAccessor
 
         val coerced = viewedHeight.coerceIn(3, 6)
         val h = coerced * 18 + 23
 
+        val craftH = if (craft) 52 else 0
+
         slots.clear()
 
         addSlot(CraftingResultSlot(playerInventory.player, this.input, this.result, 0, -999999, -999999 + h))
-
         for (m in 0 until 3) for (l in 0 until 3) {
-            addSlot(Slot(input, l + m * 3, 30 + l * 18, 17 + m * 18 + h))
+            addSlot(if (craft) Slot(input, l + m * 3, 30 + l * 18, 17 + m * 18 + h) else DisabledSlot(input, l + m * 3))
         }
 
         for (m in 0 until 3) for (l in 0 until 9) {
-            addSlot(Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 75 + m * 18 + h))
+            addSlot(Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 23 + craftH + m * 18 + h))
         }
 
         for (m in 0 until 9) {
-            addSlot(Slot(playerInventory, m, 8 + m * 18, 133 + h))
+            addSlot(Slot(playerInventory, m, 8 + m * 18, 81 + craftH + h))
         }
 
         this.viewedHeight = coerced

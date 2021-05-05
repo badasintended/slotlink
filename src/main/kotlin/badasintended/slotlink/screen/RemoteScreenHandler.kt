@@ -4,15 +4,13 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
+import badasintended.slotlink.mixin.SlotAccessor
+import badasintended.slotlink.screen.slot.DisabledSlot
 import badasintended.slotlink.util.Sort
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.screen.slot.Slot
 import net.minecraft.server.network.ServerPlayerEntity
 
 class RemoteScreenHandler : RequestScreenHandler {
@@ -34,18 +32,13 @@ class RemoteScreenHandler : RequestScreenHandler {
         this.offHand = buf.readBoolean()
     }
 
-    override fun resize(viewedHeight: Int) {
-        super.resize(viewedHeight)
+    override fun resize(viewedHeight: Int, craft: Boolean) {
+        super.resize(viewedHeight, true)
 
         if (!offHand) if (playerInventory.mainHandStack.item is MultiDimRemoteItem) playerInventory.apply {
             slots.forEachIndexed { i, slot ->
-                if (slot.stack == mainHandStack) slots[i] = object : Slot(this, selectedSlot, -999999, -999999) {
-                    override fun canInsert(stack: ItemStack) = false
-                    override fun canTakeItems(playerEntity: PlayerEntity) = false
-
-                    @Environment(EnvType.CLIENT)
-                    override fun doDrawHoveringEffect() = false
-                }
+                slot as SlotAccessor
+                if (slot.stack == mainHandStack) slots[i] = DisabledSlot(slot.inventory, slot.index)
             }
         }
     }
