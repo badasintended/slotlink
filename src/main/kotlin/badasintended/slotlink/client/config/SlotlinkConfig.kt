@@ -24,7 +24,7 @@ val config: SlotlinkConfig by lazy {
 class SlotlinkConfig(
     var showCraftingGrid: Boolean = true,
     var syncReiSearch: Boolean = false,
-    var sort: Sort = Sort.NAME
+    var sort: Sort = Sort.COUNT_DESC
 ) {
 
     fun save() {
