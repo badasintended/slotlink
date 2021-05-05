@@ -35,7 +35,6 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     private val totalSlots get() = handler.totalSlotSize
     private val filledSlots get() = handler.filledSlotSize
 
-    private var sort = handler.lastSort
     private var filter = ""
 
     private lateinit var searchBar: TextFieldWidget
@@ -81,18 +80,18 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         // Sort button
         addButton(ButtonWidget(x + 4 + 8 * 18, y + 4 + viewedHeight * 18, 14, 14)).apply {
             u = { 200 }
-            v = { sort.ordinal * 14 }
+            v = { config.sort.ordinal * 14 }
             onPressed = {
-                sort = sort.next()
+                config.sort = config.sort.next()
                 scrollBar.knob = 0f
                 c2s(SORT) {
                     writeVarInt(syncId)
-                    writeVarInt(sort.ordinal)
+                    writeVarInt(config.sort.ordinal)
                     writeString(filter)
                 }
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("sort.$sort"), x, y)
+                renderTooltip(matrices, tl("sort.${config.sort}"), x, y)
             }
         }
 
@@ -193,7 +192,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                 if (it != filter) {
                     c2s(SORT) {
                         writeVarInt(syncId)
-                        writeVarInt(sort.ordinal)
+                        writeVarInt(config.sort.ordinal)
                         writeString(it)
                     }
                     scrollBar.knob = 0f
@@ -205,7 +204,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
         c2s(SORT) {
             writeVarInt(syncId)
-            writeVarInt(sort.ordinal)
+            writeVarInt(config.sort.ordinal)
             writeString(filter)
         }
     }

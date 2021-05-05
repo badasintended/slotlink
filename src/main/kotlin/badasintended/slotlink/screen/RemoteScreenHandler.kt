@@ -6,12 +6,9 @@ import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
 import badasintended.slotlink.mixin.SlotAccessor
 import badasintended.slotlink.screen.slot.DisabledSlot
-import badasintended.slotlink.util.Sort
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.server.network.ServerPlayerEntity
 
 class RemoteScreenHandler : RequestScreenHandler {
 
@@ -21,19 +18,18 @@ class RemoteScreenHandler : RequestScreenHandler {
         syncId: Int,
         playerInventory: PlayerInventory,
         inventories: Set<FilteredInventory>,
-        lastSort: Sort,
         master: MasterBlockEntity,
         offHand: Boolean
-    ) : super(syncId, playerInventory, inventories, lastSort, null, master) {
+    ) : super(syncId, playerInventory, inventories, null, master) {
         this.offHand = offHand
     }
 
-    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : super(syncId, playerInventory, buf) {
+    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : super(syncId, playerInventory) {
         this.offHand = buf.readBoolean()
     }
 
     override fun resize(viewedHeight: Int, craft: Boolean) {
-        super.resize(viewedHeight, true)
+        super.resize(viewedHeight, craft)
 
         if (!offHand) if (playerInventory.mainHandStack.item is MultiDimRemoteItem) playerInventory.apply {
             slots.forEachIndexed { i, slot ->
@@ -44,13 +40,5 @@ class RemoteScreenHandler : RequestScreenHandler {
     }
 
     override fun getType(): ScreenHandlerType<*> = Screens.REMOTE
-
-    override fun close(player: PlayerEntity) {
-        super.close(player)
-        if (player is ServerPlayerEntity) {
-            val stack = if (offHand) player.offHandStack else player.mainHandStack
-            stack.orCreateTag.putInt("lastSort", lastSort.ordinal)
-        }
-    }
 
 }

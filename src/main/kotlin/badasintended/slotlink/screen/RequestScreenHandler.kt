@@ -18,7 +18,6 @@ import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.network.PacketByteBuf
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
 import net.minecraft.recipe.*
@@ -42,7 +41,6 @@ open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
     private val inventories: Set<FilteredInventory>,
-    var lastSort: Sort,
 ) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, BlockEntityWatcher<RequestBlockEntity>, RecipeGridAligner<Ingredient> {
 
     val player: PlayerEntity = playerInventory.player
@@ -54,6 +52,7 @@ open class RequestScreenHandler(
     private val trackedStacks: DefaultedList<Pair<ItemStack, Int>> = DefaultedList.ofSize(48, ItemStack.EMPTY to 0)
     val viewedStacks: DefaultedList<Pair<ItemStack, Int>> = DefaultedList.ofSize(48, ItemStack.EMPTY to 0)
 
+    private var lastSort = Sort.NAME
     private var lastFilter = ""
 
     var viewedHeight = 0
@@ -70,8 +69,8 @@ open class RequestScreenHandler(
     var filledSlotSize = 0
 
     /** Client side **/
-    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
-        syncId, playerInventory, emptySet(), Sort.of(buf.readVarInt())
+    constructor(syncId: Int, playerInventory: PlayerInventory) : this(
+        syncId, playerInventory, emptySet()
     )
 
     /** Server side **/
@@ -79,10 +78,9 @@ open class RequestScreenHandler(
         syncId: Int,
         playerInventory: PlayerInventory,
         inventories: Set<FilteredInventory>,
-        lastSort: Sort,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
-    ) : this(syncId, playerInventory, inventories, lastSort) {
+    ) : this(syncId, playerInventory, inventories) {
         this.request = request
         this.master = master
         inventories.forEach {
@@ -512,7 +510,6 @@ open class RequestScreenHandler(
             it.stack = moveStack(it.stack)
         }
         dropInventory(player, player.world, input)
-        request?.lastSort = lastSort
         request?.watchers?.remove(this)
         request?.markDirty()
         master?.watchers?.remove(this)

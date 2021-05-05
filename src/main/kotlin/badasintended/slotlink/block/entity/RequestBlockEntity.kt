@@ -3,36 +3,16 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.BlockEntityWatcher
-import badasintended.slotlink.util.Sort
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
-import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
 
-class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), ExtendedScreenHandlerFactory {
+class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), NamedScreenHandlerFactory {
 
-    var lastSort = Sort.NAME
     val watchers = ObjectOpenHashSet<BlockEntityWatcher<RequestBlockEntity>>()
-
-    override fun toTag(tag: CompoundTag): CompoundTag {
-        super.toTag(tag)
-
-        tag.putInt("lastSort", lastSort.ordinal)
-
-        return tag
-    }
-
-    override fun fromTag(state: BlockState, tag: CompoundTag) {
-        super.fromTag(state, tag)
-
-        lastSort = Sort.of(tag.getInt("lastSort"))
-    }
 
     override fun markRemoved() {
         super.markRemoved()
@@ -44,15 +24,11 @@ class RequestBlockEntity : ChildBlockEntity(BlockEntityTypes.REQUEST), ExtendedS
         if (!hasMaster) return null
         val master = world.getBlockEntity(masterPos) ?: return null
         if (master !is MasterBlockEntity) return null
-        val handler = RequestScreenHandler(syncId, inv, master.getInventories(world, true), lastSort, this, master)
+        val handler = RequestScreenHandler(syncId, inv, master.getInventories(world, true), this, master)
         watchers.add(handler)
         master.watchers.add(handler)
         master.markForcedChunks()
         return handler
-    }
-
-    override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-        buf.writeVarInt(lastSort.ordinal)
     }
 
     override fun getDisplayName() = TranslatableText("container.slotlink.request")

@@ -3,7 +3,6 @@ package badasintended.slotlink.item
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.screen.RemoteScreenHandler
-import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.toPos
 import badasintended.slotlink.util.toTag
@@ -52,11 +51,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
                 if (master !is MasterBlockEntity) {
                     player.actionBar("${baseTlKey}.masterNotFound")
                 } else {
-                    player.openHandledScreen(
-                        ScreenHandlerFactory(
-                            dim, master, Sort.of(stack.orCreateTag.getInt("lastSort")), hand == OFF_HAND
-                        )
-                    )
+                    player.openHandledScreen(ScreenHandlerFactory(dim, master, hand == OFF_HAND))
                 }
             }
         }
@@ -118,21 +113,19 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     class ScreenHandlerFactory(
         masterWorld: World,
         private val master: MasterBlockEntity,
-        private val lastSort: Sort,
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
         private val inventories = master.getInventories(masterWorld, true)
 
-        override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-            val handler = RemoteScreenHandler(syncId, inv, inventories, lastSort, master, offHand)
+        override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
+            val handler = RemoteScreenHandler(syncId, inv, inventories, master, offHand)
             master.watchers.add(handler)
             master.markForcedChunks()
             return handler
         }
 
         override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
-            buf.writeVarInt(lastSort.ordinal)
             buf.writeBoolean(offHand)
         }
 

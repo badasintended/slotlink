@@ -1,5 +1,6 @@
 package badasintended.slotlink.client.config
 
+import badasintended.slotlink.util.Sort
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -10,6 +11,7 @@ private val configFile = FabricLoader.getInstance().configDir.resolve("slotlink.
 private val json = Json {
     encodeDefaults = true
     prettyPrint = true
+    ignoreUnknownKeys = true
 }
 
 val config: SlotlinkConfig by lazy {
@@ -21,7 +23,8 @@ val config: SlotlinkConfig by lazy {
 @Serializable
 class SlotlinkConfig(
     var showCraftingGrid: Boolean = true,
-    var syncReiSearch: Boolean = false
+    var syncReiSearch: Boolean = false,
+    var sort: Sort = Sort.NAME
 ) {
 
     fun save() {
