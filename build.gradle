@@ -1,6 +1,8 @@
+import net.fabricmc.loom.task.RunGameTask
+
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.4.31"
-    id "org.jetbrains.kotlin.plugin.serialization" version "1.4.31"
+    id "org.jetbrains.kotlin.jvm" version "1.5.0"
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.5.0"
     id "fabric-loom" version "0.6-SNAPSHOT"
     id "maven-publish"
 }
@@ -27,8 +29,10 @@ sourceSets {
     }
 }
 
-tasks.runClient.classpath sourceSets.dev.runtimeClasspath
-tasks.runServer.classpath sourceSets.dev.runtimeClasspath
+tasks.withType(RunGameTask) {
+    classpath sourceSets.dev.runtimeClasspath
+    jvmArgs project.run_args
+}
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
@@ -49,31 +53,6 @@ dependencies {
     modRuntime "com.terraformersmc:modmenu:${project.modmenu}"
 
     devImplementation sourceSets.main.output
-}
-
-if (project.enable_compat.toBoolean()) {
-    repositories {
-        maven {
-            url "https://www.cursemaven.com"
-            content { includeGroup "curse.maven" }
-        }
-    }
-
-    dependencies {
-        modCompileOnly "curse.maven:stockpile-299913:3018405"
-    }
-}
-
-if (project.enable_databreaker.toBoolean()) {
-    repositories {
-        maven { url = "https://jitpack.io" }
-    }
-
-    dependencies {
-        modRuntime("com.github.SuperCoder7979:databreaker:${project.databreaker}") {
-            exclude module: "fabric-loader"
-        }
-    }
 }
 
 processResources {

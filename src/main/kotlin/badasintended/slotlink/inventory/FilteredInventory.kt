@@ -1,9 +1,7 @@
 package badasintended.slotlink.inventory
 
-import badasintended.slotlink.mixin.DoubleInventoryAccessor
 import badasintended.slotlink.util.isItemAndTagEqual
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.DoubleInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
@@ -106,8 +104,7 @@ class FilteredInventory(
 
     override fun hashCode(): Int {
         val inventory = inventory
-        return if (inventory is DoubleInventory) {
-            inventory as DoubleInventoryAccessor
+        return if (inventory is PairInventory) {
             inventory.first.hashCode() + inventory.second.hashCode()
         } else inventory.hashCode()
     }
@@ -121,8 +118,7 @@ class FilteredInventory(
         val inv = inventory
         val oinv = other.inventory
 
-        if (inv is DoubleInventory) if (oinv is DoubleInventory) {
-            inv as DoubleInventoryAccessor
+        if (inv is PairInventory && oinv is PairInventory) {
             return oinv.isPart(inv.first) && oinv.isPart(inv.second)
         }
 

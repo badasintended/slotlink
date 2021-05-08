@@ -4,6 +4,8 @@ import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.util.bool
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.toFormattedString
 import kotlin.math.ceil
 import net.fabricmc.api.EnvType
@@ -54,10 +56,10 @@ class MultiSlotWidget(
 
     override fun onClick(button: Int) {
         c2s(Packets.MULTI_SLOT_CLICK) {
-            writeVarInt(handler.syncId)
-            writeVarInt(index)
-            writeVarInt(button)
-            writeBoolean(Screen.hasShiftDown())
+            int(handler.syncId)
+            int(index)
+            int(button)
+            bool(Screen.hasShiftDown())
         }
     }
 

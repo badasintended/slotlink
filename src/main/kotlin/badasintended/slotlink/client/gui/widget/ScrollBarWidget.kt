@@ -4,12 +4,10 @@ import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.LiteralText
 
 @Environment(EnvType.CLIENT)
-class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h.coerceAtLeast(17), LiteralText.EMPTY) {
+class ScrollBarWidget(x: Int, y: Int, h: Int) : NoSoundWidget(x, y, 14, h.coerceAtLeast(17)) {
 
     var hasKnob = { true }
 

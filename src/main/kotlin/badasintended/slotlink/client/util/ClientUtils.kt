@@ -2,6 +2,7 @@
 
 package badasintended.slotlink.client.util
 
+import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.modId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -20,8 +21,8 @@ fun Direction.texture(): Identifier {
 val client: MinecraftClient
     get() = MinecraftClient.getInstance()
 
-fun c2s(id: Identifier, buf: PacketByteBuf.() -> Unit) {
-    ClientPlayNetworking.send(id, badasintended.slotlink.util.buf().apply(buf))
+inline fun c2s(id: Identifier, buf: PacketByteBuf.() -> Unit) {
+    ClientPlayNetworking.send(id, buf().apply(buf))
 }
 
 fun bindGuiTexture() {

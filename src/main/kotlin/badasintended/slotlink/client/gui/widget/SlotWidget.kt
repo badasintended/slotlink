@@ -5,7 +5,6 @@ import badasintended.slotlink.client.util.client
 import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
@@ -17,7 +16,7 @@ abstract class SlotWidget(
     x: Int, y: Int, s: Int,
     private val playerInventory: PlayerInventory,
     private val stackGetter: () -> ItemStack
-) : AbstractButtonWidget(x, y, s, s, LiteralText.EMPTY) {
+) : NoSoundWidget(x, y, s, s, LiteralText.EMPTY) {
 
     val stack get() = stackGetter.invoke()
 

@@ -4,6 +4,7 @@ import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.util.int
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
@@ -43,9 +44,9 @@ class FilterSlotWidget(
     override fun onClick(button: Int) {
         handler.filterSlotClick(index, button)
         c2s(Packets.FILTER_SLOT_CLICK) {
-            writeVarInt(handler.syncId)
-            writeVarInt(index)
-            writeVarInt(button)
+            int(handler.syncId)
+            int(index)
+            int(button)
         }
     }
 

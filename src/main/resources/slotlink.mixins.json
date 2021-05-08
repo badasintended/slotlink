@@ -5,9 +5,13 @@
   "compatibilityLevel": "JAVA_8",
   "mixins"            : [
     "CraftingScreenHandlerAccessor",
-    "DoubleInventoryAccessor",
+    "DoubleInventoryMixin",
     "SlotAccessor",
-    "WallMountedBlockMixin"
+    "WallMountedBlockMixin",
+    "pseudo.DoubleSidedInventoryMixin"
+  ],
+  "client"            : [
+    "pseudo.SortButtonWidgetMixin"
   ],
   "injectors"         : {
     "defaultRequire": 1

@@ -16,7 +16,7 @@ class TextFieldWidget(
     private val bgY: Int,
     private val bgW: Int,
     private val bgH: Int, text: Text
-) : TextFieldWidget(client.textRenderer, bgX + 3, bgY + 3, bgW - 5, bgH - 5, text) {
+) : TextFieldWidget(client.textRenderer, bgX + 2, bgY + 2, bgW - 12, bgH - 3, text) {
 
     var placeholder: Text = LiteralText.EMPTY
 
@@ -31,9 +31,7 @@ class TextFieldWidget(
         if (!visible) return
         bindGuiTexture()
 
-        drawNinePatch(matrices, bgX, bgY, bgW, bgH, 16f, 0f, 1, 14)
-
-        if (text.isBlank() && !isActive) drawTextWithShadow(matrices, client.textRenderer, placeholder, x, y, 0xffffff)
+        drawNinePatch(matrices, bgX, bgY, bgW, bgH, 64f, 0f, 1, 14)
 
         super.renderButton(matrices, mouseX, mouseY, delta)
     }

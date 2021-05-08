@@ -1,4 +1,4 @@
-package badasintended.slotlink.client.compat
+package badasintended.slotlink.client.compat.rei
 
 import badasintended.slotlink.client.gui.screen.RequestScreen
 import badasintended.slotlink.client.gui.screen.reiSearchHandler
@@ -8,10 +8,14 @@ import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Packets.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.util.id
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.modId
+import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.api.AutoTransferHandler.Result.createNotApplicable
 import me.shedaniel.rei.api.AutoTransferHandler.Result.createSuccessful
 import me.shedaniel.rei.api.BuiltinPlugin
+import me.shedaniel.rei.api.DisplayHelper
 import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.REIHelper
 import me.shedaniel.rei.api.RecipeHelper
@@ -23,7 +27,7 @@ import net.minecraft.recipe.RecipeType
 import net.minecraft.util.TypedActionResult
 
 @Environment(EnvType.CLIENT)
-class SlotlinkReiPlugin : REIPluginV0 {
+class ReiPlugin : REIPluginV0 {
 
     override fun getPluginIdentifier() = modId("rei")
 
@@ -45,8 +49,8 @@ class SlotlinkReiPlugin : REIPluginV0 {
 
                 ctx.minecraft.openScreen(ctx.containerScreen)
                 c2s(APPLY_RECIPE) {
-                    writeVarInt(handler.syncId)
-                    writeIdentifier(recipe.id)
+                    int(handler.syncId)
+                    id(recipe.id)
                 }
                 return@r createSuccessful()
             }
@@ -64,6 +68,24 @@ class SlotlinkReiPlugin : REIPluginV0 {
             }
             TypedActionResult.fail(EntryStack.empty())
         }
+
+        recipeHelper.registerClickArea(
+            { if (it.craftingGrid) Rectangle(it.x + 90, it.y + 49 + it.viewedHeight * 18, 22, 15) else Rectangle() },
+            RequestScreen::class.java,
+            BuiltinPlugin.CRAFTING
+        )
+    }
+
+    override fun registerBounds(displayHelper: DisplayHelper) {
+        displayHelper.registerProvider(object : DisplayHelper.DisplayBoundsProvider<RequestScreen<*>> {
+            override fun getPriority() = 100f
+
+            override fun getBaseSupportedClass() = RequestScreen::class.java
+
+            override fun getScreenBounds(screen: RequestScreen<*>): Rectangle {
+                return Rectangle(screen.x - 22, screen.y, screen.bgW + 40, screen.bgH)
+            }
+        })
     }
 
 }

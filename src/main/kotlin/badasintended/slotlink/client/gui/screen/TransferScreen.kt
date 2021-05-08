@@ -4,6 +4,7 @@ import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.next
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -23,7 +24,7 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
         val x = x + 7
         val y = y + titleY + 11
 
-        addButton(ButtonWidget(x + 6 * 18 + 4, y + 2, 14, 14)).apply {
+        add(ButtonWidget(x + 6 * 18 + 4, y + 2, 14, 14)) {
             u = { 214 }
             v = { redstone.ordinal * 14 }
             onPressed = {
@@ -35,7 +36,7 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
             }
         }
 
-        addButton(ButtonWidget(x + 6 * 18 + 4, y + 38, 14, 14)).apply {
+        add(ButtonWidget(x + 6 * 18 + 4, y + 38, 14, 14)) {
             u = { 186 }
             v = { side.ordinal * 14 }
             onPressed = {
@@ -51,9 +52,9 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
     override fun sync() {
         super.sync()
         c2s(Packets.TRANSFER_SETTINGS) {
-            writeVarInt(handler.syncId)
-            writeVarInt(redstone.ordinal)
-            writeVarInt(side.id)
+            int(handler.syncId)
+            int(redstone.ordinal)
+            int(side.id)
         }
     }
 

@@ -23,7 +23,7 @@ public abstract class WallMountedBlockMixin {
     }
 
     @Inject(at = @At("RETURN"), method = "canPlaceAt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;)Z", cancellable = true)
-    private void placeLeverAtCable(BlockState state, WorldView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void slotlink$placeLeverAtCable(BlockState state, WorldView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         Block wanted = state.getBlock();
         Block on = world.getBlockState(pos.offset(getDirection(state).getOpposite())).getBlock();
         if (wanted instanceof LeverBlock && on instanceof TransferCableBlock) {

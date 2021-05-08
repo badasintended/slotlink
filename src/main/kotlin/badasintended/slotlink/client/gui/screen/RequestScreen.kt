@@ -1,11 +1,11 @@
 package badasintended.slotlink.client.gui.screen
 
+import badasintended.slotlink.client.compat.invsort.InventorySortButton
 import badasintended.slotlink.client.config.config
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
 import badasintended.slotlink.client.gui.widget.ScrollBarWidget
-import badasintended.slotlink.client.gui.widget.SlotCountWidget
 import badasintended.slotlink.client.gui.widget.TextFieldWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.drawNinePatch
@@ -16,12 +16,17 @@ import badasintended.slotlink.init.Packets.RESTOCK
 import badasintended.slotlink.init.Packets.SCROLL
 import badasintended.slotlink.init.Packets.SORT
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.util.bool
+import badasintended.slotlink.util.int
+import badasintended.slotlink.util.string
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
 import org.lwjgl.glfw.GLFW
 
 var reiSearchHandler: ((String) -> Unit)? = null
@@ -30,18 +35,36 @@ var reiSearchHandler: ((String) -> Unit)? = null
 class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) :
     ModScreen<H>(handler, inv, title) {
 
-    private val syncId get() = handler.syncId
-    private val viewedHeight get() = handler.viewedHeight
-    private val maxScroll get() = handler.maxScroll
-    private val totalSlots get() = handler.totalSlotSize
-    private val filledSlots get() = handler.filledSlotSize
+    val x by ::x
+    val y by ::y
+    val bgW by ::backgroundWidth
+    val bgH by ::backgroundHeight
 
-    private var filter = ""
+    val viewedHeight by handler::viewedHeight
 
-    private lateinit var searchBar: TextFieldWidget
+    var craftingGrid by config::showCraftingGrid
+
+    private val syncId by handler::syncId
+    private val maxScroll by handler::maxScroll
+    private val totalSlots by handler::totalSlotSize
+    private val filledSlots by handler::filledSlotSize
+
+    private val titleWidth by lazy { textRenderer.getWidth(title) }
+    private val craftingText = TranslatableText("container.crafting")
+
+    private var sort by config::sort
+    private var syncRei by config::syncReiSearch
+    private var grabSearchBar by config::autoFocusSearchBar
 
     private lateinit var scrollBar: ScrollBarWidget
+    private lateinit var searchBar: TextFieldWidget
+
     private var lastScroll = 0
+    private var filter = ""
+
+    private var skipChar = false
+
+    private var inventorySortButton: AbstractButtonWidget? = null
 
     override val baseTlKey: String
         get() = "container.slotlink.request"
@@ -49,78 +72,78 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     override fun init() {
         super.init()
 
-        playerInventoryTitleX = Int.MIN_VALUE
-        playerInventoryTitleY = Int.MIN_VALUE
-
-        // Remaining slot display
-        addButton(SlotCountWidget(x, y + titleY, backgroundWidth, this::totalSlots, this::filledSlots))
+        playerInventoryTitleY = backgroundHeight - 94
 
         val x = x + 7
         val y = y + titleY + 11
 
-        val craftHeight = if (config.showCraftingGrid) 52 else 0
+        val craftHeight = if (craftingGrid) 67 else 0
 
         // Linked slot view
-        for (i in 0 until viewedHeight * 8) {
-            addButton(MultiSlotWidget(handler, i, x + (i % 8) * 18, y + (i / 8) * 18))
+        for (i in 0 until viewedHeight * 9) {
+            add(MultiSlotWidget(handler, i, x + (i % 9) * 18, y + (i / 9) * 18))
         }
 
         // Liked slot scroll bar
-        scrollBar = addButton(ScrollBarWidget(x + 4 + 8 * 18, y, viewedHeight * 18)).apply {
+        scrollBar = add(ScrollBarWidget(x + 4 + 9 * 18, y, viewedHeight * 18)) {
             hasKnob = { maxScroll > 0 }
             onUpdated = {
                 val scroll = (it * maxScroll + 0.5).toInt()
                 if (scroll != lastScroll) c2s(SCROLL) {
-                    writeVarInt(syncId)
-                    writeVarInt(scroll)
+                    int(syncId)
+                    int(scroll)
                 }
                 lastScroll = scroll
             }
         }
 
         // Sort button
-        addButton(ButtonWidget(x + 4 + 8 * 18, y + 4 + viewedHeight * 18, 14, 14)).apply {
-            u = { 200 }
-            v = { config.sort.ordinal * 14 }
+        add(ButtonWidget(x - 29, y, 20)) {
+            u = { 112 }
+            v = { sort.ordinal * 16 }
+            padding(2)
+            outline = true
             onPressed = {
-                config.sort = config.sort.next()
+                sort = sort.next()
                 scrollBar.knob = 0f
                 c2s(SORT) {
-                    writeVarInt(syncId)
-                    writeVarInt(config.sort.ordinal)
-                    writeString(filter)
+                    int(syncId)
+                    int(sort.ordinal)
+                    string(filter)
                 }
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("sort.${config.sort}"), x, y)
+                renderTooltip(matrices, tl("sort.${sort}"), x, y)
             }
         }
 
         // Toggle crafting grid button
-        addButton(ButtonWidget(x + 4 + 7 * 18, y + 4 + viewedHeight * 18, 14, 14)).apply {
-            u = { 172 }
-            v = { if (config.showCraftingGrid) 0 else 14 }
+        add(ButtonWidget(x - 29, y + 22, 20)) {
+            u = { 80 }
+            v = { if (craftingGrid) 0 else 16 }
+            padding(2)
+            outline = true
             onPressed = {
-                config.showCraftingGrid = !config.showCraftingGrid
+                craftingGrid = !craftingGrid
                 init(client!!, client!!.window.scaledWidth, client!!.window.scaledHeight)
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("craft.${config.showCraftingGrid}"), x, y)
+                renderTooltip(matrices, tl("craft.${craftingGrid}"), x, y)
             }
         }
 
-        if (config.showCraftingGrid) {
+        if (craftingGrid) {
             // Crafting output slot
-            addButton(CraftingResultSlotWidget(handler, x + 112, y + viewedHeight * 18 + 36))
+            add(CraftingResultSlotWidget(handler, x + 108, y + viewedHeight * 18 + 27))
 
             // Clear crafting grid button
-            addButton(ButtonWidget(x + 13, y + 22 + viewedHeight * 18, 8, 8)).apply {
+            add(ButtonWidget(x + 13, y + 18 + viewedHeight * 18, 8)) {
                 background = false
                 u = { 16 }
                 v = { 46 }
                 onPressed = {
                     c2s(CLEAR_CRAFTING_GRID) {
-                        writeVarInt(syncId)
+                        int(syncId)
                     }
                 }
                 onHovered = { matrices, x, y ->
@@ -129,14 +152,16 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             }
         }
 
+        val invSorterW = if (inventorySortButton == null) 0 else 16
+
         // Move all to network button
-        addButton(ButtonWidget(x + 9 * 18 - 8, y + viewedHeight * 18 + 19 + craftHeight, 8, 8)).apply {
+        add(ButtonWidget(x + 9 * 18 - 8 - invSorterW, y + viewedHeight * 18 + 3 + craftHeight, 8)) {
             background = false
             u = { 0 }
             v = { 46 }
             onPressed = {
                 c2s(MOVE) {
-                    writeVarInt(syncId)
+                    int(syncId)
                 }
             }
             onHovered = { matrices, x, y ->
@@ -149,13 +174,13 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         }
 
         // Restock player inventory button
-        addButton(ButtonWidget(x + 9 * 18 - 16, y + viewedHeight * 18 + 19 + craftHeight, 8, 8)).apply {
+        add(ButtonWidget(x + 9 * 18 - 16 - invSorterW, y + viewedHeight * 18 + 3 + craftHeight, 8)) {
             background = false
             u = { 8 }
             v = { 46 }
             onPressed = {
                 c2s(RESTOCK) {
-                    writeVarInt(syncId)
+                    int(syncId)
                 }
             }
             onHovered = { matrices, x, y ->
@@ -167,24 +192,40 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             }
         }
 
-        // Sync to rei button
-        if (reiSearchHandler != null) addButton(ButtonWidget(x + 4 + 6 * 18, y + 4 + viewedHeight * 18, 14, 14)).apply {
-            u = { 158 }
-            v = { if (config.syncReiSearch) 0 else 14 }
+        // Search bar auto focus button
+        add(ButtonWidget(x - 29, y + 44, 20)) {
+            u = { 128 }
+            v = { if (grabSearchBar) 0 else 16 }
+            padding(2)
+            outline = true
             onPressed = {
-                config.syncReiSearch = !config.syncReiSearch
+                grabSearchBar = !grabSearchBar
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("rei.${config.syncReiSearch}"), x, y)
+                renderTooltip(matrices, tl("autoFocus.${grabSearchBar}"), x, y)
             }
         }
 
+        // Sync to rei button
+        if (reiSearchHandler != null) add(ButtonWidget(x - 29, y + 66, 20)) {
+            u = { 96 }
+            v = { if (syncRei) 0 else 16 }
+            outline = true
+            padding(2)
+            onPressed = {
+                syncRei = !syncRei
+            }
+            onHovered = { matrices, x, y ->
+                renderTooltip(matrices, tl("rei.${syncRei}"), x, y)
+            }
+        }
+
+        // Inventory Sorter's sort button
+        inventorySortButton?.apply { add(this) }
+
         // Search bar
-        searchBar = addButton(
-            TextFieldWidget(x, y + 4 + viewedHeight * 18, 18 * if (reiSearchHandler != null) 6 else 7, 14, tl("search"))
-        ).apply {
+        searchBar = add(TextFieldWidget(x + 9 * 18 - 90, y - 13, 90, 12, tl("search"))) {
             setMaxLength(50)
-            placeholder = tl("search")
             text = filter
             tooltip.add(tl("search.tip1"))
             tooltip.add(tl("search.tip2"))
@@ -192,74 +233,117 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             setChangedListener {
                 if (it != filter) {
                     c2s(SORT) {
-                        writeVarInt(syncId)
-                        writeVarInt(config.sort.ordinal)
-                        writeString(it)
+                        int(syncId)
+                        int(sort.ordinal)
+                        string(it)
                     }
                     scrollBar.knob = 0f
                     filter = it
-                    if (config.syncReiSearch) reiSearchHandler?.invoke(filter)
+                    if (syncRei) reiSearchHandler?.invoke(filter)
                 }
+            }
+            if (config.autoFocusSearchBar) {
+                setInitialFocus(this)
             }
         }
 
         c2s(SORT) {
-            writeVarInt(syncId)
-            writeVarInt(config.sort.ordinal)
-            writeString(filter)
+            int(syncId)
+            int(sort.ordinal)
+            string(filter)
         }
+    }
+
+    override fun <T : AbstractButtonWidget?> addButton(button: T): T {
+        if (button is InventorySortButton && !button.initialized) {
+            button.initialized = true
+            inventorySortButton = button
+            return button
+        }
+        return super.addButton(button)
     }
 
     /**
      * apparently this also called on resize
      */
     override fun init(client: MinecraftClient, width: Int, height: Int) {
-        val craftHeight = if (config.showCraftingGrid) 52 else 0
+        val craftHeight = if (craftingGrid) 67 else 0
 
         var viewedHeight = 3
-        for (i in 3..6) if (height > (128 + craftHeight + (i * 18))) viewedHeight = i
+        for (i in 3..6) if (height > (119 + craftHeight + (i * 18))) viewedHeight = i
 
         backgroundWidth = 9 * 18 + 14
-        backgroundHeight = viewedHeight * 18 + 128 + craftHeight
+        backgroundHeight = viewedHeight * 18 + 114 + craftHeight
 
-        handler.resize(viewedHeight, config.showCraftingGrid)
+        handler.resize(viewedHeight, craftingGrid)
         c2s(RESIZE) {
-            writeVarInt(handler.syncId)
-            writeVarInt(viewedHeight)
-            writeBoolean(config.showCraftingGrid)
+            int(syncId)
+            int(viewedHeight)
+            bool(craftingGrid)
         }
 
         super.init(client, width, height)
     }
 
+    override fun tick() {
+        super.tick()
+        if (searchBar.isFocused) searchBar.tick()
+    }
+
     override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
         super.drawBackground(matrices, delta, mouseX, mouseY)
 
-        if (config.showCraftingGrid) {
-            val result = handler.slots[0]
-            drawNinePatch(matrices, x + result.x - 5, y + result.y - 5, 26, 26, 16f, 0f, 1, 14)
-            drawTexture(matrices, x + 90, y + 58 + viewedHeight * 18, 0, 31, 22, 15)
+        drawNinePatch(matrices, x + backgroundWidth - 3, y, 21, viewedHeight * 18 + 24, 32f, 16f, 4, 8)
+
+        if (craftingGrid) {
+            drawTexture(matrices, x + 90, y + 49 + viewedHeight * 18, 0, 31, 22, 15)
+        }
+    }
+
+    override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+        super.drawForeground(matrices, mouseX, mouseY)
+
+        if (craftingGrid) {
+            textRenderer.draw(matrices, craftingText, titleX + 21f, playerInventoryTitleY - 67f, 0x404040)
+        }
+
+        if (x + titleX < mouseX && mouseX <= x + titleX + titleWidth && y + titleY < mouseY && mouseY <= y + titleY + textRenderer.fontHeight) {
+            renderTooltip(matrices, tl("slotCount", filledSlots, totalSlots), mouseX - x, mouseY - y)
         }
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (searchBar.isFocused) {
+        return if (searchBar.isFocused) {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 searchBar.changeFocus(false)
+                true
             } else {
                 searchBar.keyPressed(keyCode, scanCode, modifiers)
             }
-            return true
+        } else if (client!!.options.keyChat.matchesKey(keyCode, scanCode)) {
+            skipChar = true
+            searchBar.changeFocus(true)
+            true
+        } else {
+            super.keyPressed(keyCode, scanCode, modifiers)
         }
-        return super.keyPressed(keyCode, scanCode, modifiers)
+    }
+
+    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        skipChar = false
+        return super.keyReleased(keyCode, scanCode, modifiers)
+    }
+
+    override fun charTyped(char: Char, modifiers: Int): Boolean {
+        return if (skipChar) false else super.charTyped(char, modifiers)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
         if (maxScroll > 0 && mouseX >= x + 7 && mouseX < x + 169 && mouseY >= y + 17 && mouseY < y + 17 + viewedHeight * 18) {
             scrollBar.knob = (scrollBar.knob - amount / maxScroll).toFloat().coerceIn(0f, 1f)
             c2s(SCROLL) {
-                writeVarInt(syncId)
-                writeVarInt((scrollBar.knob * maxScroll + 0.5).toInt())
+                int(syncId)
+                int((scrollBar.knob * maxScroll + 0.5).toInt())
             }
             return true
         }

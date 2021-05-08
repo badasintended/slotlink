@@ -1,10 +1,10 @@
 package badasintended.slotlink.client.gui.screen
 
+import badasintended.slotlink.client.compat.invsort.InventorySortButton
 import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.Element
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
@@ -19,10 +19,14 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
 
     abstract val baseTlKey: String
 
-    private var clickedElement: Element? = null
-    var hoveredElement: Element? = null
+    private var clickedElement: AbstractButtonWidget? = null
+    var hoveredElement: AbstractButtonWidget? = null
 
     fun tl(key: String, vararg args: Any) = TranslatableText("$baseTlKey.$key", *args)
+
+    protected inline fun <T : AbstractButtonWidget> add(t: T, func: T.() -> Unit = {}): T {
+        return addButton(t).apply(func)
+    }
 
     override fun render(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(matrices, mouseX, mouseY, delta)
@@ -30,8 +34,8 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
         if (playerInventory.cursorStack.isEmpty && focusedSlot != null && focusedSlot!!.hasStack()) {
             this.renderTooltip(matrices, focusedSlot!!.stack, mouseX, mouseY)
         } else {
-            hoveredElement = hoveredElement(mouseX.toDouble(), mouseY.toDouble()).orElse(null)
-            (hoveredElement as? AbstractButtonWidget)?.renderToolTip(matrices, mouseX, mouseY)
+            hoveredElement = hoveredElement(mouseX.toDouble(), mouseY.toDouble()).orElse(null) as? AbstractButtonWidget
+            if (hoveredElement !is InventorySortButton) hoveredElement?.renderToolTip(matrices, mouseX, mouseY)
         }
     }
 
@@ -50,7 +54,7 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         val result = super.mouseClicked(mouseX, mouseY, button)
-        clickedElement = hoveredElement(mouseX, mouseY).orElse(null)
+        clickedElement = hoveredElement
         return result
     }
 

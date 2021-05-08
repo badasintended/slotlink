@@ -93,7 +93,7 @@ fun modId(path: String) = Identifier(Slotlink.ID, path)
 
 val log: Logger = LogManager.getLogger(Slotlink.ID)
 
-fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
+inline fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
     player as ServerPlayerEntity
     ServerPlayNetworking.send(player, id, buf().apply(buf))
 }
@@ -141,8 +141,6 @@ fun BlockPosSet.fromTag(tag: ListTag) {
 }
 
 fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
-
-fun PacketByteBuf.readStr(): String = readString(32767)
 
 fun Int.toFormattedString(): String = when {
     this < 1000 -> "$this"

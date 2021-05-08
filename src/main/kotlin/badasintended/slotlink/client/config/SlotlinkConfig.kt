@@ -22,9 +22,10 @@ val config: SlotlinkConfig by lazy {
 
 @Serializable
 class SlotlinkConfig(
+    var autoFocusSearchBar: Boolean = false,
     var showCraftingGrid: Boolean = true,
-    var syncReiSearch: Boolean = false,
-    var sort: Sort = Sort.COUNT_DESC
+    var sort: Sort = Sort.COUNT_DESC,
+    var syncReiSearch: Boolean = false
 ) {
 
     fun save() {
