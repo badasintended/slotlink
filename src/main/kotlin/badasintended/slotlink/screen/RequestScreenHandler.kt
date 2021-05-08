@@ -8,10 +8,20 @@ import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
 import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
-import badasintended.slotlink.mixin.SlotAccessor
 import badasintended.slotlink.screen.slot.DisabledSlot
-import badasintended.slotlink.util.*
+import badasintended.slotlink.util.BlockEntityWatcher
+import badasintended.slotlink.util.MasterWatcher
+import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.actionBar
+import badasintended.slotlink.util.allEmpty
+import badasintended.slotlink.util.index
+import badasintended.slotlink.util.input
+import badasintended.slotlink.util.int
+import badasintended.slotlink.util.isItemAndTagEqual
+import badasintended.slotlink.util.merge
+import badasintended.slotlink.util.result
+import badasintended.slotlink.util.s2c
+import badasintended.slotlink.util.stack
 import java.util.*
 import kotlin.collections.set
 import kotlin.math.ceil
@@ -24,7 +34,11 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.*
+import net.minecraft.recipe.CraftingRecipe
+import net.minecraft.recipe.Ingredient
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeGridAligner
+import net.minecraft.recipe.RecipeType
 import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
@@ -198,7 +212,7 @@ open class RequestScreenHandler(
                 }
                 if (quickMove) slots
                     .filter { (it.inventory is PlayerInventory) && it.canInsert(cursor) }
-                    .sortedBy { (it as SlotAccessor).index }
+                    .sortedBy { it.index }
                     .sortedByDescending { it.stack.count }
                     .forEach {
                         val stack = it.stack
@@ -219,8 +233,6 @@ open class RequestScreenHandler(
 
     fun craftingResultSlotClick(button: Int, quickMove: Boolean) {
         if (button !in 0..2) return
-
-        this as CraftingScreenHandlerAccessor
 
         var cursor = playerInventory.cursorStack
         val resultStack = result.getStack(0)
@@ -295,11 +307,15 @@ open class RequestScreenHandler(
 
     fun move() {
         var cursor = playerInventory.cursorStack
-        slots
-            .filter {
-                (it.inventory is PlayerInventory) && it.canTakeItems(player) && (cursor.isEmpty || cursor.isItemEqual(it.stack))
+        slots.forEach {
+            if (it.inventory is PlayerInventory
+                && it.index >= 9
+                && it.canTakeItems(player)
+                && (cursor.isEmpty || cursor.isItemEqual(it.stack))
+            ) {
+                it.stack = moveStack(it.stack)
             }
-            .forEach { it.stack = moveStack(it.stack) }
+        }
 
         if (!cursor.isEmpty) {
             cursor = moveStack(cursor)
@@ -320,8 +336,6 @@ open class RequestScreenHandler(
     }
 
     open fun resize(viewedHeight: Int, craft: Boolean) {
-        this as CraftingScreenHandlerAccessor
-
         val coerced = viewedHeight.coerceIn(3, 6)
         val h = coerced * 18 + 23
 
@@ -427,7 +441,6 @@ open class RequestScreenHandler(
     }
 
     override fun acceptAlignedInput(inputs: Iterator<Ingredient>, slot: Int, amount: Int, gridX: Int, gridY: Int) {
-        this as CraftingScreenHandlerAccessor
         val ingredient = inputs.next()
         if (ingredient.isEmpty) return
 
@@ -444,8 +457,6 @@ open class RequestScreenHandler(
     }
 
     override fun onContentChanged(inventory: Inventory) {
-        this as CraftingScreenHandlerAccessor
-
         if (inventory is CraftingInventory) if (player is ServerPlayerEntity) {
             var stack = ItemStack.EMPTY
             val optional: Optional<CraftingRecipe> =
@@ -512,7 +523,6 @@ open class RequestScreenHandler(
     override fun getType(): ScreenHandlerType<*> = Screens.REQUEST
 
     override fun close(player: PlayerEntity) {
-        this as CraftingScreenHandlerAccessor
         slots.filter { it.inventory is CraftingInventory }.forEach {
             it.stack = moveStack(it.stack)
         }
