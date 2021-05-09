@@ -5,6 +5,7 @@ import badasintended.slotlink.client.gui.widget.CharGrabber
 import badasintended.slotlink.client.gui.widget.KeyGrabber
 import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.drawNinePatch
+import badasintended.slotlink.screen.slot.LockedSlot
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -48,8 +49,17 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
         drawNinePatch(matrices, x, y, backgroundWidth, backgroundHeight, 0f, 0f, 4, 8)
 
         handler.slots.forEach {
-            if (it != null) {
-                drawNinePatch(matrices, x + it.x - 1, y + it.y - 1, 18, 18, 16f, 0f, 1, 14)
+            drawNinePatch(matrices, x + it.x - 1, y + it.y - 1, 18, 18, 16f, 0f, 1, 14)
+        }
+    }
+
+    override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+        super.drawForeground(matrices, mouseX, mouseY)
+
+        bindGuiTexture()
+        handler.slots.forEach {
+            if (it is LockedSlot) {
+                drawTexture(matrices, it.x, it.y, 32, 32, 16, 16)
             }
         }
     }

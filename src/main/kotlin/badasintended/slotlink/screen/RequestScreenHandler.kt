@@ -8,7 +8,7 @@ import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
 import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.screen.slot.DisabledSlot
+import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.util.BlockEntityWatcher
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
@@ -367,7 +367,7 @@ open class RequestScreenHandler(
 
         addSlot(CraftingResultSlot(playerInventory.player, this.input, this.result, 0, -999999, -999999 + h))
         for (m in 0 until 3) for (l in 0 until 3) {
-            addSlot(if (craft) Slot(input, l + m * 3, 30 + l * 18, 8 + m * 18 + h) else DisabledSlot(input, l + m * 3))
+            addSlot(if (craft) Slot(input, l + m * 3, 30 + l * 18, 8 + m * 18 + h) else LockedSlot(input, l + m * 3))
         }
 
         for (m in 0 until 3) for (l in 0 until 9) {

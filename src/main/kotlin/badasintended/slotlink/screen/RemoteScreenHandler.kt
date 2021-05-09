@@ -4,8 +4,8 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
-import badasintended.slotlink.mixin.SlotAccessor
-import badasintended.slotlink.screen.slot.DisabledSlot
+import badasintended.slotlink.screen.slot.LockedSlot
+import badasintended.slotlink.util.index
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
@@ -33,8 +33,7 @@ class RemoteScreenHandler : RequestScreenHandler {
 
         if (!offHand) if (playerInventory.mainHandStack.item is MultiDimRemoteItem) playerInventory.apply {
             slots.forEachIndexed { i, slot ->
-                slot as SlotAccessor
-                if (slot.stack == mainHandStack) slots[i] = DisabledSlot(slot.inventory, slot.index)
+                if (slot.stack == mainHandStack) slots[i] = LockedSlot(slot.inventory, slot.index, slot.x, slot.y)
             }
         }
     }
