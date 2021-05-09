@@ -233,11 +233,11 @@ open class RequestScreenHandler(
                         THROW -> player.dropItem(stack, true)
                         else -> {
                             if (type == QUICK_MOVE) slots
-                                .filter { (it.inventory is PlayerInventory) && it.canInsert(cursor) }
+                                .filter { (it.inventory is PlayerInventory) && it.canInsert(stack) }
                                 .sortedBy { it.index }
                                 .sortedByDescending { it.stack.count }
                                 .forEach {
-                                    val merged = it.stack.merge(cursor)
+                                    val merged = it.stack.merge(stack)
                                     it.stack = merged.first
                                     stack = merged.second
                                 }
