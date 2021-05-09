@@ -6,6 +6,7 @@ import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.bool
+import badasintended.slotlink.util.enum
 import badasintended.slotlink.util.id
 import badasintended.slotlink.util.int
 import badasintended.slotlink.util.modId
@@ -19,6 +20,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
@@ -31,7 +33,7 @@ object Packets : Initializer {
     val RESIZE = modId("resize")
     val SORT = modId("sort")
     val SCROLL = modId("scroll")
-    val MULTI_SLOT_CLICK = modId("multi_slot_click")
+    val MULTI_SLOT_ACTION = modId("multi_slot_action")
     val CRAFTING_RESULT_SLOT_CLICK = modId("crafting_result_slot_click")
     val CLEAR_CRAFTING_GRID = modId("clear_crafting_grid")
     val APPLY_RECIPE = modId("apply_recipe")
@@ -50,7 +52,7 @@ object Packets : Initializer {
     override fun main() {
         s(SORT) { server, player, _, buf, _ ->
             val syncId = buf.int
-            val sort = Sort.of(buf.int)
+            val sort = buf.enum<Sort>()
             val filter = buf.string
 
             server.execute {
@@ -73,16 +75,16 @@ object Packets : Initializer {
             }
         }
 
-        s(MULTI_SLOT_CLICK) { server, player, _, buf, _ ->
+        s(MULTI_SLOT_ACTION) { server, player, _, buf, _ ->
             val syncId = buf.int
             val index = buf.int
             val button = buf.int
-            val quickMove = buf.bool
+            val type = buf.enum<SlotActionType>()
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.multiSlotClick(index, button, quickMove)
+                    handler.multiSlotAction(index, button, type)
                 }
             }
         }

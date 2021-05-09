@@ -17,6 +17,7 @@ import badasintended.slotlink.init.Packets.SCROLL
 import badasintended.slotlink.init.Packets.SORT
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.bool
+import badasintended.slotlink.util.enum
 import badasintended.slotlink.util.int
 import badasintended.slotlink.util.string
 import net.fabricmc.api.EnvType
@@ -106,11 +107,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             onPressed = {
                 sort = sort.next()
                 scrollBar.knob = 0f
-                c2s(SORT) {
-                    int(syncId)
-                    int(sort.ordinal)
-                    string(filter)
-                }
+                sort()
             }
             onHovered = { matrices, x, y ->
                 renderTooltip(matrices, tl("sort.${sort}"), x, y)
@@ -232,24 +229,24 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             tooltip.add(tl("search.tip3"))
             setChangedListener {
                 if (it != filter) {
-                    c2s(SORT) {
-                        int(syncId)
-                        int(sort.ordinal)
-                        string(it)
-                    }
                     scrollBar.knob = 0f
                     filter = it
+                    sort()
                     if (syncRei) reiSearchHandler?.invoke(filter)
                 }
             }
             if (config.autoFocusSearchBar) {
-                setInitialFocus(this)
+                grab = true
             }
         }
 
+        sort()
+    }
+
+    private fun sort() {
         c2s(SORT) {
             int(syncId)
-            int(sort.ordinal)
+            enum(sort)
             string(filter)
         }
     }
@@ -287,7 +284,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
     override fun tick() {
         super.tick()
-        if (searchBar.isFocused) searchBar.tick()
+        if (searchBar.grab) searchBar.tick()
     }
 
     override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
@@ -313,16 +310,16 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return if (searchBar.isFocused) {
+        return if (searchBar.grab) {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-                searchBar.changeFocus(false)
+                searchBar.grab = false
                 true
             } else {
                 searchBar.keyPressed(keyCode, scanCode, modifiers)
             }
         } else if (client!!.options.keyChat.matchesKey(keyCode, scanCode)) {
             skipChar = true
-            searchBar.changeFocus(true)
+            searchBar.grab = true
             true
         } else {
             super.keyPressed(keyCode, scanCode, modifiers)

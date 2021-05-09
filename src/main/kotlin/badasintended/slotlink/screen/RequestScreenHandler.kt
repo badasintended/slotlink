@@ -46,6 +46,11 @@ import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.screen.slot.SlotActionType.CLONE
+import net.minecraft.screen.slot.SlotActionType.PICKUP
+import net.minecraft.screen.slot.SlotActionType.QUICK_MOVE
+import net.minecraft.screen.slot.SlotActionType.SWAP
+import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
@@ -55,7 +60,9 @@ open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
     private val inventories: Set<FilteredInventory>,
-) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, BlockEntityWatcher<RequestBlockEntity>,
+) : CraftingScreenHandler(syncId, playerInventory),
+    MasterWatcher,
+    BlockEntityWatcher<RequestBlockEntity>,
     RecipeGridAligner<Ingredient> {
 
     val player: PlayerEntity = playerInventory.player
@@ -198,33 +205,48 @@ open class RequestScreenHandler(
     }
 
     /** server only **/
-    fun multiSlotClick(i: Int, button: Int, quickMove: Boolean) {
+    fun multiSlotAction(i: Int, data: Int, type: SlotActionType) {
+        val viewed = viewedStacks[i].first
         var cursor = playerInventory.cursorStack
+
         if (cursor.isEmpty) {
-            if (button == 0 || button == 1) {
-                val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(viewedStacks[i].first) }
-                pairs.forEach {
-                    if (cursor.count < cursor.maxCount) {
-                        val merged = cursor.merge(it.stack)
-                        cursor = merged.first
-                        it.stack = merged.second
+            if (type == CLONE) {
+                if (player.abilities.creativeMode && cursor.isEmpty) cursor = viewed.copy().apply { count = maxCount }
+            } else {
+                if (type == THROW && data == 0) {
+                    val slot = filledSlots.first { it.stack.isItemAndTagEqual(viewed) }
+                    player.dropItem(slot.stack.copy().apply { count = 1 }, true)
+                    slot.stack.decrement(1)
+                } else if (type != SWAP || !playerInventory.getStack(data).isItemAndTagEqual(viewed)) {
+                    var stack = if (type == SWAP) playerInventory.getStack(data).copy() else ItemStack.EMPTY
+                    filledSlots.any {
+                        if (it.stack.isItemAndTagEqual(viewed)) {
+                            val merged = stack.merge(it.stack)
+                            stack = merged.first
+                            it.stack = merged.second
+                        }
+                        if (stack.isEmpty) false else stack.count < stack.maxCount
+                    }
+
+                    when (type) {
+                        SWAP -> playerInventory.setStack(data, stack)
+                        THROW -> player.dropItem(stack, true)
+                        else -> {
+                            if (type == QUICK_MOVE) slots
+                                .filter { (it.inventory is PlayerInventory) && it.canInsert(cursor) }
+                                .sortedBy { it.index }
+                                .sortedByDescending { it.stack.count }
+                                .forEach {
+                                    val merged = it.stack.merge(cursor)
+                                    it.stack = merged.first
+                                    stack = merged.second
+                                }
+                            cursor = stack
+                        }
                     }
                 }
-                if (quickMove) slots
-                    .filter { (it.inventory is PlayerInventory) && it.canInsert(cursor) }
-                    .sortedBy { it.index }
-                    .sortedByDescending { it.stack.count }
-                    .forEach {
-                        val stack = it.stack
-                        val merged = stack.merge(cursor)
-                        it.stack = merged.first
-                        cursor = merged.second
-                    }
-            } else if (button == 2) {
-                if (player.abilities.creativeMode && cursor.isEmpty) cursor =
-                    viewedStacks[i].first.copy().apply { count = maxCount }
             }
-        } else if (button == 0) {
+        } else if (type == PICKUP) {
             cursor = moveStack(cursor)
         }
 

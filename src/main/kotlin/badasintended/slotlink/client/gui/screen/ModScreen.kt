@@ -1,6 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.compat.invsort.InventorySortButton
+import badasintended.slotlink.client.gui.widget.CharGrabber
+import badasintended.slotlink.client.gui.widget.KeyGrabber
 import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
@@ -68,6 +70,16 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         focused?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+    }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return buttons.any { it is KeyGrabber && it.onKey(keyCode, scanCode, modifiers) }
+            || super.keyPressed(keyCode, scanCode, modifiers)
+    }
+
+    override fun charTyped(char: Char, modifiers: Int): Boolean {
+        return buttons.any { it is CharGrabber && it.onChar(char, modifiers) }
+            || super.charTyped(char, modifiers)
     }
 
 }

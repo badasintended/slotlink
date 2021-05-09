@@ -20,3 +20,6 @@ inline val B.stack get() = readItemStack()
 
 inline fun B.id(id: Identifier) = writeIdentifier(id)
 inline val B.id get() = readIdentifier()
+
+inline fun B.enum(enum: Enum<*>) = writeVarInt(enum.ordinal)
+inline fun <reified T : Enum<T>> B.enum() = enumValues<T>()[int]
