@@ -66,7 +66,7 @@ class ReiPlugin : REIPluginV0 {
                     return@r TypedActionResult.success(EntryStack.create(element.stack))
                 }
             }
-            TypedActionResult.fail(EntryStack.empty())
+            TypedActionResult.pass(EntryStack.empty())
         }
 
         recipeHelper.registerClickArea(
