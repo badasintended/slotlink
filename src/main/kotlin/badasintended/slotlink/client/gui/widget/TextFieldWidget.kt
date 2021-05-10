@@ -25,7 +25,6 @@ class TextFieldWidget(
     var grab = false
         set(value) {
             field = value
-            isFocused = value
             focusedTicks = 0
         }
 
@@ -58,6 +57,10 @@ class TextFieldWidget(
     }
 
     override fun isActive(): Boolean {
+        return grab
+    }
+
+    override fun isFocused(): Boolean {
         return grab
     }
 
