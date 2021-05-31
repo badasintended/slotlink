@@ -1,10 +1,13 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
+import net.minecraft.block.BlockState
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE) {
+class ExportCableBlockEntity(pos: BlockPos, state: BlockState) :
+    TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE, pos, state) {
 
     override var side = Direction.UP
 

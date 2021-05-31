@@ -5,7 +5,6 @@ import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
 import badasintended.slotlink.screen.slot.LockedSlot
-import badasintended.slotlink.util.index
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType

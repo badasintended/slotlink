@@ -15,7 +15,7 @@ import net.minecraft.screen.slot.Slot
 @Suppress("LeakingThis")
 open class LinkScreenHandler(
     syncId: Int,
-    val playerInv: PlayerInventory,
+    playerInv: PlayerInventory,
     var priority: Int,
     var blacklist: Boolean,
     val filter: MutableList<Pair<ItemStack, Boolean>>,
@@ -37,14 +37,14 @@ open class LinkScreenHandler(
 
     fun filterSlotClick(i: Int, button: Int) {
         if (button !in 0..1) return
-        val stack = playerInv.cursorStack.copy().apply { count = 1 }
+        val stack = cursorStack.copy().apply { count = 1 }
         if (button != 1) stack.tag = null
-        filter[i] = stack to (button == 1 && !playerInv.cursorStack.isEmpty)
+        filter[i] = stack to (button == 1 && cursorStack.isEmpty)
     }
 
     override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {
         var itemStack = ItemStack.EMPTY
-        val slot = slots[index] ?: return itemStack
+        val slot = slots[index]
         if (slot.hasStack()) {
             val itemStack2 = slot.stack
             itemStack = itemStack2.copy()

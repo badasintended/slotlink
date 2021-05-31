@@ -24,7 +24,7 @@
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {
     "fabricloader"          : ">=0.8",
-    "minecraft"             : "1.16.x",
+    "minecraft"             : "1.17.x",
     "fabric"                : "*",
     "fabric-language-kotlin": ">=1.6"
   }

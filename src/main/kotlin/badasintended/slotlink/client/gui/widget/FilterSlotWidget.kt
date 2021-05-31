@@ -12,10 +12,10 @@ import net.minecraft.item.ItemStack
 
 @Environment(EnvType.CLIENT)
 class FilterSlotWidget(
-    private val handler: LinkScreenHandler,
+    handler: LinkScreenHandler,
     private val index: Int,
     x: Int, y: Int
-) : SlotWidget(x, y, 18, handler.playerInv, { handler.filter[index].first }) {
+) : SlotWidget<LinkScreenHandler>(x, y, 18, handler, { handler.filter[index].first }) {
 
     private val nbt get() = handler.filter[index].second
 

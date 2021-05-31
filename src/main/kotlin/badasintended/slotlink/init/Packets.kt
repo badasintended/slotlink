@@ -223,7 +223,7 @@ object Packets : Initializer {
             val stack = buf.stack
 
             client.execute {
-                client.player!!.inventory.cursorStack = stack
+                client.player!!.currentScreenHandler.cursorStack = stack
             }
         }
 

@@ -10,11 +10,13 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.tag.TagRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
+import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtList
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -28,15 +30,18 @@ import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-fun BlockPos.toTag(): CompoundTag {
-    val tag = CompoundTag()
+typealias BlockPosSet = ObjectOpenHashSet<BlockPos>
+typealias BlockEntityBuilder = (BlockPos, BlockState) -> BlockEntity
+
+fun BlockPos.toNbt(): NbtCompound {
+    val tag = NbtCompound()
     tag.putInt("x", x)
     tag.putInt("y", y)
     tag.putInt("z", z)
     return tag
 }
 
-fun CompoundTag.toPos(): BlockPos {
+fun NbtCompound.toPos(): BlockPos {
     return BlockPos(getInt("x"), getInt("y"), getInt("z"))
 }
 
@@ -131,13 +136,12 @@ var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
 
-typealias BlockPosSet = ObjectOpenHashSet<BlockPos>
 
-fun BlockPosSet.toTag() = mapTo(ListTag(), BlockPos::toTag)
+fun BlockPosSet.toNbt() = mapTo(NbtList(), BlockPos::toNbt)
 
-fun BlockPosSet.fromTag(tag: ListTag) {
+fun BlockPosSet.fromTag(tag: NbtList) {
     clear()
-    tag.mapTo(this) { (it as CompoundTag).toPos() }
+    tag.mapTo(this) { (it as NbtCompound).toPos() }
 }
 
 fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)

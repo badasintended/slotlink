@@ -4,15 +4,14 @@ import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.util.actionBar
+import badasintended.slotlink.util.toNbt
 import badasintended.slotlink.util.toPos
-import badasintended.slotlink.util.toTag
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
@@ -64,9 +63,9 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         }
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        val masterDim = RegistryKey.of(Registry.DIMENSION, Identifier(stack.orCreateTag.getString("masterDim")))
+        val masterDim = RegistryKey.of(Registry.WORLD_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
 
-        if (masterPosTag == CompoundTag()) {
+        if (masterPosTag.isEmpty) {
             player.actionBar("${baseTlKey}.hasNoMaster")
         } else use(world, player, stack, hand, masterPosTag.toPos(), masterDim)
 
@@ -83,7 +82,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         val block = world.getBlockState(pos).block
         if (block is MasterBlock) {
             if (player != null) if (player.isSneaking) {
-                stack.orCreateTag.put("masterPos", pos.toTag())
+                stack.orCreateTag.put("masterPos", pos.toNbt())
                 stack.orCreateTag.putString("masterDim", dimId)
                 player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
                 return ActionResult.SUCCESS
@@ -99,7 +98,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         tooltip.add(TranslatableText("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
 
         val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        if (masterPosTag != CompoundTag()) {
+        if (!masterPosTag.isEmpty) {
             val masterPos = masterPosTag.toPos()
             val masterDim = Identifier(stack.orCreateTag.getString("masterDim"))
             tooltip.add(

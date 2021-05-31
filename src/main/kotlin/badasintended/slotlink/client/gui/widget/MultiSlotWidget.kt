@@ -28,10 +28,10 @@ import net.minecraft.util.Formatting
  */
 @Environment(EnvType.CLIENT)
 class MultiSlotWidget(
-    private val handler: RequestScreenHandler,
+    handler: RequestScreenHandler,
     private val index: Int,
     x: Int, y: Int
-) : SlotWidget(x, y, 18, handler.playerInventory, { handler.viewedStacks[index].first }),
+) : SlotWidget<RequestScreenHandler>(x, y, 18, handler, { handler.viewedStacks[index].first }),
     KeyGrabber {
 
     private val count get() = handler.viewedStacks[index].second

@@ -6,15 +6,15 @@ import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.screen.ScreenHandler
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
-abstract class SlotWidget(
+abstract class SlotWidget<SH : ScreenHandler>(
     x: Int, y: Int, s: Int,
-    private val playerInventory: PlayerInventory,
+    protected val handler: SH,
     private val stackGetter: () -> ItemStack
 ) : NoSoundWidget(x, y, s, s, LiteralText.EMPTY) {
 
@@ -51,7 +51,7 @@ abstract class SlotWidget(
         fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
 
         client.apply {
-            if (playerInventory.cursorStack.isEmpty && !stack.isEmpty) {
+            if (handler.cursorStack.isEmpty && !stack.isEmpty) {
                 val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
                 appendTooltip(tooltips)
                 currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)

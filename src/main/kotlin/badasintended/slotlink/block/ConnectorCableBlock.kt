@@ -1,11 +1,11 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
+import badasintended.slotlink.util.BlockEntityBuilder
 import badasintended.slotlink.util.bbCuboid
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.InventoryProvider
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -25,7 +25,7 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlock(id, be) {
+abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : CableBlock(id, builder) {
 
     companion object {
 

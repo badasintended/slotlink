@@ -14,7 +14,6 @@ import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
-import badasintended.slotlink.util.index
 import badasintended.slotlink.util.input
 import badasintended.slotlink.util.int
 import badasintended.slotlink.util.isItemAndTagEqual
@@ -114,7 +113,6 @@ open class RequestScreenHandler(
         }
 
         addListener(object : ScreenHandlerListener {
-            override fun onHandlerRegistered(handler: ScreenHandler, stacks: DefaultedList<ItemStack>) {}
             override fun onPropertyUpdate(handler: ScreenHandler, property: Int, value: Int) {}
 
             override fun onSlotUpdate(handler: ScreenHandler, slotId: Int, stack: ItemStack) {
@@ -153,8 +151,9 @@ open class RequestScreenHandler(
                         !Registry.ITEM.getId(it.stack.item).toString().contains(value, true)
                     }
                     '#' -> filledSlots.removeIf r@{ entry ->
-                        val tags =
-                            player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
+                        val tags = player.world.tagManager
+                            .getOrCreateTagGroup(Registry.ITEM_KEY)
+                            .tags.filterValues { it.contains(entry.stack.item) }.keys
                         if (tags.isEmpty() && value.isBlank()) return@r false
                         else return@r tags.none { it.toString().contains(value, true) }
                     }
@@ -207,7 +206,7 @@ open class RequestScreenHandler(
     /** server only **/
     fun multiSlotAction(i: Int, data: Int, type: SlotActionType) {
         val viewed = viewedStacks[i].first
-        var cursor = playerInventory.cursorStack
+        var cursor = cursorStack
 
         if (cursor.isEmpty) {
             if (type == CLONE) {
@@ -256,7 +255,7 @@ open class RequestScreenHandler(
     fun craftingResultSlotClick(button: Int, quickMove: Boolean) {
         if (button !in 0..2) return
 
-        var cursor = playerInventory.cursorStack
+        var cursor = cursorStack
         val resultStack = result.getStack(0)
 
         if (button == 2) {
@@ -316,7 +315,7 @@ open class RequestScreenHandler(
         if (recipe.type == RecipeType.CRAFTING) {
             clearCraftingGrid()
             sendContentUpdates()
-            alignRecipeToGrid(3, 3, -1, recipe, recipe.previewInputs.iterator(), 0)
+            alignRecipeToGrid(3, 3, -1, recipe, recipe.ingredients.iterator(), 0)
         }
     }
 
@@ -328,7 +327,7 @@ open class RequestScreenHandler(
     }
 
     fun move() {
-        var cursor = playerInventory.cursorStack
+        var cursor = cursorStack
         slots.forEach {
             if (it.inventory is PlayerInventory
                 && it.index >= 9
@@ -347,7 +346,7 @@ open class RequestScreenHandler(
     }
 
     fun restock() {
-        var cursor = playerInventory.cursorStack
+        var cursor = cursorStack
         if (cursor.isEmpty) slots.filter { it.inventory is PlayerInventory }.forEach {
             it.stack = it.stack.restock()
         } else {
@@ -382,7 +381,7 @@ open class RequestScreenHandler(
     }
 
     private fun updateCursor(stack: ItemStack) {
-        playerInventory.cursorStack = stack
+        cursorStack = stack
         s2c(player, UPDATE_CURSOR) {
             stack(stack)
         }
@@ -433,13 +432,12 @@ open class RequestScreenHandler(
         }
     }
 
-    override fun onSlotClick(i: Int, j: Int, actionType: SlotActionType, playerEntity: PlayerEntity): ItemStack {
-        if (playerEntity !is ServerPlayerEntity) return ItemStack.EMPTY
-        val result = super.onSlotClick(i, j, actionType, playerEntity)
+    override fun onSlotClick(i: Int, j: Int, actionType: SlotActionType, playerEntity: PlayerEntity) {
+        if (playerEntity !is ServerPlayerEntity) return
+        super.onSlotClick(i, j, actionType, playerEntity)
         s2c(playerEntity, UPDATE_CURSOR) {
-            stack(playerEntity.inventory.cursorStack)
+            stack(cursorStack)
         }
-        return result
     }
 
     override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {
@@ -548,7 +546,7 @@ open class RequestScreenHandler(
         slots.filter { it.inventory is CraftingInventory }.forEach {
             it.stack = moveStack(it.stack)
         }
-        dropInventory(player, player.world, input)
+        dropInventory(player, input)
         request?.watchers?.remove(this)
         request?.markDirty()
         master?.watchers?.remove(this)

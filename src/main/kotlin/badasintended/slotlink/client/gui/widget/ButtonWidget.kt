@@ -4,12 +4,13 @@ import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.widget.AbstractButtonWidget
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.LiteralText
 
 @Environment(EnvType.CLIENT)
-class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : AbstractButtonWidget(x, y, w, h, LiteralText.EMPTY) {
+class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w, h, LiteralText.EMPTY) {
 
     var onHovered: (MatrixStack, Int, Int) -> Unit = { _, _, _ -> }
     var onPressed = { }
@@ -64,6 +65,8 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : AbstractButtonWidget(x,
         down = false
         return super.mouseReleased(mouseX, mouseY, button)
     }
+
+    override fun appendNarrations(builder: NarrationMessageBuilder?) {}
 
     override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
         if (visible) onHovered.invoke(matrices, mouseX, mouseY)

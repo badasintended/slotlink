@@ -1,5 +1,5 @@
 package badasintended.slotlink.client.compat.rei
-
+/*
 import badasintended.slotlink.client.gui.screen.RequestScreen
 import badasintended.slotlink.client.gui.screen.reiSearchHandler
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
@@ -88,4 +88,4 @@ class ReiPlugin : REIPluginV0 {
         })
     }
 
-}
+}*/

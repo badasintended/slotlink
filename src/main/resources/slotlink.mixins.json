@@ -2,18 +2,14 @@
   "required"          : true,
   "minVersion"        : "0.8",
   "package"           : "badasintended.slotlink.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins"            : [
     "CraftingScreenHandlerAccessor",
     "DoubleInventoryMixin",
-    "SlotAccessor",
-    "TextFieldWidgetAccessor",
     "WallMountedBlockMixin",
     "pseudo.DoubleSidedInventoryMixin"
   ],
-  "client"            : [
-    "pseudo.SortButtonWidgetMixin"
-  ],
+  "client"            : ["TextFieldWidgetAccessor", "pseudo.SortButtonWidgetMixin"],
   "injectors"         : {
     "defaultRequire": 1
   }

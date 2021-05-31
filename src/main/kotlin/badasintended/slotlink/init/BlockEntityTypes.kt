@@ -6,8 +6,8 @@ import badasintended.slotlink.block.entity.ExportCableBlockEntity
 import badasintended.slotlink.block.entity.ImportCableBlockEntity
 import badasintended.slotlink.block.entity.LinkCableBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
-import badasintended.slotlink.block.entity.ModBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
+import badasintended.slotlink.util.BlockEntityBuilder
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.util.registry.Registry
 import badasintended.slotlink.init.Blocks as B
@@ -34,7 +34,7 @@ object BlockEntityTypes : Initializer {
         EXPORT_CABLE = r(B.EXPORT_CABLE, ::ExportCableBlockEntity)
     }
 
-    private fun <E : ModBlockEntity> r(block: ModBlock, function: () -> E): BlockEntityType<E> {
+    private fun r(block: ModBlock, function: BlockEntityBuilder): T {
         return Registry.register(
             Registry.BLOCK_ENTITY_TYPE, block.id, BlockEntityType.Builder.create(function, block).build(null)
         )

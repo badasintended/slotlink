@@ -13,15 +13,17 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ConnectorCableBlockEntity(type) {
+abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
+    ConnectorCableBlockEntity(type, pos, state) {
 
     var redstone = OFF
 
@@ -41,15 +43,15 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
 
     override fun Block.isIgnored() = this is ModBlock
 
-    override fun fromTag(state: BlockState, tag: CompoundTag) {
-        super.fromTag(state, tag)
+    override fun readNbt(tag: NbtCompound) {
+        super.readNbt(tag)
 
         side = Direction.byId(tag.getInt("side"))
         redstone = RedstoneMode.of(tag.getInt("redstone"))
     }
 
-    override fun toTag(tag: CompoundTag): CompoundTag {
-        super.toTag(tag)
+    override fun writeNbt(tag: NbtCompound): NbtCompound {
+        super.writeNbt(tag)
 
         tag.putInt("side", side.id)
         tag.putInt("redstone", redstone.ordinal)
@@ -58,7 +60,16 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>) 
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-        return TransferScreenHandler(syncId, inv, priority, isBlackList, filter, side, redstone, ScreenHandlerContext.create(world, pos))
+        return TransferScreenHandler(
+            syncId,
+            inv,
+            priority,
+            isBlackList,
+            filter,
+            side,
+            redstone,
+            ScreenHandlerContext.create(world, pos)
+        )
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {

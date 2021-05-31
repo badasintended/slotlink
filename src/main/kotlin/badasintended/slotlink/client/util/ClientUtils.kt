@@ -4,11 +4,13 @@ package badasintended.slotlink.client.util
 
 import badasintended.slotlink.util.buf
 import badasintended.slotlink.util.modId
+import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
+import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
@@ -26,7 +28,8 @@ inline fun c2s(id: Identifier, buf: PacketByteBuf.() -> Unit) {
 }
 
 fun bindGuiTexture() {
-    client.textureManager.bindTexture(guiTexture)
+    RenderSystem.setShader(GameRenderer::getPositionTexShader)
+    RenderSystem.setShaderTexture(0, guiTexture)
 }
 
 private typealias DH = DrawableHelper

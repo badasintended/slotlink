@@ -31,7 +31,7 @@ class TextFieldWidget(
     val tooltip = arrayListOf<Text>()
 
     init {
-        setHasBorder(false)
+        setDrawsBackground(false)
         setEditableColor(0xffffff)
     }
 

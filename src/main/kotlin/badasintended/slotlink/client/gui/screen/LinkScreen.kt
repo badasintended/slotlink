@@ -9,7 +9,6 @@ import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.int
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
@@ -26,6 +25,8 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
 
     override fun init() {
         super.init()
+
+        titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2
 
         val x = x + 7
         val y = y + titleY + 11
@@ -72,12 +73,6 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
             int(priority)
             bool(blacklist)
         }
-    }
-
-    override fun init(client: MinecraftClient, width: Int, height: Int) {
-        super.init(client, width, height)
-
-        titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2
     }
 
     override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {

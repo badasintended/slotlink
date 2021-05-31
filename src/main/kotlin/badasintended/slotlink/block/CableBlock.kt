@@ -1,6 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.CableBlockEntity
+import badasintended.slotlink.util.BlockEntityBuilder
 import badasintended.slotlink.util.bbCuboid
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.util.function.IntFunction
@@ -10,7 +11,6 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Material
 import net.minecraft.block.ShapeContext
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
@@ -21,7 +21,8 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.WorldAccess
 
-open class CableBlock(id: String = "cable", be: () -> BlockEntity = ::CableBlockEntity) : ChildBlock(id, be, SETTINGS) {
+open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBlockEntity) :
+    ChildBlock(id, be, SETTINGS) {
 
     companion object {
 

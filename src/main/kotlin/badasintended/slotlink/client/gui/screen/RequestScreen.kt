@@ -22,8 +22,9 @@ import badasintended.slotlink.util.int
 import badasintended.slotlink.util.string
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.widget.AbstractButtonWidget
+import net.minecraft.client.gui.Element
+import net.minecraft.client.gui.Selectable
+import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
@@ -65,20 +66,33 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
     private var skipChar = false
 
-    private var inventorySortButton: AbstractButtonWidget? = null
+    private var inventorySortButton: ClickableWidget? = null
 
     override val baseTlKey: String
         get() = "container.slotlink.request"
 
     override fun init() {
+        val craftHeight = if (craftingGrid) 67 else 0
+
+        var viewedHeight = 3
+        for (i in 3..6) if (height > (119 + craftHeight + (i * 18))) viewedHeight = i
+
+        backgroundWidth = 9 * 18 + 14
+        backgroundHeight = viewedHeight * 18 + 114 + craftHeight
+
+        handler.resize(viewedHeight, craftingGrid)
+        c2s(RESIZE) {
+            int(syncId)
+            int(viewedHeight)
+            bool(craftingGrid)
+        }
+
         super.init()
 
         playerInventoryTitleY = backgroundHeight - 94
 
         val x = x + 7
         val y = y + titleY + 11
-
-        val craftHeight = if (craftingGrid) 67 else 0
 
         // Linked slot view
         for (i in 0 until viewedHeight * 9) {
@@ -162,7 +176,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                 }
             }
             onHovered = { matrices, x, y ->
-                if (playerInventory.cursorStack.isEmpty) {
+                if (handler.cursorStack.isEmpty) {
                     renderTooltip(matrices, tl("move.all"), x, y)
                 } else {
                     renderTooltip(matrices, tl("move.type"), x, y)
@@ -181,7 +195,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                 }
             }
             onHovered = { matrices, x, y ->
-                if (playerInventory.cursorStack.isEmpty) {
+                if (handler.cursorStack.isEmpty) {
                     renderTooltip(matrices, tl("restock.all"), x, y)
                 } else {
                     renderTooltip(matrices, tl("restock.cursor"), x, y)
@@ -251,35 +265,13 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         }
     }
 
-    override fun <T : AbstractButtonWidget?> addButton(button: T): T {
-        if (button is InventorySortButton && !button.initialized) {
-            button.initialized = true
-            inventorySortButton = button
-            return button
+    override fun <T> addSelectableChild(child: T): T where T : Element?, T : Selectable? {
+        if (child is ClickableWidget && child is InventorySortButton && !child.initialized) {
+            child.initialized = true
+            inventorySortButton = child
+            return child
         }
-        return super.addButton(button)
-    }
-
-    /**
-     * apparently this also called on resize
-     */
-    override fun init(client: MinecraftClient, width: Int, height: Int) {
-        val craftHeight = if (craftingGrid) 67 else 0
-
-        var viewedHeight = 3
-        for (i in 3..6) if (height > (119 + craftHeight + (i * 18))) viewedHeight = i
-
-        backgroundWidth = 9 * 18 + 14
-        backgroundHeight = viewedHeight * 18 + 114 + craftHeight
-
-        handler.resize(viewedHeight, craftingGrid)
-        c2s(RESIZE) {
-            int(syncId)
-            int(viewedHeight)
-            bool(craftingGrid)
-        }
-
-        super.init(client, width, height)
+        return super.addSelectableChild(child)
     }
 
     override fun tick() {

@@ -5,18 +5,19 @@ import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.util.BlockPosSet
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.fromTag
-import badasintended.slotlink.util.toTag
+import badasintended.slotlink.util.toNbt
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
-import java.util.SortedSet
+import java.util.*
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.block.entity.BlockEntityTicker
+import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.world.ServerWorld
-import net.minecraft.util.Tickable
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
-class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
+class MasterBlockEntity(pos: BlockPos, state: BlockState) : ModBlockEntity(BlockEntityTypes.MASTER, pos, state) {
 
     val linkPos = BlockPosSet()
     val importPos = BlockPosSet()
@@ -97,18 +98,18 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         }
     }
 
-    override fun toTag(tag: CompoundTag): CompoundTag {
-        super.toTag(tag)
+    override fun writeNbt(tag: NbtCompound): NbtCompound {
+        super.writeNbt(tag)
 
-        tag.put("linkCables", linkPos.toTag())
-        tag.put("exportCables", exportPos.toTag())
-        tag.put("importCables", importPos.toTag())
+        tag.put("linkCables", linkPos.toNbt())
+        tag.put("exportCables", exportPos.toNbt())
+        tag.put("importCables", importPos.toNbt())
 
         return tag
     }
 
-    override fun fromTag(state: BlockState, tag: CompoundTag) {
-        super.fromTag(state, tag)
+    override fun readNbt(tag: NbtCompound) {
+        super.readNbt(tag)
 
         linkPos.fromTag(tag.getList("linkCables", NbtType.COMPOUND))
         exportPos.fromTag(tag.getList("exportCables", NbtType.COMPOUND))
@@ -127,32 +128,36 @@ class MasterBlockEntity : ModBlockEntity(BlockEntityTypes.MASTER), Tickable {
         watchers.forEach { it.onMasterRemoved() }
     }
 
-    override fun tick() {
-        tick++
-        if (tick == 10) {
-            importCables.clear()
-            val world = getWorld() ?: return
-            importPos.forEach {
-                val blockEntity = world.getBlockEntity(it)
-                if (blockEntity is ImportCableBlockEntity) importCables.add(blockEntity)
-            }
-            importCables.sortByDescending { it.priority }
-            for (cable in importCables) {
-                if (cable.transfer(world, this)) break
-            }
-        } else if (tick == 20) {
-            tick = 0
-            exportCables.clear()
-            val world = getWorld() ?: return
-            exportPos.forEach {
-                val blockEntity = world.getBlockEntity(it)
-                if (blockEntity is ExportCableBlockEntity) exportCables.add(blockEntity)
-            }
-            exportCables.sortByDescending { it.priority }
-            for (cable in exportCables) {
-                if (cable.transfer(world, this)) break
+    object Ticker : BlockEntityTicker<MasterBlockEntity> {
+
+        override fun tick(world: World, pos: BlockPos, state: BlockState, masterBlockEntity: MasterBlockEntity) {
+            masterBlockEntity.apply {
+                tick++
+                if (tick == 10) {
+                    importCables.clear()
+                    importPos.forEach {
+                        val blockEntity = world.getBlockEntity(it)
+                        if (blockEntity is ImportCableBlockEntity) importCables.add(blockEntity)
+                    }
+                    importCables.sortByDescending { it.priority }
+                    for (cable in importCables) {
+                        if (cable.transfer(world, this)) break
+                    }
+                } else if (tick == 20) {
+                    tick = 0
+                    exportCables.clear()
+                    exportPos.forEach {
+                        val blockEntity = world.getBlockEntity(it)
+                        if (blockEntity is ExportCableBlockEntity) exportCables.add(blockEntity)
+                    }
+                    exportCables.sortByDescending { it.priority }
+                    for (cable in exportCables) {
+                        if (cable.transfer(world, this)) break
+                    }
+                }
             }
         }
+
     }
 
 }

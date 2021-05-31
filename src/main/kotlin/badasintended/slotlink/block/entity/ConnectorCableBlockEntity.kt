@@ -2,8 +2,8 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
 import badasintended.slotlink.inventory.FilteredInventory
+import badasintended.slotlink.util.toNbt
 import badasintended.slotlink.util.toPos
-import badasintended.slotlink.util.toTag
 import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.util.NbtType
@@ -16,8 +16,8 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.entity.ChestBlockEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtList
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
@@ -28,7 +28,8 @@ import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>) : ChildBlockEntity(type), ExtendedScreenHandlerFactory {
+abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
+    ChildBlockEntity(type, pos, state), ExtendedScreenHandlerFactory {
 
     var linkedPos: BlockPos = BlockPos.ORIGIN
         set(value) {
@@ -43,7 +44,11 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     private val filtered = FilteredInventory(filter) { isBlackList }
 
-    fun getInventory(world: WorldAccess, master: MasterBlockEntity? = null, request: Boolean = false): FilteredInventory {
+    fun getInventory(
+        world: WorldAccess,
+        master: MasterBlockEntity? = null,
+        request: Boolean = false
+    ): FilteredInventory {
         if (world !is World) return filtered.none
         if (!hasMaster) return filtered.none
 
@@ -83,21 +88,21 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
 
     protected abstract fun Block.isIgnored(): Boolean
 
-    override fun toTag(tag: CompoundTag): CompoundTag {
-        super.toTag(tag)
+    override fun writeNbt(tag: NbtCompound): NbtCompound {
+        super.writeNbt(tag)
 
         tag.putInt("priority", priority)
-        tag.put("linkedPos", linkedPos.toTag())
+        tag.put("linkedPos", linkedPos.toNbt())
         tag.putBoolean("isBlacklist", isBlackList)
 
-        val filterTag = CompoundTag()
-        val list = ListTag()
+        val filterTag = NbtCompound()
+        val list = NbtList()
         filter.forEachIndexed { i, pair ->
             if (!pair.first.isEmpty) {
-                val compound = CompoundTag()
+                val compound = NbtCompound()
                 compound.putByte("Slot", i.toByte())
                 compound.putBoolean("matchNbt", pair.second)
-                pair.first.toTag(compound)
+                pair.first.writeNbt(compound)
                 list.add(compound)
             }
         }
@@ -107,8 +112,8 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         return tag
     }
 
-    override fun fromTag(state: BlockState, tag: CompoundTag) {
-        super.fromTag(state, tag)
+    override fun readNbt(tag: NbtCompound) {
+        super.readNbt(tag)
 
         priority = tag.getInt("priority")
         linkedPos = tag.getCompound("linkedPos").toPos()
@@ -118,11 +123,11 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>)
         val list = filterTag.getList("Items", NbtType.COMPOUND)
 
         list.forEach {
-            it as CompoundTag
+            it as NbtCompound
             val slot = it.getByte("Slot").toInt()
             val nbt = it.getBoolean("matchNbt")
             if (slot in 0 until 9) {
-                val stack = ItemStack.fromTag(it)
+                val stack = ItemStack.fromNbt(it)
                 filter[slot] = stack to nbt
             }
         }

@@ -2,10 +2,10 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.block.entity.MasterBlockEntity
+import badasintended.slotlink.util.BlockEntityBuilder
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
@@ -15,8 +15,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
-abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity, settings: Settings = SETTINGS) :
-    ModBlock(id, settings), BlockEntityProvider {
+abstract class ChildBlock(
+    id: String,
+    private val blockEntityBuilder: BlockEntityBuilder,
+    settings: Settings = SETTINGS
+) : ModBlock(id, settings),
+    BlockEntityProvider {
 
     // TODO: Optimize this part
     override fun neighborUpdate(
@@ -69,7 +73,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
         }
     }
 
-    override fun createBlockEntity(world: BlockView) = blockEntity.invoke()
+    override fun createBlockEntity(pos: BlockPos, state: BlockState) = blockEntityBuilder(pos, state)
 
     override fun appendTooltip(
         stack: ItemStack,

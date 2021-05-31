@@ -2,35 +2,33 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.util.chat
-import badasintended.slotlink.util.toTag
+import badasintended.slotlink.util.toNbt
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtList
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
-import net.minecraft.world.BlockView
 import net.minecraft.world.World
 
 class MasterBlock : ModBlock("master"), BlockEntityProvider {
 
-    override fun createBlockEntity(view: BlockView): BlockEntity = MasterBlockEntity()
+    override fun createBlockEntity(pos: BlockPos, state: BlockState) = MasterBlockEntity(pos, state)
 
     override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {
         super.onPlaced(world, pos, state, placer, itemStack)
 
-        val blockEntity = world.getBlockEntity(pos)
-        val nbt = blockEntity!!.toTag(CompoundTag())
+        val blockEntity = world.getBlockEntity(pos)!!
+        val nbt = blockEntity.writeNbt(NbtCompound())
 
-        nbt.put("storagePos", ListTag())
-        blockEntity.fromTag(state, nbt)
+        nbt.put("storagePos", NbtList())
+        blockEntity.readNbt(nbt)
         blockEntity.markDirty()
     }
 
@@ -49,14 +47,14 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
         val neighborBlock = neighborState.block
 
         if (neighborBlock is ChildBlock) {
-            val neighborBlockEntity = world.getBlockEntity(neighborPos)
-            val neighborNbt = neighborBlockEntity!!.toTag(CompoundTag())
+            val neighborBlockEntity = world.getBlockEntity(neighborPos)!!
+            val neighborNbt = neighborBlockEntity.writeNbt(NbtCompound())
             val neighborHasMaster = neighborNbt.getBoolean("hasMaster")
             if (!neighborHasMaster) {
-                val masterPos = pos.toTag()
+                val masterPos = pos.toNbt()
                 neighborNbt.put("masterPos", masterPos)
                 neighborNbt.putBoolean("hasMaster", true)
-                neighborBlockEntity.fromTag(neighborState, neighborNbt)
+                neighborBlockEntity.readNbt(neighborNbt)
                 neighborBlockEntity.markDirty()
                 world.updateNeighbors(neighborPos, neighborBlock)
             }
@@ -80,10 +78,10 @@ class MasterBlock : ModBlock("master"), BlockEntityProvider {
             player.chat("$translationKey.use2", inventories.size)
             player.chat(
                 "$translationKey.use3",
-                inventories.map { it.size() }.sum(),
-                inventories.map { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }.sum()
+                inventories.sumOf { it.size() },
+                inventories.sumOf { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }
             )
-            player.chat("$translationKey.use4", inventories.map { it.size() * it.maxCountPerStack }.sum())
+            player.chat("$translationKey.use4", inventories.sumOf { it.size() * it.maxCountPerStack })
         }
         return ActionResult.SUCCESS
     }
