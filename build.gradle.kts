@@ -5,8 +5,8 @@ import net.fabricmc.loom.task.RunGameTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.5.0")
-    kotlin("plugin.serialization").version("1.5.0")
+    kotlin("jvm").version("1.5.10")
+    kotlin("plugin.serialization").version("1.5.10")
 
     id("fabric-loom").version("0.8-SNAPSHOT")
     id("com.matthewprenger.cursegradle").version("1.4.0")
@@ -56,7 +56,7 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "15"
+        jvmTarget = "16"
     }
 }
 
