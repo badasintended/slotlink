@@ -3,10 +3,12 @@ package badasintended.slotlink.block
 import badasintended.slotlink.util.modId
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
-import net.minecraft.block.Block
+import net.minecraft.block.BlockRenderType
+import net.minecraft.block.BlockState
+import net.minecraft.block.BlockWithEntity
 import net.minecraft.block.Material
 
-abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(settings) {
+abstract class ModBlock(id: String, settings: Settings = SETTINGS) : BlockWithEntity(settings) {
 
     companion object {
 
@@ -19,5 +21,9 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : Block(setti
     }
 
     val id = modId(id)
+
+    override fun getRenderType(state: BlockState?): BlockRenderType {
+        return BlockRenderType.MODEL
+    }
 
 }

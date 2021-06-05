@@ -1,6 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ModBlock
+import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.RedstoneMode.NEGATIVE
@@ -22,8 +23,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
-    ConnectorCableBlockEntity(type, pos, state) {
+abstract class TransferCableBlockEntity(
+    beType: BlockEntityType<out BlockEntity>,
+    conType: ConnectionType<*>,
+    pos: BlockPos,
+    state: BlockState
+) : ConnectorCableBlockEntity(beType, conType, pos, state) {
 
     var redstone = OFF
 
@@ -43,32 +48,25 @@ abstract class TransferCableBlockEntity(type: BlockEntityType<out BlockEntity>, 
 
     override fun Block.isIgnored() = this is ModBlock
 
-    override fun readNbt(tag: NbtCompound) {
-        super.readNbt(tag)
+    override fun readNbt(nbt: NbtCompound) {
+        super.readNbt(nbt)
 
-        side = Direction.byId(tag.getInt("side"))
-        redstone = RedstoneMode.of(tag.getInt("redstone"))
+        side = Direction.byId(nbt.getInt("side"))
+        redstone = RedstoneMode.of(nbt.getInt("redstone"))
     }
 
-    override fun writeNbt(tag: NbtCompound): NbtCompound {
-        super.writeNbt(tag)
+    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+        super.writeNbt(nbt)
 
-        tag.putInt("side", side.id)
-        tag.putInt("redstone", redstone.ordinal)
+        nbt.putInt("side", side.id)
+        nbt.putInt("redstone", redstone.ordinal)
 
-        return tag
+        return nbt
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
         return TransferScreenHandler(
-            syncId,
-            inv,
-            priority,
-            isBlackList,
-            filter,
-            side,
-            redstone,
-            ScreenHandlerContext.create(world, pos)
+            syncId, inv, priority, isBlackList, filter, side, redstone, ScreenHandlerContext.create(world, pos)
         )
     }
 

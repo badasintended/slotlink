@@ -1,10 +1,8 @@
 package badasintended.slotlink.block
 
-import badasintended.slotlink.block.entity.ChildBlockEntity
-import badasintended.slotlink.block.entity.MasterBlockEntity
+import badasintended.slotlink.network.Connection
 import badasintended.slotlink.util.BlockEntityBuilder
 import net.minecraft.block.Block
-import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack
@@ -12,65 +10,57 @@ import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
+import net.minecraft.world.WorldAccess
 
 abstract class ChildBlock(
     id: String,
     private val blockEntityBuilder: BlockEntityBuilder,
     settings: Settings = SETTINGS
-) : ModBlock(id, settings),
-    BlockEntityProvider {
+) : ModBlock(id, settings) {
 
-    // TODO: Optimize this part
     override fun neighborUpdate(
-        state: BlockState,
+        selfState: BlockState,
         world: World,
         pos: BlockPos,
         block: Block,
         neighborPos: BlockPos,
         moved: Boolean
     ) {
-        val blockEntity = world.getBlockEntity(pos) as ChildBlockEntity
-        val neighborBlock = world.getBlockState(neighborPos).block
-        val neighborBlockEntity = world.getBlockEntity(neighborPos)
-        val currentlyHasMaster = blockEntity.hasMaster
+        if (world.isClient) return
 
-        if (neighborBlockEntity is ChildBlockEntity) {
-            val neighborHasMaster = neighborBlockEntity.hasMaster
+        val connection = world.getBlockEntity(pos) as Connection
+        val neighborConnection = world.getBlockEntity(neighborPos) as? Connection
+        val neighborState = world.getBlockState(neighborPos)
 
-            val currentMasterPos = blockEntity.masterPos
-            val neighborMasterPos = neighborBlockEntity.masterPos
-
-            if (currentlyHasMaster && !neighborHasMaster) {
-                if (currentMasterPos == neighborMasterPos) {
-                    blockEntity.hasMaster = false
-                    blockEntity.markDirty()
-                    world.updateNeighbors(pos, block)
-                } else {
-                    neighborBlockEntity.hasMaster = true
-                    neighborBlockEntity.masterPos = currentMasterPos
-                    neighborBlockEntity.markDirty()
-                    world.updateNeighbors(neighborPos, neighborBlock)
-                }
-            } else if (!currentlyHasMaster && neighborHasMaster) {
-                blockEntity.hasMaster = true
-                blockEntity.masterPos = neighborMasterPos
-                blockEntity.markDirty()
-                world.updateNeighbors(pos, block)
-            }
-        } else if (neighborBlockEntity is MasterBlockEntity) {
-            if (!currentlyHasMaster) {
-                blockEntity.masterPos = neighborPos
-                blockEntity.hasMaster = true
-                blockEntity.markDirty()
-                world.updateNeighbors(pos, block)
-            }
-        } else if (currentlyHasMaster) {
-            blockEntity.hasMaster = false
-            blockEntity.markDirty()
+        if (connection.connect(neighborConnection)) {
             world.updateNeighbors(pos, block)
+        } else {
+            neighborConnection?.also {
+                if (it.connect(connection)) {
+                    world.updateNeighbors(neighborPos, neighborState.block)
+                }
+            }
         }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun getStateForNeighborUpdate(
+        state: BlockState,
+        direction: Direction,
+        neighborState: BlockState,
+        world: WorldAccess,
+        pos: BlockPos,
+        neighborPos: BlockPos
+    ): BlockState {
+        if (neighborState.isAir) {
+            val connection = world.getBlockEntity(pos) as Connection
+            connection.connectionData.sides.remove(direction)
+        }
+
+        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos)
     }
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = blockEntityBuilder(pos, state)

@@ -1,6 +1,10 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.util.toNbt
+import badasintended.slotlink.network.Connection
+import badasintended.slotlink.network.ConnectionData
+import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.Network
+import badasintended.slotlink.util.toArray
 import badasintended.slotlink.util.toPos
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -8,29 +12,48 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.BlockPos
 
-abstract class ChildBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
-    ModBlockEntity(type, pos, state) {
+abstract class ChildBlockEntity(
+    blockEntityType: BlockEntityType<out BlockEntity>,
+    connectionType: ConnectionType<*>,
+    pos: BlockPos,
+    state: BlockState
+) : ModBlockEntity(blockEntityType, pos, state),
+    Connection {
 
-    var hasMaster = false
-    var masterPos: BlockPos = BlockPos.ORIGIN
+    override val connectionData = ConnectionData(pos, connectionType)
+
+    private var lazyNetwork: Lazy<Network?>? = null
+    private var _network: Network? = null
+    override var network: Network?
+        get() = _network ?: lazyNetwork?.value
         set(value) {
-            field = value.toImmutable()
+            _network = value
         }
 
-    override fun writeNbt(tag: NbtCompound): NbtCompound {
-        super.writeNbt(tag)
+    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+        super.writeNbt(nbt)
 
-        tag.putBoolean("hasMaster", hasMaster)
-        tag.put("masterPos", masterPos.toNbt())
+        network?.also {
+            if (!it.deleted) nbt.putIntArray("network", it.masterPos.toArray())
+        }
+        nbt.putInt("sides", connectionData.sideBits)
 
-        return tag
+        return nbt
     }
 
-    override fun readNbt(tag: NbtCompound) {
-        super.readNbt(tag)
+    override fun readNbt(nbt: NbtCompound) {
+        super.readNbt(nbt)
 
-        hasMaster = tag.getBoolean("hasMaster")
-        masterPos = tag.getCompound("masterPos").toPos()
+        lazyNetwork = lazy {
+            if (nbt.contains("network")) Network.get(world, nbt.getIntArray("network").toPos())
+            else null
+        }
+        connectionData.sideBits = nbt.getInt("sides")
+    }
+
+    override fun markRemoved() {
+        super.markRemoved()
+        disconnect()
     }
 
 }

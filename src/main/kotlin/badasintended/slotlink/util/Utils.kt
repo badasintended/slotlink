@@ -41,6 +41,14 @@ fun BlockPos.toNbt(): NbtCompound {
     return tag
 }
 
+fun BlockPos.toArray(): IntArray {
+    return intArrayOf(x, y, z)
+}
+
+fun IntArray.toPos(): BlockPos {
+    return BlockPos(get(0), get(1), get(2))
+}
+
 fun NbtCompound.toPos(): BlockPos {
     return BlockPos(getInt("x"), getInt("y"), getInt("z"))
 }

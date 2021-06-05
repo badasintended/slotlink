@@ -1,9 +1,11 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.api.Compat
+import badasintended.slotlink.block.ConnectorCableBlock
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.util.toNbt
-import badasintended.slotlink.util.toPos
+import badasintended.slotlink.network.Connection
+import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.property.getNull
 import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.util.NbtType
@@ -25,16 +27,21 @@ import net.minecraft.text.TranslatableText
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
+import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>, pos: BlockPos, state: BlockState) :
-    ChildBlockEntity(type, pos, state), ExtendedScreenHandlerFactory {
+abstract class ConnectorCableBlockEntity(
+    blockEntityType: BlockEntityType<out BlockEntity>,
+    connectionType: ConnectionType<*>,
+    pos: BlockPos,
+    state: BlockState
+) : ChildBlockEntity(blockEntityType, connectionType, pos, state),
+    ExtendedScreenHandlerFactory,
+    Connection {
 
-    var linkedPos: BlockPos = BlockPos.ORIGIN
-        set(value) {
-            field = value.toImmutable()
-        }
+    private var linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)
+    private var linkedPos: BlockPos? = linkedSide?.let { pos.offset(it) }
 
     var priority = 0
 
@@ -50,7 +57,6 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>,
         request: Boolean = false
     ): FilteredInventory {
         if (world !is World) return filtered.none
-        if (!hasMaster) return filtered.none
 
         if (!world.isClient && master != null && request) {
             world as ServerWorld
@@ -59,6 +65,8 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>,
                 master.forcedChunks.add(chunkPos.x to chunkPos.z)
             }
         }
+
+        if (linkedPos == null) return filtered.none
 
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
@@ -86,14 +94,22 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>,
         return filtered.none
     }
 
+    @Suppress("DEPRECATION")
+    override fun setCachedState(state: BlockState) {
+        super.setCachedState(state)
+        linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)
+        linkedPos = linkedSide?.let { pos.offset(it) }
+    }
+
     protected abstract fun Block.isIgnored(): Boolean
 
-    override fun writeNbt(tag: NbtCompound): NbtCompound {
-        super.writeNbt(tag)
+    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+        super.writeNbt(nbt)
 
-        tag.putInt("priority", priority)
-        tag.put("linkedPos", linkedPos.toNbt())
-        tag.putBoolean("isBlacklist", isBlackList)
+        nbt.putInt("priority", priority)
+        nbt.putBoolean("isBlacklist", isBlackList)
+
+        linkedSide?.let { nbt.putInt("link", it.id) }
 
         val filterTag = NbtCompound()
         val list = NbtList()
@@ -107,38 +123,31 @@ abstract class ConnectorCableBlockEntity(type: BlockEntityType<out BlockEntity>,
             }
         }
         filterTag.put("Items", list)
-        tag.put("filter", filterTag)
+        nbt.put("filter", filterTag)
 
-        return tag
+        return nbt
     }
 
-    override fun readNbt(tag: NbtCompound) {
-        super.readNbt(tag)
+    override fun readNbt(nbt: NbtCompound) {
+        super.readNbt(nbt)
 
-        priority = tag.getInt("priority")
-        linkedPos = tag.getCompound("linkedPos").toPos()
-        isBlackList = tag.getBoolean("isBlacklist")
+        linkedSide = if (nbt.contains("link")) Direction.byId(nbt.getInt("link")) else null
+        linkedPos = linkedSide?.let { pos.offset(it) }
 
-        val filterTag = tag.getCompound("filter")
+        priority = nbt.getInt("priority")
+        isBlackList = nbt.getBoolean("isBlacklist")
+
+        val filterTag = nbt.getCompound("filter")
         val list = filterTag.getList("Items", NbtType.COMPOUND)
 
         list.forEach {
             it as NbtCompound
             val slot = it.getByte("Slot").toInt()
-            val nbt = it.getBoolean("matchNbt")
+            val matchNbt = it.getBoolean("matchNbt")
             if (slot in 0 until 9) {
                 val stack = ItemStack.fromNbt(it)
-                filter[slot] = stack to nbt
+                filter[slot] = stack to matchNbt
             }
-        }
-    }
-
-    override fun markRemoved() {
-        super.markRemoved()
-
-        if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos)
-            if (master is MasterBlockEntity) master.markDirty()
         }
     }
 

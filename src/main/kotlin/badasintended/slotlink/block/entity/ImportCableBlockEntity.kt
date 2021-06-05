@@ -1,6 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.network.ConnectionType
 import net.minecraft.block.BlockState
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
@@ -8,7 +9,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
 class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
-    TransferCableBlockEntity(BlockEntityTypes.IMPORT_CABLE, pos, state) {
+    TransferCableBlockEntity(BlockEntityTypes.IMPORT_CABLE, ConnectionType.IMPORT, pos, state) {
 
     override var side = Direction.DOWN
 
@@ -48,19 +49,6 @@ class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
         source.setStack(sourceSlot, sourceStack)
         source.markDirty()
         return sourceStack.isEmpty
-    }
-
-    override fun markDirty() {
-        super.markDirty()
-
-        if (hasMaster) {
-            val master = world?.getBlockEntity(masterPos)
-
-            if (master is MasterBlockEntity) {
-                master.importPos.add(pos)
-                master.markDirty()
-            }
-        }
     }
 
 }

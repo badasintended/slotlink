@@ -2,6 +2,8 @@ package badasintended.slotlink.item
 
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
+import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.Network
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.toNbt
@@ -46,11 +48,13 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             if (dim == null) {
                 player.actionBar("${baseTlKey}.invalidDim")
             } else {
-                val master = dim.getBlockEntity(masterPos)
-                if (master !is MasterBlockEntity) {
+                val network = Network.get(dim, masterPos)
+                if (network == null || network.deleted) {
                     player.actionBar("${baseTlKey}.masterNotFound")
                 } else {
-                    player.openHandledScreen(ScreenHandlerFactory(dim, master, hand == OFF_HAND))
+                    network.get(ConnectionType.MASTER).firstOrNull()?.also {
+                        player.openHandledScreen(ScreenHandlerFactory(dim, it, hand == OFF_HAND))
+                    }
                 }
             }
         }

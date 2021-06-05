@@ -1,18 +1,22 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
+import badasintended.slotlink.property.NullableProperty
+import badasintended.slotlink.property.getNull
+import badasintended.slotlink.property.with
 import badasintended.slotlink.util.BlockEntityBuilder
 import badasintended.slotlink.util.bbCuboid
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.InventoryProvider
 import net.minecraft.client.item.TooltipContext
-import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.NamedScreenHandlerFactory
+import net.minecraft.state.StateManager
+import net.minecraft.state.property.DirectionProperty
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
@@ -29,80 +33,95 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
 
     companion object {
 
+        val CONNECTED = NullableProperty(DirectionProperty.of("connected"))
         val end = bbCuboid(5, 5, 5, 6, 6, 6)
 
     }
 
-    /**
-     * TODO: Optimize, maybe.
-     */
     private fun checkLink(
-        world: WorldAccess,
-        pos: BlockPos,
-        facing: Direction,
         state: BlockState,
+        direction: Direction,
+        world: WorldAccess,
+        neighborState: BlockState,
         neighborPos: BlockPos
     ): BlockState {
-        val neighbor = world.getBlockState(neighborPos).block
-        if (!neighbor.isIgnored()) {
-            if ((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider)) {
-                val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getInventory(world).isNull) || (blockEntity.linkedPos == neighborPos)) {
-                    blockEntity.linkedPos = neighborPos
-                    blockEntity.markDirty()
-                    return state.with(properties[facing], true)
-                }
+        var result = state
+        val connected = state.getNull(CONNECTED)
+        if (connected == direction && neighborState.isAir) {
+            result = result.with(CONNECTED, null)
+        } else if (connected == null) {
+            val block = neighborState.block
+            if (block is InventoryProvider || world.run { getBlockEntity(neighborPos) } is Inventory) {
+                result = result
+                    .with(CONNECTED, direction)
+                    .with(PROPERTIES[direction], true)
             }
         }
-        return state
+        return result
     }
 
     protected abstract fun Block.isIgnored(): Boolean
 
     override fun center() = end
 
-    override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
-        val state = super.getPlacementState(ctx)
-        val world = ctx.world
-        val face = ctx.side.opposite
-        val pos = ctx.blockPos.offset(face)
-        val block = world.getBlockState(pos).block
-        return if (!block.isIgnored() && (world.getBlockEntity(pos) is Inventory || block is InventoryProvider)) {
-            state?.with(properties[face], true)
-        } else {
-            state
-        }
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        super.appendProperties(builder)
+        builder.add(CONNECTED)
     }
 
-    override fun onPlaced(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, itemStack: ItemStack) {
-        super.onPlaced(world, pos, state, placer, itemStack)
+    override fun connect(
+        state: BlockState,
+        direction: Direction,
+        world: WorldAccess,
+        neighborState: BlockState,
+        neighborPos: BlockPos
+    ): BlockState {
+        val fromSuper = super.connect(state, direction, world, neighborState, neighborPos)
+        return checkLink(fromSuper, direction, world, neighborState, neighborPos)
+    }
 
-        var updatedState = state
-        properties.entries.sortedByDescending { state[it.value] }.forEach {
-            updatedState = checkLink(world, pos, it.key, updatedState, pos.offset(it.key))
+    override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
+        var state = super.getPlacementState(ctx)
+        val connected = state.getNull(CONNECTED)
+        state = state.with(CONNECTED, null)
+        if (connected != null) {
+            state = state.with(PROPERTIES[connected], false)
         }
-        world.setBlockState(pos, updatedState)
+
+        val world = ctx.world
+        val opposite = ctx.side.opposite
+        val oppositePos = ctx.blockPos.offset(opposite)
+        val oppositeState = world.getBlockState(oppositePos)
+
+        state = checkLink(state, opposite, world, oppositeState, oppositePos)
+        if (state.getNull(CONNECTED) == null) {
+            state = state.with(CONNECTED, connected)
+            if (connected != null) {
+                state = state.with(PROPERTIES[connected], true)
+            }
+        }
+
+        return state
     }
 
     @Suppress("DEPRECATION")
     override fun getStateForNeighborUpdate(
         state: BlockState,
-        facing: Direction,
+        direction: Direction,
         neighborState: BlockState,
         world: WorldAccess,
         pos: BlockPos,
         neighborPos: BlockPos
     ): BlockState {
-        val fromSuper = super.getStateForNeighborUpdate(state, facing, neighborState, world, pos, neighborPos)
-        var updatedState = checkLink(world, pos, facing, fromSuper, neighborPos)
-        val blockEntity = world.getBlockEntity(pos)
-        if (blockEntity is ConnectorCableBlockEntity) if (neighborPos == blockEntity.linkedPos) {
-            val neighbor = neighborState.block
-            if (neighbor.isIgnored() || !((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider))) {
-                properties.keys.forEach {
-                    updatedState = checkLink(world, pos, it, updatedState, pos.offset(it))
-                }
+        var updatedState = super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos)
+        if (updatedState.getNull(CONNECTED) == null) {
+            DIRECTIONS.forEach {
+                val offset = pos.offset(it)
+                updatedState = connect(updatedState, it, world, world.getBlockState(offset), offset)
             }
+        }
+        updatedState.getNull(CONNECTED)?.also {
+            updatedState = updatedState.with(PROPERTIES[it], true)
         }
         return updatedState
     }
