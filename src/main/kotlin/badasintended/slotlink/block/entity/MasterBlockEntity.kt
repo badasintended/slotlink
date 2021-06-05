@@ -9,7 +9,6 @@ import badasintended.slotlink.network.ConnectionType.Companion.EXPORT
 import badasintended.slotlink.network.ConnectionType.Companion.IMPORT
 import badasintended.slotlink.network.ConnectionType.Companion.LINK
 import badasintended.slotlink.network.Network
-import badasintended.slotlink.util.MasterWatcher
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import java.util.*
 import net.minecraft.block.BlockState
@@ -29,7 +28,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
         get() = _network
         set(_) {}
 
-    var watchers = hashSetOf<MasterWatcher>()
+    var watchers = hashSetOf<Watcher>()
 
     private val invSet = ObjectLinkedOpenHashSet<FilteredInventory>()
 
@@ -103,6 +102,12 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
                 }
             }
         }
+
+    }
+
+    interface Watcher {
+
+        fun onMasterRemoved()
 
     }
 

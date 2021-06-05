@@ -4,7 +4,6 @@ import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.ConnectionType.Companion.MASTER
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.BlockEntityWatcher
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity

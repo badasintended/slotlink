@@ -1,13 +1,12 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ModBlock
+import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.NEGATIVE
+import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.OFF
+import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.ON
+import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.POSITIVE
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.screen.TransferScreenHandler
-import badasintended.slotlink.util.RedstoneMode
-import badasintended.slotlink.util.RedstoneMode.NEGATIVE
-import badasintended.slotlink.util.RedstoneMode.OFF
-import badasintended.slotlink.util.RedstoneMode.ON
-import badasintended.slotlink.util.RedstoneMode.POSITIVE
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -30,14 +29,13 @@ abstract class TransferCableBlockEntity(
     state: BlockState
 ) : ConnectorCableBlockEntity(beType, conType, pos, state) {
 
-    var redstone = OFF
-
+    var mode = OFF
     abstract var side: Direction
 
     protected abstract fun transferInternal(world: World, master: MasterBlockEntity): Boolean
 
     fun transfer(world: World, master: MasterBlockEntity): Boolean {
-        when (redstone) {
+        when (mode) {
             OFF -> return false
             ON -> Unit
             POSITIVE -> if (world.getReceivedRedstonePower(pos) <= 0) return false
@@ -52,21 +50,21 @@ abstract class TransferCableBlockEntity(
         super.readNbt(nbt)
 
         side = Direction.byId(nbt.getInt("side"))
-        redstone = RedstoneMode.of(nbt.getInt("redstone"))
+        mode = Mode.of(nbt.getInt("mode"))
     }
 
     override fun writeNbt(nbt: NbtCompound): NbtCompound {
         super.writeNbt(nbt)
 
         nbt.putInt("side", side.id)
-        nbt.putInt("redstone", redstone.ordinal)
+        nbt.putInt("mode", mode.ordinal)
 
         return nbt
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
         return TransferScreenHandler(
-            syncId, inv, priority, isBlackList, filter, side, redstone, ScreenHandlerContext.create(world, pos)
+            syncId, inv, priority, isBlackList, filter, side, mode, ScreenHandlerContext.create(world, pos)
         )
     }
 
@@ -74,8 +72,32 @@ abstract class TransferCableBlockEntity(
         super.writeScreenOpeningData(player, buf)
         buf.apply {
             writeVarInt(side.id)
-            writeVarInt(redstone.ordinal)
+            writeVarInt(mode.ordinal)
         }
+    }
+
+    enum class Mode(
+        private val id: String
+    ) {
+
+        ON("on"),
+        POSITIVE("positive"),
+        NEGATIVE("negative"),
+        OFF("off");
+
+        companion object {
+
+            val values = values()
+            fun of(i: Int) = values[i.coerceIn(0, 3)]
+
+        }
+
+        fun next(): Mode {
+            return values[(ordinal + 1) % values.size]
+        }
+
+        override fun toString() = id
+
     }
 
 }

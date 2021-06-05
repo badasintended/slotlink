@@ -16,7 +16,9 @@ class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
         val source = getInventory(world)
         if (source.isNull) return false
-        val sourceSlots = source.getAvailableSlots(side).filter { source.canExtract(it, source.getStack(it), side) }
+        val sourceSlots = source.getAvailableSlots(side).filter {
+            source.canExtract(it, source.getStack(it), side)
+        }
 
         var sourceSlot = -1
         var sourceStack = ItemStack.EMPTY

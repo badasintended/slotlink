@@ -1,10 +1,9 @@
 package badasintended.slotlink.init
 
+import badasintended.slotlink.block.entity.TransferCableBlockEntity
 import badasintended.slotlink.screen.LinkScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.screen.TransferScreenHandler
-import badasintended.slotlink.util.RedstoneMode
-import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.enum
 import badasintended.slotlink.util.id
@@ -52,7 +51,7 @@ object Packets : Initializer {
     override fun main() {
         s(SORT) { server, player, _, buf, _ ->
             val syncId = buf.int
-            val sort = buf.enum<Sort>()
+            val sort = buf.enum<RequestScreenHandler.Sort>()
             val filter = buf.string
 
             server.execute {
@@ -190,14 +189,14 @@ object Packets : Initializer {
 
         s(TRANSFER_SETTINGS) { server, player, _, buf, _ ->
             val syncId = buf.int
-            val redstone = RedstoneMode.of(buf.int)
+            val redstone = TransferCableBlockEntity.Mode.of(buf.int)
             val side = Direction.byId(buf.int)
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is TransferScreenHandler) {
                     handler.side = side
-                    handler.redstone = redstone
+                    handler.mode = redstone
                 }
             }
         }

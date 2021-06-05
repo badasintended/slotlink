@@ -2,13 +2,11 @@ package badasintended.slotlink.util
 
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.tag.TagRegistry
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -16,7 +14,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtList
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -28,9 +25,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
-typealias BlockPosSet = ObjectOpenHashSet<BlockPos>
 typealias BlockEntityBuilder = (BlockPos, BlockState) -> BlockEntity
 
 fun BlockPos.toNbt(): NbtCompound {
@@ -104,7 +99,8 @@ fun PacketByteBuf.readFilter(size: Int = 9): MutableList<Pair<ItemStack, Boolean
 
 fun modId(path: String) = Identifier(Slotlink.ID, path)
 
-val log: Logger = LogManager.getLogger(Slotlink.ID)
+@Suppress("unused")
+val log = LogManager.getLogger(Slotlink.ID)!!
 
 inline fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
     player as ServerPlayerEntity
@@ -144,15 +140,6 @@ var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
 
-
-fun BlockPosSet.toNbt() = mapTo(NbtList(), BlockPos::toNbt)
-
-fun BlockPosSet.fromTag(tag: NbtList) {
-    clear()
-    tag.mapTo(this) { (it as NbtCompound).toPos() }
-}
-
-fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
 
 fun Int.toFormattedString(): String = when {
     this < 1000 -> "$this"

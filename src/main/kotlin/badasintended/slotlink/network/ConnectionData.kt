@@ -55,6 +55,6 @@ class ConnectionData(
         var result = pos.hashCode()
         result = 31 * result + type.hashCode()
         return result
-}
+    }
 
 }

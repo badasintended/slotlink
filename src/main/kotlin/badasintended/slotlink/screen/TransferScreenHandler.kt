@@ -1,8 +1,8 @@
 package badasintended.slotlink.screen
 
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
+import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode
 import badasintended.slotlink.init.Screens
-import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.readFilter
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -19,7 +19,7 @@ class TransferScreenHandler(
     blacklist: Boolean,
     filter: MutableList<Pair<ItemStack, Boolean>>,
     var side: Direction,
-    var redstone: RedstoneMode,
+    var mode: Mode,
     context: ScreenHandlerContext
 ) : LinkScreenHandler(syncId, playerInv, priority, blacklist, filter, context) {
 
@@ -29,7 +29,7 @@ class TransferScreenHandler(
         buf.readBoolean(),
         buf.readFilter(),
         Direction.byId(buf.readVarInt()),
-        RedstoneMode.of(buf.readVarInt()),
+        Mode.of(buf.readVarInt()),
         ScreenHandlerContext.EMPTY
     )
 
@@ -39,7 +39,7 @@ class TransferScreenHandler(
             val be = world.getBlockEntity(pos)
             if (be is TransferCableBlockEntity) {
                 be.side = side
-                be.redstone = redstone
+                be.mode = mode
                 be.markDirty()
             }
         }

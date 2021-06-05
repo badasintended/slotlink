@@ -16,7 +16,7 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
     LinkScreen<TransferScreenHandler>(h, inventory, title) {
 
     private var side = handler.side
-    private var redstone = handler.redstone
+    private var redstone = handler.mode
 
     override fun init() {
         super.init()

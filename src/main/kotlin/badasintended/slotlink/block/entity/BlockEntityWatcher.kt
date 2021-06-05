@@ -1,4 +1,4 @@
-package badasintended.slotlink.util
+package badasintended.slotlink.block.entity
 
 import net.minecraft.block.entity.BlockEntity
 

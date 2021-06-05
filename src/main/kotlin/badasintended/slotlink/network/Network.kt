@@ -37,8 +37,6 @@ class Network internal constructor(
     val map = hashMapOf<BlockPos, ConnectionData>()
     val cache = hashMapOf<ConnectionType<*>, List<Connection>>()
 
-    val checked = hashSetOf<Connection>()
-
     init {
         add(ConnectionData(masterPos, ConnectionType.MASTER))
     }

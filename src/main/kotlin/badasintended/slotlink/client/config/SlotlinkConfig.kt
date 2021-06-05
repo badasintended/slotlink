@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.config
 
-import badasintended.slotlink.util.Sort
+import badasintended.slotlink.screen.RequestScreenHandler.Sort
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString

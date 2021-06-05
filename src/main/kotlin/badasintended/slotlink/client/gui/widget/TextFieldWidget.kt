@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
@@ -19,8 +18,6 @@ class TextFieldWidget(
     private val bgH: Int, text: Text
 ) : TextFieldWidget(client.textRenderer, bgX + 2, bgY + 2, bgW - 12, bgH - 3, text),
     CharGrabber {
-
-    var placeholder: Text = LiteralText.EMPTY
 
     var grab = false
         set(value) {
