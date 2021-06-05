@@ -42,6 +42,10 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop["fabricApi"]}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop["fabricKotlin"]}")
 
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
+    modRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+
     devImplementation(sourceSets["main"].output)
 }
 

@@ -14,9 +14,9 @@
   "license"      : "LGPL-3.0",
   "icon"         : "assets/slotlink/icon.png",
   "entrypoints"  : {
-    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
-    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
-    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.ReiPlugin"}]
+    "main"  : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
+    "client": [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei"   : [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.ReiPlugin"}]
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {

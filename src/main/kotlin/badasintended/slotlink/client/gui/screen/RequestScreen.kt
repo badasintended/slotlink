@@ -41,15 +41,16 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     val y by ::y
     val bgW by ::backgroundWidth
     val bgH by ::backgroundHeight
-
-    val viewedHeight by handler::viewedHeight
-
     var craftingGrid by config::showCraftingGrid
+
+    var arrowX = -1
+    var arrowY = -1
 
     private val syncId by handler::syncId
     private val maxScroll by handler::maxScroll
     private val totalSlots by handler::totalSlotSize
     private val filledSlots by handler::filledSlotSize
+    private val viewedHeight by handler::viewedHeight
 
     private val titleWidth by lazy { textRenderer.getWidth(title) }
     private val craftingText = TranslatableText("container.crafting")
@@ -161,6 +162,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                     renderTooltip(matrices, tl("craft.clear"), x, y)
                 }
             }
+
+            arrowX = x + 83
+            arrowY = y + 32 + viewedHeight * 18
         }
 
         val invSorterW = if (inventorySortButton == null) 0 else 16
@@ -179,7 +183,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                 if (handler.cursorStack.isEmpty) {
                     renderTooltip(matrices, tl("move.all"), x, y)
                 } else {
-                    renderTooltip(matrices, tl("move.type"), x, y)
+                    renderTooltip(matrices, tl("move.clazz"), x, y)
                 }
             }
         }
@@ -285,7 +289,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         drawNinePatch(matrices, x + backgroundWidth - 3, y, 21, viewedHeight * 18 + 24, 32f, 16f, 4, 8)
 
         if (craftingGrid) {
-            drawTexture(matrices, x + 90, y + 49 + viewedHeight * 18, 0, 31, 22, 15)
+            drawTexture(matrices, arrowX, arrowY, 0, 31, 22, 15)
         }
     }
 
