@@ -3,6 +3,7 @@ package badasintended.slotlink.block
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.Connection
+import badasintended.slotlink.network.Network
 import badasintended.slotlink.util.chat
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -19,6 +20,7 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import net.minecraft.world.WorldAccess
 
 class MasterBlock : ModBlock("master") {
 
@@ -88,6 +90,14 @@ class MasterBlock : ModBlock("master") {
             player.chat("$translationKey.use4", inventories.sumOf { it.size() * it.maxCountPerStack })
         }
         return ActionResult.SUCCESS
+    }
+
+    override fun onBroken(world: WorldAccess, pos: BlockPos, state: BlockState) {
+        super.onBroken(world, pos, state)
+
+        if (world is World) {
+            Network.get(world, pos)?.delete()
+        }
     }
 
 }

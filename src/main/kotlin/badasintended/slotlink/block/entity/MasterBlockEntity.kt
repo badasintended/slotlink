@@ -75,7 +75,6 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
 
     override fun markRemoved() {
         super.markRemoved()
-        _network.delete()
         watchers.forEach { it.onMasterRemoved() }
     }
 
