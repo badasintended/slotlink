@@ -1,6 +1,5 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.api.Compat
 import badasintended.slotlink.block.ConnectorCableBlock
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.network.Connection
@@ -71,13 +70,6 @@ abstract class ConnectorCableBlockEntity(
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
         val linkedBlockEntity = world.getBlockEntity(linkedPos)
-
-        if (request) {
-            val registered = Compat.getRegisteredClass(linkedBlockEntity)
-            if (registered != null) {
-                return filtered.with(Compat.getHandler(registered, linkedBlockEntity))
-            }
-        }
 
         if (!linkedBlock.isIgnored()) when {
             linkedBlock is ChestBlock && linkedBlockEntity is ChestBlockEntity -> {

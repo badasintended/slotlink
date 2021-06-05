@@ -1,6 +1,5 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.api.Compat
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
@@ -18,8 +17,7 @@ class LinkCableBlockEntity(pos: BlockPos, state: BlockState) :
     ConnectorCableBlockEntity(BlockEntityTypes.LINK_CABLE, ConnectionType.LINK, pos, state) {
 
     override fun Block.isIgnored(): Boolean {
-        if (this is ModBlock || Compat.isBlacklisted(this)) return true
-        return ignoredTag.contains(this)
+        return this is ModBlock || ignoredTag.contains(this)
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
