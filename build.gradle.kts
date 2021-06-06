@@ -1,6 +1,8 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
 import com.matthewprenger.cursegradle.CurseRelation
+import groovy.json.JsonGenerator
+import groovy.json.JsonSlurper
 import net.fabricmc.loom.task.RunGameTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -73,6 +75,20 @@ tasks.processResources {
 
     filesMatching("fabric.mod.json") {
         expand("version" to project.version)
+    }
+
+    doLast {
+        val slurper = JsonSlurper()
+        val json = JsonGenerator.Options()
+            .disableUnicodeEscaping()
+            .build()
+        fileTree(outputs.files.asPath) {
+            include("**/*.json")
+            forEach {
+                val mini = json.toJson(slurper.parse(it, "UTF-8"))
+                it.writeText(mini)
+            }
+        }
     }
 }
 
