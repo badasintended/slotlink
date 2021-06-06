@@ -122,7 +122,9 @@ curseforge {
                 }
             })
 
-            uploadTask.dependsOn("build")
+            afterEvaluate {
+                uploadTask.dependsOn("build")
+            }
         })
     }
 }
