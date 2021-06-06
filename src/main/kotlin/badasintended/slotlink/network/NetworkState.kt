@@ -6,49 +6,54 @@ import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtIntArray
 import net.minecraft.nbt.NbtList
-import net.minecraft.server.MinecraftServer
-import net.minecraft.util.Identifier
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.registry.Registry
-import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.PersistentState
-import net.minecraft.world.World
 
-class NetworkState(
-    private val server: MinecraftServer,
-    nbt: NbtCompound = NbtCompound()
-) : PersistentState() {
+class NetworkState : PersistentState() {
 
-    internal val map = hashMapOf<World, HashMap<BlockPos, Network>>()
+    companion object {
 
-    init {
-        nbt.keys.forEach { worldId ->
-            server.getWorld(RegistryKey.of(Registry.WORLD_KEY, Identifier(worldId)))?.let { world ->
-                val list = nbt.getList(worldId, NbtType.COMPOUND)
-                val networks = hashMapOf<BlockPos, Network>()
-                list.forEach { obj ->
-                    obj as NbtCompound
-                    val master = obj.getIntArray("master").toPos()
-                    networks[master] = Network(world, master).also { network ->
-                        val posses = obj.getList("pos", NbtType.INT_ARRAY)
-                        posses.forEach { pos ->
-                            pos as NbtIntArray
-                            network.add(ConnectionData(pos.intArray))
+        operator fun get(world: ServerWorld): NetworkState {
+            world as NetworkStateHolder
+            return world.networkState
+        }
+
+        @JvmStatic
+        fun create(world: ServerWorld, nbt: NbtCompound): NetworkState {
+            return NetworkState().apply {
+                if (nbt.contains("networks")) {
+                    val networks = nbt.getList("networks", NbtType.COMPOUND)
+                    networks.forEach { obj ->
+                        obj as NbtCompound
+                        val masterPos = obj.getIntArray("master").toPos()
+                        map[masterPos] = Network(this, world, masterPos).also { network ->
+                            val posses = obj.getList("pos", NbtType.INT_ARRAY)
+                            posses.forEach { pos ->
+                                pos as NbtIntArray
+                                network.add(ConnectionData(pos.intArray))
+                            }
                         }
                     }
                 }
-                map[world] = networks
             }
         }
+
     }
 
+    val map = hashMapOf<BlockPos, Network>()
+
+    operator fun get(pos: BlockPos) = map[pos]
+    inline fun getOrPut(pos: BlockPos, default: () -> Network) = map.getOrPut(pos, default)
+    fun remove(pos: BlockPos) = map.remove(pos)
+
     override fun writeNbt(nbt: NbtCompound): NbtCompound {
-        map.forEach { (world, networks) ->
+        if (map.isNotEmpty()) {
             val list = NbtList()
-            networks.forEach { (master, network) ->
+            map.forEach { (masterPos, network) ->
                 if (!network.deleted && network.map.isNotEmpty()) {
                     val obj = NbtCompound()
-                    obj.putIntArray("master", master.toArray())
+                    obj.putIntArray("master", masterPos.toArray())
                     val posses = NbtList()
                     network.map.values.forEach { data ->
                         if (data.type.save) {
@@ -59,8 +64,7 @@ class NetworkState(
                     list.add(obj)
                 }
             }
-            val worldId = world.registryKey.value
-            nbt.put(worldId.toString(), list)
+            nbt.put("networks", list)
         }
         return nbt
     }

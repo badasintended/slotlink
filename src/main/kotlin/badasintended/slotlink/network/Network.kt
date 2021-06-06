@@ -1,32 +1,30 @@
 package badasintended.slotlink.network
 
 import kotlin.reflect.safeCast
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 class Network internal constructor(
+    val state: NetworkState?,
     val world: World,
     val masterPos: BlockPos
 ) {
 
     companion object {
 
-        var state: NetworkState? = null
-
         fun get(world: World?, pos: BlockPos): Network? {
-            if (world == null) return null
-            if (world.isClient) return null
-            return state!!.map.getOrPut(world, ::HashMap)[pos]
+            if (world !is ServerWorld) return null
+            return NetworkState[world][pos]
         }
 
         fun getOrCreate(world: World, pos: BlockPos): Network {
-            if (world.isClient) return Network(world, pos)
+            if (world !is ServerWorld) return Network(null, world, pos)
 
-            return state!!.map
-                .getOrPut(world, ::HashMap)
-                .getOrPut(pos) {
-                    Network(world, pos)
-                }
+            val state = NetworkState[world]
+            return state.getOrPut(pos) {
+                Network(state, world, pos)
+            }
         }
 
     }
@@ -65,7 +63,7 @@ class Network internal constructor(
         _deleted = true
         map.clear()
         cache.clear()
-        state!!.map[world]?.remove(masterPos)
+        state?.remove(masterPos)
         markDirty()
     }
 

@@ -6,10 +6,14 @@
   "mixins"            : [
     "CraftingScreenHandlerAccessor",
     "DoubleInventoryMixin",
+    "ServerWorldMixin",
     "WallMountedBlockMixin",
     "pseudo.DoubleSidedInventoryMixin"
   ],
-  "client"            : ["TextFieldWidgetAccessor", "pseudo.SortButtonWidgetMixin"],
+  "client"            : [
+    "TextFieldWidgetAccessor",
+    "pseudo.SortButtonWidgetMixin"
+  ],
   "injectors"         : {
     "defaultRequire": 1
   }

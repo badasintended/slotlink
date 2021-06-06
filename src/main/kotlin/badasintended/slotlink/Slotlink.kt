@@ -4,7 +4,6 @@ package badasintended.slotlink
 
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.init.Blocks
-import badasintended.slotlink.init.Events
 import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Packets
 import badasintended.slotlink.init.Screens
@@ -15,7 +14,7 @@ object Slotlink {
 
     const val ID = "slotlink"
 
-    private val init = listOf(BlockEntityTypes, Blocks, Events, Items, Packets, Screens)
+    private val init = listOf(BlockEntityTypes, Blocks, Items, Packets, Screens)
 
     fun main() {
         init.forEach { it.main() }
