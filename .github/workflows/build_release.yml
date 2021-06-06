@@ -18,10 +18,11 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
-      - run: ./gradlew build curseforge
+      - run: ./gradlew build curseforge modrinth
         env:
           MOD_VERSION: ${{ steps.vars.outputs.VERSION }}
           CURSEFORGE_API: ${{ secrets.CURSEFORGE_API }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
       - uses: actions/upload-artifact@v2
         with:
           name: build ${{ steps.vars.outputs.VERSION }}

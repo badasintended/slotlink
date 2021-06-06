@@ -1,6 +1,7 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
 import com.matthewprenger.cursegradle.CurseRelation
+import com.modrinth.minotaur.TaskModrinthUpload
 import groovy.json.JsonGenerator
 import groovy.json.JsonSlurper
 import net.fabricmc.loom.task.RunGameTask
@@ -12,6 +13,7 @@ plugins {
 
     id("fabric-loom").version("0.8-SNAPSHOT")
     id("com.matthewprenger.cursegradle").version("1.4.0")
+    id("com.modrinth.minotaur").version("1.1.0")
     id("maven-publish")
 }
 
@@ -96,8 +98,8 @@ curseforge {
     env["CURSEFORGE_API"]?.let { CURSEFORGE_API ->
         apiKey = CURSEFORGE_API
         project(closureOf<CurseProject> {
-            id = "391014"
-            releaseType = "release"
+            id = prop["cf.projectId"]
+            releaseType = prop["cf.releaseType"]
 
             changelogType = "markdown"
             changelog = "https://github.com/badasintended/slotlink/releases/tag/${project.version}"
@@ -107,16 +109,37 @@ curseforge {
             })
 
             addGameVersion("Fabric")
-            addGameVersion(prop["minecraft"])
+            prop["cf.gameVersion"].split(", ").forEach {
+                addGameVersion(it)
+            }
 
             relations(closureOf<CurseRelation> {
-                requiredDependency("fabric-api")
-                requiredDependency("fabric-language-kotlin")
-                optionalDependency("roughly-enough-items")
+                prop["cf.require"].split(", ").forEach {
+                    requiredDependency(it)
+                }
+                prop["cf.optional"].split(", ").forEach {
+                    optionalDependency(it)
+                }
             })
 
             uploadTask.dependsOn("build")
         })
+    }
+}
+
+task<TaskModrinthUpload>("modrinth") {
+    onlyIf { env.contains("MODRINTH_TOKEN") }
+    dependsOn("build")
+
+    token = env["MORINTH_TOKEN"]
+    projectId = prop["mr.projectId"]
+    versionNumber = version.toString()
+    uploadFile = tasks["remapJar"]
+    releaseType = prop["mr.releaseType"]
+    addLoader("fabric")
+
+    prop["mr.gameVersion"].split(", ").forEach {
+        addGameVersion(it)
     }
 }
 
