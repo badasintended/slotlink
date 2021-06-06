@@ -1,12 +1,11 @@
 package badasintended.slotlink.item
 
-import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.Network
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.util.actionBar
-import badasintended.slotlink.util.toNbt
+import badasintended.slotlink.util.toArray
 import badasintended.slotlink.util.toPos
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.minecraft.client.item.TooltipContext
@@ -66,12 +65,15 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             OFF_HAND -> player.offHandStack
         }
 
-        val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        val masterDim = RegistryKey.of(Registry.WORLD_KEY, Identifier(stack.orCreateTag.getString("masterDim")))
+        val network = stack.getSubTag("network")
 
-        if (masterPosTag.isEmpty) {
+        if (network == null) {
             player.actionBar("${baseTlKey}.hasNoMaster")
-        } else use(world, player, stack, hand, masterPosTag.toPos(), masterDim)
+        } else {
+            val pos = network.getIntArray("pos").toPos()
+            val dim = RegistryKey.of(Registry.WORLD_KEY, Identifier(network.getString("dim")))
+            use(world, player, stack, hand, pos, dim)
+        }
 
         return TypedActionResult.success(stack)
     }
@@ -81,16 +83,15 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         val stack = context.stack
         val world = context.world
         val pos = context.blockPos
-        val dimId = world.registryKey.value.toString()
 
-        val block = world.getBlockState(pos).block
-        if (block is MasterBlock) {
-            if (player != null) if (player.isSneaking) {
-                stack.orCreateTag.put("masterPos", pos.toNbt())
-                stack.orCreateTag.putString("masterDim", dimId)
-                player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
-                return ActionResult.SUCCESS
-            }
+        val network = Network.get(world, pos)
+        if (network != null && player != null && player.isSneaking) {
+            val dimId = world.registryKey.value.toString()
+            val tag = stack.getOrCreateSubTag("network")
+            tag.putIntArray("pos", pos.toArray())
+            tag.putString("dim", dimId)
+            player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
+            return ActionResult.SUCCESS
         }
 
         return ActionResult.PASS
@@ -101,12 +102,13 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
 
         tooltip.add(TranslatableText("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
 
-        val masterPosTag = stack.orCreateTag.getCompound("masterPos")
-        if (!masterPosTag.isEmpty) {
-            val masterPos = masterPosTag.toPos()
-            val masterDim = Identifier(stack.orCreateTag.getString("masterDim"))
+        val tag = stack.orCreateTag
+        if (tag.contains("network")) {
+            val network = tag.getCompound("network")
+            val pos = network.getIntArray("pos")
+            val dim = network.getString("dim")
             tooltip.add(
-                TranslatableText("${baseTlKey}.info", masterPos.x, masterPos.y, masterPos.z, masterDim).formatted(
+                TranslatableText("${baseTlKey}.info", pos[0], pos[1], pos[2], dim).formatted(
                     Formatting.DARK_PURPLE
                 )
             )

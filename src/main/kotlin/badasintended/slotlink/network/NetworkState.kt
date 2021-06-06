@@ -60,7 +60,7 @@ class NetworkState(
                 }
             }
             val worldId = world.registryKey.value
-            nbt.put("${worldId.namespace}:${worldId.path}", list)
+            nbt.put(worldId.toString(), list)
         }
         return nbt
     }
