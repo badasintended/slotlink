@@ -1,6 +1,7 @@
 package badasintended.slotlink.item
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
+import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.Network
 import badasintended.slotlink.screen.RemoteScreenHandler
@@ -83,9 +84,9 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         val stack = context.stack
         val world = context.world
         val pos = context.blockPos
+        val block = world.getBlockState(pos).block
 
-        val network = Network.get(world, pos)
-        if (network != null && player != null && player.isSneaking) {
+        if (block == Blocks.MASTER && player != null && player.isSneaking) {
             val dimId = world.registryKey.value.toString()
             val tag = stack.getOrCreateSubTag("network")
             tag.putIntArray("pos", pos.toArray())
