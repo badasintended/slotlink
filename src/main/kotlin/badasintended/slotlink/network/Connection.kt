@@ -28,6 +28,7 @@ interface Connection {
 
     fun disconnect() {
         network?.also { network ->
+            network.remove(this)
             network.validate()
         }
         network = null
