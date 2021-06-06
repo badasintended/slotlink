@@ -133,7 +133,7 @@ task<TaskModrinthUpload>("modrinth") {
     onlyIf { env.contains("MODRINTH_TOKEN") }
     dependsOn("build")
 
-    token = env["MORINTH_TOKEN"]
+    token = env["MODRINTH_TOKEN"]
     projectId = prop["mr.projectId"]
     versionNumber = version.toString()
     uploadFile = tasks["remapJar"]
