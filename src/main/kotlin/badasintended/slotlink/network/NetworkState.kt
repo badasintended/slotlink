@@ -31,7 +31,8 @@ class NetworkState : PersistentState() {
                             val posses = obj.getList("pos", NbtType.INT_ARRAY)
                             posses.forEach { pos ->
                                 pos as NbtIntArray
-                                network.add(ConnectionData(pos.intArray))
+                                val arr = pos.intArray
+                                network.map[arr.toPos()] = ConnectionType[arr[3]]
                             }
                         }
                     }
@@ -55,9 +56,9 @@ class NetworkState : PersistentState() {
                     val obj = NbtCompound()
                     obj.putIntArray("master", masterPos.toArray())
                     val posses = NbtList()
-                    network.map.values.forEach { data ->
-                        if (data.type.save) {
-                            posses.add(NbtIntArray(data.toArray()))
+                    network.map.forEach { (pos, type) ->
+                        if (type.save) {
+                            posses.add(NbtIntArray(intArrayOf(pos.x, pos.y, pos.z, type.index)))
                         }
                     }
                     obj.put("pos", posses)

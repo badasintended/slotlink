@@ -20,7 +20,7 @@ interface Connection {
         network.also { selfNetwork ->
             if (selfNetwork == null || selfNetwork.deleted) {
                 this.network = other.network
-                this.network?.add(connectionData)
+                this.network?.add(this)
             }
         }
         return lastNetwork != network

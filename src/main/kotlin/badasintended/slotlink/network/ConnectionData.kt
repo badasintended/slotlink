@@ -1,6 +1,5 @@
 package badasintended.slotlink.network
 
-import badasintended.slotlink.util.toPos
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 
@@ -26,23 +25,6 @@ class ConnectionData(
                 }
             }
         }
-
-    constructor(array: IntArray) : this(
-        array.toPos(),
-        ConnectionType[array[3]],
-        array[4].let { bits ->
-            val set = hashSetOf<Direction>()
-            for (i in 0 until 6) {
-                if (((bits shr i) and 1) != 0) {
-                    set.add(Direction.byId(i))
-                }
-            }
-            set
-        })
-
-    fun toArray(): IntArray {
-        return intArrayOf(pos.x, pos.y, pos.z, type.index, sideBits)
-    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is ConnectionData) return false

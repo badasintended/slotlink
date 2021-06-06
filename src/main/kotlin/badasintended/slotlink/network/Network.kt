@@ -32,22 +32,24 @@ class Network internal constructor(
     private var _deleted = false
     val deleted get() = _deleted
 
-    val map = hashMapOf<BlockPos, ConnectionData>()
+    val map = hashMapOf<BlockPos, ConnectionType<*>>()
     val cache = hashMapOf<ConnectionType<*>, List<Connection>>()
 
     init {
-        add(ConnectionData(masterPos, ConnectionType.MASTER))
+        map[masterPos] = ConnectionType.MASTER
     }
 
-    fun add(data: ConnectionData) {
+    fun add(connection: Connection) {
         if (world.isClient) return
-        map[data.pos] = data
+        val data = connection.connectionData
+        map[data.pos] = data.type
         markDirty()
         invalidate(data.type)
     }
 
-    fun remove(data: ConnectionData) {
+    fun remove(connection: Connection) {
         if (world.isClient) return
+        val data = connection.connectionData
         map.remove(data.pos)
         markDirty()
         invalidate(data.type)
@@ -91,7 +93,7 @@ class Network internal constructor(
 
         unvisited.forEach { pos ->
             get(pos) {
-                remove(it.connectionData)
+                remove(it)
                 it.network = null
             }
         }
@@ -112,14 +114,9 @@ class Network internal constructor(
     ): List<T> {
         if (world.isClient) return emptyList()
         return cache.getOrPut(type) {
-            val result = transformer(map
-                .filterValues { it.type == type }
-                .mapNotNull { type.clazz.safeCast(world.getBlockEntity(it.value.pos)) })
-            map.keys.removeIf { map[it]!!.type == type }
-            result.forEach {
-                map[it.connectionData.pos] = it.connectionData
-            }
-            result
+            transformer(map
+                .filterValues { it == type }
+                .mapNotNull { type.clazz.safeCast(world.getBlockEntity(it.key)) })
         } as List<T>
     }
 
