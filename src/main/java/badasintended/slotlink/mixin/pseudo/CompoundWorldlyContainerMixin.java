@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Pseudo
-@Mixin(targets = "ninjaphenix.expandedstorage.common.inventory.DoubleSidedInventory")
-public abstract class DoubleSidedInventoryMixin implements PairInventory {
+@Mixin(targets = "ninjaphenix.expandedstorage.base.internal_api.inventory.CompoundWorldlyContainer")
+public abstract class CompoundWorldlyContainerMixin implements PairInventory {
 
     @Shadow
     @Final
@@ -22,7 +22,7 @@ public abstract class DoubleSidedInventoryMixin implements PairInventory {
     SidedInventory second;
 
     @Shadow
-    abstract boolean isPart(final SidedInventory inventory);
+    abstract boolean consistsPartlyOf(final SidedInventory inventory);
 
     @NotNull
     @Override
@@ -38,7 +38,7 @@ public abstract class DoubleSidedInventoryMixin implements PairInventory {
 
     @Override
     public boolean slotlink$isPart(@NotNull Inventory inventory) {
-        return inventory instanceof SidedInventory && isPart((SidedInventory) inventory);
+        return inventory instanceof SidedInventory && consistsPartlyOf((SidedInventory) inventory);
     }
 
 }

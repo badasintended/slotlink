@@ -8,7 +8,7 @@
     "DoubleInventoryMixin",
     "ServerWorldMixin",
     "WallMountedBlockMixin",
-    "pseudo.DoubleSidedInventoryMixin"
+    "pseudo.CompoundWorldlyContainerMixin"
   ],
   "client"            : [
     "TextFieldWidgetAccessor",
