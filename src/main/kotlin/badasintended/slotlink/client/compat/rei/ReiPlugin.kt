@@ -11,7 +11,6 @@ import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.id
 import badasintended.slotlink.util.int
 import dev.architectury.event.CompoundEventResult
-import kotlin.reflect.full.isSubclassOf
 import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.api.client.REIRuntime
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin
@@ -96,7 +95,7 @@ class ReiPlugin : REIClientPlugin {
             override fun getPriority() = 100.0
 
             override fun <R : Screen> isHandingScreen(screen: Class<R>): Boolean {
-                return screen.kotlin.isSubclassOf(RequestScreen::class)
+                return RequestScreen::class.java.isAssignableFrom(screen)
             }
 
             override fun getScreenBounds(screen: RequestScreen<*>): Rectangle {
