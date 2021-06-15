@@ -70,7 +70,7 @@ class ReiPlugin : REIPluginV0 {
         }
 
         recipeHelper.registerClickArea(
-            { if (it.craftingGrid) Rectangle(it.x + 90, it.y + 49 + it.viewedHeight * 18, 22, 15) else Rectangle() },
+            { if (it.craftingGrid) Rectangle(it.screenX + 90, it.screenY + 49 + it.viewedHeight * 18, 22, 15) else Rectangle() },
             RequestScreen::class.java,
             BuiltinPlugin.CRAFTING
         )
@@ -83,7 +83,7 @@ class ReiPlugin : REIPluginV0 {
             override fun getBaseSupportedClass() = RequestScreen::class.java
 
             override fun getScreenBounds(screen: RequestScreen<*>): Rectangle {
-                return Rectangle(screen.x - 22, screen.y, screen.bgW + 40, screen.bgH)
+                return Rectangle(screen.screenX - 22, screen.screenY, screen.bgW + 40, screen.bgH)
             }
         })
     }

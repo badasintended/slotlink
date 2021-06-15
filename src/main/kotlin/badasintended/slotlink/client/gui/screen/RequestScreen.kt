@@ -36,8 +36,8 @@ var reiSearchHandler: ((String) -> Unit)? = null
 class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) :
     ModScreen<H>(handler, inv, title) {
 
-    val x by ::x
-    val y by ::y
+    val screenX by ::x
+    val screenY by ::y
     val bgW by ::backgroundWidth
     val bgH by ::backgroundHeight
 
