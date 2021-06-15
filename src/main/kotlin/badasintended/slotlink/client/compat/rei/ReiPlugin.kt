@@ -8,8 +8,12 @@ import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
 import badasintended.slotlink.init.Packets.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.util.backgroundHeight
+import badasintended.slotlink.util.backgroundWidth
 import badasintended.slotlink.util.id
 import badasintended.slotlink.util.int
+import badasintended.slotlink.util.x
+import badasintended.slotlink.util.y
 import dev.architectury.event.CompoundEventResult
 import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.api.client.REIRuntime
@@ -99,7 +103,7 @@ class ReiPlugin : REIClientPlugin {
             }
 
             override fun getScreenBounds(screen: RequestScreen<*>): Rectangle {
-                return Rectangle(screen.x - 22, screen.y, screen.bgW + 40, screen.bgH)
+                return Rectangle(screen.x - 22, screen.y, screen.backgroundWidth + 40, screen.backgroundHeight)
             }
         })
     }
