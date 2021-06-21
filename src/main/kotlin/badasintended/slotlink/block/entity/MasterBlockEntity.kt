@@ -75,6 +75,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
 
     override fun markRemoved() {
         super.markRemoved()
+        _network.invalidate(ConnectionType.MASTER)
         watchers.forEach { it.onMasterRemoved() }
     }
 

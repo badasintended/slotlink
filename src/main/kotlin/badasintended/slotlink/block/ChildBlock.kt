@@ -1,5 +1,6 @@
 package badasintended.slotlink.block
 
+import badasintended.slotlink.block.entity.ChildBlockEntity
 import badasintended.slotlink.network.Connection
 import badasintended.slotlink.util.BlockEntityBuilder
 import net.minecraft.block.Block
@@ -64,6 +65,15 @@ abstract class ChildBlock(
     }
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = blockEntityBuilder(pos, state)
+
+    override fun onBroken(world: WorldAccess, pos: BlockPos, state: BlockState) {
+        super.onBroken(world, pos, state)
+
+        val blockEntity = world.getBlockEntity(pos)
+        if (blockEntity is ChildBlockEntity) {
+            blockEntity.disconnect()
+        }
+    }
 
     override fun appendTooltip(
         stack: ItemStack,
