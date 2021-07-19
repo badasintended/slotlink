@@ -43,7 +43,7 @@ abstract class SlotWidget<SH : ScreenHandler>(
         renderOverlay(matrices, stack)
     }
 
-    final override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+    final override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
         matrices.push()
         matrices.translate(0.0, 0.0, +256.0)
         val x = stackX

@@ -41,7 +41,7 @@ class TextFieldWidget(
         super.renderButton(matrices, mouseX, mouseY, delta)
     }
 
-    override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+    override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
         if (visible && !isActive) client.currentScreen?.renderTooltip(matrices, tooltip, mouseX, mouseY)
     }
 

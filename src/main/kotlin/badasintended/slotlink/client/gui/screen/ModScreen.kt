@@ -38,7 +38,7 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
             this.renderTooltip(matrices, focusedSlot!!.stack, mouseX, mouseY)
         } else {
             hoveredElement = hoveredElement(mouseX.toDouble(), mouseY.toDouble()).orElse(null) as? ClickableWidget
-            if (hoveredElement !is InventorySortButton) hoveredElement?.renderToolTip(matrices, mouseX, mouseY)
+            if (hoveredElement !is InventorySortButton) hoveredElement?.renderTooltip(matrices, mouseX, mouseY)
         }
     }
 

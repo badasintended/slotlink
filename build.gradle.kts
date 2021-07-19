@@ -8,8 +8,8 @@ import net.fabricmc.loom.task.RunGameTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.5.10")
-    kotlin("plugin.serialization").version("1.5.10")
+    kotlin("jvm").version("1.5.20")
+    kotlin("plugin.serialization").version("1.5.20")
 
     id("fabric-loom").version("0.8-SNAPSHOT")
     id("com.matthewprenger.cursegradle").version("1.4.0")
@@ -32,7 +32,6 @@ sourceSets {
 
 repositories {
     maven("https://maven.shedaniel.me/")
-    maven("https://maven.terraformersmc.com/releases")
 }
 
 dependencies {

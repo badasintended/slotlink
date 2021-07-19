@@ -68,7 +68,7 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
 
     override fun appendNarrations(builder: NarrationMessageBuilder?) {}
 
-    override fun renderToolTip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+    override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
         if (visible) onHovered.invoke(matrices, mouseX, mouseY)
     }
 

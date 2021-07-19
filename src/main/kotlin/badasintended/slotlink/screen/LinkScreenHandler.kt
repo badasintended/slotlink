@@ -38,7 +38,7 @@ open class LinkScreenHandler(
     fun filterSlotClick(i: Int, button: Int) {
         if (button !in 0..1) return
         val stack = cursorStack.copy().apply { count = 1 }
-        if (button != 1) stack.tag = null
+        if (button != 1) stack.nbt = null
         filter[i] = stack to (button == 1 && cursorStack.isEmpty)
     }
 

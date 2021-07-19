@@ -114,7 +114,7 @@ open class RequestScreenHandler(
             override fun onPropertyUpdate(handler: ScreenHandler, property: Int, value: Int) {}
 
             override fun onSlotUpdate(handler: ScreenHandler, slotId: Int, stack: ItemStack) {
-                s2c(player, ScreenHandlerSlotUpdateS2CPacket(syncId, slotId, stack))
+                s2c(player, ScreenHandlerSlotUpdateS2CPacket(syncId, nextRevision(), slotId, stack))
             }
         })
     }
@@ -486,7 +486,7 @@ open class RequestScreenHandler(
                 }
             }
             result.setStack(0, stack)
-            s2c(player, ScreenHandlerSlotUpdateS2CPacket(syncId, 0, stack))
+            s2c(player, ScreenHandlerSlotUpdateS2CPacket(syncId, nextRevision(), 0, stack))
         }
     }
 

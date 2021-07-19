@@ -274,8 +274,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         return super.addSelectableChild(child)
     }
 
-    override fun tick() {
-        super.tick()
+    override fun handledScreenTick() {
+        super.handledScreenTick()
         if (searchBar.grab) searchBar.tick()
     }
 

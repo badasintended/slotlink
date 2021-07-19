@@ -58,7 +58,7 @@ class ReiPlugin : REIClientPlugin {
 
                 if (!ctx.isActuallyCrafting) return@r createSuccessful()
 
-                ctx.minecraft.openScreen(ctx.containerScreen)
+                ctx.minecraft.setScreen(ctx.containerScreen)
                 c2s(APPLY_RECIPE) {
                     int(handler.syncId)
                     id(recipe.id)

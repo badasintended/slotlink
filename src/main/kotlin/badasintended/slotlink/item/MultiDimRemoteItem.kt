@@ -66,7 +66,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             OFF_HAND -> player.offHandStack
         }
 
-        val network = stack.getSubTag("network")
+        val network = stack.getSubNbt("network")
 
         if (network == null) {
             player.actionBar("${baseTlKey}.hasNoMaster")
@@ -88,7 +88,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
 
         if (block == Blocks.MASTER && player != null && player.isSneaking) {
             val dimId = world.registryKey.value.toString()
-            val tag = stack.getOrCreateSubTag("network")
+            val tag = stack.getOrCreateSubNbt("network")
             tag.putIntArray("pos", pos.toArray())
             tag.putString("dim", dimId)
             player.actionBar("${baseTlKey}.linked", pos.x, pos.y, pos.z, dimId)
@@ -103,7 +103,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
 
         tooltip.add(TranslatableText("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
 
-        val tag = stack.orCreateTag
+        val tag = stack.orCreateNbt
         if (tag.contains("network")) {
             val network = tag.getCompound("network")
             val pos = network.getIntArray("pos")
