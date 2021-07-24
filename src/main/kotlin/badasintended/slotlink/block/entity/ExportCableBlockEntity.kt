@@ -19,8 +19,8 @@ class ExportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.EXPORT_
             for (j in 0 until source.size()) {
                 val sourceStack = source.getStack(j)
                 if (sourceStack.isEmpty) continue
-                if (!target.isValid(j, sourceStack)) continue
                 for (k in targetSlots) {
+                    if (!target.canInsert(k, sourceStack, side)) continue
                     target.merge(k, sourceStack, side)
                     source.markDirty()
                     target.markDirty()
