@@ -19,7 +19,14 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
     ModBlock(id, settings), BlockEntityProvider {
 
     // TODO: Optimize this part
-    override fun neighborUpdate(state: BlockState, world: World, pos: BlockPos, block: Block, neighborPos: BlockPos, moved: Boolean) {
+    override fun neighborUpdate(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        block: Block,
+        neighborPos: BlockPos,
+        moved: Boolean
+    ) {
         val blockEntity = world.getBlockEntity(pos) as ChildBlockEntity
         val neighborBlock = world.getBlockState(neighborPos).block
         val neighborBlockEntity = world.getBlockEntity(neighborPos)
@@ -31,7 +38,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
             val currentMasterPos = blockEntity.masterPos
             val neighborMasterPos = neighborBlockEntity.masterPos
 
-            if (currentlyHasMaster and !neighborHasMaster) {
+            if (currentlyHasMaster && !neighborHasMaster) {
                 if (currentMasterPos == neighborMasterPos) {
                     blockEntity.hasMaster = false
                     blockEntity.markDirty()
@@ -42,7 +49,7 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
                     neighborBlockEntity.markDirty()
                     world.updateNeighbors(neighborPos, neighborBlock)
                 }
-            } else if (!currentlyHasMaster and neighborHasMaster) {
+            } else if (!currentlyHasMaster && neighborHasMaster) {
                 blockEntity.hasMaster = true
                 blockEntity.masterPos = neighborMasterPos
                 blockEntity.markDirty()
@@ -64,7 +71,12 @@ abstract class ChildBlock(id: String, private val blockEntity: () -> BlockEntity
 
     override fun createBlockEntity(world: BlockView) = blockEntity.invoke()
 
-    override fun appendTooltip(stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+    override fun appendTooltip(
+        stack: ItemStack,
+        world: BlockView?,
+        tooltip: MutableList<Text>,
+        options: TooltipContext
+    ) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.child.tooltip").formatted(Formatting.GRAY))
     }

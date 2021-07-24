@@ -31,7 +31,7 @@ class ImportCableBlockEntity : TransferCableBlockEntity(BlockEntityTypes.IMPORT_
             }
         }
 
-        if (sourceStack.isEmpty or (sourceSlot == -1)) return false
+        if (sourceStack.isEmpty || sourceSlot == -1) return false
 
         for (target in targets) {
             for (i in 0 until target.size()) {

@@ -35,7 +35,6 @@ object Screens : Initializer {
         TRANSFER = h("transfer", ::TransferScreenHandler)
     }
 
-
     @Environment(EnvType.CLIENT)
     override fun client() {
         s(REQUEST, ::RequestScreen)
@@ -48,8 +47,15 @@ object Screens : Initializer {
         return ScreenHandlerRegistry.registerExtended(modId(id), func)
     }
 
+    private fun <H : ScreenHandler> h(id: String, func: (Int, PlayerInventory) -> H): S<H> {
+        return ScreenHandlerRegistry.registerSimple(modId(id), func)
+    }
+
     @Environment(EnvType.CLIENT)
-    private fun <H : ScreenHandler, S : HandledScreen<H>> s(type: ScreenHandlerType<H>, function: (H, PlayerInventory, Text) -> S) {
+    private fun <H : ScreenHandler, S : HandledScreen<H>> s(
+        type: ScreenHandlerType<H>,
+        function: (H, PlayerInventory, Text) -> S
+    ) {
         ScreenRegistry.register(type, ScreenRegistry.Factory(function))
     }
 

@@ -1,9 +1,7 @@
 package badasintended.slotlink.inventory
 
-import badasintended.slotlink.mixin.DoubleInventoryAccessor
 import badasintended.slotlink.util.isItemAndTagEqual
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.DoubleInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
@@ -29,7 +27,7 @@ class FilteredInventory(
 
     fun merge(slot: Int, source: ItemStack, side: Direction) {
         var target = getStack(slot)
-        while ((target.count < target.maxCount) and !source.isEmpty) {
+        while (target.count < target.maxCount && !source.isEmpty) {
             val one = source.copy()
             one.count = 1
             if (!isValid(slot, one)) return
@@ -46,7 +44,7 @@ class FilteredInventory(
         }
     }
 
-    fun isValid(stack: ItemStack): Boolean = if (stack.isEmpty or filter.all { it.first.isEmpty }) true else {
+    fun isValid(stack: ItemStack): Boolean = if (stack.isEmpty || filter.all { it.first.isEmpty }) true else {
         val equals = filter.filter { it.first.isItemEqual(stack) }
 
         val blacklist = blacklist.invoke()
@@ -54,13 +52,13 @@ class FilteredInventory(
         if (equals.any { !it.second }) {
             !blacklist
         } else {
-            val nbt = equals.filter { it.second and it.first.isItemAndTagEqual(stack) }
+            val nbt = equals.filter { it.second && it.first.isItemAndTagEqual(stack) }
             if (blacklist) nbt.isEmpty() else nbt.isNotEmpty()
         }
     }
 
     override fun isValid(slot: Int, stack: ItemStack): Boolean {
-        return isValid(stack) and (inventory?.isValid(slot, stack) ?: false)
+        return isValid(stack) && inventory?.isValid(slot, stack) ?: false
     }
 
     override fun getMaxCountPerStack() = inventory?.maxCountPerStack ?: 64
@@ -78,7 +76,7 @@ class FilteredInventory(
     }
 
     override fun canInsert(slot: Int, stack: ItemStack, dir: Direction?): Boolean {
-        return isValid(stack) and ((inventory as? SidedInventory)?.canInsert(slot, stack, dir) ?: true)
+        return isValid(stack) && (inventory as? SidedInventory)?.canInsert(slot, stack, dir) ?: true
     }
 
     override fun canExtract(slot: Int, stack: ItemStack?, dir: Direction?): Boolean {
@@ -93,7 +91,8 @@ class FilteredInventory(
 
     override fun getStack(slot: Int): ItemStack = inventory?.getStack(slot) ?: ItemStack.EMPTY
 
-    override fun removeStack(slot: Int, amount: Int): ItemStack = inventory?.removeStack(slot, amount) ?: ItemStack.EMPTY
+    override fun removeStack(slot: Int, amount: Int): ItemStack =
+        inventory?.removeStack(slot, amount) ?: ItemStack.EMPTY
 
     override fun removeStack(slot: Int): ItemStack = inventory?.removeStack(slot) ?: ItemStack.EMPTY
 
@@ -105,8 +104,7 @@ class FilteredInventory(
 
     override fun hashCode(): Int {
         val inventory = inventory
-        return if (inventory is DoubleInventory) {
-            inventory as DoubleInventoryAccessor
+        return if (inventory is PairInventory) {
             inventory.first.hashCode() + inventory.second.hashCode()
         } else inventory.hashCode()
     }
@@ -120,9 +118,8 @@ class FilteredInventory(
         val inv = inventory
         val oinv = other.inventory
 
-        if (inv is DoubleInventory) if (oinv is DoubleInventory) {
-            inv as DoubleInventoryAccessor
-            return oinv.isPart(inv.first) and oinv.isPart(inv.second)
+        if (inv is PairInventory && oinv is PairInventory) {
+            return oinv.isPart(inv.first) && oinv.isPart(inv.second)
         }
 
         return inv == oinv

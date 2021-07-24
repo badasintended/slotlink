@@ -1,0 +1,32 @@
+{
+  "parent"      : "minecraft:recipes/root",
+  "criteria"    : {
+    "has_the_recipe" : {
+      "trigger"   : "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "slotlink:cable"
+      }
+    },
+    "has_iron_ingots": {
+      "trigger"   : "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "c:iron_ingots"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_iron_ingots",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards"     : {
+    "recipes": [
+      "slotlink:cable"
+    ]
+  }
+}

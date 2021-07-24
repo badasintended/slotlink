@@ -1,9 +1,5 @@
 package badasintended.slotlink.screen
 
-import java.util.Optional
-import kotlin.collections.set
-import kotlin.math.ceil
-import kotlin.math.min
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import badasintended.slotlink.init.Packets.UPDATE_CURSOR
@@ -12,24 +8,30 @@ import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
 import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
-import badasintended.slotlink.mixin.CraftingScreenHandlerAccessor
-import badasintended.slotlink.mixin.SlotAccessor
+import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.util.BlockEntityWatcher
 import badasintended.slotlink.util.MasterWatcher
 import badasintended.slotlink.util.Sort
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
+import badasintended.slotlink.util.index
+import badasintended.slotlink.util.input
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.isItemAndTagEqual
 import badasintended.slotlink.util.merge
+import badasintended.slotlink.util.result
 import badasintended.slotlink.util.s2c
 import badasintended.slotlink.util.stack
+import java.util.*
+import kotlin.collections.set
+import kotlin.math.ceil
+import kotlin.math.min
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
 import net.minecraft.inventory.CraftingResultInventory
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.network.PacketByteBuf
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
 import net.minecraft.recipe.CraftingRecipe
@@ -44,6 +46,11 @@ import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.screen.slot.SlotActionType.CLONE
+import net.minecraft.screen.slot.SlotActionType.PICKUP
+import net.minecraft.screen.slot.SlotActionType.QUICK_MOVE
+import net.minecraft.screen.slot.SlotActionType.SWAP
+import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
@@ -53,8 +60,10 @@ open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
     private val inventories: Set<FilteredInventory>,
-    var lastSort: Sort,
-) : CraftingScreenHandler(syncId, playerInventory), MasterWatcher, BlockEntityWatcher<RequestBlockEntity>, RecipeGridAligner<Ingredient> {
+) : CraftingScreenHandler(syncId, playerInventory),
+    MasterWatcher,
+    BlockEntityWatcher<RequestBlockEntity>,
+    RecipeGridAligner<Ingredient> {
 
     val player: PlayerEntity = playerInventory.player
     private val emptySlots = arrayListOf<Pair<Inventory, Int>>()
@@ -62,9 +71,10 @@ open class RequestScreenHandler(
 
     private val filledStacks = arrayListOf<ItemStack>()
 
-    private val trackedStacks: DefaultedList<Pair<ItemStack, Int>> = DefaultedList.ofSize(48, ItemStack.EMPTY to 0)
-    val viewedStacks: DefaultedList<Pair<ItemStack, Int>> = DefaultedList.ofSize(48, ItemStack.EMPTY to 0)
+    private val trackedStacks = DefaultedList.ofSize(54, ItemStack.EMPTY to 0)
+    val viewedStacks = DefaultedList.ofSize(54, ItemStack.EMPTY to 0)!!
 
+    private var lastSort = Sort.NAME
     private var lastFilter = ""
 
     var viewedHeight = 0
@@ -81,8 +91,8 @@ open class RequestScreenHandler(
     var filledSlotSize = 0
 
     /** Client side **/
-    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : this(
-        syncId, playerInventory, emptySet(), Sort.of(buf.readVarInt())
+    constructor(syncId: Int, playerInventory: PlayerInventory) : this(
+        syncId, playerInventory, emptySet()
     )
 
     /** Server side **/
@@ -90,10 +100,9 @@ open class RequestScreenHandler(
         syncId: Int,
         playerInventory: PlayerInventory,
         inventories: Set<FilteredInventory>,
-        lastSort: Sort,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
-    ) : this(syncId, playerInventory, inventories, lastSort) {
+    ) : this(syncId, playerInventory, inventories) {
         this.request = request
         this.master = master
         inventories.forEach {
@@ -144,8 +153,9 @@ open class RequestScreenHandler(
                         !Registry.ITEM.getId(it.stack.item).toString().contains(value, true)
                     }
                     '#' -> filledSlots.removeIf r@{ entry ->
-                        val tags = player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
-                        if (tags.isEmpty() and value.isBlank()) return@r false
+                        val tags =
+                            player.world.tagManager.items.tags.filterValues { it.contains(entry.stack.item) }.keys
+                        if (tags.isEmpty() && value.isBlank()) return@r false
                         else return@r tags.none { it.toString().contains(value, true) }
                     }
                 }
@@ -169,15 +179,15 @@ open class RequestScreenHandler(
 
         sort.sorter.invoke(filledStacks)
 
-        if ((lastSort != sort) or (lastFilter != filter)) scroll(0) else scroll(lastScroll)
+        if (lastSort != sort || lastFilter != filter) scroll(0) else scroll(lastScroll)
 
         lastSort = sort
         lastFilter = filter
 
         s2c(player, UPDATE_SLOT_NUMBERS) {
-            writeVarInt(syncId)
-            writeVarInt(totalSlotSize)
-            writeVarInt(filledSlotSize)
+            int(syncId)
+            int(totalSlotSize)
+            int(filledSlotSize)
         }
     }
 
@@ -186,8 +196,8 @@ open class RequestScreenHandler(
 
         val scroll = amount.coerceIn(0, maxScroll)
 
-        for (i in 0 until viewedHeight * 8) {
-            val stack = filledStacks.getOrElse(i + 8 * scroll) { ItemStack.EMPTY }
+        for (i in 0 until viewedHeight * 9) {
+            val stack = filledStacks.getOrElse(i + 9 * scroll) { ItemStack.EMPTY }
             viewedStacks[i] = stack.copy().apply { count = 1 } to stack.count
         }
 
@@ -195,32 +205,48 @@ open class RequestScreenHandler(
     }
 
     /** server only **/
-    fun multiSlotClick(i: Int, button: Int, quickMove: Boolean) {
+    fun multiSlotAction(i: Int, data: Int, type: SlotActionType) {
+        val viewed = viewedStacks[i].first
         var cursor = playerInventory.cursorStack
+
         if (cursor.isEmpty) {
-            if ((button == 0) or (button == 1)) {
-                val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(viewedStacks[i].first) }
-                pairs.forEach {
-                    if (cursor.count < cursor.maxCount) {
-                        val merged = cursor.merge(it.stack)
-                        cursor = merged.first
-                        it.stack = merged.second
+            if (type == CLONE) {
+                if (player.abilities.creativeMode && cursor.isEmpty) cursor = viewed.copy().apply { count = maxCount }
+            } else {
+                if (type == THROW && data == 0) {
+                    val slot = filledSlots.first { it.stack.isItemAndTagEqual(viewed) }
+                    player.dropItem(slot.stack.copy().apply { count = 1 }, true)
+                    slot.stack.decrement(1)
+                } else if (type != SWAP || !playerInventory.getStack(data).isItemAndTagEqual(viewed)) {
+                    var stack = if (type == SWAP) playerInventory.getStack(data).copy() else ItemStack.EMPTY
+                    filledSlots.any {
+                        if (it.stack.isItemAndTagEqual(viewed)) {
+                            val merged = stack.merge(it.stack)
+                            stack = merged.first
+                            it.stack = merged.second
+                        }
+                        if (stack.isEmpty) false else stack.count < stack.maxCount
+                    }
+
+                    when (type) {
+                        SWAP -> playerInventory.setStack(data, stack)
+                        THROW -> player.dropItem(stack, true)
+                        else -> {
+                            if (type == QUICK_MOVE) slots
+                                .filter { (it.inventory is PlayerInventory) && it.canInsert(stack) }
+                                .sortedBy { it.index }
+                                .sortedByDescending { it.stack.count }
+                                .forEach {
+                                    val merged = it.stack.merge(stack)
+                                    it.stack = merged.first
+                                    stack = merged.second
+                                }
+                            cursor = stack
+                        }
                     }
                 }
-                if (quickMove) slots
-                    .filter { (it.inventory is PlayerInventory) and it.canInsert(cursor) }
-                    .sortedBy { (it as SlotAccessor).index }
-                    .sortedByDescending { it.stack.count }
-                    .forEach {
-                        val stack = it.stack
-                        val merged = stack.merge(cursor)
-                        it.stack = merged.first
-                        cursor = merged.second
-                    }
-            } else if (button == 2) {
-                if (player.abilities.creativeMode and cursor.isEmpty) cursor = viewedStacks[i].first.copy().apply { count = maxCount }
             }
-        } else if (button == 0) {
+        } else if (type == PICKUP) {
             cursor = moveStack(cursor)
         }
 
@@ -230,22 +256,21 @@ open class RequestScreenHandler(
     fun craftingResultSlotClick(button: Int, quickMove: Boolean) {
         if (button !in 0..2) return
 
-        this as CraftingScreenHandlerAccessor
-
         var cursor = playerInventory.cursorStack
         val resultStack = result.getStack(0)
 
         if (button == 2) {
-            if (player.abilities.creativeMode and cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
+            if (player.abilities.creativeMode && cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
         } else {
             while (true) {
                 val merged = cursor.merge(resultStack)
-                if (!merged.second.isEmpty or merged.allEmpty()) break
+                if (!merged.second.isEmpty || merged.allEmpty()) break
 
                 cursor = merged.first
                 resultStack.onCraft(player.world, player, resultStack.count)
 
-                val remainingStacks = player.world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
+                val remainingStacks =
+                    player.world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
 
                 var finished = false
                 for (i in remainingStacks.indices) {
@@ -273,7 +298,7 @@ open class RequestScreenHandler(
                 result.unlockLastRecipe(player)
                 result.setStack(0, ItemStack.EMPTY)
                 onContentChanged(input)
-                if (!quickMove or finished) break
+                if (!quickMove || finished) break
             }
             if (quickMove) {
                 insertItem(cursor, 10, 46, true)
@@ -304,9 +329,15 @@ open class RequestScreenHandler(
 
     fun move() {
         var cursor = playerInventory.cursorStack
-        slots
-            .filter { (it.inventory is PlayerInventory) and it.canTakeItems(player) and if (cursor.isEmpty) true else cursor.isItemEqual(it.stack) }
-            .forEach { it.stack = moveStack(it.stack) }
+        slots.forEach {
+            if (it.inventory is PlayerInventory
+                && it.index >= 9
+                && it.canTakeItems(player)
+                && (cursor.isEmpty || cursor.isItemEqual(it.stack))
+            ) {
+                it.stack = moveStack(it.stack)
+            }
+        }
 
         if (!cursor.isEmpty) {
             cursor = moveStack(cursor)
@@ -326,26 +357,25 @@ open class RequestScreenHandler(
         updateCursor(cursor)
     }
 
-    open fun resize(viewedHeight: Int) {
-        this as CraftingScreenHandlerAccessor
-
+    open fun resize(viewedHeight: Int, craft: Boolean) {
         val coerced = viewedHeight.coerceIn(3, 6)
         val h = coerced * 18 + 23
+
+        val craftH = if (craft) 67 else 0
 
         slots.clear()
 
         addSlot(CraftingResultSlot(playerInventory.player, this.input, this.result, 0, -999999, -999999 + h))
-
         for (m in 0 until 3) for (l in 0 until 3) {
-            addSlot(Slot(input, l + m * 3, 30 + l * 18, 17 + m * 18 + h))
+            addSlot(if (craft) Slot(input, l + m * 3, 30 + l * 18, 8 + m * 18 + h) else LockedSlot(input, l + m * 3))
         }
 
         for (m in 0 until 3) for (l in 0 until 9) {
-            addSlot(Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 75 + m * 18 + h))
+            addSlot(Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 9 + craftH + m * 18 + h))
         }
 
         for (m in 0 until 9) {
-            addSlot(Slot(playerInventory, m, 8 + m * 18, 133 + h))
+            addSlot(Slot(playerInventory, m, 8 + m * 18, 67 + craftH + h))
         }
 
         this.viewedHeight = coerced
@@ -354,14 +384,14 @@ open class RequestScreenHandler(
     private fun updateCursor(stack: ItemStack) {
         playerInventory.cursorStack = stack
         s2c(player, UPDATE_CURSOR) {
-            writeItemStack(stack)
+            stack(stack)
         }
     }
 
     private fun moveStack(stack: ItemStack): ItemStack {
         if (stack.isEmpty) return stack
         var result = stack
-        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(result) and (it.stack.count < it.stack.maxCount) }
+        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(result) && it.stack.count < it.stack.maxCount }
         pairs.forEach {
             val merged = it.stack.merge(result)
             if (it.first.isValid(it.second, merged.first)) {
@@ -369,7 +399,7 @@ open class RequestScreenHandler(
                 result = merged.second
             }
         }
-        if (!result.isEmpty or pairs.isEmpty()) {
+        if (!result.isEmpty || pairs.isEmpty()) {
             val pair = emptySlots.firstOrNull { it.first.isValid(it.second, result) }
             if (pair != null) {
                 pair.stack = result
@@ -407,7 +437,7 @@ open class RequestScreenHandler(
         if (playerEntity !is ServerPlayerEntity) return ItemStack.EMPTY
         val result = super.onSlotClick(i, j, actionType, playerEntity)
         s2c(playerEntity, UPDATE_CURSOR) {
-            writeItemStack(playerEntity.inventory.cursorStack)
+            stack(playerEntity.inventory.cursorStack)
         }
         return result
     }
@@ -432,15 +462,14 @@ open class RequestScreenHandler(
         return stack
     }
 
-    override fun acceptAlignedInput(inputs: MutableIterator<Ingredient>, slot: Int, amount: Int, gridX: Int, gridY: Int) {
-        this as CraftingScreenHandlerAccessor
+    override fun acceptAlignedInput(inputs: Iterator<Ingredient>, slot: Int, amount: Int, gridX: Int, gridY: Int) {
         val ingredient = inputs.next()
         if (ingredient.isEmpty) return
 
         val pair = filledSlots.firstOrNull { ingredient.test(it.stack) }
         val stack = if (pair == null) {
             slots
-                .firstOrNull { (it.inventory is PlayerInventory) and it.canTakeItems(player) and (ingredient.test(it.stack)) }
+                .firstOrNull { it.inventory is PlayerInventory && it.canTakeItems(player) && ingredient.test(it.stack) }
                 ?.takeStack(1) ?: return
         } else {
             pair.first.removeStack(pair.second, 1)
@@ -450,11 +479,10 @@ open class RequestScreenHandler(
     }
 
     override fun onContentChanged(inventory: Inventory) {
-        this as CraftingScreenHandlerAccessor
-
         if (inventory is CraftingInventory) if (player is ServerPlayerEntity) {
             var stack = ItemStack.EMPTY
-            val optional: Optional<CraftingRecipe> = player.server.recipeManager.getFirstMatch(RecipeType.CRAFTING, input, player.world)
+            val optional: Optional<CraftingRecipe> =
+                player.server.recipeManager.getFirstMatch(RecipeType.CRAFTING, input, player.world)
             if (optional.isPresent) {
                 val craftingRecipe = optional.get()
                 if (result.shouldCraftRecipe(player.world, player, craftingRecipe)) {
@@ -479,7 +507,7 @@ open class RequestScreenHandler(
             for (i in 0 until inventory.size()) {
                 val before = stacks[i]
                 val after = inventory.getStack(i)
-                if (!before.isItemAndTagEqual(after) or (before.count != after.count)) {
+                if (!before.isItemAndTagEqual(after) || before.count != after.count) {
                     resort = true
                     stacks[i] = after.copy()
                 }
@@ -490,22 +518,22 @@ open class RequestScreenHandler(
 
         viewedStacks.forEachIndexed { i, after ->
             val before = trackedStacks[i]
-            if (!before.first.isItemAndTagEqual(after.first) or (before.second != after.second)) {
+            if (!before.first.isItemAndTagEqual(after.first) || before.second != after.second) {
                 s2c(player, UPDATE_VIEWED_STACK) {
-                    writeVarInt(syncId)
-                    writeVarInt(i)
-                    writeItemStack(after.first)
-                    writeVarInt(after.second)
+                    int(syncId)
+                    int(i)
+                    stack(after.first)
+                    int(after.second)
                 }
                 trackedStacks[i] = after.first.copy() to after.second
             }
         }
 
-        val max = ceil((filledStacks.size / 8f) - viewedHeight).toInt().coerceAtLeast(0)
+        val max = ceil((filledStacks.size / 9f) - viewedHeight).toInt().coerceAtLeast(0)
         if (maxScroll != max) {
             s2c(player, UPDATE_MAX_SCROLL) {
-                writeVarInt(syncId)
-                writeVarInt(max)
+                int(syncId)
+                int(max)
             }
             maxScroll = max
             scroll(0)
@@ -517,12 +545,10 @@ open class RequestScreenHandler(
     override fun getType(): ScreenHandlerType<*> = Screens.REQUEST
 
     override fun close(player: PlayerEntity) {
-        this as CraftingScreenHandlerAccessor
         slots.filter { it.inventory is CraftingInventory }.forEach {
             it.stack = moveStack(it.stack)
         }
         dropInventory(player, player.world, input)
-        request?.lastSort = lastSort
         request?.watchers?.remove(this)
         request?.markDirty()
         master?.watchers?.remove(this)

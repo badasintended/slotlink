@@ -1,7 +1,11 @@
+import net.fabricmc.loom.task.RunGameTask
+
 plugins {
-    id "org.jetbrains.kotlin.jvm" version '1.4.30'
-    id 'fabric-loom' version '0.5-SNAPSHOT'
-    id 'maven-publish'
+    id "org.jetbrains.kotlin.jvm" version "1.5.0"
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.5.0"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
+    id "fabric-loom" version "0.6-SNAPSHOT"
+    id "maven-publish"
 }
 
 
@@ -19,8 +23,21 @@ if (versionEnv == null || versionEnv.isBlank()) {
 
 version = "${versionEnv}+${project.minecraft_version}"
 
+sourceSets {
+    dev {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
+
+tasks.withType(RunGameTask) {
+    classpath sourceSets.dev.runtimeClasspath
+    jvmArgs project.run_args
+}
+
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://maven.terraformersmc.com/releases" }
 }
 
 dependencies {
@@ -33,29 +50,36 @@ dependencies {
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin}"
 
     modImplementation "me.shedaniel:RoughlyEnoughItems:${project.rei}"
+
+    modRuntime "com.terraformersmc:modmenu:${project.modmenu}"
+
+    devImplementation sourceSets.main.output
 }
 
-if (project.enable_compat.toBoolean()) {
-    repositories {
-        maven {
-            url "https://www.cursemaven.com"
-            content { includeGroup "curse.maven" }
-        }
-    }
+curseforge {
+    if (System.getenv("CURSEFORGE_API") != null) {
+        apiKey = System.getenv("CURSEFORGE_API")
+        project {
+            id = "391014"
+            releaseType = "release"
 
-    dependencies {
-        modCompileOnly "curse.maven:stockpile-299913:3018405"
-    }
-}
+            changelogType = "html"
+            changelog = "<a href=\"https://github.com/badasintended/slotlink/releases/tag/${versionEnv}\"></a>"
 
-if (project.enable_databreaker.toBoolean()) {
-    repositories {
-        maven { url = "https://jitpack.io" }
-    }
+            mainArtifact remapJar
 
-    dependencies {
-        modRuntime("com.github.SuperCoder7979:databreaker:${project.databreaker}") {
-            exclude module: "fabric-loader"
+            addGameVersion "Fabric"
+            addGameVersion project.minecraft_version
+
+            relations {
+                requiredDependency "fabric-api"
+                requiredDependency "fabric-language-kotlin"
+                optionalDependency "roughly-enough-items"
+            }
+
+            afterEvaluate {
+                uploadTask.dependsOn "build"
+            }
         }
     }
 }
@@ -71,7 +95,6 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "fabric.mod.json"
     }
-
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is

@@ -14,19 +14,18 @@
   "license"      : "LGPL-3.0",
   "icon"         : "assets/slotlink/icon.png",
   "entrypoints"  : {
-    "main"           : [
+    "main"          : [
       "badasintended.slotlink.api.Compat",
       {"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}
     ],
-    "client"         : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
-    "rei_plugins_v0" : [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.SlotlinkReiPlugin"}],
-    "slotlink-compat": [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.StockpileCompat"}]
+    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei_plugins_v0": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.ReiPlugin"}]
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {
     "fabricloader"          : ">=0.8",
     "minecraft"             : "1.16.x",
     "fabric"                : "*",
-    "fabric-language-kotlin": ">=1.4"
+    "fabric-language-kotlin": ">=1.6"
   }
 }

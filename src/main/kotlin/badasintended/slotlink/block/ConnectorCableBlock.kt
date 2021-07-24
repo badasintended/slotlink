@@ -36,12 +36,18 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
     /**
      * TODO: Optimize, maybe.
      */
-    private fun checkLink(world: WorldAccess, pos: BlockPos, facing: Direction, state: BlockState, neighborPos: BlockPos): BlockState {
+    private fun checkLink(
+        world: WorldAccess,
+        pos: BlockPos,
+        facing: Direction,
+        state: BlockState,
+        neighborPos: BlockPos
+    ): BlockState {
         val neighbor = world.getBlockState(neighborPos).block
         if (!neighbor.isIgnored()) {
-            if ((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider)) {
+            if ((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider)) {
                 val blockEntity = world.getBlockEntity(pos) as? ConnectorCableBlockEntity ?: return state
-                if ((blockEntity.getInventory(world).isNull) or (blockEntity.linkedPos == neighborPos)) {
+                if ((blockEntity.getInventory(world).isNull) || (blockEntity.linkedPos == neighborPos)) {
                     blockEntity.linkedPos = neighborPos
                     blockEntity.markDirty()
                     return state.with(properties[facing], true)
@@ -61,7 +67,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         val face = ctx.side.opposite
         val pos = ctx.blockPos.offset(face)
         val block = world.getBlockState(pos).block
-        return if (!block.isIgnored() and ((world.getBlockEntity(pos) is Inventory) or (block is InventoryProvider))) {
+        return if (!block.isIgnored() && (world.getBlockEntity(pos) is Inventory || block is InventoryProvider)) {
             state?.with(properties[face], true)
         } else {
             state
@@ -92,7 +98,7 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         val blockEntity = world.getBlockEntity(pos)
         if (blockEntity is ConnectorCableBlockEntity) if (neighborPos == blockEntity.linkedPos) {
             val neighbor = neighborState.block
-            if (neighbor.isIgnored() or !((world.getBlockEntity(neighborPos) is Inventory) or (neighbor is InventoryProvider))) {
+            if (neighbor.isIgnored() || !((world.getBlockEntity(neighborPos) is Inventory) || (neighbor is InventoryProvider))) {
                 properties.keys.forEach {
                     updatedState = checkLink(world, pos, it, updatedState, pos.offset(it))
                 }
@@ -101,12 +107,24 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return updatedState
     }
 
-    override fun appendTooltip(stack: ItemStack, world: BlockView?, tooltip: MutableList<Text>, options: TooltipContext) {
+    override fun appendTooltip(
+        stack: ItemStack,
+        world: BlockView?,
+        tooltip: MutableList<Text>,
+        options: TooltipContext
+    ) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
     }
 
-    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+    override fun onUse(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        player: PlayerEntity,
+        hand: Hand,
+        hit: BlockHitResult
+    ): ActionResult {
         if (player.mainHandStack.isEmpty) {
             player.openHandledScreen(state.createScreenHandlerFactory(world, pos))
             return ActionResult.SUCCESS
@@ -114,7 +132,11 @@ abstract class ConnectorCableBlock(id: String, be: () -> BlockEntity) : CableBlo
         return ActionResult.PASS
     }
 
-    override fun createScreenHandlerFactory(state: BlockState, world: World, pos: BlockPos): NamedScreenHandlerFactory? {
+    override fun createScreenHandlerFactory(
+        state: BlockState,
+        world: World,
+        pos: BlockPos
+    ): NamedScreenHandlerFactory? {
         val blockEntity = world.getBlockEntity(pos) ?: return null
         if (blockEntity !is ConnectorCableBlockEntity) return null
         return blockEntity

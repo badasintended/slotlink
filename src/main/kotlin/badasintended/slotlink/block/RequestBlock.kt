@@ -13,7 +13,14 @@ import net.minecraft.world.World
 
 class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
 
-    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+    override fun onUse(
+        state: BlockState,
+        world: World,
+        pos: BlockPos,
+        player: PlayerEntity,
+        hand: Hand,
+        hit: BlockHitResult
+    ): ActionResult {
         val blockEntity = world.getBlockEntity(pos) as RequestBlockEntity
         if (!blockEntity.hasMaster) {
             player.actionBar("${translationKey}.hasNoMaster")
@@ -23,7 +30,11 @@ class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
         return ActionResult.SUCCESS
     }
 
-    override fun createScreenHandlerFactory(state: BlockState, world: World, pos: BlockPos): NamedScreenHandlerFactory? {
+    override fun createScreenHandlerFactory(
+        state: BlockState,
+        world: World,
+        pos: BlockPos
+    ): NamedScreenHandlerFactory? {
         val blockEntity = world.getBlockEntity(pos) ?: return null
         if (blockEntity !is RequestBlockEntity) return null
         return blockEntity

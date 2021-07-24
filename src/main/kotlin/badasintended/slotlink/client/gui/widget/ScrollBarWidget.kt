@@ -1,15 +1,13 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.util.bindGuiTexture
-import badasintended.slotlink.util.drawNinePatch
+import badasintended.slotlink.client.util.bindGuiTexture
+import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.widget.AbstractButtonWidget
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.LiteralText
 
 @Environment(EnvType.CLIENT)
-class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h.coerceAtLeast(17), LiteralText.EMPTY) {
+class ScrollBarWidget(x: Int, y: Int, h: Int) : NoSoundWidget(x, y, 14, h.coerceAtLeast(17)) {
 
     var hasKnob = { true }
 
@@ -35,7 +33,7 @@ class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         clicked = hasKnob.invoke()
-        return visible and isMouseOver(mouseX, mouseY)
+        return visible && isMouseOver(mouseX, mouseY)
     }
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
@@ -43,7 +41,7 @@ class ScrollBarWidget(x: Int, y: Int, h: Int) : AbstractButtonWidget(x, y, 14, h
             knob = 1.0f - ((y + height - mouseY).toFloat() / height).coerceIn(0f, 1f)
             onUpdated.invoke(knob)
         }
-        return visible and isMouseOver(mouseX, mouseY)
+        return visible && isMouseOver(mouseX, mouseY)
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {

@@ -5,8 +5,13 @@ import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.screen.TransferScreenHandler
 import badasintended.slotlink.util.RedstoneMode
 import badasintended.slotlink.util.Sort
+import badasintended.slotlink.util.bool
+import badasintended.slotlink.util.enum
+import badasintended.slotlink.util.id
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.modId
-import badasintended.slotlink.util.readStr
+import badasintended.slotlink.util.stack
+import badasintended.slotlink.util.string
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
@@ -15,6 +20,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
@@ -27,7 +33,7 @@ object Packets : Initializer {
     val RESIZE = modId("resize")
     val SORT = modId("sort")
     val SCROLL = modId("scroll")
-    val MULTI_SLOT_CLICK = modId("multi_slot_click")
+    val MULTI_SLOT_ACTION = modId("multi_slot_action")
     val CRAFTING_RESULT_SLOT_CLICK = modId("crafting_result_slot_click")
     val CLEAR_CRAFTING_GRID = modId("clear_crafting_grid")
     val APPLY_RECIPE = modId("apply_recipe")
@@ -45,9 +51,9 @@ object Packets : Initializer {
 
     override fun main() {
         s(SORT) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val sort = Sort.of(buf.readVarInt())
-            val filter = buf.readStr()
+            val syncId = buf.int
+            val sort = buf.enum<Sort>()
+            val filter = buf.string
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -58,8 +64,8 @@ object Packets : Initializer {
         }
 
         s(SCROLL) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val amount = buf.readVarInt()
+            val syncId = buf.int
+            val amount = buf.int
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -69,23 +75,23 @@ object Packets : Initializer {
             }
         }
 
-        s(MULTI_SLOT_CLICK) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val index = buf.readVarInt()
-            val button = buf.readVarInt()
-            val quickMove = buf.readBoolean()
+        s(MULTI_SLOT_ACTION) { server, player, _, buf, _ ->
+            val syncId = buf.int
+            val index = buf.int
+            val button = buf.int
+            val type = buf.enum<SlotActionType>()
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.multiSlotClick(index, button, quickMove)
+                    handler.multiSlotAction(index, button, type)
                 }
             }
         }
 
         s(APPLY_RECIPE) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val recipeId = buf.readIdentifier()
+            val syncId = buf.int
+            val recipeId = buf.id
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -97,9 +103,9 @@ object Packets : Initializer {
         }
 
         s(CRAFTING_RESULT_SLOT_CLICK) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val button = buf.readVarInt()
-            val quickMove = buf.readBoolean()
+            val syncId = buf.int
+            val button = buf.int
+            val quickMove = buf.bool
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -110,19 +116,20 @@ object Packets : Initializer {
         }
 
         s(RESIZE) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val viewedHeight = buf.readVarInt()
+            val syncId = buf.int
+            val viewedHeight = buf.int
+            val showCraftingGrid = buf.bool
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.resize(viewedHeight)
+                    handler.resize(viewedHeight, showCraftingGrid)
                 }
             }
         }
 
         s(CLEAR_CRAFTING_GRID) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
+            val syncId = buf.int
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -133,7 +140,7 @@ object Packets : Initializer {
         }
 
         s(MOVE) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
+            val syncId = buf.int
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -144,7 +151,7 @@ object Packets : Initializer {
         }
 
         s(RESTOCK) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
+            val syncId = buf.int
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -155,9 +162,9 @@ object Packets : Initializer {
         }
 
         s(FILTER_SLOT_CLICK) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val index = buf.readVarInt()
-            val button = buf.readVarInt()
+            val syncId = buf.int
+            val index = buf.int
+            val button = buf.int
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -168,9 +175,9 @@ object Packets : Initializer {
         }
 
         s(LINK_SETTINGS) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val priority = buf.readVarInt()
-            val blacklist = buf.readBoolean()
+            val syncId = buf.int
+            val priority = buf.int
+            val blacklist = buf.bool
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -182,9 +189,9 @@ object Packets : Initializer {
         }
 
         s(TRANSFER_SETTINGS) { server, player, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val redstone = RedstoneMode.of(buf.readVarInt())
-            val side = Direction.byId(buf.readVarInt())
+            val syncId = buf.int
+            val redstone = RedstoneMode.of(buf.int)
+            val side = Direction.byId(buf.int)
 
             server.execute {
                 val handler = player.currentScreenHandler
@@ -199,9 +206,9 @@ object Packets : Initializer {
     @Environment(EnvType.CLIENT)
     override fun client() {
         c(UPDATE_SLOT_NUMBERS) { client, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val total = buf.readVarInt()
-            val filled = buf.readVarInt()
+            val syncId = buf.int
+            val total = buf.int
+            val filled = buf.int
 
             client.execute {
                 val handler = client.player!!.currentScreenHandler
@@ -213,7 +220,7 @@ object Packets : Initializer {
         }
 
         c(UPDATE_CURSOR) { client, _, buf, _ ->
-            val stack = buf.readItemStack()
+            val stack = buf.stack
 
             client.execute {
                 client.player!!.inventory.cursorStack = stack
@@ -221,8 +228,8 @@ object Packets : Initializer {
         }
 
         c(UPDATE_MAX_SCROLL) { client, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val maxScroll = buf.readVarInt()
+            val syncId = buf.int
+            val maxScroll = buf.int
 
             client.execute {
                 val handler = client.player!!.currentScreenHandler
@@ -233,10 +240,10 @@ object Packets : Initializer {
         }
 
         c(UPDATE_VIEWED_STACK) { client, _, buf, _ ->
-            val syncId = buf.readVarInt()
-            val index = buf.readVarInt()
-            val stack = buf.readItemStack()
-            val count = buf.readVarInt()
+            val syncId = buf.int
+            val index = buf.int
+            val stack = buf.stack
+            val count = buf.int
 
             client.execute {
                 val handler = client.player!!.currentScreenHandler
@@ -247,12 +254,18 @@ object Packets : Initializer {
         }
     }
 
-    private fun s(id: Identifier, function: (MinecraftServer, ServerPlayerEntity, ServerPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit) {
+    private fun s(
+        id: Identifier,
+        function: (MinecraftServer, ServerPlayerEntity, ServerPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit
+    ) {
         ServerPlayNetworking.registerGlobalReceiver(id, function)
     }
 
     @Environment(EnvType.CLIENT)
-    private fun c(id: Identifier, function: (MinecraftClient, ClientPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit) {
+    private fun c(
+        id: Identifier,
+        function: (MinecraftClient, ClientPlayNetworkHandler, PacketByteBuf, PacketSender) -> Unit
+    ) {
         ClientPlayNetworking.registerGlobalReceiver(id, function)
     }
 

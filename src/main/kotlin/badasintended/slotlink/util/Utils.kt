@@ -1,21 +1,15 @@
 package badasintended.slotlink.util
 
-import kotlin.math.ln
-import kotlin.math.min
-import kotlin.math.pow
 import badasintended.slotlink.Slotlink
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import kotlin.math.ln
+import kotlin.math.min
+import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.fabric.api.tag.TagRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawableHelper
-import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
@@ -76,11 +70,6 @@ fun bbCuboid(xPos: Int, yPos: Int, zPos: Int, xSize: Int, ySize: Int, zSize: Int
     return VoxelShapes.cuboid(xMin, yMin, zMin, xMax, yMax, zMax)
 }
 
-@Environment(EnvType.CLIENT)
-fun Direction.texture(): Identifier {
-    return modId("textures/gui/side_${asString()}.png")
-}
-
 fun Direction.next(): Direction {
     return Direction.byId(id + 1)
 }
@@ -104,15 +93,7 @@ fun modId(path: String) = Identifier(Slotlink.ID, path)
 
 val log: Logger = LogManager.getLogger(Slotlink.ID)
 
-@Environment(EnvType.CLIENT)
-fun getClient(): MinecraftClient = MinecraftClient.getInstance()
-
-@Environment(EnvType.CLIENT)
-fun c2s(id: Identifier, buf: PacketByteBuf.() -> Unit) {
-    ClientPlayNetworking.send(id, buf().apply(buf))
-}
-
-fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
+inline fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
     player as ServerPlayerEntity
     ServerPlayNetworking.send(player, id, buf().apply(buf))
 }
@@ -125,7 +106,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
 val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
-    return ItemStack.areTagsEqual(this, other) and ItemStack.areItemsEqual(this, other)
+    return ItemStack.areTagsEqual(this, other) && ItemStack.areItemsEqual(this, other)
 }
 
 fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
@@ -133,7 +114,7 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
     val t = this.copy()
 
     if (isEmpty) return f to ItemStack.EMPTY
-    if (!isItemAndTagEqual(f) or (count >= maxCount) or f.isEmpty) return t to f
+    if (!isItemAndTagEqual(f) || count >= maxCount || f.isEmpty) return t to f
 
     val max = (maxCount - count).coerceAtLeast(0)
     val added = min(max, f.count)
@@ -144,61 +125,7 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
     return t to f
 }
 
-fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty and second.isEmpty
-
-val guiTexture = modId("textures/gui/gui.png")
-
-@Environment(EnvType.CLIENT)
-fun bindGuiTexture() {
-    getClient().textureManager.bindTexture(guiTexture)
-}
-
-private typealias DH = DrawableHelper
-
-fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Float, v: Float, ltrb: Int, cm: Int) {
-    drawNinePatch(matrices, x, y, w, h, u, v, ltrb, cm, ltrb)
-}
-
-fun drawNinePatch(matrices: MatrixStack, x: Int, y: Int, w: Int, h: Int, u: Float, v: Float, lt: Int, cm: Int, rb: Int) {
-    drawNinePatch(matrices, x, y, w, h, u, v, lt, cm, rb, lt, cm, rb)
-}
-
-/**
- * Wed Oct 14 01:43:12 PM UTC 2020
- * well i managed to write this shit
- *
- * @param x square x position
- * @param y square y position
- * @param w square width
- * @param h square height
- * @param u texture left position (in pixel)
- * @param v texture top position (in pixel)
- * @param l nine-patch left size
- * @param c nine-patch center size
- * @param r nine-patch right size
- * @param t nine-patch top size
- * @param m nine-patch middle size
- * @param b nine-patch bottom size
- */
-@Environment(EnvType.CLIENT)
-fun drawNinePatch(
-    matrices: MatrixStack,
-    x: Int, y: Int, w: Int, h: Int,
-    u: Float, v: Float,
-    l: Int, c: Int, r: Int, t: Int, m: Int, b: Int
-) {
-    DH.drawTexture(matrices, x, y, l, t, u, v, l, t, 256, 256)
-    DH.drawTexture(matrices, x + l, y, w - l - r, t, u + l, v, c, t, 256, 256)
-    DH.drawTexture(matrices, x + w - r, y, r, t, u + l + c, v, r, t, 256, 256)
-
-    DH.drawTexture(matrices, x, y + t, l, h - t - b, u, v + t, l, m, 256, 256)
-    DH.drawTexture(matrices, x + l, y + t, w - l - r, h - t - b, u + l, v + t, c, m, 256, 256)
-    DH.drawTexture(matrices, x + w - r, y + t, r, h - t - b, u + l + c, v + t, r, m, 256, 256)
-
-    DH.drawTexture(matrices, x, y + h - b, l, b, u, v + t + m, l, b, 256, 256)
-    DH.drawTexture(matrices, x + l, y + h - b, w - l - r, b, u + l, v + t + m, c, b, 256, 256)
-    DH.drawTexture(matrices, x + w - r, y + h - b, r, b, u + l + c, v + t + m, r, b, 256, 256)
-}
+fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty && second.isEmpty
 
 var Pair<Inventory, Int>.stack: ItemStack
     get() = first.getStack(second)
@@ -214,8 +141,6 @@ fun BlockPosSet.fromTag(tag: ListTag) {
 }
 
 fun hasMod(id: String) = FabricLoader.getInstance().isModLoaded(id)
-
-fun PacketByteBuf.readStr(): String = readString(32767)
 
 fun Int.toFormattedString(): String = when {
     this < 1000 -> "$this"

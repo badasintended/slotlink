@@ -4,16 +4,11 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
-import badasintended.slotlink.util.Sort
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
-import net.minecraft.entity.player.PlayerEntity
+import badasintended.slotlink.screen.slot.LockedSlot
+import badasintended.slotlink.util.index
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.screen.slot.Slot
-import net.minecraft.server.network.ServerPlayerEntity
 
 class RemoteScreenHandler : RequestScreenHandler {
 
@@ -23,39 +18,26 @@ class RemoteScreenHandler : RequestScreenHandler {
         syncId: Int,
         playerInventory: PlayerInventory,
         inventories: Set<FilteredInventory>,
-        lastSort: Sort,
         master: MasterBlockEntity,
         offHand: Boolean
-    ) : super(syncId, playerInventory, inventories, lastSort, null, master) {
+    ) : super(syncId, playerInventory, inventories, null, master) {
         this.offHand = offHand
     }
 
-    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : super(syncId, playerInventory, buf) {
+    constructor(syncId: Int, playerInventory: PlayerInventory, buf: PacketByteBuf) : super(syncId, playerInventory) {
         this.offHand = buf.readBoolean()
     }
 
-    override fun resize(viewedHeight: Int) {
-        super.resize(viewedHeight)
+    override fun resize(viewedHeight: Int, craft: Boolean) {
+        super.resize(viewedHeight, craft)
 
         if (!offHand) if (playerInventory.mainHandStack.item is MultiDimRemoteItem) playerInventory.apply {
-            slots[37 + selectedSlot] = object : Slot(this, selectedSlot, -999999, -999999) {
-                override fun canInsert(stack: ItemStack) = false
-                override fun canTakeItems(playerEntity: PlayerEntity) = false
-
-                @Environment(EnvType.CLIENT)
-                override fun doDrawHoveringEffect() = false
+            slots.forEachIndexed { i, slot ->
+                if (slot.stack == mainHandStack) slots[i] = LockedSlot(slot.inventory, slot.index, slot.x, slot.y)
             }
         }
     }
 
     override fun getType(): ScreenHandlerType<*> = Screens.REMOTE
-
-    override fun close(player: PlayerEntity) {
-        super.close(player)
-        if (player is ServerPlayerEntity) {
-            val stack = if (offHand) player.offHandStack else player.mainHandStack
-            stack.orCreateTag.putInt("lastSort", lastSort.ordinal)
-        }
-    }
 
 }

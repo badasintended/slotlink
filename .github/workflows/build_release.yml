@@ -19,9 +19,10 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
-      - run: ./gradlew build
+      - run: ./gradlew build curseforge
         env:
           MOD_VERSION: ${{ steps.vars.outputs.VERSION }}
+          CURSEFORGE_API: ${{ secrets.CURSEFORGE_API }}
       - uses: actions/upload-artifact@v2
         with:
           name: build ${{ steps.vars.outputs.VERSION }}
