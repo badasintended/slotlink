@@ -30,7 +30,6 @@ class FilteredInventory(
         while (target.count < target.maxCount && !source.isEmpty) {
             val one = source.copy()
             one.count = 1
-            if (!isValid(slot, one)) return
             if (!canInsert(slot, one, side)) return
             if (target.isEmpty) {
                 setStack(slot, one)
@@ -76,7 +75,7 @@ class FilteredInventory(
     }
 
     override fun canInsert(slot: Int, stack: ItemStack, dir: Direction?): Boolean {
-        return isValid(stack) && (inventory as? SidedInventory)?.canInsert(slot, stack, dir) ?: true
+        return isValid(stack) && (inventory as? SidedInventory)?.canInsert(slot, stack, dir) ?: isValid(slot, stack)
     }
 
     override fun canExtract(slot: Int, stack: ItemStack?, dir: Direction?): Boolean {
