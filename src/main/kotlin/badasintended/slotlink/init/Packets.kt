@@ -51,13 +51,13 @@ object Packets : Initializer {
     override fun main() {
         s(SORT) { server, player, _, buf, _ ->
             val syncId = buf.int
-            val sort = buf.enum<RequestScreenHandler.Sort>()
+            val sort = buf.enum<RequestScreenHandler.SortMode>()
             val filter = buf.string
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.sort(sort, filter)
+                    handler.scheduleSort(sort, filter)
                 }
             }
         }

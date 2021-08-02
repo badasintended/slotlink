@@ -1,6 +1,6 @@
 package badasintended.slotlink.client.config
 
-import badasintended.slotlink.screen.RequestScreenHandler.Sort
+import badasintended.slotlink.screen.RequestScreenHandler.SortMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -24,7 +24,7 @@ val config: SlotlinkConfig by lazy {
 class SlotlinkConfig(
     var autoFocusSearchBar: Boolean = false,
     var showCraftingGrid: Boolean = true,
-    var sort: Sort = Sort.COUNT_DESC,
+    var sort: SortMode = SortMode.COUNT_DESC,
     var syncReiSearch: Boolean = false
 ) {
 
