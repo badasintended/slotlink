@@ -3,6 +3,7 @@ package badasintended.slotlink.screen
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode
 import badasintended.slotlink.init.Screens
+import badasintended.slotlink.util.ObjBoolPair
 import badasintended.slotlink.util.readFilter
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -17,7 +18,7 @@ class TransferScreenHandler(
     playerInv: PlayerInventory,
     priority: Int,
     blacklist: Boolean,
-    filter: MutableList<Pair<ItemStack, Boolean>>,
+    filter: MutableList<ObjBoolPair<ItemStack>>,
     var side: Direction,
     var mode: Mode,
     context: ScreenHandlerContext

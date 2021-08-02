@@ -10,15 +10,21 @@ import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.screen.slot.LockedSlot
+import badasintended.slotlink.screen.view.ItemView
+import badasintended.slotlink.screen.view.toView
+import badasintended.slotlink.util.ObjIntPair
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
 import badasintended.slotlink.util.input
 import badasintended.slotlink.util.int
 import badasintended.slotlink.util.isItemAndTagEqual
+import badasintended.slotlink.util.item
 import badasintended.slotlink.util.merge
+import badasintended.slotlink.util.nbt
 import badasintended.slotlink.util.result
 import badasintended.slotlink.util.s2c
 import badasintended.slotlink.util.stack
+import badasintended.slotlink.util.to
 import java.util.*
 import kotlin.collections.set
 import kotlin.math.ceil
@@ -49,7 +55,6 @@ import net.minecraft.screen.slot.SlotActionType.QUICK_MOVE
 import net.minecraft.screen.slot.SlotActionType.SWAP
 import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.registry.Registry
 
 @Suppress("LeakingThis")
@@ -63,13 +68,13 @@ open class RequestScreenHandler(
     RecipeGridAligner<Ingredient> {
 
     val player: PlayerEntity = playerInventory.player
-    private val emptySlots = arrayListOf<Pair<Inventory, Int>>()
-    private val filledSlots = arrayListOf<Pair<Inventory, Int>>()
+    private val emptySlots = arrayListOf<ObjIntPair<Inventory>>()
+    private val filledSlots = arrayListOf<ObjIntPair<Inventory>>()
 
     private val filledStacks = arrayListOf<ItemStack>()
 
-    private val trackedStacks = DefaultedList.ofSize(54, ItemStack.EMPTY to 0)
-    val viewedStacks = DefaultedList.ofSize(54, ItemStack.EMPTY to 0)!!
+    private val trackedViews = ArrayList<ItemView>(54)
+    val itemViews = ArrayList<ItemView>(54)
 
     private var lastSortData = SortData(SortMode.NAME, "")
     private var scheduledSortData: SortData? = null
@@ -82,10 +87,16 @@ open class RequestScreenHandler(
     private var request: RequestBlockEntity? = null
     private var master: MasterBlockEntity? = null
 
-    private val cache = hashMapOf<Inventory, DefaultedList<ItemStack>>()
+    private val cache = hashMapOf<Inventory, List<ItemView>>()
 
     var totalSlotSize = 0
     var filledSlotSize = 0
+
+    init {
+        for (i in 0 until 54) {
+            itemViews.add(ItemStack.EMPTY.toView())
+        }
+    }
 
     /** Client side **/
     constructor(syncId: Int, playerInventory: PlayerInventory) : this(
@@ -103,11 +114,15 @@ open class RequestScreenHandler(
         this.request = request
         this.master = master
         inventories.forEach {
-            val stacks = DefaultedList.ofSize(it.size(), ItemStack.EMPTY)
+            val views = ArrayList<ItemView>(it.size())
             for (i in 0 until it.size()) {
-                stacks[i] = it.getStack(i).copy()
+                views.add(it.getStack(i).toView())
             }
-            cache[it] = stacks
+            cache[it] = views
+        }
+
+        for (i in 0 until 54) {
+            trackedViews.add(ItemStack.EMPTY.toView())
         }
 
         addListener(object : ScreenHandlerListener {
@@ -124,13 +139,11 @@ open class RequestScreenHandler(
     }
 
     fun scroll(amount: Int) {
-        viewedStacks.clear()
-
         val scroll = amount.coerceIn(0, maxScroll)
 
         for (i in 0 until viewedHeight * 9) {
             val stack = filledStacks.getOrElse(i + 9 * scroll) { ItemStack.EMPTY }
-            viewedStacks[i] = stack.copy().apply { count = 1 } to stack.count
+            itemViews[i].update(stack)
         }
 
         lastScroll = scroll
@@ -138,21 +151,21 @@ open class RequestScreenHandler(
 
     /** server only **/
     fun multiSlotAction(i: Int, data: Int, type: SlotActionType) {
-        val viewed = viewedStacks[i].first
+        val view = itemViews[i]
         var cursor = cursorStack
 
         if (cursor.isEmpty) {
             if (type == CLONE) {
-                if (player.abilities.creativeMode && cursor.isEmpty) cursor = viewed.copy().apply { count = maxCount }
+                if (player.abilities.creativeMode && cursor.isEmpty) cursor = view.toStack().apply { count = maxCount }
             } else {
                 if (type == THROW && data == 0) {
-                    val slot = filledSlots.first { it.stack.isItemAndTagEqual(viewed) }
+                    val slot = filledSlots.first { view.isItemAndTagEqual(it.stack) }
                     player.dropItem(slot.stack.copy().apply { count = 1 }, true)
                     slot.stack.decrement(1)
-                } else if (type != SWAP || !playerInventory.getStack(data).isItemAndTagEqual(viewed)) {
+                } else if (type != SWAP || !view.isItemAndTagEqual(playerInventory.getStack(data))) {
                     var stack = if (type == SWAP) playerInventory.getStack(data).copy() else ItemStack.EMPTY
                     filledSlots.any {
-                        if (it.stack.isItemAndTagEqual(viewed)) {
+                        if (view.isItemAndTagEqual(it.stack)) {
                             val merged = stack.merge(it.stack)
                             stack = merged.first
                             it.stack = merged.second
@@ -433,14 +446,14 @@ open class RequestScreenHandler(
         var resort = false
         cache.forEach {
             val inventory = it.key
-            val stacks = it.value
+            val views = it.value
 
             for (i in 0 until inventory.size()) {
-                val before = stacks[i]
-                val after = inventory.getStack(i)
-                if (!before.isItemAndTagEqual(after) || before.count != after.count) {
+                val view = views[i]
+                val stack = inventory.getStack(i)
+                if (!view.isItemAndTagEqual(stack)) {
                     resort = true
-                    stacks[i] = after.copy()
+                    views[i].update(stack)
                 }
             }
         }
@@ -515,16 +528,17 @@ open class RequestScreenHandler(
             }
         }
 
-        viewedStacks.forEachIndexed { i, after ->
-            val before = trackedStacks[i]
-            if (!before.first.isItemAndTagEqual(after.first) || before.second != after.second) {
+        itemViews.forEachIndexed { i, after ->
+            val before = trackedViews[i]
+            if (before != after) {
                 s2c(player, UPDATE_VIEWED_STACK) {
                     int(syncId)
                     int(i)
-                    stack(after.first)
-                    int(after.second)
+                    item(after.item)
+                    nbt(after.nbt)
+                    int(after.count)
                 }
-                trackedStacks[i] = after.first.copy() to after.second
+                before.update(after)
             }
         }
 

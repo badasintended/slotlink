@@ -8,7 +8,9 @@ import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.enum
 import badasintended.slotlink.util.id
 import badasintended.slotlink.util.int
+import badasintended.slotlink.util.item
 import badasintended.slotlink.util.modId
+import badasintended.slotlink.util.nbt
 import badasintended.slotlink.util.stack
 import badasintended.slotlink.util.string
 import net.fabricmc.api.EnvType
@@ -241,13 +243,14 @@ object Packets : Initializer {
         c(UPDATE_VIEWED_STACK) { client, _, buf, _ ->
             val syncId = buf.int
             val index = buf.int
-            val stack = buf.stack
+            val item = buf.item
+            val nbt = buf.nbt
             val count = buf.int
 
             client.execute {
                 val handler = client.player!!.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    handler.viewedStacks[index] = stack to count
+                    handler.itemViews[index].update(item, nbt, count)
                 }
             }
         }

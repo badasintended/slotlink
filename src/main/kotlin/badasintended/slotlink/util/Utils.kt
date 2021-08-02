@@ -13,7 +13,6 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -28,24 +27,12 @@ import org.apache.logging.log4j.LogManager
 
 typealias BlockEntityBuilder = (BlockPos, BlockState) -> BlockEntity
 
-fun BlockPos.toNbt(): NbtCompound {
-    val tag = NbtCompound()
-    tag.putInt("x", x)
-    tag.putInt("y", y)
-    tag.putInt("z", z)
-    return tag
-}
-
 fun BlockPos.toArray(): IntArray {
     return intArrayOf(x, y, z)
 }
 
 fun IntArray.toPos(): BlockPos {
     return BlockPos(get(0), get(1), get(2))
-}
-
-fun NbtCompound.toPos(): BlockPos {
-    return BlockPos(getInt("x"), getInt("y"), getInt("z"))
 }
 
 fun PlayerEntity.actionBar(key: String, vararg args: Any) {
@@ -82,15 +69,15 @@ fun Direction.next(): Direction {
     return Direction.byId(id + 1)
 }
 
-fun PacketByteBuf.writeFilter(filter: List<Pair<ItemStack, Boolean>>) {
+fun PacketByteBuf.writeFilter(filter: List<ObjBoolPair<ItemStack>>) {
     filter.forEach {
         writeItemStack(it.first)
         writeBoolean(it.second)
     }
 }
 
-fun PacketByteBuf.readFilter(size: Int = 9): MutableList<Pair<ItemStack, Boolean>> {
-    val list = arrayListOf<Pair<ItemStack, Boolean>>()
+fun PacketByteBuf.readFilter(size: Int = 9): MutableList<ObjBoolPair<ItemStack>> {
+    val list = arrayListOf<ObjBoolPair<ItemStack>>()
     for (i in 0 until size) {
         list.add(readItemStack() to readBoolean())
     }
@@ -136,7 +123,7 @@ fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
 
 fun Pair<ItemStack, ItemStack>.allEmpty() = first.isEmpty && second.isEmpty
 
-var Pair<Inventory, Int>.stack: ItemStack
+var ObjIntPair<Inventory>.stack: ItemStack
     get() = first.getStack(second)
     set(value) = first.setStack(second, value)
 

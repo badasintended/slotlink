@@ -9,6 +9,7 @@ import badasintended.slotlink.network.ConnectionType.Companion.EXPORT
 import badasintended.slotlink.network.ConnectionType.Companion.IMPORT
 import badasintended.slotlink.network.ConnectionType.Companion.LINK
 import badasintended.slotlink.network.Network
+import badasintended.slotlink.util.IntPair
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import java.util.*
 import net.minecraft.block.BlockState
@@ -33,7 +34,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
     private val invSet = ObjectLinkedOpenHashSet<FilteredInventory>()
 
     private var tick = 0
-    val forcedChunks = hashSetOf<Pair<Int, Int>>()
+    val forcedChunks = hashSetOf<IntPair>()
 
     fun getInventories(world: World, request: Boolean = false): SortedSet<FilteredInventory> {
         invSet.clear()

@@ -2,7 +2,9 @@ package badasintended.slotlink.screen
 
 import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.init.Screens
+import badasintended.slotlink.util.ObjBoolPair
 import badasintended.slotlink.util.readFilter
+import badasintended.slotlink.util.to
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
@@ -18,7 +20,7 @@ open class LinkScreenHandler(
     playerInv: PlayerInventory,
     var priority: Int,
     var blacklist: Boolean,
-    val filter: MutableList<Pair<ItemStack, Boolean>>,
+    val filter: MutableList<ObjBoolPair<ItemStack>>,
     protected val context: ScreenHandlerContext
 ) : ScreenHandler(null, syncId) {
 

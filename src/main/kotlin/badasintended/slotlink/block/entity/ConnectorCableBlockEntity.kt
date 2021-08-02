@@ -5,6 +5,8 @@ import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.property.getNull
+import badasintended.slotlink.util.ObjBoolPair
+import badasintended.slotlink.util.to
 import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.util.NbtType
@@ -46,7 +48,7 @@ abstract class ConnectorCableBlockEntity(
 
     var isBlackList = false
 
-    var filter: DefaultedList<Pair<ItemStack, Boolean>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
+    var filter: DefaultedList<ObjBoolPair<ItemStack>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
 
     private val filtered = FilteredInventory(filter) { isBlackList }
 

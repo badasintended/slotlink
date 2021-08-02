@@ -1,5 +1,6 @@
 package badasintended.slotlink.inventory
 
+import badasintended.slotlink.util.ObjBoolPair
 import badasintended.slotlink.util.isItemAndTagEqual
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
@@ -8,7 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.math.Direction
 
 class FilteredInventory(
-    private val filter: List<Pair<ItemStack, Boolean>>,
+    private val filter: List<ObjBoolPair<ItemStack>>,
     private val blacklist: () -> Boolean
 ) : SidedInventory {
 

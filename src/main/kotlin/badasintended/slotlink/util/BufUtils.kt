@@ -2,8 +2,11 @@
 
 package badasintended.slotlink.util
 
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Identifier
+import net.minecraft.util.registry.Registry
 import net.minecraft.network.PacketByteBuf as B
 
 inline fun B.bool(boolean: Boolean) = writeBoolean(boolean)
@@ -17,6 +20,12 @@ inline val B.string get() = readString(32767)
 
 inline fun B.stack(stack: ItemStack) = writeItemStack(stack)
 inline val B.stack get() = readItemStack()
+
+inline fun B.item(item: Item) = writeVarInt(Registry.ITEM.getRawId(item))
+inline val B.item get() = Registry.ITEM[readVarInt()]
+
+inline fun B.nbt(nbt: NbtCompound?) = writeNbt(nbt)
+inline val B.nbt get() = readNbt()
 
 inline fun B.id(id: Identifier) = writeIdentifier(id)
 inline val B.id get() = readIdentifier()

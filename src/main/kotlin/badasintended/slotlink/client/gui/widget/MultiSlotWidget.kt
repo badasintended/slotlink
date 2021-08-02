@@ -31,10 +31,10 @@ class MultiSlotWidget(
     handler: RequestScreenHandler,
     private val index: Int,
     x: Int, y: Int
-) : SlotWidget<RequestScreenHandler>(x, y, 18, handler, { handler.viewedStacks[index].first }),
+) : SlotWidget<RequestScreenHandler>(x, y, 18, handler, { handler.itemViews[index].renderStack }),
     KeyGrabber {
 
-    private val count get() = handler.viewedStacks[index].second
+    private val count get() = handler.itemViews[index].count
 
     override fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
         client.apply {
