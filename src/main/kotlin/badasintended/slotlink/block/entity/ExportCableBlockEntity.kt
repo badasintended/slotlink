@@ -23,11 +23,14 @@ class ExportCableBlockEntity(pos: BlockPos, state: BlockState) :
             for (j in 0 until source.size()) {
                 val sourceStack = source.getStack(j)
                 if (sourceStack.isEmpty) continue
+                val lastCount = sourceStack.count
                 for (k in targetSlots) {
                     target.merge(k, sourceStack, side)
-                    source.markDirty()
-                    target.markDirty()
-                    if (sourceStack.isEmpty) return true
+                    if (sourceStack.count < lastCount) {
+                        source.markDirty()
+                        target.markDirty()
+                        if (sourceStack.isEmpty) return true
+                    }
                 }
             }
         }

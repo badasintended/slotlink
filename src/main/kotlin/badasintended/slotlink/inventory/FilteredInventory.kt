@@ -29,10 +29,10 @@ class FilteredInventory(
     fun merge(slot: Int, source: ItemStack, side: Direction) {
         var target = getStack(slot)
         while (target.count < target.maxCount && !source.isEmpty) {
-            val one = source.copy()
-            one.count = 1
-            if (!canInsert(slot, one, side)) return
+            if (!canInsert(slot, source, side)) return
             if (target.isEmpty) {
+                val one = source.copy()
+                one.count = 1
                 setStack(slot, one)
                 source.decrement(1)
                 target = getStack(slot)
