@@ -1,7 +1,6 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.compat.invsort.InventorySortButton
-import badasintended.slotlink.client.config.config
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
@@ -9,6 +8,7 @@ import badasintended.slotlink.client.gui.widget.ScrollBarWidget
 import badasintended.slotlink.client.gui.widget.TextFieldWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.drawNinePatch
+import badasintended.slotlink.config.config
 import badasintended.slotlink.init.Packets.CLEAR_CRAFTING_GRID
 import badasintended.slotlink.init.Packets.MOVE
 import badasintended.slotlink.init.Packets.RESIZE

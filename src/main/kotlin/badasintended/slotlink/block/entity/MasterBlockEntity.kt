@@ -1,5 +1,6 @@
 package badasintended.slotlink.block.entity
 
+import badasintended.slotlink.config.config
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.network.Connection
@@ -86,6 +87,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
             if (!world.isClient) masterBlockEntity.apply {
                 tick++
                 if (tick == 10) {
+                    if (config.pauseTransferWhenOnScreen && watchers.isNotEmpty()) return
                     val cables = _network.get(IMPORT) { list ->
                         list.sortedByDescending { it.priority }
                     }
@@ -94,6 +96,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
                     }
                 } else if (tick == 20) {
                     tick = 0
+                    if (config.pauseTransferWhenOnScreen && watchers.isNotEmpty()) return
                     val cables = _network.get(EXPORT) { list ->
                         list.sortedByDescending { it.priority }
                     }

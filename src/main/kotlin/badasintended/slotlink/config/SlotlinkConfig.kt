@@ -1,6 +1,7 @@
-package badasintended.slotlink.client.config
+package badasintended.slotlink.config
 
 import badasintended.slotlink.screen.RequestScreenHandler.SortMode
+import badasintended.slotlink.util.log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -16,6 +17,7 @@ private val json = Json {
 
 val config: SlotlinkConfig by lazy {
     val conf = if (configFile.exists()) json.decodeFromString(configFile.readText()) else SlotlinkConfig()
+    log.info("slotlink config loaded")
     conf.save()
     conf
 }
@@ -25,11 +27,23 @@ class SlotlinkConfig(
     var autoFocusSearchBar: Boolean = false,
     var showCraftingGrid: Boolean = true,
     var sort: SortMode = SortMode.COUNT_DESC,
-    var syncReiSearch: Boolean = false
+    var syncReiSearch: Boolean = false,
+    var pauseTransferWhenOnScreen: Boolean = true
 ) {
 
     fun save() {
         configFile.writeText(json.encodeToString(this))
+    }
+
+    fun invalidate() {
+        json.decodeFromString<SlotlinkConfig>(configFile.readText()).also {
+            autoFocusSearchBar = it.autoFocusSearchBar
+            showCraftingGrid = it.showCraftingGrid
+            sort = it.sort
+            syncReiSearch = it.syncReiSearch
+            pauseTransferWhenOnScreen = it.pauseTransferWhenOnScreen
+        }
+        log.info("slotlink config invalidated")
     }
 
 }
