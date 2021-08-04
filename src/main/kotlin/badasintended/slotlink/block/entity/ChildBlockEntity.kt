@@ -53,7 +53,7 @@ abstract class ChildBlockEntity(
 
     override fun markRemoved() {
         super.markRemoved()
-        network?.invalidate(connectionData.type)
+        invalidate()
     }
 
 }

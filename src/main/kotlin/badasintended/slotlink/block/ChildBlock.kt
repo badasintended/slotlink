@@ -66,12 +66,14 @@ abstract class ChildBlock(
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = blockEntityBuilder(pos, state)
 
-    override fun onBroken(world: WorldAccess, pos: BlockPos, state: BlockState) {
-        super.onBroken(world, pos, state)
-
-        val blockEntity = world.getBlockEntity(pos)
-        if (blockEntity is ChildBlockEntity) {
-            blockEntity.disconnect()
+    @Suppress("DEPRECATION")
+    override fun onStateReplaced(state: BlockState, world: World, pos: BlockPos, newState: BlockState, moved: Boolean) {
+        if (!state.isOf(newState.block)) {
+            val blockEntity = world.getBlockEntity(pos)
+            if (blockEntity is ChildBlockEntity) {
+                blockEntity.disconnect()
+            }
+            super.onStateReplaced(state, world, pos, newState, moved)
         }
     }
 
