@@ -28,7 +28,7 @@ class SlotlinkConfig(
     var showCraftingGrid: Boolean = true,
     var sort: SortMode = SortMode.COUNT_DESC,
     var syncReiSearch: Boolean = false,
-    var pauseTransferWhenOnScreen: Boolean = true
+    var pauseTransferWhenOnScreen: Boolean = false
 ) {
 
     fun save() {

@@ -67,9 +67,15 @@ open class RequestScreenHandler(
     BlockEntityWatcher<RequestBlockEntity>,
     RecipeGridAligner<Ingredient> {
 
+    companion object {
+
+        private val whitespaceRegex = Regex("\\s+")
+
+    }
+
     val player: PlayerEntity = playerInventory.player
-    private val emptySlots = arrayListOf<ObjIntPair<Inventory>>()
-    private val filledSlots = arrayListOf<ObjIntPair<Inventory>>()
+    private val emptySlots = linkedSetOf<ObjIntPair<Inventory>>()
+    private val filledSlots = linkedSetOf<ObjIntPair<Inventory>>()
 
     private val filledStacks = arrayListOf<ItemStack>()
 
@@ -310,20 +316,28 @@ open class RequestScreenHandler(
 
         slots.clear()
 
-        addSlot(CraftingResultSlot(playerInventory.player, this.input, this.result, 0, -999999, -999999 + h))
-        for (m in 0 until 3) for (l in 0 until 3) {
-            addSlot(if (craft) Slot(input, l + m * 3, 30 + l * 18, 8 + m * 18 + h) else LockedSlot(input, l + m * 3))
-        }
+        addSlotOnly(CraftingResultSlot(playerInventory.player, this.input, this.result, 0, -999999, -999999 + h))
 
-        for (m in 0 until 3) for (l in 0 until 9) {
-            addSlot(Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 9 + craftH + m * 18 + h))
-        }
+        for (m in 0 until 3) for (l in 0 until 3) addSlotOnly(
+            if (craft) Slot(input, l + m * 3, 30 + l * 18, 8 + m * 18 + h)
+            else LockedSlot(input, l + m * 3)
+        )
 
-        for (m in 0 until 9) {
-            addSlot(Slot(playerInventory, m, 8 + m * 18, 67 + craftH + h))
-        }
+        for (m in 0 until 3) for (l in 0 until 9) addSlotOnly(
+            Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 9 + craftH + m * 18 + h)
+        )
+
+        for (m in 0 until 9) addSlotOnly(
+            Slot(playerInventory, m, 8 + m * 18, 67 + craftH + h)
+        )
 
         this.viewedHeight = coerced
+    }
+
+    private fun addSlotOnly(slot: Slot): Slot {
+        slot.id = slots.size
+        slots.add(slot)
+        return slot
     }
 
     private fun updateCursor(stack: ItemStack) {
@@ -375,6 +389,19 @@ open class RequestScreenHandler(
         if (player is ServerPlayerEntity) {
             s2c(player, CloseScreenS2CPacket(syncId))
             player.actionBar("container.slotlink.request.$key")
+        }
+    }
+
+    private fun sort(sortData: SortData) {
+        sortData.mode.sorter.invoke(filledStacks)
+
+        if (lastSortData != sortData) scroll(0) else scroll(lastScroll)
+        lastSortData = sortData
+
+        s2c(player, UPDATE_SLOT_NUMBERS) {
+            int(syncId)
+            int(totalSlotSize)
+            int(filledSlotSize)
         }
     }
 
@@ -444,21 +471,53 @@ open class RequestScreenHandler(
         if (player !is ServerPlayerEntity) return
 
         var resort = false
-        cache.forEach {
-            val inventory = it.key
-            val views = it.value
+        cache.forEach { entry ->
+            val inventory = entry.key
+            val views = entry.value
 
             for (i in 0 until inventory.size()) {
                 val view = views[i]
                 val stack = inventory.getStack(i)
                 if (!view.isItemAndTagEqual(stack)) {
+                    if (view.isEmpty && !stack.isEmpty) {
+                        filledSlots.add(inventory to i)
+                        emptySlots.remove(inventory to i)
+                        filledSlotSize++
+                    } else if (!view.isEmpty && stack.isEmpty) {
+                        filledSlots.remove(inventory to i)
+                        emptySlots.add(inventory to i)
+                        filledSlotSize--
+                    }
+
+                    val beforeId = filledStacks.indexOfFirst { view.isItemAndTagEqual(it) }
+                    if (beforeId >= 0) {
+                        val beforeMatch = filledStacks[beforeId]
+                        beforeMatch.count -= view.count
+                        if (beforeMatch.isEmpty) {
+                            filledStacks.removeAt(beforeId)
+                        }
+                    }
+
+                    if (!stack.isEmpty && lastSortData.filters.all { it.match(stack) }) {
+                        val afterMatch = filledStacks.firstOrNull { it.isItemAndTagEqual(stack) }
+                        if (afterMatch == null) {
+                            filledStacks.add(stack.copy())
+                        } else {
+                            afterMatch.count += stack.count
+                        }
+                    }
+
                     resort = true
-                    views[i].update(stack)
+                    view.update(stack)
+                } else if (view.count != stack.count) {
+                    val filled = filledStacks.first { view.isItemAndTagEqual(it) }
+                    filled.count -= view.count - stack.count
+                    view.update(stack)
                 }
             }
         }
 
-        if (resort) scheduledSortData = lastSortData
+        if (resort) sort(lastSortData)
 
         scheduledSortData?.let { sortData ->
             scheduledSortData = null
@@ -480,52 +539,23 @@ open class RequestScreenHandler(
                 }
             }
 
-            var filter = sortData.filter.trim()
-
-            while (filter.isNotBlank()) {
-                if (filter.first() in "@#") {
-                    val nameId = filter.indexOfFirst(Char::isWhitespace)
-                    val value = if (nameId > -1) filter.substring(1, nameId) else filter.drop(1)
-                    when (filter.first()) {
-                        '@' -> filledSlots.removeIf {
-                            !Registry.ITEM.getId(it.stack.item).toString().contains(value, true)
-                        }
-                        '#' -> filledSlots.removeIf r@{ entry ->
-                            val tags = player.world.tagManager
-                                .getOrCreateTagGroup(Registry.ITEM_KEY)
-                                .tags.filterValues { it.contains(entry.stack.item) }.keys
-                            if (tags.isEmpty() && value.isBlank()) return@r false
-                            else return@r tags.none { it.toString().contains(value, true) }
-                        }
-                    }
-                    filter = filter.drop(1).removePrefix(value).trim()
-                } else {
-                    filledSlots.removeIf { !it.stack.name.string.contains(filter.trim(), true) }
-                    filter = ""
-                }
+            filledSlots.removeIf { slot ->
+                sortData.filters.any { !it.match(slot.stack) }
             }
 
             filledStacks.clear()
 
             filledSlots.forEach { slot ->
-                val match = filledStacks.firstOrNull { it.isItemAndTagEqual(slot.stack) }
+                val stack = slot.stack
+                val match = filledStacks.firstOrNull { it.isItemAndTagEqual(stack) }
                 if (match == null) {
-                    filledStacks.add(slot.stack.copy())
+                    filledStacks.add(stack.copy())
                 } else {
-                    match.count += slot.stack.count
+                    match.count += stack.count
                 }
             }
 
-            sortData.mode.sorter.invoke(filledStacks)
-
-            if (lastSortData != sortData) scroll(0) else scroll(lastScroll)
-            lastSortData = sortData
-
-            s2c(player, UPDATE_SLOT_NUMBERS) {
-                int(syncId)
-                int(totalSlotSize)
-                int(filledSlotSize)
-            }
+            sort(sortData)
         }
 
         itemViews.forEachIndexed { i, after ->
@@ -572,10 +602,33 @@ open class RequestScreenHandler(
 
     override fun onRemoved() = onRemoved("brokenSelf")
 
-    private data class SortData(
+    private inner class SortData(
         val mode: SortMode,
-        val filter: String,
-    )
+        filter: String,
+    ) {
+
+        val filters by lazy { filter.trim().split(whitespaceRegex).map { Filter(it) } }
+
+    }
+
+    private inner class Filter(string: String) {
+
+        val first = string.getOrElse(0) { 'w' }
+        val term = when (first) {
+            '@', '#' -> string.drop(1)
+            else -> string
+        }
+
+        fun match(stack: ItemStack): Boolean = term.isBlank() || when (first) {
+            '@' -> Registry.ITEM.getId(stack.item).toString().contains(term, true)
+            '#' -> player.world.tagManager
+                .getOrCreateTagGroup(Registry.ITEM_KEY)
+                .tags.filterValues { it.contains(stack.item) }.keys
+                .any { it.toString().contains(term, true) }
+            else -> stack.name.string.contains(term, true)
+        }
+
+    }
 
     @Suppress("unused")
     enum class SortMode(

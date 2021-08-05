@@ -102,7 +102,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
 val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
-    return ItemStack.areNbtEqual(this, other) && ItemStack.areItemsEqual(this, other)
+    return ItemStack.areItemsEqual(this, other) && ItemStack.areNbtEqual(this, other)
 }
 
 fun ItemStack.merge(from: ItemStack): Pair<ItemStack, ItemStack> {
