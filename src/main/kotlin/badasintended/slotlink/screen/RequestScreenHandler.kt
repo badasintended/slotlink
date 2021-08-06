@@ -510,9 +510,11 @@ open class RequestScreenHandler(
                     resort = true
                     view.update(stack)
                 } else if (view.count != stack.count) {
-                    val filled = filledStacks.first { view.isItemAndTagEqual(it) }
-                    filled.count -= view.count - stack.count
-                    view.update(stack)
+                    val filled = filledStacks.firstOrNull { view.isItemAndTagEqual(it) }
+                    if (filled != null) {
+                        filled.count -= view.count - stack.count
+                        view.update(stack)
+                    }
                 }
             }
         }
