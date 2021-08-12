@@ -515,6 +515,7 @@ open class RequestScreenHandler(
                         filled.count -= view.count - stack.count
                         view.update(stack)
                     }
+                    resort = true
                 }
             }
         }
