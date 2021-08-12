@@ -25,7 +25,7 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
       - uses: actions/upload-artifact@v2
         with:
-          name: build ${{ steps.vars.outputs.VERSION }}
+          name: slotlink ${{ steps.vars.outputs.VERSION }}
           path: "./build/libs/**.jar"
       - uses: alexellis/upload-assets@0.2.2
         env:
