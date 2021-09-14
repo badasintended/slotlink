@@ -13,6 +13,7 @@ import badasintended.slotlink.init.Screens
 import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.screen.view.ItemView
 import badasintended.slotlink.screen.view.toView
+import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
 import badasintended.slotlink.util.cursorStorage
@@ -115,17 +116,28 @@ open class RequestScreenHandler(
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        storages: Set<Storage<ItemVariant>>,
+        storages: MutableSet<FilteredItemStorage>,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
     ) : this(syncId, playerInventory, storages) {
         this.request = request
         this.master = master
         Transaction.openOuter().use { transaction ->
-            storages.forEach { storage ->
-                caches[storage] = storage
-                    .iterable(transaction)
-                    .map { it.toView() }
+            val dedup = HashSet<StorageView<ItemVariant>>()
+            val storageIter = storages.iterator()
+            storage@ while (storageIter.hasNext()) {
+                val storage = storageIter.next()
+                val viewIter = storage.iterator(transaction)
+                val cache = arrayListOf<ItemView>()
+                while (viewIter.hasNext()) {
+                    val view = viewIter.next()
+                    if (!dedup.add(view)) {
+                        storageIter.remove()
+                        continue@storage
+                    }
+                    cache.add(view.toView())
+                }
+                caches[storage] = cache
             }
         }
 

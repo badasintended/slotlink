@@ -12,7 +12,6 @@ import badasintended.slotlink.network.Network
 import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.IntPair
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
-import java.util.*
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.nbt.NbtCompound
@@ -38,7 +37,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
     private var tick = 0
     val forcedChunks = hashSetOf<IntPair>()
 
-    fun getStorages(world: World, request: Boolean = false): SortedSet<FilteredItemStorage> {
+    fun getStorages(world: World, request: Boolean = false): MutableSet<FilteredItemStorage> {
         invSet.clear()
         _network
             .get(LINK) { list -> list.sortedByDescending { it.priority } }
