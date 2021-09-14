@@ -10,13 +10,9 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtList
-import net.minecraft.util.ActionResult
-import net.minecraft.util.Hand
-import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
@@ -64,31 +60,6 @@ class MasterBlock : ModBlock("master") {
                 }
             }
         }
-    }
-
-    override fun onUse(
-        state: BlockState,
-        world: World,
-        pos: BlockPos,
-        player: PlayerEntity,
-        hand: Hand,
-        hit: BlockHitResult
-    ): ActionResult {
-//        if (!world.isClient) {
-//            val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
-//            val inventories = blockEntity.getStorages(world, true)
-//
-//            player.chat("")
-//            player.chat("$translationKey.use1", pos.x, pos.y, pos.z)
-//            player.chat("$translationKey.use2", inventories.size)
-//            player.chat(
-//                "$translationKey.use3",
-//                inventories.sumOf { it.size() },
-//                inventories.sumOf { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }
-//            )
-//            player.chat("$translationKey.use4", inventories.sumOf { it.size() * it.maxCountPerStack })
-//        }
-        return ActionResult.SUCCESS
     }
 
     override fun onBroken(world: WorldAccess, pos: BlockPos, state: BlockState) {
