@@ -32,7 +32,6 @@ sourceSets {
 
 repositories {
     maven("https://maven.shedaniel.me/")
-    maven("https://cursemaven.com")
 }
 
 dependencies {
@@ -50,8 +49,6 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
     modRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
 
-    modCompileOnly("curse.maven:expandedstorage-317856:3436889")
-    
     devImplementation(sourceSets["main"].output)
 }
 
