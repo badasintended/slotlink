@@ -3,7 +3,7 @@ package badasintended.slotlink.client.gui.widget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.client
 import badasintended.slotlink.init.Packets
-import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.util.int
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -12,10 +12,10 @@ import net.minecraft.item.ItemStack
 
 @Environment(EnvType.CLIENT)
 class FilterSlotWidget(
-    handler: LinkScreenHandler,
+    handler: ConnectorCableScreenHandler,
     private val index: Int,
     x: Int, y: Int
-) : SlotWidget<LinkScreenHandler>(x, y, 18, handler, { handler.filter[index].first }) {
+) : SlotWidget<ConnectorCableScreenHandler>(x, y, 18, handler, { handler.filter[index].first }) {
 
     private val nbt get() = handler.filter[index].second
 

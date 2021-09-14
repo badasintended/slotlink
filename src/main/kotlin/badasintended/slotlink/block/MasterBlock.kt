@@ -4,7 +4,6 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.Network
-import badasintended.slotlink.util.chat
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -75,20 +74,20 @@ class MasterBlock : ModBlock("master") {
         hand: Hand,
         hit: BlockHitResult
     ): ActionResult {
-        if (!world.isClient) {
-            val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
-            val inventories = blockEntity.getInventories(world, true)
-
-            player.chat("")
-            player.chat("$translationKey.use1", pos.x, pos.y, pos.z)
-            player.chat("$translationKey.use2", inventories.size)
-            player.chat(
-                "$translationKey.use3",
-                inventories.sumOf { it.size() },
-                inventories.sumOf { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }
-            )
-            player.chat("$translationKey.use4", inventories.sumOf { it.size() * it.maxCountPerStack })
-        }
+//        if (!world.isClient) {
+//            val blockEntity = world.getBlockEntity(pos)!! as MasterBlockEntity
+//            val inventories = blockEntity.getStorages(world, true)
+//
+//            player.chat("")
+//            player.chat("$translationKey.use1", pos.x, pos.y, pos.z)
+//            player.chat("$translationKey.use2", inventories.size)
+//            player.chat(
+//                "$translationKey.use3",
+//                inventories.sumOf { it.size() },
+//                inventories.sumOf { inv -> (0 until inv.size()).filter { inv.getStack(it).isEmpty }.size }
+//            )
+//            player.chat("$translationKey.use4", inventories.sumOf { it.size() * it.maxCountPerStack })
+//        }
         return ActionResult.SUCCESS
     }
 

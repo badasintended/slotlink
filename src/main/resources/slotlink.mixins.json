@@ -5,10 +5,8 @@
   "compatibilityLevel": "JAVA_16",
   "mixins"            : [
     "CraftingScreenHandlerAccessor",
-    "DoubleInventoryMixin",
     "ServerWorldMixin",
-    "WallMountedBlockMixin",
-    "pseudo.CompoundWorldlyContainerMixin"
+    "WallMountedBlockMixin"
   ],
   "client"            : [
     "HandledScreenAccessor",

@@ -2,9 +2,11 @@ package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.FilterSlotWidget
+import badasintended.slotlink.client.util.GuiTextures
+import badasintended.slotlink.client.util.bind
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Packets.LINK_SETTINGS
-import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.int
 import net.fabricmc.api.EnvType
@@ -14,7 +16,7 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
-open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
+open class ConnectorCableScreen<H : ConnectorCableScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
     ModScreen<H>(h, inventory, title) {
 
     private var priority = handler.priority
@@ -36,6 +38,8 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
         }
 
         add(ButtonWidget(x + 2 * 18, y + 2, 14, 14)) {
+            bgU = 228
+            bgV = 28
             u = { 242 }
             v = { 0 }
             onPressed = {
@@ -45,6 +49,8 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
         }
 
         add(ButtonWidget(x + 2 * 18, y + 2 + 2 * 18, 14, 14)) {
+            bgU = 228
+            bgV = 28
             u = { 242 }
             v = { 14 }
             onPressed = {
@@ -54,6 +60,8 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
         }
 
         add(ButtonWidget(x + 6 * 18 + 4, y + 20, 14, 14)) {
+            bgU = 228
+            bgV = 28
             u = { 228 }
             v = { if (blacklist) 14 else 0 }
             onPressed = {
@@ -73,6 +81,13 @@ open class LinkScreen<H : LinkScreenHandler>(h: H, inventory: PlayerInventory, t
             int(priority)
             bool(blacklist)
         }
+    }
+
+    override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
+        super.drawBackground(matrices, delta, mouseX, mouseY)
+
+        GuiTextures.FILTER.bind()
+        drawTexture(matrices, x, y, 0, 0, 176, 166)
     }
 
     override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {

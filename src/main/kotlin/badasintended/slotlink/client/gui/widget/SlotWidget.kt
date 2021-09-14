@@ -1,8 +1,6 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.client.util.bindGuiTexture
 import badasintended.slotlink.client.util.client
-import badasintended.slotlink.client.util.drawNinePatch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
@@ -35,10 +33,6 @@ abstract class SlotWidget<SH : ScreenHandler>(
 
     final override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         if (!visible) return
-        bindGuiTexture()
-
-        drawNinePatch(matrices, x, y, width, height, 16f, 0f, 1, 14)
-
         client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
         renderOverlay(matrices, stack)
     }

@@ -1,9 +1,9 @@
 package badasintended.slotlink.init
 
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
-import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.enum
 import badasintended.slotlink.util.id
@@ -166,7 +166,7 @@ object Packets : Initializer {
 
             server.execute {
                 val handler = player.currentScreenHandler
-                if (handler.syncId == syncId) if (handler is LinkScreenHandler) {
+                if (handler.syncId == syncId) if (handler is ConnectorCableScreenHandler) {
                     handler.filterSlotClick(index, button)
                 }
             }
@@ -179,7 +179,7 @@ object Packets : Initializer {
 
             server.execute {
                 val handler = player.currentScreenHandler
-                if (handler.syncId == syncId) if (handler is LinkScreenHandler) {
+                if (handler.syncId == syncId) if (handler is ConnectorCableScreenHandler) {
                     handler.priority = priority
                     handler.blacklist = blacklist
                 }
@@ -193,7 +193,7 @@ object Packets : Initializer {
 
             server.execute {
                 val handler = player.currentScreenHandler
-                if (handler.syncId == syncId) if (handler is TransferScreenHandler) {
+                if (handler.syncId == syncId) if (handler is TransferCableScreenHandler) {
                     handler.side = side
                     handler.mode = redstone
                 }

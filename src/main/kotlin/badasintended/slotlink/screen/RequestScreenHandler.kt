@@ -1,3 +1,5 @@
+@file:Suppress("LeakingThis", "DEPRECATION", "UnstableApiUsage")
+
 package badasintended.slotlink.screen
 
 import badasintended.slotlink.block.entity.BlockEntityWatcher
@@ -8,27 +10,31 @@ import badasintended.slotlink.init.Packets.UPDATE_MAX_SCROLL
 import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
 import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
-import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.screen.view.ItemView
 import badasintended.slotlink.screen.view.toView
-import badasintended.slotlink.util.ObjIntPair
+import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
+import badasintended.slotlink.util.cursorStorage
 import badasintended.slotlink.util.input
 import badasintended.slotlink.util.int
-import badasintended.slotlink.util.isItemAndTagEqual
+import badasintended.slotlink.util.isEmpty
 import badasintended.slotlink.util.item
 import badasintended.slotlink.util.merge
 import badasintended.slotlink.util.nbt
 import badasintended.slotlink.util.result
 import badasintended.slotlink.util.s2c
 import badasintended.slotlink.util.stack
-import badasintended.slotlink.util.to
+import badasintended.slotlink.util.storage
 import java.util.*
 import kotlin.collections.set
 import kotlin.math.ceil
 import kotlin.math.min
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.CraftingInventory
@@ -57,11 +63,10 @@ import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.registry.Registry
 
-@Suppress("LeakingThis")
 open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
-    private val inventories: Set<FilteredInventory>,
+    private val storages: Set<Storage<ItemVariant>>,
 ) : CraftingScreenHandler(syncId, playerInventory),
     MasterBlockEntity.Watcher,
     BlockEntityWatcher<RequestBlockEntity>,
@@ -74,10 +79,8 @@ open class RequestScreenHandler(
     }
 
     val player: PlayerEntity = playerInventory.player
-    private val emptySlots = linkedSetOf<ObjIntPair<Inventory>>()
-    private val filledSlots = linkedSetOf<ObjIntPair<Inventory>>()
 
-    private val filledStacks = arrayListOf<ItemStack>()
+    private val filledViews = arrayListOf<ItemView>()
 
     private val trackedViews = ArrayList<ItemView>(54)
     val itemViews = ArrayList<ItemView>(54)
@@ -93,7 +96,7 @@ open class RequestScreenHandler(
     private var request: RequestBlockEntity? = null
     private var master: MasterBlockEntity? = null
 
-    private val cache = hashMapOf<Inventory, List<ItemView>>()
+    private val caches = hashMapOf<Storage<ItemVariant>, List<ItemView>>()
 
     var totalSlotSize = 0
     var filledSlotSize = 0
@@ -113,18 +116,29 @@ open class RequestScreenHandler(
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        inventories: Set<FilteredInventory>,
+        storages: MutableSet<FilteredItemStorage>,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
-    ) : this(syncId, playerInventory, inventories) {
+    ) : this(syncId, playerInventory, storages) {
         this.request = request
         this.master = master
-        inventories.forEach {
-            val views = ArrayList<ItemView>(it.size())
-            for (i in 0 until it.size()) {
-                views.add(it.getStack(i).toView())
+        Transaction.openOuter().use { transaction ->
+            val dedup = HashSet<StorageView<ItemVariant>>()
+            val storageIter = storages.iterator()
+            storage@ while (storageIter.hasNext()) {
+                val storage = storageIter.next()
+                val viewIter = storage.iterator(transaction)
+                val cache = arrayListOf<ItemView>()
+                while (viewIter.hasNext()) {
+                    val view = viewIter.next()
+                    if (!dedup.add(view)) {
+                        storageIter.remove()
+                        continue@storage
+                    }
+                    cache.add(view.toView())
+                }
+                caches[storage] = cache
             }
-            cache[it] = views
         }
 
         for (i in 0 until 54) {
@@ -148,7 +162,7 @@ open class RequestScreenHandler(
         val scroll = amount.coerceIn(0, maxScroll)
 
         for (i in 0 until viewedHeight * 9) {
-            val stack = filledStacks.getOrElse(i + 9 * scroll) { ItemStack.EMPTY }
+            val stack = filledViews.getOrElse(i + 9 * scroll) { ItemView.EMPTY }
             itemViews[i].update(stack)
         }
 
@@ -158,41 +172,59 @@ open class RequestScreenHandler(
     /** server only **/
     fun multiSlotAction(i: Int, data: Int, type: SlotActionType) {
         val view = itemViews[i]
+        val variant = view.toVariant()
         var cursor = cursorStack
 
         if (cursor.isEmpty) {
             if (type == CLONE) {
                 if (player.abilities.creativeMode && cursor.isEmpty) cursor = view.toStack().apply { count = maxCount }
             } else {
-                if (type == THROW && data == 0) {
-                    val slot = filledSlots.first { view.isItemAndTagEqual(it.stack) }
-                    player.dropItem(slot.stack.copy().apply { count = 1 }, true)
-                    slot.stack.decrement(1)
-                } else if (type != SWAP || !view.isItemAndTagEqual(playerInventory.getStack(data))) {
-                    var stack = if (type == SWAP) playerInventory.getStack(data).copy() else ItemStack.EMPTY
-                    filledSlots.any {
-                        if (view.isItemAndTagEqual(it.stack)) {
-                            val merged = stack.merge(it.stack)
-                            stack = merged.first
-                            it.stack = merged.second
+                if (type == THROW) {
+                    val all = data == 1
+                    Transaction.openOuter().use { transaction ->
+                        for (storage in storages) {
+                            val extracted = storage
+                                .extract(variant, if (all) variant.item.maxCount.toLong() else 1, transaction)
+                            if (extracted > 0) {
+                                player.storage.drop(variant, extracted, transaction)
+                                break
+                            }
                         }
-                        if (stack.isEmpty) false else stack.count < stack.maxCount
+                        transaction.commit()
                     }
-
+                } else if (type != SWAP || !view.isItemAndTagEqual(playerInventory.getStack(data))) {
                     when (type) {
-                        SWAP -> playerInventory.setStack(data, stack)
-                        THROW -> player.dropItem(stack, true)
-                        else -> {
-                            if (type == QUICK_MOVE) slots
-                                .filter { (it.inventory is PlayerInventory) && it.canInsert(stack) }
-                                .sortedBy { it.index }
-                                .sortedByDescending { it.stack.count }
-                                .forEach {
-                                    val merged = it.stack.merge(stack)
-                                    it.stack = merged.first
-                                    stack = merged.second
-                                }
-                            cursor = stack
+                        SWAP -> Transaction.openOuter().use { transaction ->
+                            val slot = player.storage.getSlot(data)
+                            var available = slot.capacity - slot.amount
+                            for (storage in storages) {
+                                val extracted = storage.extract(variant, available, transaction)
+                                available -= slot.insert(variant, extracted, transaction)
+                                if (available <= 0) break
+                            }
+                            transaction.commit()
+                        }
+                        QUICK_MOVE -> Transaction.openOuter().use { transaction ->
+                            var free = variant.item.maxCount.toLong()
+                            for (storage in storages) {
+                                val available = storage.simulateExtract(variant, free, transaction)
+                                val inserted = player.storage.offer(variant, available, transaction)
+                                val extracted = storage.extract(variant, inserted, transaction)
+                                free -= extracted
+                                if (free == 0L || inserted == 0L) break
+                            }
+                            transaction.commit()
+                        }
+                        else -> if (!variant.isBlank) Transaction.openOuter().use { transaction ->
+                            val max = variant.item.maxCount.toLong()
+                            var extracted = 0L
+                            for (storage in storages) {
+                                extracted += storage.extract(variant, max - extracted, transaction)
+                                if (extracted == max) break
+                            }
+                            cursorStorage.insert(variant, extracted, transaction)
+                            cursor = cursorStorage.resource.toStack(cursorStorage.amount.toInt())
+                            transaction.commit()
                         }
                     }
                 }
@@ -232,13 +264,21 @@ open class RequestScreenHandler(
                             if (inputStack.count != 1) {
                                 inputStack.decrement(1)
                             } else {
-                                val slot = filledSlots.firstOrNull { it.stack.isItemAndTagEqual(inputStack) }
-                                if (slot == null) {
+                                val variant = ItemVariant.of(inputStack)
+                                var extracted = false
+                                Transaction.openOuter().use { transaction ->
+                                    for (storage in storages) {
+                                        if (storage.extract(variant, 1, transaction) == 1L) {
+                                            extracted = true
+                                            break
+                                        }
+                                    }
+                                    transaction.commit()
+                                }
+                                if (!extracted) {
                                     inputStack.decrement(1)
                                     finished = true
                                     continue
-                                } else {
-                                    slot.first.removeStack(slot.second, 1)
                                 }
                             }
                         } else {
@@ -349,39 +389,37 @@ open class RequestScreenHandler(
 
     private fun moveStack(stack: ItemStack): ItemStack {
         if (stack.isEmpty) return stack
-        var result = stack
-        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(result) && it.stack.count < it.stack.maxCount }
-        pairs.forEach {
-            val merged = it.stack.merge(result)
-            if (it.first.isValid(it.second, merged.first)) {
-                it.stack = merged.first
-                result = merged.second
+        val variant = ItemVariant.of(stack)
+        var count = stack.count.toLong()
+
+        Transaction.openOuter().use { transaction ->
+            for (storage in storages) {
+                count -= storage.insert(variant, count, transaction)
+                if (count == 0L) break
             }
+            transaction.commit()
         }
-        if (!result.isEmpty || pairs.isEmpty()) {
-            val pair = emptySlots.firstOrNull { it.first.isValid(it.second, result) }
-            if (pair != null) {
-                pair.stack = result
-                filledSlots.add(pair)
-                emptySlots.remove(pair)
-                result = ItemStack.EMPTY
-            }
-        }
-        return result
+
+        return variant.toStack(count.toInt())
     }
 
     private fun ItemStack.restock(max: Int = 64): ItemStack {
         if (isEmpty) return ItemStack.EMPTY
 
-        var stack = copy()
-        val pairs = filledSlots.filter { it.stack.isItemAndTagEqual(stack) }
-        pairs.forEach {
-            if (stack.count < min(stack.maxCount, max)) {
-                val merged = stack.merge(it.stack)
-                stack = merged.first
-                it.stack = merged.second
+        val stack = copy()
+        val variant = ItemVariant.of(stack)
+        var free = min(stack.maxCount, max) - stack.count
+
+        Transaction.openOuter().use { transaction ->
+            for (storage in storages) {
+                val extracted = storage.extract(variant, free.toLong(), transaction).toInt()
+                stack.count += extracted
+                free -= extracted
+                if (free == 0) break
             }
+            transaction.commit()
         }
+
         return stack
     }
 
@@ -393,7 +431,7 @@ open class RequestScreenHandler(
     }
 
     private fun sort(sortData: SortData) {
-        sortData.mode.sorter.invoke(filledStacks)
+        sortData.mode.sort(filledViews)
 
         if (lastSortData != sortData) scroll(0) else scroll(lastScroll)
         lastSortData = sortData
@@ -437,14 +475,23 @@ open class RequestScreenHandler(
         val ingredient = inputs.next()
         if (ingredient.isEmpty) return
 
-        val pair = filledSlots.firstOrNull { ingredient.test(it.stack) }
-        val stack = if (pair == null) {
-            slots
-                .firstOrNull { it.inventory is PlayerInventory && it.canTakeItems(player) && ingredient.test(it.stack) }
-                ?.takeStack(1) ?: return
-        } else {
-            pair.first.removeStack(pair.second, 1)
+        Transaction.openOuter().use { transaction ->
+            for (storage in storages) {
+                val view = storage.iterable(transaction).firstOrNull { view ->
+                    ingredient.matchingStacks.any { test -> view.resource.matches(test) }
+                }
+                if (view != null) {
+                    view.extract(view.resource, 1, transaction)
+                    input.setStack(slot, view.resource.toStack(1))
+                    transaction.commit()
+                    return
+                }
+            }
         }
+
+        val stack = slots
+            .firstOrNull { it.inventory is PlayerInventory && it.canTakeItems(player) && ingredient.test(it.stack) }
+            ?.takeStack(1) ?: return
 
         input.setStack(slot, stack)
     }
@@ -471,90 +518,82 @@ open class RequestScreenHandler(
         if (player !is ServerPlayerEntity) return
 
         var resort = false
-        cache.forEach { entry ->
-            val inventory = entry.key
-            val views = entry.value
 
-            for (i in 0 until inventory.size()) {
-                val view = views[i]
-                val stack = inventory.getStack(i)
-                if (!view.isItemAndTagEqual(stack)) {
-                    if (view.isEmpty && !stack.isEmpty) {
-                        filledSlots.add(inventory to i)
-                        emptySlots.remove(inventory to i)
-                        filledSlotSize++
-                    } else if (!view.isEmpty && stack.isEmpty) {
-                        filledSlots.remove(inventory to i)
-                        emptySlots.add(inventory to i)
-                        filledSlotSize--
-                    }
+        Transaction.openOuter().use { transaction ->
+            caches.forEach { entry ->
+                val storage = entry.key
+                val caches = entry.value
 
-                    val beforeId = filledStacks.indexOfFirst { view.isItemAndTagEqual(it) }
-                    if (beforeId >= 0) {
-                        val beforeMatch = filledStacks[beforeId]
-                        beforeMatch.count -= view.count
-                        if (beforeMatch.isEmpty) {
-                            filledStacks.removeAt(beforeId)
+                var i = 0
+                for (view in storage.iterator(transaction)) {
+                    val cache = caches[i]
+                    if (!cache.isItemAndTagEqual(view)) {
+                        if (cache.isEmpty && !view.isEmpty) {
+                            filledSlotSize++
+                        } else if (!cache.isEmpty && view.isEmpty) {
+                            filledSlotSize--
                         }
-                    }
 
-                    if (!stack.isEmpty && lastSortData.filters.all { it.match(stack) }) {
-                        val afterMatch = filledStacks.firstOrNull { it.isItemAndTagEqual(stack) }
-                        if (afterMatch == null) {
-                            filledStacks.add(stack.copy())
-                        } else {
-                            afterMatch.count += stack.count
+                        val beforeId = filledViews.indexOfFirst { cache.isItemAndTagEqual(it) }
+                        if (beforeId >= 0) {
+                            val beforeMatch = filledViews[beforeId]
+                            beforeMatch.count -= cache.count
+                            if (beforeMatch.isEmpty) {
+                                filledViews.removeAt(beforeId)
+                            }
                         }
-                    }
 
-                    resort = true
-                    view.update(stack)
-                } else if (view.count != stack.count) {
-                    val filled = filledStacks.firstOrNull { view.isItemAndTagEqual(it) }
-                    if (filled != null) {
-                        filled.count -= view.count - stack.count
-                        view.update(stack)
+                        if (!view.isEmpty && lastSortData.filters.all { it.match(view) }) {
+                            val afterMatch = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
+                            if (afterMatch == null) {
+                                filledViews.add(view.toView())
+                            } else {
+                                afterMatch.count += view.amount.toInt()
+                            }
+                        }
+
                         resort = true
+                        cache.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                    } else if (cache.count != view.amount.toInt()) {
+                        val filled = filledViews.firstOrNull { cache.isItemAndTagEqual(it) }
+                        if (filled != null) {
+                            filled.count -= cache.count - view.amount.toInt()
+                            cache.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                            resort = true
+                        }
                     }
+
+                    i++
                 }
             }
         }
+
 
         if (resort) sort(lastSortData)
 
         scheduledSortData?.let { sortData ->
             scheduledSortData = null
-            emptySlots.clear()
-            filledSlots.clear()
             totalSlotSize = 0
             filledSlotSize = 0
+            filledViews.clear()
 
-            inventories.forEach { inv ->
-                for (slot in 0 until inv.size()) {
-                    totalSlotSize++
-                    val stack = inv.getStack(slot)
-                    if (stack.isEmpty) {
-                        emptySlots.add(inv to slot)
-                    } else {
-                        filledSlots.add(inv to slot)
-                        filledSlotSize++
+            Transaction.openOuter().use { transaction ->
+                storages.forEach { storage ->
+                    storage.iterator(transaction).forEach { view ->
+                        totalSlotSize++
+                        if (!view.isEmpty) {
+                            filledSlotSize++
+
+                            if (sortData.filters.all { it.match(view) }) {
+                                val match = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
+                                if (match == null) {
+                                    filledViews.add(view.toView())
+                                } else {
+                                    match.count += view.amount.toInt()
+                                }
+                            }
+                        }
                     }
-                }
-            }
-
-            filledSlots.removeIf { slot ->
-                sortData.filters.any { !it.match(slot.stack) }
-            }
-
-            filledStacks.clear()
-
-            filledSlots.forEach { slot ->
-                val stack = slot.stack
-                val match = filledStacks.firstOrNull { it.isItemAndTagEqual(stack) }
-                if (match == null) {
-                    filledStacks.add(stack.copy())
-                } else {
-                    match.count += stack.count
                 }
             }
 
@@ -575,7 +614,7 @@ open class RequestScreenHandler(
             }
         }
 
-        val max = ceil((filledStacks.size / 9f) - viewedHeight).toInt().coerceAtLeast(0)
+        val max = ceil((filledViews.size / 9f) - viewedHeight).toInt().coerceAtLeast(0)
         if (maxScroll != max) {
             s2c(player, UPDATE_MAX_SCROLL) {
                 int(syncId)
@@ -622,13 +661,13 @@ open class RequestScreenHandler(
             else -> string
         }
 
-        fun match(stack: ItemStack): Boolean = term.isBlank() || when (first) {
-            '@' -> Registry.ITEM.getId(stack.item).toString().contains(term, true)
+        fun match(view: StorageView<ItemVariant>): Boolean = term.isBlank() || when (first) {
+            '@' -> Registry.ITEM.getId(view.resource.item).toString().contains(term, true)
             '#' -> player.world.tagManager
                 .getOrCreateTagGroup(Registry.ITEM_KEY)
-                .tags.filterValues { it.contains(stack.item) }.keys
+                .tags.filterValues { it.contains(view.resource.item) }.keys
                 .any { it.toString().contains(term, true) }
-            else -> stack.name.string.contains(term, true)
+            else -> view.resource.toStack().name.string.contains(term, true)
         }
 
     }
@@ -636,11 +675,11 @@ open class RequestScreenHandler(
     @Suppress("unused")
     enum class SortMode(
         private val id: String,
-        val sorter: (ArrayList<ItemStack>) -> Any
+        val sort: (ArrayList<ItemView>) -> Any
     ) {
 
-        NAME("name", { it -> it.sortBy { it.name.string } }),
-        NAME_DESC("name_desc", { it -> it.sortByDescending { it.name.string } }),
+        NAME("name", { it -> it.sortBy { it.staticStack.name.string } }),
+        NAME_DESC("name_desc", { it -> it.sortByDescending { it.staticStack.item.name.string } }),
 
         ID("id", { it -> it.sortBy { Registry.ITEM.getId(it.item).toString() } }),
         ID_DESC("id_desc", { it -> it.sortByDescending { Registry.ITEM.getId(it.item).toString() } }),

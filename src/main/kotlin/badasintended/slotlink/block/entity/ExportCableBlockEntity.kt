@@ -2,34 +2,36 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.util.isEmpty
+import kotlin.math.min
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.block.BlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
+@Suppress("UnstableApiUsage", "DEPRECATION")
 class ExportCableBlockEntity(pos: BlockPos, state: BlockState) :
     TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE, ConnectionType.EXPORT, pos, state) {
 
     override var side = Direction.UP
 
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
-        val target = getInventory(world)
-        if (target.isNull) return false
+        val target = getStorage(world, side)
+        if (!target.supportsInsertion()) return false
 
-        val targetSlots = target.getAvailableSlots(side)
-        val inventories = master.getInventories(world)
+        val sources = master.getStorages(world)
 
-        for (source in inventories) {
-            for (j in 0 until source.size()) {
-                val sourceStack = source.getStack(j)
-                if (sourceStack.isEmpty) continue
-                val lastCount = sourceStack.count
-                for (k in targetSlots) {
-                    target.merge(k, sourceStack, side)
-                    if (sourceStack.count < lastCount) {
-                        source.markDirty()
-                        target.markDirty()
-                        if (sourceStack.isEmpty) return true
+        Transaction.openOuter().use { transaction ->
+            for (source in sources) {
+                for (view in source.iterable(transaction)) {
+                    if (view.isEmpty) continue
+                    val variant = view.resource
+                    val inserted = target.insert(variant, min(variant.item.maxCount.toLong(), view.amount), transaction)
+                    if (inserted > 0) {
+                        view.extract(variant, inserted, transaction)
+                        transaction.commit()
+                        return true
                     }
                 }
             }

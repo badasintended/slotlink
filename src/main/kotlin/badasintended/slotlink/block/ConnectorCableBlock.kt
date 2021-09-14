@@ -6,12 +6,11 @@ import badasintended.slotlink.property.getNull
 import badasintended.slotlink.property.with
 import badasintended.slotlink.util.BlockEntityBuilder
 import badasintended.slotlink.util.bbCuboid
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
-import net.minecraft.block.InventoryProvider
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.NamedScreenHandlerFactory
@@ -38,6 +37,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
 
     }
 
+    @Suppress("DEPRECATION", "UnstableApiUsage")
     private fun checkLink(
         state: BlockState,
         direction: Direction,
@@ -47,14 +47,18 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
     ): BlockState {
         var result = state
         val connected = state.getNull(CONNECTED)
+        val block = neighborState.block
         if (connected == direction && neighborState.isAir) {
             result = result.with(CONNECTED, null)
-        } else if (connected == null) {
-            val block = neighborState.block
-            if (block is InventoryProvider || world.run { getBlockEntity(neighborPos) } is Inventory) {
-                result = result
-                    .with(CONNECTED, direction)
-                    .with(PROPERTIES[direction], true)
+        } else if (connected == null && world is World && !block.isIgnored()) {
+            for (d in DIRECTIONS) {
+                val storage = ItemStorage.SIDED.find(world, neighborPos, d)
+                if (storage != null) {
+                    result = result
+                        .with(CONNECTED, direction)
+                        .with(PROPERTIES[direction], true)
+                    break
+                }
             }
         }
         return result

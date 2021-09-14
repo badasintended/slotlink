@@ -6,7 +6,7 @@ import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.OFF
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.ON
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.POSITIVE
 import badasintended.slotlink.network.ConnectionType
-import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.screen.TransferCableScreenHandler
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -63,7 +63,7 @@ abstract class TransferCableBlockEntity(
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-        return TransferScreenHandler(
+        return TransferCableScreenHandler(
             syncId, inv, priority, isBlackList, filter, side, mode, ScreenHandlerContext.create(world, pos)
         )
     }

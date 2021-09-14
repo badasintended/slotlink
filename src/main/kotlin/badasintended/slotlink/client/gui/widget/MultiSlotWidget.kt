@@ -31,7 +31,7 @@ class MultiSlotWidget(
     handler: RequestScreenHandler,
     private val index: Int,
     x: Int, y: Int
-) : SlotWidget<RequestScreenHandler>(x, y, 18, handler, { handler.itemViews[index].renderStack }),
+) : SlotWidget<RequestScreenHandler>(x, y, 18, handler, { handler.itemViews[index].staticStack }),
     KeyGrabber {
 
     private val count get() = handler.itemViews[index].count

@@ -122,7 +122,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getInventories(masterWorld, true)
+        private val inventories = master.getStorages(masterWorld, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
             val handler = RemoteScreenHandler(syncId, inv, inventories, master, offHand)
