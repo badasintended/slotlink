@@ -6,7 +6,7 @@ import net.minecraft.util.registry.Registry
 object SlotlinkDev {
 
     fun main() {
-        Registry.register(Registry.ITEM, modId("inventory_filler"), InventoryFillerItem)
+        Registry.register(Registry.ITEM, modId("storage_filler"), StorageFillerItem)
     }
 
 }

@@ -1,18 +1,20 @@
 package badasintended.slotlink.dev
 
 import badasintended.slotlink.item.ModItem
-import net.minecraft.block.InventoryProvider
-import net.minecraft.inventory.Inventory
+import kotlin.random.Random
+import kotlin.random.asJavaRandom
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
 import net.minecraft.text.LiteralText
 import net.minecraft.util.ActionResult
+import net.minecraft.util.math.Direction
 import net.minecraft.util.registry.Registry
-import kotlin.random.Random
-import kotlin.random.asJavaRandom
 
-object InventoryFillerItem : Item(ModItem.SETTINGS) {
+object StorageFillerItem : Item(ModItem.SETTINGS) {
 
     private val random = Random.asJavaRandom()
 
@@ -20,6 +22,7 @@ object InventoryFillerItem : Item(ModItem.SETTINGS) {
         return true
     }
 
+    @Suppress("DEPRECATION", "UnstableApiUsage")
     override fun useOnBlock(context: ItemUsageContext): ActionResult {
         val world = context.world
         val player = context.player ?: return ActionResult.FAIL
@@ -27,17 +30,14 @@ object InventoryFillerItem : Item(ModItem.SETTINGS) {
         if (world.isClient) return ActionResult.SUCCESS
 
         val pos = context.blockPos
-        val state = world.getBlockState(pos)
-        val block = state.block
+        val storage = ItemStorage.SIDED.find(world, pos, Direction.UP)
 
-        val inv = if (block is InventoryProvider) block.getInventory(state, world, pos) else world.getBlockEntity(pos) as? Inventory
-
-        inv?.apply {
-            for (i in 0 until size()) {
+        if (storage != null) Transaction.openOuter().use { transaction ->
+            while (true) {
                 val item = Registry.ITEM.getRandom(random)
-                inv.setStack(i, ItemStack(item, item.maxCount))
+                if (storage.insert(ItemVariant.of(item), item.maxCount.toLong(), transaction) == 0L) break
             }
-
+            transaction.commit()
             player.sendMessage(LiteralText("Filled (${pos.x}, ${pos.y}, ${pos.z})"), true)
         }
 
