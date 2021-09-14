@@ -28,7 +28,7 @@ class RequestBlockEntity(pos: BlockPos, state: BlockState) :
         val world = getWorld() ?: return null
         network?.also { network ->
             val master = network.get(MASTER).firstOrNull() ?: return null
-            val handler = RequestScreenHandler(syncId, inv, master.getInventories(world, true), this, master)
+            val handler = RequestScreenHandler(syncId, inv, master.getStorages(world, true), this, master)
             watchers.add(handler)
             master.watchers.add(handler)
             master.markForcedChunks()

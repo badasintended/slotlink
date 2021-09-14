@@ -1,10 +1,13 @@
+@file:Suppress("DEPRECATION", "UnstableApiUsage")
+
 package badasintended.slotlink.screen
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.Screens
-import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.item.MultiDimRemoteItem
 import badasintended.slotlink.screen.slot.LockedSlot
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerType
@@ -16,7 +19,7 @@ class RemoteScreenHandler : RequestScreenHandler {
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        inventories: Set<FilteredInventory>,
+        inventories: Set<Storage<ItemVariant>>,
         master: MasterBlockEntity,
         offHand: Boolean
     ) : super(syncId, playerInventory, inventories, null, master) {

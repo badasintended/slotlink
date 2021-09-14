@@ -1,5 +1,7 @@
 package badasintended.slotlink.screen.view
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -8,18 +10,21 @@ import net.minecraft.nbt.NbtCompound
 class ItemView(
     private var _item: Item,
     private var _nbt: NbtCompound?,
-    private var _count: Int
+    var count: Int
 ) {
+
+    companion object {
+        val EMPTY = ItemView(Items.AIR, null, 0)
+    }
 
     val item get() = _item
     val nbt get() = _nbt
-    val count get() = _count
 
     val isEmpty get() = item == Items.AIR || count <= 0
 
     private lateinit var _renderStack: ItemStack
     private var reloadRenderStack = true
-    val renderStack: ItemStack
+    val staticStack: ItemStack
         get() {
             if (reloadRenderStack) {
                 reloadRenderStack = false
@@ -39,19 +44,45 @@ class ItemView(
         return false
     }
 
+    @Suppress("DEPRECATION", "UnstableApiUsage")
+    fun isItemAndTagEqual(view: StorageView<ItemVariant>): Boolean {
+        if (isEmpty && (view.isResourceBlank || view.amount == 0L)) return true
+        if (!view.resource.isOf(item)) return false
+
+        if (!isEmpty && !(view.isResourceBlank || view.amount == 0L)) {
+            return view.resource.nbtMatches(nbt)
+        }
+
+        return false
+    }
+
+    fun isItemAndTagEqual(stack: ItemView): Boolean {
+        if (isEmpty && stack.isEmpty) return true
+        if (item != stack.item) return false
+
+        if (!isEmpty && !stack.isEmpty) {
+            return nbt == stack.nbt
+        }
+
+        return false
+    }
+
     fun update(item: Item, nbt: NbtCompound?, count: Int) {
         _item = item
         _nbt = nbt
-        _count = count
+        this.count = count
         reloadRenderStack = true
     }
-
-    fun update(stack: ItemStack) = update(stack.item, stack.nbt?.copy(), stack.count)
 
     fun update(other: ItemView) = update(other.item, other.nbt?.copy(), other.count)
 
     fun toStack(): ItemStack {
         return ItemStack(item, count).also { it.nbt = nbt }
+    }
+
+    @Suppress("DEPRECATION", "UnstableApiUsage")
+    fun toVariant(): ItemVariant {
+        return ItemVariant.of(item, nbt)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -69,3 +100,6 @@ class ItemView(
 }
 
 fun ItemStack.toView() = ItemView(item, nbt?.copy(), count)
+
+@Suppress("DEPRECATION", "UnstableApiUsage")
+fun StorageView<ItemVariant>.toView() = ItemView(resource.item, resource.nbt, amount.toInt())

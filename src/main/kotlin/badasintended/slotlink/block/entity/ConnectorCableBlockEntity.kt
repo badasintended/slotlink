@@ -1,23 +1,23 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ConnectorCableBlock
-import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.property.getNull
+import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.ObjBoolPair
 import badasintended.slotlink.util.to
 import badasintended.slotlink.util.writeFilter
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage
 import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
-import net.minecraft.block.ChestBlock
-import net.minecraft.block.InventoryProvider
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
-import net.minecraft.block.entity.ChestBlockEntity
-import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtList
@@ -32,6 +32,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
+@Suppress("DEPRECATION", "UnstableApiUsage")
 abstract class ConnectorCableBlockEntity(
     blockEntityType: BlockEntityType<out BlockEntity>,
     connectionType: ConnectionType<*>,
@@ -41,23 +42,31 @@ abstract class ConnectorCableBlockEntity(
     ExtendedScreenHandlerFactory,
     Connection {
 
+    private var apiCache: BlockApiCache<Storage<ItemVariant>, Direction>? = null
+
     private var linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)
+        set(value) {
+            apiCache = null
+            field = value
+        }
+
     private var linkedPos: BlockPos? = linkedSide?.let { pos.offset(it) }
+        set(value) {
+            apiCache = null
+            field = value
+        }
 
     var priority = 0
-
     var isBlackList = false
-
     var filter: DefaultedList<ObjBoolPair<ItemStack>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
 
-    private val filtered = FilteredInventory(filter) { isBlackList }
-
-    fun getInventory(
+    fun getStorage(
         world: WorldAccess,
+        side: Direction,
         master: MasterBlockEntity? = null,
         request: Boolean = false
-    ): FilteredInventory {
-        if (world !is World) return filtered.none
+    ): FilteredItemStorage {
+        if (world !is World) return FilteredItemStorage.EMPTY
 
         if (!world.isClient && master != null && request) {
             world as ServerWorld
@@ -67,25 +76,23 @@ abstract class ConnectorCableBlockEntity(
             }
         }
 
-        if (linkedPos == null) return filtered.none
+        if (linkedPos == null) return FilteredItemStorage.EMPTY
 
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
-        val linkedBlockEntity = world.getBlockEntity(linkedPos)
 
-        if (!linkedBlock.isIgnored()) when {
-            linkedBlock is ChestBlock && linkedBlockEntity is ChestBlockEntity -> {
-                return filtered.with(ChestBlock.getInventory(linkedBlock, linkedState, world, linkedPos, true))
+        return if (!linkedBlock.isIgnored()) {
+            val storage = if (!world.isClient) {
+                world as ServerWorld
+                if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
+                apiCache!!.find(side)
+            } else {
+                ItemStorage.SIDED.find(world, linkedPos, side)
             }
-            linkedBlock is InventoryProvider -> {
-                return filtered.with(linkedBlock.getInventory(linkedState, world, linkedPos))
-            }
-            linkedBlockEntity is Inventory -> {
-                return filtered.with(linkedBlockEntity)
-            }
+            FilteredItemStorage(filter, isBlackList, storage)
+        } else {
+            FilteredItemStorage.EMPTY
         }
-
-        return filtered.none
     }
 
     @Suppress("DEPRECATION")

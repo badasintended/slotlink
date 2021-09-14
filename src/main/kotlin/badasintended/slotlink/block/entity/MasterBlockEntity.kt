@@ -2,7 +2,6 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.config.config
 import badasintended.slotlink.init.BlockEntityTypes
-import badasintended.slotlink.inventory.FilteredInventory
 import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.ConnectionData
 import badasintended.slotlink.network.ConnectionType
@@ -10,6 +9,7 @@ import badasintended.slotlink.network.ConnectionType.Companion.EXPORT
 import badasintended.slotlink.network.ConnectionType.Companion.IMPORT
 import badasintended.slotlink.network.ConnectionType.Companion.LINK
 import badasintended.slotlink.network.Network
+import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.IntPair
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import java.util.*
@@ -18,6 +18,7 @@ import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
 class MasterBlockEntity(pos: BlockPos, state: BlockState) :
@@ -32,16 +33,16 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
 
     var watchers = hashSetOf<Watcher>()
 
-    private val invSet = ObjectLinkedOpenHashSet<FilteredInventory>()
+    private val invSet = ObjectLinkedOpenHashSet<FilteredItemStorage>()
 
     private var tick = 0
     val forcedChunks = hashSetOf<IntPair>()
 
-    fun getInventories(world: World, request: Boolean = false): SortedSet<FilteredInventory> {
+    fun getStorages(world: World, request: Boolean = false): SortedSet<FilteredItemStorage> {
         invSet.clear()
         _network
             .get(LINK) { list -> list.sortedByDescending { it.priority } }
-            .forEach { invSet.add(it.getInventory(world, this, request)) }
+            .forEach { invSet.add(it.getStorage(world, Direction.UP, this, request)) }
         return invSet
     }
 

@@ -6,7 +6,7 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.fabricmc.fabric.api.tag.TagRegistry
+import net.fabricmc.fabric.api.tag.TagFactory
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -99,7 +99,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
     ServerPlayNetworking.getSender(player).sendPacket(packet)
 }
 
-val ignoredTag: Tag<Block> = TagRegistry.block(modId("ignored"))
+val ignoredTag: Tag<Block> = TagFactory.BLOCK.create(modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
     return ItemStack.areItemsEqual(this, other) && ItemStack.areNbtEqual(this, other)
@@ -135,3 +135,5 @@ fun Int.toFormattedString(): String = when {
         String.format("%.1f%c", this / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
     }
 }
+
+
