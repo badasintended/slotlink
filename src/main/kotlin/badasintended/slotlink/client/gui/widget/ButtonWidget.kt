@@ -1,7 +1,7 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.client.util.bindGuiTexture
-import badasintended.slotlink.client.util.drawNinePatch
+import badasintended.slotlink.client.util.GuiTextures
+import badasintended.slotlink.client.util.bind
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -12,12 +12,14 @@ import net.minecraft.text.LiteralText
 @Environment(EnvType.CLIENT)
 class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w, h, LiteralText.EMPTY) {
 
+    var texture = GuiTextures.FILTER
     var onHovered: (MatrixStack, Int, Int) -> Unit = { _, _, _ -> }
     var onPressed = { }
+    var bgU = 0
+    var bgV = 0
     var u = { 0 }
     var v = { 0 }
     var background = true
-    var outline = false
 
     private var down = false
     private val padding = object {
@@ -36,16 +38,11 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
 
     override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         if (!visible) return
-        bindGuiTexture()
+        texture.bind()
 
         if (background) {
-            if (outline) {
-                val u = if (hovered) 64f else 48f
-                drawNinePatch(matrices, x, y, width, height, u, 16f, 2, 12)
-            } else {
-                val u = if (down) 16f else if (hovered) 48f else 32f
-                drawNinePatch(matrices, x, y, width, height, u, 0f, 1, 14)
-            }
+            val u = if (hovered) bgU + width else bgU
+            drawTexture(matrices, x, y, u, bgV, width, height)
         }
 
         padding.apply {

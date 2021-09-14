@@ -3,7 +3,7 @@ package badasintended.slotlink.client.gui.screen
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Packets
-import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.int
 import badasintended.slotlink.util.next
 import net.fabricmc.api.EnvType
@@ -12,8 +12,8 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
-class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title: Text) :
-    LinkScreen<TransferScreenHandler>(h, inventory, title) {
+class TransferCableScreen(h: TransferCableScreenHandler, inventory: PlayerInventory, title: Text) :
+    ConnectorCableScreen<TransferCableScreenHandler>(h, inventory, title) {
 
     private var side = handler.side
     private var redstone = handler.mode
@@ -25,6 +25,8 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
         val y = y + titleY + 11
 
         add(ButtonWidget(x + 6 * 18 + 4, y + 2, 14, 14)) {
+            bgU = 228
+            bgV = 28
             u = { 214 }
             v = { redstone.ordinal * 14 }
             onPressed = {
@@ -37,7 +39,9 @@ class TransferScreen(h: TransferScreenHandler, inventory: PlayerInventory, title
         }
 
         add(ButtonWidget(x + 6 * 18 + 4, y + 38, 14, 14)) {
-            u = { 186 }
+            bgU = 228
+            bgV = 28
+            u = { 200 }
             v = { side.ordinal * 14 }
             onPressed = {
                 side = side.next()

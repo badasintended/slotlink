@@ -1,12 +1,12 @@
 package badasintended.slotlink.init
 
-import badasintended.slotlink.client.gui.screen.LinkScreen
+import badasintended.slotlink.client.gui.screen.ConnectorCableScreen
 import badasintended.slotlink.client.gui.screen.RequestScreen
-import badasintended.slotlink.client.gui.screen.TransferScreen
-import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.client.gui.screen.TransferCableScreen
+import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.screen.TransferScreenHandler
+import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.modId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -25,22 +25,22 @@ object Screens : Initializer {
 
     lateinit var REQUEST: S<RequestScreenHandler>
     lateinit var REMOTE: S<RemoteScreenHandler>
-    lateinit var LINK: S<LinkScreenHandler>
-    lateinit var TRANSFER: S<TransferScreenHandler>
+    lateinit var CONNECTOR_CABLE: S<ConnectorCableScreenHandler>
+    lateinit var TRANSFER_CABLE: S<TransferCableScreenHandler>
 
     override fun main() {
         REQUEST = h("request", ::RequestScreenHandler)
         REMOTE = h("remote", ::RemoteScreenHandler)
-        LINK = h("link", ::LinkScreenHandler)
-        TRANSFER = h("transfer", ::TransferScreenHandler)
+        CONNECTOR_CABLE = h("connector_cable", ::ConnectorCableScreenHandler)
+        TRANSFER_CABLE = h("transfer_cable", ::TransferCableScreenHandler)
     }
 
     @Environment(EnvType.CLIENT)
     override fun client() {
         s(REQUEST, ::RequestScreen)
         s(REMOTE, ::RequestScreen)
-        s(LINK, ::LinkScreen)
-        s(TRANSFER, ::TransferScreen)
+        s(CONNECTOR_CABLE, ::ConnectorCableScreen)
+        s(TRANSFER_CABLE, ::TransferCableScreen)
     }
 
     private fun <H : ScreenHandler> h(id: String, func: (Int, PlayerInventory, PacketByteBuf) -> H): S<H> {

@@ -3,7 +3,7 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
-import badasintended.slotlink.screen.LinkScreenHandler
+import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.util.ignoredTag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -21,7 +21,7 @@ class LinkCableBlockEntity(pos: BlockPos, state: BlockState) :
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
-        return LinkScreenHandler(syncId, inv, priority, isBlackList, filter, ScreenHandlerContext.create(world, pos))
+        return ConnectorCableScreenHandler(syncId, inv, priority, isBlackList, filter, ScreenHandlerContext.create(world, pos))
     }
 
 }

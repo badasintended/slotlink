@@ -13,7 +13,7 @@ import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.util.math.Direction
 
-class TransferScreenHandler(
+class TransferCableScreenHandler(
     syncId: Int,
     playerInv: PlayerInventory,
     priority: Int,
@@ -22,7 +22,7 @@ class TransferScreenHandler(
     var side: Direction,
     var mode: Mode,
     context: ScreenHandlerContext
-) : LinkScreenHandler(syncId, playerInv, priority, blacklist, filter, context) {
+) : ConnectorCableScreenHandler(syncId, playerInv, priority, blacklist, filter, context) {
 
     constructor(syncId: Int, playerInv: PlayerInventory, buf: PacketByteBuf) : this(
         syncId, playerInv,
@@ -46,6 +46,6 @@ class TransferScreenHandler(
         }
     }
 
-    override fun getType(): ScreenHandlerType<*> = Screens.TRANSFER
+    override fun getType(): ScreenHandlerType<*> = Screens.TRANSFER_CABLE
 
 }

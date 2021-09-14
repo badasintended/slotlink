@@ -15,7 +15,7 @@ import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.screen.slot.Slot
 
 @Suppress("LeakingThis")
-open class LinkScreenHandler(
+open class ConnectorCableScreenHandler(
     syncId: Int,
     playerInv: PlayerInventory,
     var priority: Int,
@@ -82,6 +82,6 @@ open class LinkScreenHandler(
 
     override fun canUse(player: PlayerEntity) = true
 
-    override fun getType(): ScreenHandlerType<*> = Screens.LINK
+    override fun getType(): ScreenHandlerType<*> = Screens.CONNECTOR_CABLE
 
 }
