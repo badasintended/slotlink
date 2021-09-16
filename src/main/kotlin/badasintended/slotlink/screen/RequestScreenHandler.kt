@@ -208,6 +208,7 @@ open class RequestScreenHandler(
                             var free = variant.item.maxCount.toLong()
                             for (storage in storages) {
                                 val available = storage.simulateExtract(variant, free, transaction)
+                                if (available == 0L) continue
                                 val inserted = player.storage.offer(variant, available, transaction)
                                 val extracted = storage.extract(variant, inserted, transaction)
                                 free -= extracted
