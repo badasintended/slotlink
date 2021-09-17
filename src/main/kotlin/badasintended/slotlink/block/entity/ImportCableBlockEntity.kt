@@ -3,7 +3,6 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.util.isEmpty
-import kotlin.math.min
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.block.BlockState
 import net.minecraft.util.math.BlockPos
@@ -25,8 +24,11 @@ class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
             for (view in source.iterable(transaction)) {
                 if (view.isEmpty) continue
                 val variant = view.resource
+                val available = transaction.openNested().use { simulation ->
+                    view.extract(variant, variant.item.maxCount.toLong(), simulation)
+                }
                 for (target in targets) {
-                    val inserted = target.insert(variant, min(variant.item.maxCount.toLong(), view.amount), transaction)
+                    val inserted = target.insert(variant, available, transaction)
                     if (inserted > 0) {
                         view.extract(variant, inserted, transaction)
                         transaction.commit()
