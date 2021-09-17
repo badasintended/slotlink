@@ -22,15 +22,15 @@ class ItemView(
 
     val isEmpty get() = item == Items.AIR || count <= 0
 
-    private lateinit var _renderStack: ItemStack
-    private var reloadRenderStack = true
-    val staticStack: ItemStack
+    private lateinit var _singleStack: ItemStack
+    private var reloadSingleStack = true
+    val singleStack: ItemStack
         get() {
-            if (reloadRenderStack) {
-                reloadRenderStack = false
-                _renderStack = toStack()
+            if (reloadSingleStack) {
+                reloadSingleStack = false
+                _singleStack = toStack(1)
             }
-            return _renderStack
+            return _singleStack
         }
 
     fun isItemAndTagEqual(stack: ItemStack): Boolean {
@@ -71,12 +71,12 @@ class ItemView(
         _item = item
         _nbt = nbt
         this.count = count
-        reloadRenderStack = true
+        reloadSingleStack = true
     }
 
     fun update(other: ItemView) = update(other.item, other.nbt?.copy(), other.count)
 
-    fun toStack(): ItemStack {
+    fun toStack(count: Int = this.count): ItemStack {
         return ItemStack(item, count).also { it.nbt = nbt }
     }
 

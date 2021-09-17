@@ -177,7 +177,7 @@ open class RequestScreenHandler(
 
         if (cursor.isEmpty) {
             if (type == CLONE) {
-                if (player.abilities.creativeMode && cursor.isEmpty) cursor = view.toStack().apply { count = maxCount }
+                if (player.abilities.creativeMode && cursor.isEmpty) cursor = view.toStack(view.item.maxCount)
             } else {
                 if (type == THROW) {
                     val all = data == 1
@@ -679,8 +679,8 @@ open class RequestScreenHandler(
         val sort: (ArrayList<ItemView>) -> Any
     ) {
 
-        NAME("name", { it -> it.sortBy { it.staticStack.name.string } }),
-        NAME_DESC("name_desc", { it -> it.sortByDescending { it.staticStack.item.name.string } }),
+        NAME("name", { it -> it.sortBy { it.singleStack.name.string } }),
+        NAME_DESC("name_desc", { it -> it.sortByDescending { it.singleStack.item.name.string } }),
 
         ID("id", { it -> it.sortBy { Registry.ITEM.getId(it.item).toString() } }),
         ID_DESC("id_desc", { it -> it.sortByDescending { Registry.ITEM.getId(it.item).toString() } }),
