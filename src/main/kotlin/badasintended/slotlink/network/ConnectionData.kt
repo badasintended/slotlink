@@ -4,10 +4,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 
 class ConnectionData(
-    val pos: BlockPos,
+    pos: BlockPos,
     val type: ConnectionType<*>,
     val sides: HashSet<Direction> = hashSetOf()
 ) {
+
+    val pos: BlockPos = pos.toImmutable()
 
     var sideBits: Int
         get() {
