@@ -5,6 +5,7 @@ import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.Network
 import badasintended.slotlink.screen.RemoteScreenHandler
+import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.toArray
 import badasintended.slotlink.util.toPos
@@ -122,10 +123,10 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
         private val offHand: Boolean
     ) : ExtendedScreenHandlerFactory {
 
-        private val inventories = master.getStorages(masterWorld, true)
+        private val storages = master.getStorages(masterWorld, FilterFlags.INSERT, true)
 
         override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler {
-            val handler = RemoteScreenHandler(syncId, inv, inventories, master, offHand)
+            val handler = RemoteScreenHandler(syncId, inv, storages, master, offHand)
             master.watchers.add(handler)
             master.markForcedChunks()
             return handler

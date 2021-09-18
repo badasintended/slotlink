@@ -4,6 +4,7 @@ import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.ConnectionType.Companion.MASTER
 import badasintended.slotlink.screen.RequestScreenHandler
+import badasintended.slotlink.storage.FilterFlags
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
@@ -28,7 +29,8 @@ class RequestBlockEntity(pos: BlockPos, state: BlockState) :
         val world = getWorld() ?: return null
         network?.also { network ->
             val master = network.get(MASTER).firstOrNull() ?: return null
-            val handler = RequestScreenHandler(syncId, inv, master.getStorages(world, true), this, master)
+            val storages = master.getStorages(world, FilterFlags.INSERT, true)
+            val handler = RequestScreenHandler(syncId, inv, storages, this, master)
             watchers.add(handler)
             master.watchers.add(handler)
             master.markForcedChunks()

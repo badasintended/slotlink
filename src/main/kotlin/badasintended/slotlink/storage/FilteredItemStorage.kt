@@ -13,16 +13,17 @@ import net.minecraft.item.ItemStack
 class FilteredItemStorage(
     private val filter: List<ObjBoolPair<ItemStack>>,
     private val blacklist: Boolean,
+    private val flag: Int,
     storage: Storage<ItemVariant>?
 ) : FilteringStorage<ItemVariant>(storage ?: Storage.empty()) {
 
     companion object {
 
-        val EMPTY = FilteredItemStorage(emptyList(), true, null)
+        val EMPTY = FilteredItemStorage(emptyList(), true, 0, null)
 
     }
 
-    override fun canInsert(resource: ItemVariant) = if (filter.all { it.first.isEmpty }) true else {
+    private fun isValid(resource: ItemVariant) = if (filter.all { it.first.isEmpty }) true else {
         val equals = filter.filter { resource.matches(it.first) }
 
         if (equals.any { !it.second }) {
@@ -33,8 +34,15 @@ class FilteredItemStorage(
         }
     }
 
+    override fun canInsert(resource: ItemVariant) = (flag and FilterFlags.INSERT) == 0 || isValid(resource)
+    override fun canExtract(resource: ItemVariant) = (flag and FilterFlags.EXTRACT) == 0 || isValid(resource)
+
     override fun iterator(transaction: TransactionContext): MutableIterator<StorageView<ItemVariant>> {
-        return backingStorage.get().iterator(transaction)
+        return if (flag and FilterFlags.EXTRACT == 0) {
+            backingStorage.get().iterator(transaction)
+        } else {
+            super.iterator(transaction)
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.util.isEmpty
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.block.BlockState
@@ -16,11 +17,11 @@ class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
     override var side = Direction.DOWN
 
     override fun transferInternal(world: World, master: MasterBlockEntity): Boolean {
-        val source = getStorage(world, side)
+        val source = getStorage(world, side, FilterFlags.EXTRACT)
         if (!source.supportsExtraction()) return false
 
         Transaction.openOuter().use { transaction ->
-            val targets = master.getStorages(world)
+            val targets = master.getStorages(world, FilterFlags.INSERT)
             for (view in source.iterable(transaction)) {
                 if (view.isEmpty) continue
                 val variant = view.resource

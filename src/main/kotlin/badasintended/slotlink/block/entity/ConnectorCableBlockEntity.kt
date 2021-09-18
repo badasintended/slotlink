@@ -63,6 +63,7 @@ abstract class ConnectorCableBlockEntity(
     fun getStorage(
         world: WorldAccess,
         side: Direction,
+        flag: Int,
         master: MasterBlockEntity? = null,
         request: Boolean = false
     ): FilteredItemStorage {
@@ -89,7 +90,7 @@ abstract class ConnectorCableBlockEntity(
             } else {
                 ItemStorage.SIDED.find(world, linkedPos, side)
             }
-            FilteredItemStorage(filter, isBlackList, storage)
+            FilteredItemStorage(filter, isBlackList, flag, storage)
         } else {
             FilteredItemStorage.EMPTY
         }

@@ -37,11 +37,11 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
     private var tick = 0
     val forcedChunks = hashSetOf<IntPair>()
 
-    fun getStorages(world: World, request: Boolean = false): MutableSet<FilteredItemStorage> {
+    fun getStorages(world: World, flag: Int, request: Boolean = false): MutableSet<FilteredItemStorage> {
         invSet.clear()
         _network
             .get(LINK) { list -> list.sortedByDescending { it.priority } }
-            .forEach { invSet.add(it.getStorage(world, Direction.UP, this, request)) }
+            .forEach { invSet.add(it.getStorage(world, Direction.UP, flag, this, request)) }
         return invSet
     }
 
