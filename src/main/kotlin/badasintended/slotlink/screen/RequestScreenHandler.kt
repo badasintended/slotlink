@@ -505,6 +505,7 @@ open class RequestScreenHandler(
             val stacks = it.value
 
             for (i in 0 until inventory.size()) {
+                if (i >= stacks.size) stacks.add(ItemStack.EMPTY)
                 val before = stacks[i]
                 val after = inventory.getStack(i)
                 if (!before.isItemAndTagEqual(after) || before.count != after.count) {
