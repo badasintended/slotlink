@@ -22,21 +22,11 @@ val env: Map<String, String> = System.getenv()
 
 version = env["MOD_VERSION"] ?: "local"
 
-sourceSets {
-    val main by getting
-    create("dev") {
-        compileClasspath += main.compileClasspath
-        runtimeClasspath += main.runtimeClasspath
-    }
-}
-
 repositories {
     maven("https://maven.shedaniel.me/")
 }
 
 dependencies {
-    val devImplementation by configurations.getting
-
     minecraft("com.mojang:minecraft:${prop["minecraft"]}")
     mappings("net.fabricmc:yarn:${prop["yarn"]}:v2")
 
@@ -48,8 +38,14 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
     modRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+}
 
-    devImplementation(sourceSets["main"].output)
+sourceSets {
+    val main by getting
+    create("dev") {
+        compileClasspath += main.compileClasspath + main.output
+        runtimeClasspath += main.runtimeClasspath
+    }
 }
 
 java {
@@ -129,6 +125,7 @@ curseforge {
 }
 
 task<TaskModrinthUpload>("modrinth") {
+    group = "upload"
     onlyIf { env.contains("MODRINTH_TOKEN") }
     dependsOn("build")
 

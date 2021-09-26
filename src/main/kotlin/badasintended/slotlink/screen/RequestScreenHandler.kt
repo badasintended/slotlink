@@ -631,10 +631,28 @@ open class RequestScreenHandler(
     override fun getType(): ScreenHandlerType<*> = Screens.REQUEST
 
     override fun close(player: PlayerEntity) {
-        slots.filter { it.inventory is CraftingInventory }.forEach {
-            it.stack = moveStack(it.stack)
+        if (!cursorStack.isEmpty) {
+            // try to move cursor stack to player inventory first
+            Transaction.openOuter().use { transaction ->
+                val variant = ItemVariant.of(cursorStack)
+                val inserted = player.storage.offer(variant, cursorStack.count.toLong(), transaction)
+                if (inserted > 0L) {
+                    cursorStorage.extract(variant, inserted, transaction)
+                    transaction.commit()
+                }
+            }
+            // then move to network
+            cursorStack = moveStack(cursorStack)
         }
-        dropInventory(player, input)
+
+        // try to move crafting input to network first
+        for (i in 0 until input.size()) {
+            input.setStack(i, moveStack(input.getStack(i)))
+        }
+
+        // run vanilla way
+        super.close(player)
+
         request?.watchers?.remove(this)
         request?.markDirty()
         master?.watchers?.remove(this)
