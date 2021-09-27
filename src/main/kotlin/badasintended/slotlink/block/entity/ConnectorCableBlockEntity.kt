@@ -57,6 +57,11 @@ abstract class ConnectorCableBlockEntity(
         }
 
     var priority = 0
+        set(value) {
+            invalidate()
+            field = value
+        }
+
     var isBlackList = false
     var filter: DefaultedList<ObjBoolPair<ItemStack>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
 
