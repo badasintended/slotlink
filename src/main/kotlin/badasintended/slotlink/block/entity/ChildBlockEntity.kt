@@ -11,6 +11,7 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
 
 abstract class ChildBlockEntity(
     blockEntityType: BlockEntityType<out BlockEntity>,
@@ -22,6 +23,7 @@ abstract class ChildBlockEntity(
 
     override val connectionData = ConnectionData(pos, connectionType)
 
+    private var lazyNetworkPos: BlockPos? = null
     private var lazyNetwork: Lazy<Network?>? = null
     private var _network: Network? = null
     override var network: Network?
@@ -44,11 +46,15 @@ abstract class ChildBlockEntity(
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
 
-        lazyNetwork = lazy {
-            if (nbt.contains("network")) Network.get(world, nbt.getIntArray("network").toPos())
-            else null
-        }
+        lazyNetworkPos = if (nbt.contains("network")) nbt.getIntArray("network").toPos() else null
         connectionData.sideBits = nbt.getInt("sides")
+    }
+
+    override fun setWorld(world: World?) {
+        super.setWorld(world)
+        lazyNetwork = lazy {
+            lazyNetworkPos?.let { Network.get(world, it) }
+        }
     }
 
     override fun markRemoved() {
