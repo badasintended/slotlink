@@ -60,6 +60,12 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
 
     private val voxelCache = Int2ObjectOpenHashMap<VoxelShape>()
 
+    init {
+        for (property in PROPERTIES.values) {
+            defaultState = defaultState.with(property, false)
+        }
+    }
+
     protected open fun connect(
         state: BlockState,
         direction: Direction,
@@ -77,7 +83,7 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
         builder.add(NORTH, SOUTH, EAST, WEST, UP, DOWN)
     }
 
-    override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
+    override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
         val world = ctx.world
         val pos = ctx.blockPos
 

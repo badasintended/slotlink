@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.NamedScreenHandlerFactory
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.text.Text
@@ -37,6 +38,10 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
 
     }
 
+    init {
+        defaultState = defaultState.with(CONNECTED, null)
+    }
+
     @Suppress("DEPRECATION", "UnstableApiUsage")
     private fun checkLink(
         state: BlockState,
@@ -45,12 +50,14 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         neighborState: BlockState,
         neighborPos: BlockPos
     ): BlockState {
+        if (world !is ServerWorld) return state
+
         var result = state
         val connected = state.getNull(CONNECTED)
         val block = neighborState.block
         if (connected == direction && neighborState.isAir) {
             result = result.with(CONNECTED, null)
-        } else if (connected == null && world is World && !block.isIgnored()) {
+        } else if (connected == null && !block.isIgnored()) {
             for (d in DIRECTIONS) {
                 val storage = ItemStorage.SIDED.find(world, neighborPos, d)
                 if (storage != null) {
@@ -84,8 +91,8 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         return checkLink(fromSuper, direction, world, neighborState, neighborPos)
     }
 
-    override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
-        var state = super.getPlacementState(ctx)
+    override fun getPlacementState(ctx: ItemPlacementContext): BlockState? {
+        var state = super.getPlacementState(ctx) ?: return null
         val connected = state.getNull(CONNECTED)
         state = state.with(CONNECTED, null)
         if (connected != null) {
