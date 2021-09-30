@@ -476,16 +476,17 @@ open class RequestScreenHandler(
         val ingredient = inputs.next()
         if (ingredient.isEmpty) return
 
+        val matchingVariant = ingredient.matchingStacks.map { ItemVariant.of(it) }
+
         Transaction.openOuter().use { transaction ->
             for (storage in storages) {
-                val view = storage.iterable(transaction).firstOrNull { view ->
-                    ingredient.matchingStacks.any { test -> view.resource.matches(test) }
-                }
-                if (view != null) {
-                    view.extract(view.resource, 1, transaction)
-                    input.setStack(slot, view.resource.toStack(1))
-                    transaction.commit()
-                    return
+                for (variant in matchingVariant) {
+                    val extracted = storage.extract(variant, 1L, transaction)
+                    if (extracted > 0L) {
+                        input.setStack(slot, variant.toStack())
+                        transaction.commit()
+                        return
+                    }
                 }
             }
         }
