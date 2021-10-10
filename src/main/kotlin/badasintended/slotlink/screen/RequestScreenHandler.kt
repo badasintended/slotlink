@@ -232,7 +232,7 @@ open class RequestScreenHandler(
                 }
             }
         } else if (type == PICKUP) {
-            cursor = moveStack(cursor)
+            cursor = moveStackToNetwork(cursor)
         }
 
         updateCursor(cursor)
@@ -254,37 +254,37 @@ open class RequestScreenHandler(
                 cursor = merged.first
                 resultStack.onCraft(player.world, player, resultStack.count)
 
-                val remainingStacks =
-                    player.world.fastRecipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
+                val remainingStacks = player.world.fastRecipeManager
+                    .getRemainingStacks(RecipeType.CRAFTING, input, player.world)
 
                 var finished = false
                 for (i in remainingStacks.indices) {
                     val remainingStack = remainingStacks[i]
                     val inputStack = input.getStack(i)
                     if (!inputStack.isEmpty) {
-                        if (remainingStack.isEmpty) {
-                            if (inputStack.count != 1) {
-                                inputStack.decrement(1)
-                            } else {
-                                val variant = ItemVariant.of(inputStack)
-                                var extracted = false
-                                Transaction.openOuter().use { transaction ->
-                                    for (storage in storages) {
-                                        if (storage.extract(variant, 1, transaction) == 1L) {
-                                            extracted = true
-                                            break
-                                        }
-                                    }
-                                    transaction.commit()
-                                }
-                                if (!extracted) {
-                                    inputStack.decrement(1)
-                                    finished = true
-                                    continue
-                                }
-                            }
+                        if (inputStack.count != 1) {
+                            inputStack.decrement(1)
+                            player.moveOrNetworkOrDrop(remainingStack, true)
                         } else {
-                            input.setStack(i, remainingStack)
+                            val variant = ItemVariant.of(inputStack)
+                            var extracted = false
+                            Transaction.openOuter().use { transaction ->
+                                for (storage in storages) {
+                                    if (storage.extract(variant, 1, transaction) == 1L) {
+                                        extracted = true
+                                        break
+                                    }
+                                }
+                                transaction.commit()
+                            }
+                            if (extracted) player.moveOrNetworkOrDrop(remainingStack, true)
+                            else {
+                                inputStack.decrement(1)
+                                if (inputStack.isEmpty) input.setStack(i, remainingStack)
+                                else player.moveOrNetworkOrDrop(remainingStack, true)
+                                finished = true
+                                continue
+                            }
                         }
                     }
                 }
@@ -294,12 +294,7 @@ open class RequestScreenHandler(
                 if (!quickMove || finished) break
             }
             if (quickMove) {
-                insertItem(cursor, 10, 46, true)
-                if (!cursor.isEmpty) {
-                    val stack = moveStack(cursor)
-                    player.dropItem(stack, true)
-                    cursor = ItemStack.EMPTY
-                }
+                player.moveOrNetworkOrDrop(cursor, true)
             }
         }
         updateCursor(cursor)
@@ -316,7 +311,7 @@ open class RequestScreenHandler(
     fun clearCraftingGrid(toPlayerInventory: Boolean = false) {
         for (i in 1..9) slots[i].apply {
             if (toPlayerInventory) insertItem(stack, 10, 46, false)
-            stack = moveStack(stack)
+            stack = moveStackToNetwork(stack)
         }
     }
 
@@ -328,12 +323,12 @@ open class RequestScreenHandler(
                 && it.canTakeItems(player)
                 && (cursor.isEmpty || cursor.isItemEqual(it.stack))
             ) {
-                it.stack = moveStack(it.stack)
+                it.stack = moveStackToNetwork(it.stack)
             }
         }
 
         if (!cursor.isEmpty) {
-            cursor = moveStack(cursor)
+            cursor = moveStackToNetwork(cursor)
         }
 
         updateCursor(cursor)
@@ -389,7 +384,7 @@ open class RequestScreenHandler(
         }
     }
 
-    private fun moveStack(stack: ItemStack): ItemStack {
+    private fun moveStackToNetwork(stack: ItemStack): ItemStack {
         if (stack.isEmpty) return stack
         val variant = ItemVariant.of(stack)
         var count = stack.count.toLong()
@@ -403,6 +398,26 @@ open class RequestScreenHandler(
         }
 
         return variant.toStack(count.toInt())
+    }
+
+    private fun moveStackToPlayerOrNetwork(player: PlayerEntity, stack: ItemStack): ItemStack {
+        if (stack.isEmpty) return stack
+
+        Transaction.openOuter().use { transaction ->
+            val variant = ItemVariant.of(stack)
+            val count = stack.count.toLong()
+            val offered = player.storage.offer(variant, count, transaction)
+            if (offered > 0L) {
+                stack.decrement(offered.toInt())
+                transaction.commit()
+            }
+        }
+
+        return moveStackToNetwork(stack)
+    }
+
+    private fun PlayerEntity.moveOrNetworkOrDrop(stack: ItemStack, retainOwnership: Boolean) {
+        dropItem(moveStackToPlayerOrNetwork(this, stack), retainOwnership)
     }
 
     private fun ItemStack.restock(max: Int = 64): ItemStack {
@@ -462,10 +477,10 @@ open class RequestScreenHandler(
             }
             is CraftingInventory -> {
                 super.transferSlot(player, index)
-                stack = moveStack(slots[index].stack)
+                stack = moveStackToNetwork(slots[index].stack)
             }
             is PlayerInventory -> {
-                stack = moveStack(slots[index].stack)
+                stack = moveStackToNetwork(slots[index].stack)
                 slots[index].stack = stack
                 stack = super.transferSlot(player, index)
             }
@@ -635,23 +650,15 @@ open class RequestScreenHandler(
     override fun close(player: PlayerEntity) {
         if (player !is ServerPlayerEntity) return
 
-        if (!cursorStack.isEmpty) {
-            // try to move cursor stack to player inventory first
-            if (player.isAlive && !player.isDisconnected) Transaction.openOuter().use { transaction ->
-                val variant = ItemVariant.of(cursorStack)
-                val inserted = player.storage.offer(variant, cursorStack.count.toLong(), transaction)
-                if (inserted > 0L) {
-                    cursorStorage.extract(variant, inserted, transaction)
-                    transaction.commit()
-                }
-            }
-            // then move to network, and drop if fail
-            player.dropItem(moveStack(cursorStack), false)
+        if (!cursorStack.isEmpty) if (player.isAlive && !player.isDisconnected) {
+            player.moveOrNetworkOrDrop(cursorStack, false)
+        } else {
+            player.dropItem(moveStackToNetwork(cursorStack), false)
         }
 
         // try to move crafting input to network first
         for (i in 0 until input.size()) {
-            input.setStack(i, moveStack(input.getStack(i)))
+            input.setStack(i, moveStackToNetwork(input.getStack(i)))
         }
         // then move to player inventory, and drop if fail
         dropInventory(player, input)
