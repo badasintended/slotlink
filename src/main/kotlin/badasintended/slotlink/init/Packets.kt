@@ -1,6 +1,7 @@
 package badasintended.slotlink.init
 
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
+import badasintended.slotlink.recipe.fastRecipeManager
 import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.screen.TransferCableScreenHandler
@@ -94,7 +95,7 @@ object Packets : Initializer {
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId) if (handler is RequestScreenHandler) {
-                    val recipe = player.world.recipeManager.get(recipeId)
+                    val recipe = player.world.fastRecipeManager.get(recipeId)
                     if (recipe.isPresent) handler.applyRecipe(recipe.get())
                 }
             }

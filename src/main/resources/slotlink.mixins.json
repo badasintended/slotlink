@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins"            : [
     "CraftingScreenHandlerAccessor",
+    "RecipeManagerAccessor",
     "ServerWorldMixin",
     "WallMountedBlockMixin"
   ],

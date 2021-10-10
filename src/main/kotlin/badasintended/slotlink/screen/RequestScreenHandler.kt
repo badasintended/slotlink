@@ -10,6 +10,7 @@ import badasintended.slotlink.init.Packets.UPDATE_MAX_SCROLL
 import badasintended.slotlink.init.Packets.UPDATE_SLOT_NUMBERS
 import badasintended.slotlink.init.Packets.UPDATE_VIEWED_STACK
 import badasintended.slotlink.init.Screens
+import badasintended.slotlink.recipe.fastRecipeManager
 import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.screen.view.ItemView
 import badasintended.slotlink.screen.view.toView
@@ -254,7 +255,7 @@ open class RequestScreenHandler(
                 resultStack.onCraft(player.world, player, resultStack.count)
 
                 val remainingStacks =
-                    player.world.recipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
+                    player.world.fastRecipeManager.getRemainingStacks(RecipeType.CRAFTING, input, player.world)
 
                 var finished = false
                 for (i in remainingStacks.indices) {
@@ -502,7 +503,7 @@ open class RequestScreenHandler(
         if (inventory is CraftingInventory) if (player is ServerPlayerEntity) {
             var stack = ItemStack.EMPTY
             val optional: Optional<CraftingRecipe> =
-                player.server.recipeManager.getFirstMatch(RecipeType.CRAFTING, input, player.world)
+                player.server.fastRecipeManager.getFirstMatch(RecipeType.CRAFTING, input, player.world)
             if (optional.isPresent) {
                 val craftingRecipe = optional.get()
                 if (result.shouldCraftRecipe(player.world, player, craftingRecipe)) {
