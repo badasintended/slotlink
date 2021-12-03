@@ -64,10 +64,9 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
         }
     }
 
-    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+    override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
         nbt.putInt("sides", connectionData.sideBits)
-        return nbt
     }
 
     override fun readNbt(nbt: NbtCompound) {

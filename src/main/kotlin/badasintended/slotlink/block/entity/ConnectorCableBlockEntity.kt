@@ -110,7 +110,7 @@ abstract class ConnectorCableBlockEntity(
 
     protected abstract fun Block.isIgnored(): Boolean
 
-    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+    override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
 
         nbt.putInt("priority", priority)
@@ -131,8 +131,6 @@ abstract class ConnectorCableBlockEntity(
         }
         filterTag.put("Items", list)
         nbt.put("filter", filterTag)
-
-        return nbt
     }
 
     override fun readNbt(nbt: NbtCompound) {

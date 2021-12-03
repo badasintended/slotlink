@@ -5,7 +5,6 @@ import badasintended.slotlink.util.BlockEntityBuilder
 import badasintended.slotlink.util.bbCuboid
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
-import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Material
@@ -33,7 +32,6 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
         val SETTINGS: Settings = FabricBlockSettings
             .of(Material.GLASS)
             .breakByHand(true)
-            .breakByTool(FabricToolTags.PICKAXES)
             .hardness(3f)
 
         val PROPERTIES = mapOf(

@@ -32,15 +32,13 @@ abstract class ChildBlockEntity(
             _network = value
         }
 
-    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+    override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
 
         network?.also {
             if (!it.deleted) nbt.putIntArray("network", it.masterPos.toArray())
         }
         nbt.putInt("sides", connectionData.sideBits)
-
-        return nbt
     }
 
     override fun readNbt(nbt: NbtCompound) {

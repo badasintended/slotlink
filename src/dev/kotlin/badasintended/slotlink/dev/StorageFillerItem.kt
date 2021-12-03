@@ -1,8 +1,6 @@
 package badasintended.slotlink.dev
 
 import badasintended.slotlink.item.ModItem
-import kotlin.random.Random
-import kotlin.random.asJavaRandom
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
@@ -16,13 +14,11 @@ import net.minecraft.util.registry.Registry
 
 object StorageFillerItem : Item(ModItem.SETTINGS) {
 
-    private val random = Random.asJavaRandom()
-
     override fun hasGlint(stack: ItemStack?): Boolean {
         return true
     }
 
-    @Suppress("DEPRECATION", "UnstableApiUsage")
+    @Suppress("UnstableApiUsage")
     override fun useOnBlock(context: ItemUsageContext): ActionResult {
         val world = context.world
         val player = context.player ?: return ActionResult.FAIL
@@ -34,7 +30,7 @@ object StorageFillerItem : Item(ModItem.SETTINGS) {
 
         if (storage != null) Transaction.openOuter().use { transaction ->
             while (true) {
-                val item = Registry.ITEM.getRandom(random)
+                val item = Registry.ITEM.getRandom(world.random)
                 if (storage.insert(ItemVariant.of(item), item.maxCount.toLong(), transaction) == 0L) break
             }
             transaction.commit()

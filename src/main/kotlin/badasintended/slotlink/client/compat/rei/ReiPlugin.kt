@@ -26,25 +26,26 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler.Result.createNotApplicable
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler.Result.createSuccessful
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry
+import me.shedaniel.rei.api.common.entry.EntryIngredient
+import me.shedaniel.rei.api.common.plugins.PluginManager
+import me.shedaniel.rei.api.common.registry.ReloadStage
 import me.shedaniel.rei.api.common.util.EntryStacks
 import me.shedaniel.rei.plugin.common.BuiltinPlugin
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.recipe.RecipeType
 
 @Suppress("unused")
-@Environment(EnvType.CLIENT)
 class ReiPlugin : REIClientPlugin {
 
     override fun registerCategories(registry: CategoryRegistry) {
         registry.addWorkstations(BuiltinPlugin.CRAFTING, EntryStacks.of(Blocks.REQUEST))
         registry.addWorkstations(
-            BuiltinPlugin.CRAFTING,
-            EntryStacks.of(Items.LIMITED_REMOTE),
-            EntryStacks.of(Items.UNLIMITED_REMOTE),
-            EntryStacks.of(Items.MULTI_DIM_REMOTE)
+            BuiltinPlugin.CRAFTING, EntryIngredient.of(
+                EntryStacks.of(Items.LIMITED_REMOTE),
+                EntryStacks.of(Items.UNLIMITED_REMOTE),
+                EntryStacks.of(Items.MULTI_DIM_REMOTE)
+            )
         )
     }
 
@@ -108,7 +109,7 @@ class ReiPlugin : REIClientPlugin {
         })
     }
 
-    override fun postRegister() {
+    override fun postStage(manager: PluginManager<REIClientPlugin>?, stage: ReloadStage?) {
         reiSearchHandler = { REIRuntime.getInstance().searchTextField?.text = it }
     }
 

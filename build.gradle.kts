@@ -8,10 +8,10 @@ import net.fabricmc.loom.task.RunGameTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.5.20")
-    kotlin("plugin.serialization").version("1.5.20")
+    kotlin("jvm").version("1.6.0")
+    kotlin("plugin.serialization").version("1.6.0")
 
-    id("fabric-loom").version("0.8-SNAPSHOT")
+    id("fabric-loom").version("0.10.+")
     id("com.matthewprenger.cursegradle").version("1.4.0")
     id("com.modrinth.minotaur").version("1.1.0")
     id("maven-publish")
@@ -37,7 +37,7 @@ dependencies {
 
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
-    modRuntime("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
 }
 
 sourceSets {
@@ -49,8 +49,8 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<JavaCompile> {
@@ -59,7 +59,7 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "16"
+        jvmTarget = "17"
     }
 }
 

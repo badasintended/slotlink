@@ -53,13 +53,11 @@ abstract class TransferCableBlockEntity(
         mode = Mode.of(nbt.getInt("mode"))
     }
 
-    override fun writeNbt(nbt: NbtCompound): NbtCompound {
+    override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
 
         nbt.putInt("side", side.id)
         nbt.putInt("mode", mode.ordinal)
-
-        return nbt
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {

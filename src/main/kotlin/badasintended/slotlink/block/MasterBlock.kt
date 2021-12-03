@@ -11,7 +11,6 @@ import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -33,7 +32,7 @@ class MasterBlock : ModBlock("master") {
         super.onPlaced(world, pos, state, placer, itemStack)
 
         val blockEntity = world.getBlockEntity(pos)!!
-        val nbt = blockEntity.writeNbt(NbtCompound())
+        val nbt = blockEntity.createNbt()
 
         nbt.put("storagePos", NbtList())
         blockEntity.readNbt(nbt)
