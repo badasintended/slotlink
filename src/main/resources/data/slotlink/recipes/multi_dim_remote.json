@@ -3,7 +3,7 @@
   "ingredients": [
     {"item": "slotlink:unlimited_remote"},
     {"item": "minecraft:dragon_breath"},
-    {"item": "minecraft:heart_of_the_sea"},
+    {"item": "minecraft:totem_of_undying"},
     {"item": "minecraft:nether_star"}
   ],
   "result"     : {
