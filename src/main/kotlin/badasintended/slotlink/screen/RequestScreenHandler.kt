@@ -418,6 +418,7 @@ open class RequestScreenHandler(
 
     private fun PlayerEntity.moveOrNetworkOrDrop(stack: ItemStack, retainOwnership: Boolean) {
         dropItem(moveStackToPlayerOrNetwork(this, stack), retainOwnership)
+        stack.count = 0
     }
 
     private fun ItemStack.restock(max: Int = 64): ItemStack {
