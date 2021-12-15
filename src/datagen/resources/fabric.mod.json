@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id"           : "slotlink_datagen",
+  "version"      : "1",
+  "entrypoints"  : {
+    "fabric-datagen": [
+      {"adapter": "kotlin", "value": "badasintended.slotlink.datagen.SlotlinkDataGenerator"}
+    ]
+  }
+}
