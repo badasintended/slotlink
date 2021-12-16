@@ -21,4 +21,4 @@ bin/
 run/
 logs/
 
-src/generated/
+src/generated/output/
