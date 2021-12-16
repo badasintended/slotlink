@@ -21,7 +21,7 @@ class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
         if (!source.supportsExtraction()) return false
 
         Transaction.openOuter().use { transaction ->
-            val targets = master.getStorages(world, FilterFlags.INSERT)
+            val targets = master.getStorages(this::class, world, FilterFlags.INSERT)
             for (view in source.iterable(transaction)) {
                 if (view.isEmpty) continue
                 val variant = view.resource
