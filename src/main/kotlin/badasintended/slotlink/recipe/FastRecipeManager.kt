@@ -27,6 +27,7 @@ class FastRecipeManager(
     private val firstMatchCache = WeakHashMap<Inventory, Recipe<Inventory>>()
     private val getCache = WeakHashMap<Identifier, Recipe<*>>()
 
+    @Synchronized
     @Suppress("UNCHECKED_CAST")
     override fun <C : Inventory, T : Recipe<C>> getFirstMatch(
         type: RecipeType<T>,
@@ -49,6 +50,7 @@ class FastRecipeManager(
         return Optional.empty()
     }
 
+    @Synchronized
     override fun get(id: Identifier): Optional<out Recipe<*>> {
         return Optional.ofNullable(getCache.getOrPut(id) { delegate.recipes.values.firstNotNullOfOrNull { it[id] } })
     }
