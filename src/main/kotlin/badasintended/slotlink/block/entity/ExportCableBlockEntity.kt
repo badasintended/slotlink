@@ -4,7 +4,6 @@ import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.util.isEmpty
-import kotlin.math.min
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.block.BlockState
 import net.minecraft.util.math.BlockPos
@@ -21,14 +20,17 @@ class ExportCableBlockEntity(pos: BlockPos, state: BlockState) :
         val target = getStorage(world, side, FilterFlags.INSERT)
         if (!target.supportsInsertion()) return false
 
-        val sources = master.getStorages(world, FilterFlags.EXTRACT)
+        val sources = master.getStorages(this::class, world, FilterFlags.EXTRACT)
 
         Transaction.openOuter().use { transaction ->
             for (source in sources) {
                 for (view in source.iterable(transaction)) {
                     if (view.isEmpty) continue
                     val variant = view.resource
-                    val inserted = target.insert(variant, min(variant.item.maxCount.toLong(), view.amount), transaction)
+                    val available = transaction.openNested().use { simulation ->
+                        view.extract(variant, variant.item.maxCount.toLong(), simulation)
+                    }
+                    val inserted = target.insert(variant, available, transaction)
                     if (inserted > 0) {
                         view.extract(variant, inserted, transaction)
                         transaction.commit()

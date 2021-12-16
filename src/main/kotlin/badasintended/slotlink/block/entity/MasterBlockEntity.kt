@@ -12,6 +12,8 @@ import badasintended.slotlink.network.Network
 import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.IntPair
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
+import java.util.*
+import kotlin.reflect.KClass
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntityTicker
 import net.minecraft.nbt.NbtCompound
@@ -32,17 +34,23 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
 
     var watchers = hashSetOf<Watcher>()
 
-    private val invSet = ObjectLinkedOpenHashSet<FilteredItemStorage>()
+    private val storageSets = WeakHashMap<KClass<*>, MutableSet<FilteredItemStorage>>()
 
     private var tick = 0
     val forcedChunks = hashSetOf<IntPair>()
 
-    fun getStorages(world: World, flag: Int, request: Boolean = false): MutableSet<FilteredItemStorage> {
-        invSet.clear()
+    fun getStorages(
+        key: KClass<*>,
+        world: World,
+        flag: Int,
+        request: Boolean = false
+    ): MutableSet<FilteredItemStorage> {
+        val set = storageSets.getOrPut(key, ::ObjectLinkedOpenHashSet)
+        set.clear()
         _network
             .get(LINK) { list -> list.sortedByDescending { it.priority } }
-            .forEach { invSet.add(it.getStorage(world, Direction.UP, flag, this, request)) }
-        return invSet
+            .forEach { set.add(it.getStorage(world, Direction.UP, flag, this, request)) }
+        return set
     }
 
     fun unmarkForcedChunks() = world?.let { world ->
