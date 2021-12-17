@@ -71,6 +71,16 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
 
+        shaped(Blocks.REQUEST)
+            .pattern("TCT")
+            .pattern("CGC")
+            .pattern("TCT")
+            .input('G', tag.c("gold_ingots"))
+            .input('T', McBlocks.CRAFTING_TABLE)
+            .input('C', Blocks.LINK_CABLE)
+            .criterion(Blocks.LINK_CABLE)
+            .offerTo(exporter)
+
         shaped(Items.LIMITED_REMOTE)
             .pattern("SDS")
             .pattern("GRG")
