@@ -113,6 +113,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
         // Sort button
         add(ButtonWidget(x - 29, y, 20)) {
+            allowSpectator = true
             texture = GuiTextures.REQUEST
             bgU = 216
             bgV = 32
@@ -131,6 +132,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
         // Toggle crafting grid button
         add(ButtonWidget(x - 29, y + 22, 20)) {
+            allowSpectator = true
             texture = GuiTextures.REQUEST
             bgU = 216
             bgV = 32
@@ -214,6 +216,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
         // Search bar auto focus button
         add(ButtonWidget(x - 29, y + 44, 20)) {
+            allowSpectator = true
             texture = GuiTextures.REQUEST
             bgU = 216
             bgV = 32
@@ -230,6 +233,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
         // Sync to rei button
         if (reiSearchHandler != null) add(ButtonWidget(x - 29, y + 66, 20)) {
+            allowSpectator = true
             texture = GuiTextures.REQUEST
             bgU = 216
             bgV = 32

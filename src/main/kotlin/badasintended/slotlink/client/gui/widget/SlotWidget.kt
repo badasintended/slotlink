@@ -55,7 +55,8 @@ abstract class SlotWidget<SH : ScreenHandler>(
     }
 
     final override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (hovered && visible) {
+        val player = client.player ?: return false
+        if (hovered && visible && !player.isSpectator) {
             onClick(button)
             return true
         }

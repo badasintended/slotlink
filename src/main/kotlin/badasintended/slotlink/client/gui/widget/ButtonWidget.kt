@@ -2,6 +2,7 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.client.util.GuiTextures
 import badasintended.slotlink.client.util.bind
+import badasintended.slotlink.client.util.client
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -20,6 +21,7 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
     var u = { 0 }
     var v = { 0 }
     var background = true
+    var allowSpectator = false
 
     private var down = false
     private val padding = object {
@@ -51,6 +53,11 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (!allowSpectator) {
+            val player = client.player
+            if (player != null && player.isSpectator) return false
+        }
+
         if (isMouseOver(mouseX, mouseY)) {
             down = true
         }
