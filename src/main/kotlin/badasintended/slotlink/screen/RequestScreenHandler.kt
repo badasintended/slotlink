@@ -244,6 +244,8 @@ open class RequestScreenHandler(
         var cursor = cursorStack
         val resultStack = result.getStack(0)
 
+        if (resultStack.isEmpty) return
+
         if (button == 2) {
             if (player.abilities.creativeMode && cursor.isEmpty) cursor = resultStack.copy().apply { count = maxCount }
         } else {
