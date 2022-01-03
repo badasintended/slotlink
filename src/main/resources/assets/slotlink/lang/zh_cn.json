@@ -1,7 +1,6 @@
 {
   "itemGroup.slotlink.group"                  : "存储链接",
   "block.slotlink.master"                     : "网络主机",
-  "block.slotlink.master.tooltip"             : "存储链接的核心。§5每个存储网络都需要一个。",
   "block.slotlink.child.tooltip"              : "需要链接到主方块以开始工作",
   "block.slotlink.request"                    : "存储请求器",
   "block.slotlink.request.hasNoMaster"        : "你需要将它与一个网络主机相链接。",

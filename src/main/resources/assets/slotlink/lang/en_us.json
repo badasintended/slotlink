@@ -1,7 +1,8 @@
 {
   "itemGroup.slotlink.group"                  : "slotlink",
   "block.slotlink.master"                     : "Network Master",
-  "block.slotlink.master.tooltip"             : "Heart of the storage connection. §5One per connection",
+  "block.slotlink.master.tooltip"             : "Punch the block with empty hand while sneaking to revalidate the network",
+  "block.slotlink.master.revalidated"         : "Storage network revalidated",
   "block.slotlink.child.tooltip"              : "Needs to be connected to master block to work",
   "block.slotlink.request"                    : "Storage Request",
   "block.slotlink.request.hasNoMaster"        : "You need to connect it to a master block",
