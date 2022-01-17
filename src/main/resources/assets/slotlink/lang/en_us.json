@@ -6,6 +6,7 @@
   "block.slotlink.child.tooltip"              : "Needs to be connected to master block to work",
   "block.slotlink.request"                    : "Storage Request",
   "block.slotlink.request.hasNoMaster"        : "You need to connect it to a master block",
+  "block.slotlink.interface"                  : "Storage Interface",
   "block.slotlink.cable"                      : "Cable",
   "block.slotlink.cable.tooltipFilter"        : "Right click with empty hand to set its filter",
   "block.slotlink.link_cable"                 : "Link Cable",

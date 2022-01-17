@@ -3,6 +3,7 @@ package badasintended.slotlink.init
 import badasintended.slotlink.block.CableBlock
 import badasintended.slotlink.block.ExportCableBlock
 import badasintended.slotlink.block.ImportCableBlock
+import badasintended.slotlink.block.InterfaceBlock
 import badasintended.slotlink.block.LinkCableBlock
 import badasintended.slotlink.block.MasterBlock
 import badasintended.slotlink.block.ModBlock
@@ -15,6 +16,7 @@ object Blocks : Initializer {
 
     val MASTER = MasterBlock()
     val REQUEST = RequestBlock()
+    val INTERFACE = InterfaceBlock()
 
     val CABLE = CableBlock()
     val LINK_CABLE = LinkCableBlock()
@@ -22,7 +24,7 @@ object Blocks : Initializer {
     val EXPORT_CABLE = ExportCableBlock()
 
     override fun main() {
-        r(MASTER, REQUEST, CABLE, LINK_CABLE, IMPORT_CABLE, EXPORT_CABLE)
+        r(MASTER, REQUEST, INTERFACE, CABLE, LINK_CABLE, IMPORT_CABLE, EXPORT_CABLE)
     }
 
     private fun r(vararg modBlocks: ModBlock) {

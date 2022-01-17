@@ -6,6 +6,7 @@
   "block.slotlink.child.tooltip"              : "Doit être connecté à un contrôleur de réseau pour fonctionner",
   "block.slotlink.request"                    : "Requêteur de stockage",
   "block.slotlink.request.hasNoMaster"        : "Vous devez le connecter à un contrôleur de réseau",
+  "block.slotlink.interface"                  : "Interface de stockage",
   "block.slotlink.cable"                      : "Câble",
   "block.slotlink.cable.tooltipFilter"        : "Clic droit avec une main vide pour configurer",
   "block.slotlink.link_cable"                 : "Câble de liaison",

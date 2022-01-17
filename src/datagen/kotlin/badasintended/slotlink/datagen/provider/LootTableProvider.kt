@@ -13,6 +13,7 @@ class LootTableProvider(dataGenerator: FabricDataGenerator) : FabricBlockLootTab
         addDrop(Blocks.LINK_CABLE)
         addDrop(Blocks.MASTER)
         addDrop(Blocks.REQUEST)
+        addDrop(Blocks.INTERFACE)
     }
 
 }
