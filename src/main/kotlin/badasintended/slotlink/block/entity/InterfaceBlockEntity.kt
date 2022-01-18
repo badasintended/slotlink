@@ -4,57 +4,36 @@ package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.ConnectionType.Companion.MASTER
+import badasintended.slotlink.screen.FilterScreenHandler
 import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.storage.FilteredItemStorage
-import java.util.*
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
+import badasintended.slotlink.storage.FilteredItemStorage.Companion.EMPTY
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
 import net.minecraft.block.BlockState
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
-import net.minecraft.world.World
+
+private const val flag = FilterFlags.INSERT + FilterFlags.EXTRACT
 
 class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
-    ChildBlockEntity(BlockEntityTypes.INTERFACE, ConnectionType.INTERFACE, pos, state),
-    Storage<ItemVariant> {
+    FilteredBlockEntity(BlockEntityTypes.INTERFACE, ConnectionType.INTERFACE, pos, state) {
 
-    private val insertStorageCache = StorageCache(FilterFlags.INSERT)
-    private val extractStorageCache = StorageCache(FilterFlags.EXTRACT)
-
-    override fun insert(resource: ItemVariant, maxAmount: Long, transaction: TransactionContext) =
-        insertStorageCache[transaction].insert(resource, maxAmount, transaction)
-
-    override fun extract(resource: ItemVariant, maxAmount: Long, transaction: TransactionContext) =
-        extractStorageCache[transaction].extract(resource, maxAmount, transaction)
-
-    override fun iterator(transaction: TransactionContext): MutableIterator<StorageView<ItemVariant>> =
-        extractStorageCache[transaction].iterator(transaction)
-
-    private inner class StorageCache(private val flags: Int) {
-
-        private val instances = WeakHashMap<TransactionContext, Storage<ItemVariant>>()
-
-        @Synchronized
-        operator fun get(transaction: TransactionContext): Storage<ItemVariant> =
-            world?.let { world ->
-                network?.get(ConnectionType.MASTER)?.firstOrNull()?.let { master ->
-                    instances.computeIfAbsent(transaction) {
-                        getInner(world, master)
-                    }
-                }
-            } ?: FilteredItemStorage.EMPTY
-
-        private fun getInner(world: World, master: MasterBlockEntity): Storage<ItemVariant> =
-            CombinedStorage(
-                master.getStorages(
-                    InterfaceBlockEntity::class,
-                    world,
-                    flags,
-                    false
-                ).toList()
-            )
+    @Suppress("UNUSED_PARAMETER")
+    fun getStorage(unused: Direction): FilteredItemStorage {
+        world?.also { world ->
+            val master = network?.get(MASTER)?.firstOrNull() ?: return EMPTY
+            val storages = master.getStorages(InterfaceBlockEntity::class, world, flag)
+            return FilteredItemStorage(filter, blacklist, flag, CombinedStorage(storages.toList()))
+        }
+        return EMPTY
     }
+
+    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity) = FilterScreenHandler(
+        syncId, inv, blacklist, filter, ScreenHandlerContext.create(world, pos)
+    )
+
 }

@@ -1,9 +1,11 @@
 package badasintended.slotlink.init
 
 import badasintended.slotlink.client.gui.screen.ConnectorCableScreen
+import badasintended.slotlink.client.gui.screen.FilterScreen
 import badasintended.slotlink.client.gui.screen.RequestScreen
 import badasintended.slotlink.client.gui.screen.TransferCableScreen
 import badasintended.slotlink.screen.ConnectorCableScreenHandler
+import badasintended.slotlink.screen.FilterScreenHandler
 import badasintended.slotlink.screen.RemoteScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.screen.TransferCableScreenHandler
@@ -25,12 +27,14 @@ object Screens : Initializer {
 
     lateinit var REQUEST: S<RequestScreenHandler>
     lateinit var REMOTE: S<RemoteScreenHandler>
+    lateinit var FILTER: S<FilterScreenHandler>
     lateinit var CONNECTOR_CABLE: S<ConnectorCableScreenHandler>
     lateinit var TRANSFER_CABLE: S<TransferCableScreenHandler>
 
     override fun main() {
         REQUEST = h("request", ::RequestScreenHandler)
         REMOTE = h("remote", ::RemoteScreenHandler)
+        FILTER = h("filter", ::FilterScreenHandler)
         CONNECTOR_CABLE = h("connector_cable", ::ConnectorCableScreenHandler)
         TRANSFER_CABLE = h("transfer_cable", ::TransferCableScreenHandler)
     }
@@ -39,6 +43,7 @@ object Screens : Initializer {
     override fun client() {
         s(REQUEST, ::RequestScreen)
         s(REMOTE, ::RequestScreen)
+        s(FILTER, ::FilterScreen)
         s(CONNECTOR_CABLE, ::ConnectorCableScreen)
         s(TRANSFER_CABLE, ::TransferCableScreen)
     }

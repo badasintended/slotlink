@@ -1,13 +1,9 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.gui.widget.ButtonWidget
-import badasintended.slotlink.client.gui.widget.FilterSlotWidget
-import badasintended.slotlink.client.util.GuiTextures
-import badasintended.slotlink.client.util.bind
 import badasintended.slotlink.client.util.c2s
-import badasintended.slotlink.init.Packets.LINK_SETTINGS
+import badasintended.slotlink.init.Packets.PRIORITY_SETTINGS
 import badasintended.slotlink.screen.ConnectorCableScreenHandler
-import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.int
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -17,25 +13,16 @@ import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
 open class ConnectorCableScreen<H : ConnectorCableScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
-    ModScreen<H>(h, inventory, title) {
+    FilterScreen<H>(h, inventory, title) {
 
     private var priority = handler.priority
     private var blacklist = handler.blacklist
 
-    override val baseTlKey: String
-        get() = "container.slotlink.cable"
-
     override fun init() {
         super.init()
 
-        titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2
-
         val x = x + 7
         val y = y + titleY + 11
-
-        for (i in 0 until 9) {
-            add(FilterSlotWidget(handler, i, x + 3 * 18 + (i % 3) * 18, y + (i / 3) * 18))
-        }
 
         add(ButtonWidget(x + 2 * 18, y + 2, 14, 14)) {
             bgU = 228
@@ -58,36 +45,14 @@ open class ConnectorCableScreen<H : ConnectorCableScreenHandler>(h: H, inventory
                 sync()
             }
         }
-
-        add(ButtonWidget(x + 6 * 18 + 4, y + 20, 14, 14)) {
-            bgU = 228
-            bgV = 28
-            u = { 228 }
-            v = { if (blacklist) 14 else 0 }
-            onPressed = {
-                blacklist = !blacklist
-                sync()
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("blacklist.$blacklist"), x, y)
-            }
-        }
-
     }
 
-    protected open fun sync() {
-        c2s(LINK_SETTINGS) {
+    override fun sync() {
+        super.sync()
+        c2s(PRIORITY_SETTINGS) {
             int(handler.syncId)
             int(priority)
-            bool(blacklist)
         }
-    }
-
-    override fun drawBackground(matrices: MatrixStack, delta: Float, mouseX: Int, mouseY: Int) {
-        super.drawBackground(matrices, delta, mouseX, mouseY)
-
-        GuiTextures.FILTER.bind()
-        drawTexture(matrices, x, y, 0, 0, 176, 166)
     }
 
     override fun drawForeground(matrices: MatrixStack, mouseX: Int, mouseY: Int) {

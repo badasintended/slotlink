@@ -7,6 +7,7 @@ import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.ON
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.POSITIVE
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.screen.TransferCableScreenHandler
+import badasintended.slotlink.util.int
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -15,7 +16,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.PacketByteBuf
-import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.math.BlockPos
@@ -60,17 +60,15 @@ abstract class TransferCableBlockEntity(
         nbt.putInt("mode", mode.ordinal)
     }
 
-    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity): ScreenHandler? {
-        return TransferCableScreenHandler(
-            syncId, inv, priority, isBlackList, filter, side, mode, ScreenHandlerContext.create(world, pos)
-        )
-    }
+    override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity) = TransferCableScreenHandler(
+        syncId, inv, blacklist, filter, priority, side, mode, ScreenHandlerContext.create(world, pos)
+    )
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
         super.writeScreenOpeningData(player, buf)
         buf.apply {
-            writeVarInt(side.id)
-            writeVarInt(mode.ordinal)
+            int(side.id)
+            int(mode.ordinal)
         }
     }
 

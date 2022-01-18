@@ -3,6 +3,7 @@ package badasintended.slotlink.init
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
 import badasintended.slotlink.recipe.fastRecipeManager
 import badasintended.slotlink.screen.ConnectorCableScreenHandler
+import badasintended.slotlink.screen.FilterScreenHandler
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.bool
@@ -39,7 +40,8 @@ object Packets : Initializer {
     val MOVE = modId("move")
     val RESTOCK = modId("restock")
     val FILTER_SLOT_CLICK = modId("filter_slot_click")
-    val LINK_SETTINGS = modId("link_cable_settings")
+    val FILTER_SETTINGS = modId("filter_settings")
+    val PRIORITY_SETTINGS = modId("priority_settings")
     val TRANSFER_SETTINGS = modId("transfer_settings")
 
     // S2C
@@ -167,22 +169,32 @@ object Packets : Initializer {
 
             server.execute {
                 val handler = player.currentScreenHandler
-                if (handler.syncId == syncId) if (handler is ConnectorCableScreenHandler) {
+                if (handler.syncId == syncId && handler is FilterScreenHandler) {
                     handler.filterSlotClick(index, button)
                 }
             }
         }
 
-        s(LINK_SETTINGS) { server, player, buf ->
+        s(FILTER_SETTINGS) { server, player, buf ->
             val syncId = buf.int
-            val priority = buf.int
             val blacklist = buf.bool
 
             server.execute {
                 val handler = player.currentScreenHandler
-                if (handler.syncId == syncId) if (handler is ConnectorCableScreenHandler) {
-                    handler.priority = priority
+                if (handler.syncId == syncId && handler is FilterScreenHandler) {
                     handler.blacklist = blacklist
+                }
+            }
+        }
+
+        s(PRIORITY_SETTINGS) { server, player, buf ->
+            val syncId = buf.int
+            val priority = buf.int
+
+            server.execute {
+                val handler = player.currentScreenHandler
+                if (handler.syncId == syncId && handler is ConnectorCableScreenHandler) {
+                    handler.priority = priority
                 }
             }
         }

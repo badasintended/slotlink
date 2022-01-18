@@ -1,5 +1,6 @@
 package badasintended.slotlink.dev
 
+import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.item.ModItem
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
@@ -26,8 +27,9 @@ object StorageFillerItem : Item(ModItem.SETTINGS) {
         if (world.isClient) return ActionResult.SUCCESS
 
         val pos = context.blockPos
-        val storage = ItemStorage.SIDED.find(world, pos, Direction.UP)
+        if (world.getBlockState(pos).block is ModBlock) return ActionResult.SUCCESS
 
+        val storage = ItemStorage.SIDED.find(world, pos, Direction.UP)
         if (storage != null) Transaction.openOuter().use { transaction ->
             while (true) {
                 val item = Registry.ITEM.getRandom(world.random)
