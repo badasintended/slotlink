@@ -33,7 +33,7 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
     override fun iterator(transaction: TransactionContext): MutableIterator<StorageView<ItemVariant>> =
         extractStorageCache[transaction].iterator(transaction)
 
-    inner private class StorageCache(private val flags: Int) {
+    private inner class StorageCache(private val flags: Int) {
 
         private val instances = WeakHashMap<TransactionContext, Storage<ItemVariant>>()
 
