@@ -21,9 +21,6 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
     ChildBlockEntity(BlockEntityTypes.INTERFACE, ConnectionType.INTERFACE, pos, state),
     Storage<ItemVariant> {
 
-    @Suppress("UNUSED_PARAMETER")
-    fun getStorage(direction: Direction) = this
-
     private val insertStorageCache = StorageCache(FilterFlags.INSERT)
     private val extractStorageCache = StorageCache(FilterFlags.EXTRACT)
 

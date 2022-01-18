@@ -33,7 +33,7 @@ object BlockEntityTypes : Initializer {
         IMPORT_CABLE = r(B.IMPORT_CABLE, ::ImportCableBlockEntity)
         EXPORT_CABLE = r(B.EXPORT_CABLE, ::ExportCableBlockEntity)
 
-        ItemStorage.SIDED.registerForBlockEntity(InterfaceBlockEntity::getStorage, INTERFACE)
+        ItemStorage.SIDED.registerSelf(INTERFACE)
     }
 
     private fun <BE : BlockEntity> r(block: ModBlock, function: (BlockPos, BlockState) -> BE): T<BE> {
