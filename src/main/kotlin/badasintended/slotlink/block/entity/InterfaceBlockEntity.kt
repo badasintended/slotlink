@@ -39,7 +39,7 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
 
         @Synchronized
         operator fun get(transaction: TransactionContext): Storage<ItemVariant> =
-            world?.takeUnless { it.isClient }?.let { world ->
+            world?.let { world ->
                 network?.get(ConnectionType.MASTER)?.firstOrNull()?.let { master ->
                     instances.computeIfAbsent(transaction) {
                         getInner(world, master)
