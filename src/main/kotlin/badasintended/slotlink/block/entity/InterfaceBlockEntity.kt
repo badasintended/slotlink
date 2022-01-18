@@ -37,6 +37,7 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
 
         private val instances = WeakHashMap<TransactionContext, Storage<ItemVariant>>()
 
+        @Synchronized
         operator fun get(transaction: TransactionContext): Storage<ItemVariant> =
             world?.takeUnless { it.isClient }?.let { world ->
                 network?.get(ConnectionType.MASTER)?.firstOrNull()?.let { master ->
