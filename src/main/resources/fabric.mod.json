@@ -5,7 +5,10 @@
   "name"         : "slotlink",
   "description"  : "Clone of Storage Networks for Fabric Loader, for lazy people who doesn't want to sort chests!",
   "authors"      : ["deirn"],
-  "contributors" : ["Imbarainbow"],
+  "contributors" : [
+    "Adirelle",
+    "Imbarainbow"
+  ],
   "contact"      : {
     "homepage": "https://github.com/badasintended/slotlink",
     "sources" : "https://github.com/badasintended/slotlink",

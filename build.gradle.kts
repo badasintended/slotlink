@@ -81,7 +81,7 @@ loom {
                 "-Dfabric-api.datagen.output-dir=${file("src/generated/output")}",
                 "-Dfabric-api.datagen.modid=slotlink_datagen"
             )
-            runDir("${project.buildDir}/datagen")
+            runDir("build/datagen")
             source("datagen")
         }
     }

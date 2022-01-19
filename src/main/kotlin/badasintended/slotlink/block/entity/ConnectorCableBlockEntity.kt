@@ -1,31 +1,23 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ConnectorCableBlock
-import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.property.getNull
 import badasintended.slotlink.storage.FilteredItemStorage
-import badasintended.slotlink.util.ObjBoolPair
+import badasintended.slotlink.util.int
 import badasintended.slotlink.util.to
-import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage
-import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtList
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
-import net.minecraft.text.TranslatableText
-import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.util.math.Direction
@@ -38,9 +30,7 @@ abstract class ConnectorCableBlockEntity(
     connectionType: ConnectionType<*>,
     pos: BlockPos,
     state: BlockState
-) : ChildBlockEntity(blockEntityType, connectionType, pos, state),
-    ExtendedScreenHandlerFactory,
-    Connection {
+) : FilteredBlockEntity(blockEntityType, connectionType, pos, state) {
 
     private var apiCache: BlockApiCache<Storage<ItemVariant>, Direction>? = null
 
@@ -61,9 +51,6 @@ abstract class ConnectorCableBlockEntity(
             invalidate()
             field = value
         }
-
-    var isBlackList = false
-    var filter: DefaultedList<ObjBoolPair<ItemStack>> = DefaultedList.ofSize(9, ItemStack.EMPTY to false)
 
     fun getStorage(
         world: WorldAccess,
@@ -95,7 +82,7 @@ abstract class ConnectorCableBlockEntity(
             } else {
                 ItemStorage.SIDED.find(world, linkedPos, side)
             }
-            FilteredItemStorage(filter, isBlackList, flag, storage)
+            FilteredItemStorage(filter, blacklist, flag, storage)
         } else {
             FilteredItemStorage.EMPTY
         }
@@ -114,23 +101,7 @@ abstract class ConnectorCableBlockEntity(
         super.writeNbt(nbt)
 
         nbt.putInt("priority", priority)
-        nbt.putBoolean("isBlacklist", isBlackList)
-
         linkedSide?.let { nbt.putInt("link", it.id) }
-
-        val filterTag = NbtCompound()
-        val list = NbtList()
-        filter.forEachIndexed { i, pair ->
-            if (!pair.first.isEmpty) {
-                val compound = NbtCompound()
-                compound.putByte("Slot", i.toByte())
-                compound.putBoolean("matchNbt", pair.second)
-                pair.first.writeNbt(compound)
-                list.add(compound)
-            }
-        }
-        filterTag.put("Items", list)
-        nbt.put("filter", filterTag)
     }
 
     override fun readNbt(nbt: NbtCompound) {
@@ -138,32 +109,14 @@ abstract class ConnectorCableBlockEntity(
 
         linkedSide = if (nbt.contains("link")) Direction.byId(nbt.getInt("link")) else null
         linkedPos = linkedSide?.let { pos.offset(it) }
-
         priority = nbt.getInt("priority")
-        isBlackList = nbt.getBoolean("isBlacklist")
-
-        val filterTag = nbt.getCompound("filter")
-        val list = filterTag.getList("Items", NbtType.COMPOUND)
-
-        list.forEach {
-            it as NbtCompound
-            val slot = it.getByte("Slot").toInt()
-            val matchNbt = it.getBoolean("matchNbt")
-            if (slot in 0 until 9) {
-                val stack = ItemStack.fromNbt(it)
-                filter[slot] = stack to matchNbt
-            }
-        }
     }
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
+        super.writeScreenOpeningData(player, buf)
         buf.apply {
-            writeVarInt(priority)
-            writeBoolean(isBlackList)
-            writeFilter(filter)
+            int(priority)
         }
     }
-
-    override fun getDisplayName() = TranslatableText("container.slotlink.cable", pos.x, pos.y, pos.z)
 
 }

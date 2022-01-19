@@ -81,6 +81,18 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .criterion(Blocks.LINK_CABLE)
             .offerTo(exporter)
 
+        shaped(Blocks.INTERFACE)
+            .pattern("SIS")
+            .pattern("IRE")
+            .pattern("SES")
+            .input('R', tag.c("iron_ingots"))
+            .input('S', McBlocks.SMOOTH_STONE)
+            .input('I', Blocks.IMPORT_CABLE)
+            .input('E', Blocks.EXPORT_CABLE)
+            .criterion(Blocks.IMPORT_CABLE)
+            .criterion(Blocks.EXPORT_CABLE)
+            .offerTo(exporter)
+
         shaped(Items.LIMITED_REMOTE)
             .pattern("SDS")
             .pattern("GRG")

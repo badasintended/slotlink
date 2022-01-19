@@ -1,6 +1,5 @@
 package badasintended.slotlink.block
 
-import badasintended.slotlink.block.entity.ConnectorCableBlockEntity
 import badasintended.slotlink.property.NullableProperty
 import badasintended.slotlink.property.getNull
 import badasintended.slotlink.property.with
@@ -13,7 +12,6 @@ import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
-import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.DirectionProperty
@@ -144,7 +142,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         options: TooltipContext
     ) {
         super.appendTooltip(stack, world, tooltip, options)
-        tooltip.add(TranslatableText("block.slotlink.cable.tooltipFilter").formatted(Formatting.GRAY))
+        tooltip.add(TranslatableText("block.slotlink.filter.tooltip").formatted(Formatting.GRAY))
     }
 
     override fun onUse(
@@ -160,16 +158,6 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
             return ActionResult.SUCCESS
         }
         return ActionResult.PASS
-    }
-
-    override fun createScreenHandlerFactory(
-        state: BlockState,
-        world: World,
-        pos: BlockPos
-    ): NamedScreenHandlerFactory? {
-        val blockEntity = world.getBlockEntity(pos) ?: return null
-        if (blockEntity !is ConnectorCableBlockEntity) return null
-        return blockEntity
     }
 
 }
