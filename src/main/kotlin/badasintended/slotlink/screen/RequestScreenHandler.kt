@@ -218,7 +218,7 @@ open class RequestScreenHandler(
                             transaction.commit()
                         }
                         else -> if (!variant.isBlank) Transaction.openOuter().use { transaction ->
-                            val max = variant.item.maxCount.toLong()
+                            val max = min(view.count.toLong(), variant.item.maxCount.toLong())
                             var extracted = 0L
                             for (storage in storages) {
                                 extracted += storage.extract(variant, max - extracted, transaction)
