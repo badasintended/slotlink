@@ -218,11 +218,12 @@ open class RequestScreenHandler(
                             transaction.commit()
                         }
                         else -> if (!variant.isBlank) Transaction.openOuter().use { transaction ->
-                            val max = variant.item.maxCount.toLong()
+                            val max = min(view.count.toLong(), variant.item.maxCount.toLong())
+                            val request = if (data == 1) (max + 1) / 2 else max
                             var extracted = 0L
                             for (storage in storages) {
-                                extracted += storage.extract(variant, max - extracted, transaction)
-                                if (extracted == max) break
+                                extracted += storage.extract(variant, request - extracted, transaction)
+                                if (extracted == request) break
                             }
                             cursorStorage.insert(variant, extracted, transaction)
                             cursor = cursorStorage.resource.toStack(cursorStorage.amount.toInt())
