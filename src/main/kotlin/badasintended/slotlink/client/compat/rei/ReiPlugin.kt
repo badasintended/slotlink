@@ -1,22 +1,32 @@
 package badasintended.slotlink.client.compat.rei
 
+import badasintended.slotlink.client.gui.screen.FilterScreen
 import badasintended.slotlink.client.gui.screen.RequestScreen
-import badasintended.slotlink.client.gui.screen.reiSearchHandler
+import badasintended.slotlink.client.gui.widget.FilterSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
+import badasintended.slotlink.init.Packets
 import badasintended.slotlink.init.Packets.APPLY_RECIPE
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.backgroundHeight
 import badasintended.slotlink.util.backgroundWidth
+import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.id
 import badasintended.slotlink.util.int
+import badasintended.slotlink.util.stack
 import badasintended.slotlink.util.x
 import badasintended.slotlink.util.y
 import dev.architectury.event.CompoundEventResult
+import java.util.stream.Stream
 import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.api.client.REIRuntime
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor.BoundsProvider
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry
 import me.shedaniel.rei.api.client.registry.screen.ClickArea.Result.fail
@@ -33,6 +43,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks
 import me.shedaniel.rei.plugin.common.BuiltinPlugin
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeType
 
 @Suppress("unused")
@@ -107,10 +118,55 @@ class ReiPlugin : REIClientPlugin {
                 return Rectangle(screen.x - 22, screen.y, screen.backgroundWidth + 40, screen.backgroundHeight)
             }
         })
+
+        registry.registerDraggableStackVisitor(object : DraggableStackVisitor<FilterScreen<*>> {
+            override fun <R : Screen> isHandingScreen(screen: R) = screen is FilterScreen<*>
+
+            override fun acceptDraggedStack(
+                context: DraggingContext<FilterScreen<*>>,
+                stack: DraggableStack
+            ): DraggedAcceptorResult {
+                val item = stack.stack.value as? ItemStack ?: return DraggedAcceptorResult.PASS
+                val pos = context.currentPosition ?: return DraggedAcceptorResult.PASS
+                val slot = context.screen.hoveredElement(pos.x.toDouble(), pos.y.toDouble()).orElse(null)
+                    as? FilterSlotWidget ?: return DraggedAcceptorResult.PASS
+
+                val ctrlPressed = Screen.hasControlDown()
+                context.screen.screenHandler.filterSlotClick(slot.index, item, ctrlPressed)
+                c2s(Packets.FILTER_SLOT_CLICK) {
+                    int(context.screen.screenHandler.syncId)
+                    int(slot.index)
+                    stack(item)
+                    bool(ctrlPressed)
+                }
+
+                return DraggedAcceptorResult.CONSUMED
+            }
+
+            override fun getDraggableAcceptingBounds(
+                context: DraggingContext<FilterScreen<*>>,
+                stack: DraggableStack
+            ): Stream<BoundsProvider> {
+                if (stack.stack.value !is ItemStack) return Stream.empty()
+
+                val screen = context.screen
+                val slotRect = Rectangle(screen.filterSlotX, screen.filterSlotY, 3 * 18, 3 * 18)
+                return Stream.of(BoundsProvider.ofRectangle(slotRect))
+            }
+        })
     }
 
     override fun postStage(manager: PluginManager<REIClientPlugin>?, stage: ReloadStage?) {
-        reiSearchHandler = { REIRuntime.getInstance().searchTextField?.text = it }
+        ReiAccess.exists = true
+
+        ReiAccess.setSearch = {
+            REIRuntime.getInstance().searchTextField?.text = it
+        }
+
+        ReiAccess.isDraggingStack = r@{
+            val overlay = REIRuntime.getInstance().overlay.orElse(null) ?: return@r false
+            return@r overlay.draggingContext.isDraggingStack
+        }
     }
 
 }

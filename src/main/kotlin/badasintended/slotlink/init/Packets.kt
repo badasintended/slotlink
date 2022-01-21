@@ -165,12 +165,13 @@ object Packets : Initializer {
         s(FILTER_SLOT_CLICK) { server, player, buf ->
             val syncId = buf.int
             val index = buf.int
-            val button = buf.int
+            val stack = buf.stack
+            val ctrl = buf.bool
 
             server.execute {
                 val handler = player.currentScreenHandler
                 if (handler.syncId == syncId && handler is FilterScreenHandler) {
-                    handler.filterSlotClick(index, button)
+                    handler.filterSlotClick(index, stack, ctrl)
                 }
             }
         }

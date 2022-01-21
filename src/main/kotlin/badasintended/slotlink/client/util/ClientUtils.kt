@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GameRenderer
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Direction
@@ -36,4 +37,10 @@ object GuiTextures {
 fun Identifier.bind() {
     RenderSystem.setShader(GameRenderer::getPositionTexShader)
     RenderSystem.setShaderTexture(0, this)
+}
+
+inline fun MatrixStack.wrap(action: () -> Unit) {
+    push()
+    action()
+    pop()
 }

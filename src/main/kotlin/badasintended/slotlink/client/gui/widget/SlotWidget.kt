@@ -1,6 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
+import badasintended.slotlink.client.compat.rei.ReiAccess
 import badasintended.slotlink.client.util.client
+import badasintended.slotlink.client.util.wrap
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
@@ -31,27 +33,24 @@ abstract class SlotWidget<SH : ScreenHandler>(
         }
     }
 
-    final override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
-        if (!visible) return
-        client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
-        renderOverlay(matrices, stack)
-    }
-
-    final override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        matrices.push()
-        matrices.translate(0.0, 0.0, +256.0)
-        val x = stackX
-        val y = stackY
-        fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
-
-        client.apply {
-            if (handler.cursorStack.isEmpty && !stack.isEmpty) {
+    override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
+        if (!stack.isEmpty && handler.cursorStack.isEmpty && !ReiAccess.isDraggingStack()) matrices.wrap {
+            matrices.translate(0.0, 0.0, +256.0)
+            val x = stackX
+            val y = stackY
+            fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
+            client.apply {
                 val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
                 appendTooltip(tooltips)
                 currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
             }
         }
-        matrices.pop()
+    }
+
+    final override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
+        if (!visible) return
+        client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
+        renderOverlay(matrices, stack)
     }
 
     final override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

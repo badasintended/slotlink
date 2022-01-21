@@ -1,6 +1,7 @@
 package badasintended.slotlink.client.gui.screen
 
 import badasintended.slotlink.client.compat.invsort.InventorySortButton
+import badasintended.slotlink.client.compat.rei.ReiAccess
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
@@ -32,8 +33,6 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import org.lwjgl.glfw.GLFW
-
-var reiSearchHandler: ((String) -> Unit)? = null
 
 @Environment(EnvType.CLIENT)
 class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) :
@@ -232,7 +231,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         }
 
         // Sync to rei button
-        if (reiSearchHandler != null) add(ButtonWidget(x - 29, y + 66, 20)) {
+        if (ReiAccess.exists) add(ButtonWidget(x - 29, y + 66, 20)) {
             allowSpectator = true
             texture = GuiTextures.REQUEST
             bgU = 216
@@ -263,7 +262,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                     scrollBar.knob = 0f
                     filter = it
                     sort()
-                    if (syncRei) reiSearchHandler?.invoke(filter)
+                    if (syncRei && ReiAccess.exists) ReiAccess.setSearch(filter)
                 }
             }
             if (config.autoFocusSearchBar) {

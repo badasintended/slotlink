@@ -37,11 +37,10 @@ open class FilterScreenHandler(
         }
     }
 
-    fun filterSlotClick(i: Int, button: Int) {
-        if (button !in 0..1) return
-        val stack = cursorStack.copy().apply { count = 1 }
-        if (button != 1) stack.nbt = null
-        filter[i] = stack to (button == 1 && cursorStack.isEmpty)
+    fun filterSlotClick(i: Int, filterStack: ItemStack, ctrlPressed: Boolean) {
+        val stack = filterStack.copy().apply { count = 1 }
+        if (!ctrlPressed) stack.nbt = null
+        filter[i] = stack to (ctrlPressed && !filterStack.isEmpty)
     }
 
     open fun onClose(blockEntity: FilteredBlockEntity) {

@@ -2,6 +2,7 @@ package badasintended.slotlink.client.gui.widget
 
 import badasintended.slotlink.client.util.c2s
 import badasintended.slotlink.client.util.client
+import badasintended.slotlink.client.util.wrap
 import badasintended.slotlink.init.Packets.MULTI_SLOT_ACTION
 import badasintended.slotlink.screen.RequestScreenHandler
 import badasintended.slotlink.util.enum
@@ -45,14 +46,14 @@ class MultiSlotWidget(
 
             val countText = if (count <= 1) "" else count.toFormattedString()
 
-            matrices.push()
-            matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
-            matrices.scale(scale, scale, 1f)
-            textRenderer.drawWithShadow(
-                matrices, countText, ((x + 17 - (textRenderer.getWidth(countText) * scale)) / scale),
-                ((y + 17 - (textRenderer.fontHeight * scale)) / scale), 0xFFFFFF
-            )
-            matrices.pop()
+            matrices.wrap {
+                matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
+                matrices.scale(scale, scale, 1f)
+                textRenderer.drawWithShadow(
+                    matrices, countText, ((x + 17 - (textRenderer.getWidth(countText) * scale)) / scale),
+                    ((y + 17 - (textRenderer.fontHeight * scale)) / scale), 0xFFFFFF
+                )
+            }
         }
     }
 
