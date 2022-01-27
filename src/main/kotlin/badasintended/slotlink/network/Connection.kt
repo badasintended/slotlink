@@ -1,41 +1,44 @@
 package badasintended.slotlink.network
 
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 
-interface Connection {
+class Connection(
+    pos: BlockPos,
+    val type: NodeType<*>,
+    val sides: HashSet<Direction> = hashSetOf()
+) {
 
-    var network: Network?
-    val connectionData: ConnectionData
+    val pos: BlockPos = pos.toImmutable()
 
-    fun connect(connection: Connection?): Boolean {
-        val other = connection ?: return false
-
-        val side = Direction.fromVector(connectionData.pos.subtract(other.connectionData.pos))!!
-        connectionData.sides.add(side.opposite)
-        other.connectionData.sides.add(side)
-
-        if (network == other.network) return false
-        val lastNetwork = network
-
-        network.also { selfNetwork ->
-            if (selfNetwork == null || selfNetwork.deleted) {
-                this.network = other.network
-                this.network?.add(this)
+    var sideBits: Int
+        get() {
+            var value = 0
+            sides.forEach {
+                value += 1 shl it.id
+            }
+            return value
+        }
+        set(value) {
+            sides.clear()
+            for (i in 0 until 6) {
+                if (((value shr i) and 1) != 0) {
+                    sides.add(Direction.byId(i))
+                }
             }
         }
-        return lastNetwork != network
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Connection) return false
+        if (other === this) return true
+
+        return pos == other.pos && type == other.type
     }
 
-    fun disconnect() {
-        network?.also { network ->
-            network.remove(this)
-            network.validate()
-        }
-        network = null
-    }
-
-    fun invalidate() {
-        network?.invalidate(connectionData.type)
+    override fun hashCode(): Int {
+        var result = pos.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
     }
 
 }

@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ConnectorCableBlock
-import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.property.getNull
 import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.int
@@ -27,10 +27,10 @@ import net.minecraft.world.WorldAccess
 @Suppress("DEPRECATION", "UnstableApiUsage")
 abstract class ConnectorCableBlockEntity(
     blockEntityType: BlockEntityType<out BlockEntity>,
-    connectionType: ConnectionType<*>,
+    nodeType: NodeType<*>,
     pos: BlockPos,
     state: BlockState
-) : FilteredBlockEntity(blockEntityType, connectionType, pos, state) {
+) : FilteredBlockEntity(blockEntityType, nodeType, pos, state) {
 
     private var apiCache: BlockApiCache<Storage<ItemVariant>, Direction>? = null
 

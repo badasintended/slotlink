@@ -1,7 +1,7 @@
 package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.ChildBlockEntity
-import badasintended.slotlink.network.Connection
+import badasintended.slotlink.network.Node
 import badasintended.slotlink.util.BlockEntityBuilder
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -32,15 +32,15 @@ abstract class ChildBlock(
     ) {
         if (world.isClient) return
 
-        val connection = world.getBlockEntity(pos) as Connection
-        val neighborConnection = world.getBlockEntity(neighborPos) as? Connection
+        val node = world.getBlockEntity(pos) as Node
+        val neighborNode = world.getBlockEntity(neighborPos) as? Node
         val neighborState = world.getBlockState(neighborPos)
 
-        if (connection.connect(neighborConnection)) {
+        if (node.connect(neighborNode)) {
             world.updateNeighbors(pos, block)
         } else {
-            neighborConnection?.also {
-                if (it.connect(connection)) {
+            neighborNode?.also {
+                if (it.connect(node)) {
                     world.updateNeighbors(neighborPos, neighborState.block)
                 }
             }
@@ -57,8 +57,8 @@ abstract class ChildBlock(
         neighborPos: BlockPos
     ): BlockState {
         if (neighborState.isAir) {
-            val connection = world.getBlockEntity(pos) as Connection
-            connection.connectionData.sides.remove(direction)
+            val node = world.getBlockEntity(pos) as Node
+            node.connection.sides.remove(direction)
         }
 
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos)

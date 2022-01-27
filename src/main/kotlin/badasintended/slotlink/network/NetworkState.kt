@@ -32,7 +32,7 @@ class NetworkState : PersistentState() {
                             posses.forEach { pos ->
                                 pos as NbtIntArray
                                 val arr = pos.intArray
-                                network.map[arr.toPos()] = ConnectionType[arr[3]]
+                                network.map[arr.toPos()] = NodeType[arr[3]]
                             }
                         }
                     }

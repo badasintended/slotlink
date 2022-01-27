@@ -1,7 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
-import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.util.isEmpty
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
@@ -12,7 +12,7 @@ import net.minecraft.world.World
 
 @Suppress("UnstableApiUsage", "DEPRECATION")
 class ExportCableBlockEntity(pos: BlockPos, state: BlockState) :
-    TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE, ConnectionType.EXPORT, pos, state) {
+    TransferCableBlockEntity(BlockEntityTypes.EXPORT_CABLE, NodeType.EXPORT, pos, state) {
 
     override var side = Direction.UP
 

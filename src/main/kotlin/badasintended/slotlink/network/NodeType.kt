@@ -9,22 +9,22 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import kotlin.reflect.KClass
 
-class ConnectionType<T : Any>(
+class NodeType<T : Any>(
     val clazz: KClass<T>,
     val save: Boolean = true
 ) {
 
     companion object {
 
-        private val map = arrayListOf<ConnectionType<*>>()
+        private val map = arrayListOf<NodeType<*>>()
 
-        val MASTER = ConnectionType(MasterBlockEntity::class, false)
-        val CABLE = ConnectionType(CableBlockEntity::class)
-        val REQUEST = ConnectionType(RequestBlockEntity::class)
-        val LINK = ConnectionType(LinkCableBlockEntity::class)
-        val EXPORT = ConnectionType(ExportCableBlockEntity::class)
-        val IMPORT = ConnectionType(ImportCableBlockEntity::class)
-        val INTERFACE = ConnectionType(InterfaceBlockEntity::class)
+        val MASTER = NodeType(MasterBlockEntity::class, false)
+        val CABLE = NodeType(CableBlockEntity::class)
+        val REQUEST = NodeType(RequestBlockEntity::class)
+        val LINK = NodeType(LinkCableBlockEntity::class)
+        val EXPORT = NodeType(ExportCableBlockEntity::class)
+        val IMPORT = NodeType(ImportCableBlockEntity::class)
+        val INTERFACE = NodeType(InterfaceBlockEntity::class)
 
         operator fun get(i: Int) = map[i]
 

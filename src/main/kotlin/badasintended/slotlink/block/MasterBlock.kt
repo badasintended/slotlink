@@ -2,8 +2,8 @@ package badasintended.slotlink.block
 
 import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.init.BlockEntityTypes
-import badasintended.slotlink.network.Connection
 import badasintended.slotlink.network.Network
+import badasintended.slotlink.network.Node
 import badasintended.slotlink.util.actionBar
 import net.fabricmc.fabric.api.block.BlockAttackInteractionAware
 import net.minecraft.block.Block
@@ -62,8 +62,8 @@ class MasterBlock : ModBlock("master"), BlockAttackInteractionAware {
         val neighborBlock = neighborState.block
 
         if (neighborBlock is ChildBlock) {
-            val connection = world.getBlockEntity(neighborPos) as? Connection
-            connection?.also {
+            val node = world.getBlockEntity(neighborPos) as? Node
+            node?.also {
                 val master = world.getBlockEntity(pos) as MasterBlockEntity
                 if (it.connect(master)) {
                     world.updateNeighbors(neighborPos, neighborBlock)

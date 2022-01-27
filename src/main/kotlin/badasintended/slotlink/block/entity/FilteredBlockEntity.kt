@@ -1,6 +1,6 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.util.ObjBoolPair
 import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.to
@@ -21,10 +21,10 @@ import net.minecraft.util.math.BlockPos
 
 abstract class FilteredBlockEntity(
     blockEntityType: BlockEntityType<out BlockEntity>,
-    connectionType: ConnectionType<*>,
+    nodeType: NodeType<*>,
     pos: BlockPos,
     state: BlockState
-) : ChildBlockEntity(blockEntityType, connectionType, pos, state),
+) : ChildBlockEntity(blockEntityType, nodeType, pos, state),
     ExtendedScreenHandlerFactory {
 
     var blacklist = false

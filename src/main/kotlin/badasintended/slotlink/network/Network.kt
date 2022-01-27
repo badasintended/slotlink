@@ -29,33 +29,34 @@ class Network internal constructor(
 
     }
 
+    val master get() = get(NodeType.MASTER).firstOrNull()
+
     private var _deleted = false
     val deleted get() = _deleted
 
-    val map = hashMapOf<BlockPos, ConnectionType<*>>()
-    val cache = hashMapOf<ConnectionType<*>, List<Connection>>()
+    val map = hashMapOf<BlockPos, NodeType<*>>()
+    val cache = hashMapOf<NodeType<*>, List<Node>>()
+
 
     init {
-        map[masterPos] = ConnectionType.MASTER
+        map[masterPos] = NodeType.MASTER
     }
 
-    fun add(connection: Connection) {
+    fun add(node: Node) {
         if (world.isClient) return
-        val data = connection.connectionData
-        map[data.pos] = data.type
+        map[node.connection.pos] = node.connection.type
         markDirty()
-        invalidate(data.type)
+        invalidate(node.connection.type)
     }
 
-    fun remove(connection: Connection) {
+    fun remove(node: Node) {
         if (world.isClient) return
-        val data = connection.connectionData
-        map.remove(data.pos)
+        map.remove(node.connection.pos)
         markDirty()
-        invalidate(data.type)
+        invalidate(node.connection.type)
     }
 
-    fun invalidate(type: ConnectionType<*>) {
+    fun invalidate(type: NodeType<*>) {
         if (world.isClient) return
         cache.remove(type)
     }
@@ -82,8 +83,7 @@ class Network internal constructor(
             unvisited.remove(pos)
 
             get(pos) {
-                val data = it.connectionData
-                data.sides.forEach { side ->
+                it.connection.sides.forEach { side ->
                     visit(pos.offset(side))
                 }
             }
@@ -99,17 +99,17 @@ class Network internal constructor(
         }
     }
 
-    inline fun get(pos: BlockPos, consumer: (Connection) -> Unit) {
+    inline fun get(pos: BlockPos, consumer: (Node) -> Unit) {
         if (world.isClient || !map.containsKey(pos)) return
         val be = world.getBlockEntity(pos)
-        (be as? Connection)?.apply {
+        (be as? Node)?.apply {
             consumer(this)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    inline fun <T : Connection> get(
-        type: ConnectionType<T>,
+    inline fun <T : Node> get(
+        type: NodeType<T>,
         transformer: (List<T>) -> List<T> = { it }
     ): List<T> {
         if (world.isClient) return emptyList()

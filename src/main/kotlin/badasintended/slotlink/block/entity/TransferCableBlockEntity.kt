@@ -5,7 +5,7 @@ import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.NEGATIV
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.OFF
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.ON
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.POSITIVE
-import badasintended.slotlink.network.ConnectionType
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.int
 import net.minecraft.block.Block
@@ -24,7 +24,7 @@ import net.minecraft.world.World
 
 abstract class TransferCableBlockEntity(
     beType: BlockEntityType<out BlockEntity>,
-    conType: ConnectionType<*>,
+    conType: NodeType<*>,
     pos: BlockPos,
     state: BlockState
 ) : ConnectorCableBlockEntity(beType, conType, pos, state) {

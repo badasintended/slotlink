@@ -1,9 +1,9 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.network.Connection
-import badasintended.slotlink.network.ConnectionData
-import badasintended.slotlink.network.ConnectionType
 import badasintended.slotlink.network.Network
+import badasintended.slotlink.network.Node
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.util.toArray
 import badasintended.slotlink.util.toPos
 import net.minecraft.block.BlockState
@@ -15,13 +15,13 @@ import net.minecraft.world.World
 
 abstract class ChildBlockEntity(
     blockEntityType: BlockEntityType<out BlockEntity>,
-    connectionType: ConnectionType<*>,
+    nodeType: NodeType<*>,
     pos: BlockPos,
     state: BlockState
 ) : ModBlockEntity(blockEntityType, pos, state),
-    Connection {
+    Node {
 
-    override val connectionData = ConnectionData(pos, connectionType)
+    override val connection = Connection(pos, nodeType)
 
     private var lazyNetworkPos: BlockPos? = null
     private var lazyNetwork: Lazy<Network?>? = null
@@ -38,14 +38,14 @@ abstract class ChildBlockEntity(
         network?.also {
             if (!it.deleted) nbt.putIntArray("network", it.masterPos.toArray())
         }
-        nbt.putInt("sides", connectionData.sideBits)
+        nbt.putInt("sides", connection.sideBits)
     }
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
 
         lazyNetworkPos = if (nbt.contains("network")) nbt.getIntArray("network").toPos() else null
-        connectionData.sideBits = nbt.getInt("sides")
+        connection.sideBits = nbt.getInt("sides")
     }
 
     override fun setWorld(world: World?) {

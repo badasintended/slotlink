@@ -3,12 +3,9 @@ package badasintended.slotlink.block.entity
 import badasintended.slotlink.config.config
 import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.Connection
-import badasintended.slotlink.network.ConnectionData
-import badasintended.slotlink.network.ConnectionType
-import badasintended.slotlink.network.ConnectionType.Companion.EXPORT
-import badasintended.slotlink.network.ConnectionType.Companion.IMPORT
-import badasintended.slotlink.network.ConnectionType.Companion.LINK
 import badasintended.slotlink.network.Network
+import badasintended.slotlink.network.Node
+import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.storage.FilteredItemStorage
 import badasintended.slotlink.util.IntPair
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
@@ -23,9 +20,9 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
 class MasterBlockEntity(pos: BlockPos, state: BlockState) :
-    ModBlockEntity(BlockEntityTypes.MASTER, pos, state), Connection {
+    ModBlockEntity(BlockEntityTypes.MASTER, pos, state), Node {
 
-    override val connectionData = ConnectionData(pos, ConnectionType.MASTER)
+    override val connection = Connection(pos, NodeType.MASTER)
 
     private val _network by lazy { Network.getOrCreate(world!!, pos) }
     override var network: Network?
@@ -48,7 +45,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
         val set = storageSets.getOrPut(key, ::ObjectLinkedOpenHashSet)
         set.clear()
         _network
-            .get(LINK) { list -> list.sortedByDescending { it.priority } }
+            .get(NodeType.LINK) { list -> list.sortedByDescending { it.priority } }
             .forEach { set.add(it.getStorage(world, Direction.UP, flag, this, request)) }
         return set
     }
@@ -74,12 +71,12 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
 
     override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
-        nbt.putInt("sides", connectionData.sideBits)
+        nbt.putInt("sides", connection.sideBits)
     }
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
-        connectionData.sideBits = nbt.getInt("sides")
+        connection.sideBits = nbt.getInt("sides")
     }
 
     override fun markRemoved() {
@@ -95,7 +92,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
                 tick++
                 if (tick == 10) {
                     if (config.pauseTransferWhenOnScreen && watchers.isNotEmpty()) return
-                    val cables = _network.get(IMPORT) { list ->
+                    val cables = _network.get(NodeType.IMPORT) { list ->
                         list.sortedByDescending { it.priority }
                     }
                     for (cable in cables) {
@@ -104,7 +101,7 @@ class MasterBlockEntity(pos: BlockPos, state: BlockState) :
                 } else if (tick == 20) {
                     tick = 0
                     if (config.pauseTransferWhenOnScreen && watchers.isNotEmpty()) return
-                    val cables = _network.get(EXPORT) { list ->
+                    val cables = _network.get(NodeType.EXPORT) { list ->
                         list.sortedByDescending { it.priority }
                     }
                     for (cable in cables) {
