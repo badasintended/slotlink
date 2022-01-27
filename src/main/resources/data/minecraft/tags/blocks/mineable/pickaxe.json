@@ -6,6 +6,7 @@
     "slotlink:cable",
     "slotlink:link_cable",
     "slotlink:import_cable",
-    "slotlink:export_cable"
+    "slotlink:export_cable",
+    "slotlink:interface"
   ]
 }
