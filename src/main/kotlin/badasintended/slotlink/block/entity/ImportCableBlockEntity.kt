@@ -1,6 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.util.isEmpty
@@ -12,7 +13,7 @@ import net.minecraft.world.World
 
 @Suppress("UnstableApiUsage", "DEPRECATION")
 class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
-    TransferCableBlockEntity(BlockEntityTypes.IMPORT_CABLE, NodeType.IMPORT, pos, state) {
+    TransferCableBlockEntity(Blocks.IMPORT_CABLE, BlockEntityTypes.IMPORT_CABLE, NodeType.IMPORT, pos, state) {
 
     override var side = Direction.DOWN
 

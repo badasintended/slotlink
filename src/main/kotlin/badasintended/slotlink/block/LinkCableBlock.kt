@@ -6,8 +6,8 @@ import net.minecraft.block.Block
 
 class LinkCableBlock : ConnectorCableBlock("link_cable", ::LinkCableBlockEntity) {
 
-    override fun Block.isIgnored(): Boolean {
-        return this is ModBlock || ignoredTag.contains(this)
+    override fun isIgnored(block: Block): Boolean {
+        return ignoredTag.contains(block)
     }
 
 }

@@ -1,6 +1,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.block.ConnectorCableBlock
+import badasintended.slotlink.network.Node
 import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.property.getNull
 import badasintended.slotlink.storage.FilteredItemStorage
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.lookup.v1.block.BlockApiCache
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage
-import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
@@ -26,6 +26,7 @@ import net.minecraft.world.WorldAccess
 
 @Suppress("DEPRECATION", "UnstableApiUsage")
 abstract class ConnectorCableBlockEntity(
+    val block: ConnectorCableBlock,
     blockEntityType: BlockEntityType<out BlockEntity>,
     nodeType: NodeType<*>,
     pos: BlockPos,
@@ -74,7 +75,7 @@ abstract class ConnectorCableBlockEntity(
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
 
-        return if (!linkedBlock.isIgnored()) {
+        return if (!block.isIgnored(linkedBlock)) {
             val storage = if (!world.isClient) {
                 world as ServerWorld
                 if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
@@ -88,14 +89,16 @@ abstract class ConnectorCableBlockEntity(
         }
     }
 
+    override fun connect(adjacentNode: Node?): Boolean {
+        return if (adjacentNode is InterfaceBlockEntity) false else super.connect(adjacentNode)
+    }
+
     @Suppress("DEPRECATION")
     override fun setCachedState(state: BlockState) {
         super.setCachedState(state)
         linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)
         linkedPos = linkedSide?.let { pos.offset(it) }
     }
-
-    protected abstract fun Block.isIgnored(): Boolean
 
     override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)

@@ -1,6 +1,6 @@
 package badasintended.slotlink.block.entity
 
-import badasintended.slotlink.block.ModBlock
+import badasintended.slotlink.block.ConnectorCableBlock
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.NEGATIVE
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.OFF
 import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.ON
@@ -8,7 +8,6 @@ import badasintended.slotlink.block.entity.TransferCableBlockEntity.Mode.POSITIV
 import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.screen.TransferCableScreenHandler
 import badasintended.slotlink.util.int
-import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
@@ -23,11 +22,12 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
 abstract class TransferCableBlockEntity(
-    beType: BlockEntityType<out BlockEntity>,
-    conType: NodeType<*>,
+    block: ConnectorCableBlock,
+    blockEntityType: BlockEntityType<out BlockEntity>,
+    nodeType: NodeType<*>,
     pos: BlockPos,
     state: BlockState
-) : ConnectorCableBlockEntity(beType, conType, pos, state) {
+) : ConnectorCableBlockEntity(block, blockEntityType, nodeType, pos, state) {
 
     var mode = OFF
     abstract var side: Direction
@@ -43,8 +43,6 @@ abstract class TransferCableBlockEntity(
         }
         return transferInternal(world, master)
     }
-
-    override fun Block.isIgnored() = this is ModBlock
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)

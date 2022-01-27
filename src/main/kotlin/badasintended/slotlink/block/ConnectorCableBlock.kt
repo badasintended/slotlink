@@ -55,7 +55,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         val block = neighborState.block
         if (connected == direction && neighborState.isAir) {
             result = result.with(CONNECTED, null)
-        } else if (connected == null && !block.isIgnored()) {
+        } else if (connected == null && !isIgnored(block)) {
             for (d in DIRECTIONS) {
                 val storage = ItemStorage.SIDED.find(world, neighborPos, d)
                 if (storage != null) {
@@ -69,7 +69,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         return result
     }
 
-    protected abstract fun Block.isIgnored(): Boolean
+    abstract fun isIgnored(block: Block): Boolean
 
     override fun center() = end
 

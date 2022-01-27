@@ -3,6 +3,7 @@
 package badasintended.slotlink.block.entity
 
 import badasintended.slotlink.init.BlockEntityTypes
+import badasintended.slotlink.network.Node
 import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.screen.FilterScreenHandler
 import badasintended.slotlink.storage.FilterFlags
@@ -28,6 +29,10 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
             return FilteredItemStorage(filter, blacklist, flag, CombinedStorage(storages.toList()))
         }
         return FilteredItemStorage.EMPTY
+    }
+
+    override fun connect(adjacentNode: Node?): Boolean {
+        return if (adjacentNode is ConnectorCableBlockEntity) false else super.connect(adjacentNode)
     }
 
     override fun createMenu(syncId: Int, inv: PlayerInventory, player: PlayerEntity) = FilterScreenHandler(

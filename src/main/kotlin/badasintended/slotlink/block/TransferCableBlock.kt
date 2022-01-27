@@ -10,7 +10,7 @@ import net.minecraft.world.WorldAccess
 
 abstract class TransferCableBlock(id: String, builder: BlockEntityBuilder) : ConnectorCableBlock(id, builder) {
 
-    override fun Block.isIgnored() = this is ModBlock
+    override fun isIgnored(block: Block) = false
 
     override fun connect(
         state: BlockState,
