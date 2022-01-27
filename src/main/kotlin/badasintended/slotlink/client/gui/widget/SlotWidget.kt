@@ -34,12 +34,12 @@ abstract class SlotWidget<SH : ScreenHandler>(
     }
 
     override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        if (!stack.isEmpty && handler.cursorStack.isEmpty && !ReiAccess.isDraggingStack()) matrices.wrap {
+        matrices.wrap {
             matrices.translate(0.0, 0.0, +256.0)
             val x = stackX
             val y = stackY
             fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
-            client.apply {
+            if (!stack.isEmpty && handler.cursorStack.isEmpty && !ReiAccess.isDraggingStack()) client.apply {
                 val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
                 appendTooltip(tooltips)
                 currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
