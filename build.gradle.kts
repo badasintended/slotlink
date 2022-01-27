@@ -22,6 +22,7 @@ val env: Map<String, String> = System.getenv()
 version = env["MOD_VERSION"] ?: "local"
 
 repositories {
+    maven("https://maven.bai.lol")
     maven("https://maven.shedaniel.me/")
 }
 
@@ -37,6 +38,9 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
     modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+
+    modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
+    modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")
 }
 
 sourceSets {
