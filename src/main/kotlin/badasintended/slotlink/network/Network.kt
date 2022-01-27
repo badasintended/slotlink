@@ -76,20 +76,24 @@ class Network internal constructor(
     }
 
     fun validate() {
+        if (world.isClient) return
+
         val unvisited = HashSet(map.keys)
+        fun visit(pos: BlockPos, adjacentNode: Node?) {
+            if (!unvisited.remove(pos)) {
+                if (map.contains(pos) || adjacentNode == null) return
+                val newConnection = world.getBlockEntity(pos) as? Node ?: return
+                if (!newConnection.connect(adjacentNode)) return
+            }
 
-        fun visit(pos: BlockPos) {
-            if (!unvisited.contains(pos)) return
-            unvisited.remove(pos)
-
-            get(pos) {
-                it.connection.sides.forEach { side ->
-                    visit(pos.offset(side))
+            get(pos) { node ->
+                node.connection.sides.forEach { side ->
+                    visit(pos.offset(side), node)
                 }
             }
         }
 
-        visit(masterPos)
+        visit(masterPos, null)
 
         unvisited.forEach { pos ->
             get(pos) {

@@ -9,7 +9,7 @@ import badasintended.slotlink.block.entity.MasterBlockEntity
 import badasintended.slotlink.block.entity.RequestBlockEntity
 import kotlin.reflect.KClass
 
-class NodeType<T : Any>(
+class NodeType<T : Node>(
     val clazz: KClass<T>,
     val save: Boolean = true
 ) {
