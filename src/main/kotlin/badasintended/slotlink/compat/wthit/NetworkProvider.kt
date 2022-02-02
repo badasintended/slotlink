@@ -29,7 +29,7 @@ object NetworkProvider : IBlockComponentProvider, IServerDataProvider<ChildBlock
 
     override fun appendServerData(data: NbtCompound, player: ServerPlayerEntity, world: World, node: ChildBlockEntity) {
         node.network?.also { network ->
-            data.putIntArray(posKey, network.masterPos.toArray())
+            if (!network.deleted) data.putIntArray(posKey, network.masterPos.toArray())
         }
     }
 
