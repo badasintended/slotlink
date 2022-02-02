@@ -43,9 +43,9 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
             Direction.DOWN to DOWN
         )
 
-        val center = bbCuboid(6, 6, 6, 4, 4, 4)
+        val centerShape = bbCuboid(6, 6, 6, 4, 4, 4)
 
-        val shapes = mapOf(
+        val sideShapes = mapOf(
             NORTH to bbCuboid(6, 6, 0, 4, 4, 10),
             SOUTH to bbCuboid(6, 6, 6, 4, 4, 10),
             EAST to bbCuboid(6, 6, 6, 10, 4, 4),
@@ -54,9 +54,9 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
             DOWN to bbCuboid(6, 0, 6, 4, 10, 4)
         )
 
-    }
+        val voxelCache = Int2ObjectOpenHashMap<VoxelShape>()
 
-    private val voxelCache = Int2ObjectOpenHashMap<VoxelShape>()
+    }
 
     init {
         for (property in PROPERTIES.values) {
@@ -74,8 +74,6 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
         val block = neighborState.block
         return state.with(PROPERTIES[direction], block is ModBlock)
     }
-
-    protected open fun center() = center
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
         builder.add(NORTH, SOUTH, EAST, WEST, UP, DOWN)
@@ -113,9 +111,9 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
 
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
         var key = 0
-        shapes.keys.forEach { key = (key shl 1) + if (state[it]) 1 else 0 }
+        sideShapes.keys.forEach { key = (key shl 1) + if (state[it]) 1 else 0 }
         return voxelCache.getOrPut(key) {
-            VoxelShapes.union(center(), *shapes.filter { state[it.key] }.values.toTypedArray())
+            VoxelShapes.union(centerShape, *sideShapes.filter { state[it.key] }.values.toTypedArray())
         }
     }
 

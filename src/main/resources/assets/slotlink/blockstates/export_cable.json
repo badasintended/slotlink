@@ -6,6 +6,12 @@
     {"when": {"east": true}, "apply": {"model": "slotlink:block/cable_side", "y": 90}},
     {"when": {"west": true}, "apply": {"model": "slotlink:block/cable_side", "y": -90}},
     {"when": {"up": true}, "apply": {"model": "slotlink:block/cable_side", "x": -90}},
-    {"when": {"down": true}, "apply": {"model": "slotlink:block/cable_side", "x": 90}}
+    {"when": {"down": true}, "apply": {"model": "slotlink:block/cable_side", "x": 90}},
+    {"when": {"connected": "north"}, "apply": {"model": "slotlink:block/cable_connection"}},
+    {"when": {"connected": "south"}, "apply": {"model": "slotlink:block/cable_connection", "y": 180}},
+    {"when": {"connected": "east"}, "apply": {"model": "slotlink:block/cable_connection", "y": 90}},
+    {"when": {"connected": "west"}, "apply": {"model": "slotlink:block/cable_connection", "y": -90}},
+    {"when": {"connected": "up"}, "apply": {"model": "slotlink:block/cable_connection", "x": -90}},
+    {"when": {"connected": "down"}, "apply": {"model": "slotlink:block/cable_connection", "x": 90}}
   ]
 }

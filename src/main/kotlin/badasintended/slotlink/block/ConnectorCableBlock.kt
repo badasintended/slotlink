@@ -8,6 +8,7 @@ import badasintended.slotlink.util.bbCuboid
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
+import net.minecraft.block.ShapeContext
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemPlacementContext
@@ -23,6 +24,8 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import net.minecraft.util.shape.VoxelShape
+import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
@@ -32,7 +35,17 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
     companion object {
 
         val CONNECTED = NullableProperty(DirectionProperty.of("connected"))
-        val end = bbCuboid(5, 5, 5, 6, 6, 6)
+
+        val endShape = bbCuboid(5, 5, 5, 6, 6, 6)
+        val connectionShapes = mapOf(
+            null to VoxelShapes.empty(),
+            Direction.NORTH to bbCuboid(5, 5, 0, 6, 6, 2),
+            Direction.SOUTH to bbCuboid(5, 5, 14, 6, 6, 2),
+            Direction.EAST to bbCuboid(14, 5, 5, 2, 6, 6),
+            Direction.WEST to bbCuboid(0, 5, 5, 2, 6, 6),
+            Direction.UP to bbCuboid(5, 14, 5, 6, 2, 6),
+            Direction.DOWN to bbCuboid(5, 0, 5, 6, 2, 6)
+        )
 
     }
 
@@ -70,8 +83,6 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
     }
 
     abstract fun isIgnored(block: Block): Boolean
-
-    override fun center() = end
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
         super.appendProperties(builder)
@@ -159,6 +170,21 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
             return ActionResult.SUCCESS
         }
         return ActionResult.PASS
+    }
+
+    override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
+        var key = 1
+        sideShapes.keys.forEach { key = (key shl 1) + if (state[it]) 1 else 0 }
+        key = key shl connectionShapes.size
+        val connected = state[CONNECTED].value
+        connected?.also { key += it.id + 1 }
+        return voxelCache.getOrPut(key) {
+            VoxelShapes.union(
+                endShape,
+                connectionShapes[connected],
+                *sideShapes.filter { state[it.key] }.values.toTypedArray()
+            )
+        }
     }
 
 }
