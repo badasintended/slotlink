@@ -33,7 +33,6 @@ import kotlin.collections.set
 import kotlin.math.ceil
 import kotlin.math.min
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.entity.player.PlayerEntity
@@ -67,7 +66,7 @@ import net.minecraft.util.registry.Registry
 open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
-    private val storages: Set<Storage<ItemVariant>>,
+    private val storages: Set<FilteredItemStorage>,
 ) : CraftingScreenHandler(syncId, playerInventory),
     MasterBlockEntity.Watcher,
     BlockEntityWatcher<RequestBlockEntity>,
@@ -97,7 +96,7 @@ open class RequestScreenHandler(
     private var request: RequestBlockEntity? = null
     private var master: MasterBlockEntity? = null
 
-    private val caches = hashMapOf<Storage<ItemVariant>, List<ItemView>>()
+    private val visualStorages = hashMapOf<FilteredItemStorage, List<ItemView>>()
 
     var totalSlotSize = 0
     var filledSlotSize = 0
@@ -124,21 +123,13 @@ open class RequestScreenHandler(
         this.request = request
         this.master = master
         Transaction.openOuter().use { transaction ->
-            val dedup = HashSet<StorageView<ItemVariant>>()
-            val storageIter = storages.iterator()
-            storage@ while (storageIter.hasNext()) {
-                val storage = storageIter.next()
-                val viewIter = storage.iterator(transaction)
-                val cache = arrayListOf<ItemView>()
-                while (viewIter.hasNext()) {
-                    val view = viewIter.next()
-                    if (!dedup.add(view)) {
-                        storageIter.remove()
-                        continue@storage
-                    }
-                    cache.add(view.toView())
+            val uniqueDifferentiators = HashSet<Any>()
+            storages.forEach { storage ->
+                if (uniqueDifferentiators.add(storage.differentiator)) {
+                    visualStorages[storage] = storage
+                        .iterable(transaction)
+                        .map { it.toView() }
                 }
-                caches[storage] = cache
             }
         }
 
@@ -542,24 +533,24 @@ open class RequestScreenHandler(
         var resort = false
 
         Transaction.openOuter().use { transaction ->
-            caches.forEach { entry ->
+            visualStorages.forEach { entry ->
                 val storage = entry.key
                 val caches = entry.value
 
                 var i = 0
                 for (view in storage.iterator(transaction)) {
-                    val cache = caches[i]
-                    if (!cache.isItemAndTagEqual(view)) {
-                        if (cache.isEmpty && !view.isEmpty) {
+                    val cacheView = caches[i]
+                    if (!cacheView.isItemAndTagEqual(view)) {
+                        if (cacheView.isEmpty && !view.isEmpty) {
                             filledSlotSize++
-                        } else if (!cache.isEmpty && view.isEmpty) {
+                        } else if (!cacheView.isEmpty && view.isEmpty) {
                             filledSlotSize--
                         }
 
-                        val beforeId = filledViews.indexOfFirst { cache.isItemAndTagEqual(it) }
+                        val beforeId = filledViews.indexOfFirst { cacheView.isItemAndTagEqual(it) }
                         if (beforeId >= 0) {
                             val beforeMatch = filledViews[beforeId]
-                            beforeMatch.count -= cache.count
+                            beforeMatch.count -= cacheView.count
                             if (beforeMatch.isEmpty) {
                                 filledViews.removeAt(beforeId)
                             }
@@ -575,12 +566,12 @@ open class RequestScreenHandler(
                         }
 
                         resort = true
-                        cache.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
-                    } else if (cache.count != view.amount.toInt()) {
-                        val filled = filledViews.firstOrNull { cache.isItemAndTagEqual(it) }
+                        cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                    } else if (cacheView.count != view.amount.toInt()) {
+                        val filled = filledViews.firstOrNull { cacheView.isItemAndTagEqual(it) }
                         if (filled != null) {
-                            filled.count -= cache.count - view.amount.toInt()
-                            cache.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                            filled.count -= cacheView.count - view.amount.toInt()
+                            cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
                             resort = true
                         }
                     }
@@ -600,7 +591,7 @@ open class RequestScreenHandler(
             filledViews.clear()
 
             Transaction.openOuter().use { transaction ->
-                storages.forEach { storage ->
+                visualStorages.keys.forEach { storage ->
                     storage.iterator(transaction).forEach { view ->
                         totalSlotSize++
                         if (!view.isEmpty) {

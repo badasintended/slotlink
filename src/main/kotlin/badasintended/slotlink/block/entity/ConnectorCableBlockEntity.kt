@@ -21,7 +21,6 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.util.math.Direction
-import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
 @Suppress("DEPRECATION", "UnstableApiUsage")
@@ -60,32 +59,25 @@ abstract class ConnectorCableBlockEntity(
         master: MasterBlockEntity? = null,
         request: Boolean = false
     ): FilteredItemStorage {
-        if (world !is World) return FilteredItemStorage.EMPTY
+        if (linkedPos == null) return FilteredItemStorage.EMPTY
+        if (world !is ServerWorld) return FilteredItemStorage.EMPTY
 
-        if (!world.isClient && master != null && request) {
-            world as ServerWorld
+        if (master != null && request) {
             val chunkPos = ChunkPos(pos)
             if (!world.forcedChunks.contains(chunkPos.toLong())) {
                 master.forcedChunks.add(chunkPos.x to chunkPos.z)
             }
         }
 
-        if (linkedPos == null) return FilteredItemStorage.EMPTY
-
         val linkedState = world.getBlockState(linkedPos)
         val linkedBlock = linkedState.block
 
-        return if (!block.isIgnored(linkedBlock)) {
-            val storage = if (!world.isClient) {
-                world as ServerWorld
-                if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
-                apiCache!!.find(side)
-            } else {
-                ItemStorage.SIDED.find(world, linkedPos, side)
-            }
-            FilteredItemStorage(filter, blacklist, flag, storage)
+        if (!block.isIgnored(linkedBlock)) {
+            if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
+            val storage = apiCache!!.find(side) ?: return FilteredItemStorage.EMPTY
+            return FilteredItemStorage(filter, blacklist, flag, storage, linkedPos!!)
         } else {
-            FilteredItemStorage.EMPTY
+            return FilteredItemStorage.EMPTY
         }
     }
 

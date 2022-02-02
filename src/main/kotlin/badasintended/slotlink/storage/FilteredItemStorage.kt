@@ -14,12 +14,13 @@ class FilteredItemStorage(
     private val filter: List<ObjBoolPair<ItemStack>>,
     private val blacklist: Boolean,
     private val flag: Int,
-    storage: Storage<ItemVariant>?
-) : FilteringStorage<ItemVariant>(storage ?: Storage.empty()) {
+    storage: Storage<ItemVariant>,
+    val differentiator: Any = Unit
+) : FilteringStorage<ItemVariant>(storage) {
 
     companion object {
 
-        val EMPTY = FilteredItemStorage(emptyList(), true, 0, null)
+        val EMPTY = FilteredItemStorage(emptyList(), true, 0, Storage.empty())
 
     }
 
