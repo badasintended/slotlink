@@ -25,6 +25,7 @@ class InterfaceBlock : ChildBlock("interface", ::InterfaceBlockEntity) {
     ) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.filter.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(TranslatableText("block.slotlink.interface.tooltip").formatted(Formatting.GRAY))
     }
 
     override fun onUse(

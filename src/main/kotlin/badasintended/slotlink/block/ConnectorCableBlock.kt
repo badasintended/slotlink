@@ -143,6 +143,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
     ) {
         super.appendTooltip(stack, world, tooltip, options)
         tooltip.add(TranslatableText("block.slotlink.filter.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(TranslatableText("block.slotlink.connector_cable.tooltip").formatted(Formatting.GRAY))
     }
 
     override fun onUse(
