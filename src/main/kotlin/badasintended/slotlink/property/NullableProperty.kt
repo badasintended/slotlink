@@ -32,6 +32,8 @@ class NullableProperty<T : Comparable<T>>(
             return value.compareTo(other.value)
         }
 
+        override fun toString() = value?.toString() ?: "null"
+
     }
 
     private val values = linkedSetOf<Value<T>>()
