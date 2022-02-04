@@ -24,15 +24,19 @@ class FilteredItemStorage(
 
     }
 
-    private fun isValid(resource: ItemVariant) = if (filter.all { it.first.isEmpty }) true else {
-        val equals = filter.filter { resource.matches(it.first) }
+    private fun isValid(resource: ItemVariant): Boolean {
+        if (filter.all { it.first.isEmpty }) return true
 
-        if (equals.any { !it.second }) {
-            !blacklist
-        } else {
-            val nbt = equals.filter { it.second && resource.matches(it.first) }
-            if (blacklist) nbt.isEmpty() else nbt.isNotEmpty()
+        filter.forEach {
+            val stack = it.first
+            val matchNbt = it.second
+
+            if (resource.isOf(stack.item)) {
+                if (!matchNbt || resource.nbtMatches(stack.nbt)) return !blacklist
+            }
         }
+
+        return blacklist
     }
 
     override fun canInsert(resource: ItemVariant) = (flag and FilterFlags.INSERT) == 0 || isValid(resource)
