@@ -5,37 +5,36 @@ import badasintended.slotlink.init.Items
 import badasintended.slotlink.util.modId
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipesProvider
-import net.fabricmc.fabric.api.tag.TagFactory
-import net.minecraft.data.server.recipe.CraftingRecipeJsonFactory
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider
+import net.minecraft.data.server.recipe.CraftingRecipeJsonBuilder
 import net.minecraft.data.server.recipe.RecipeJsonProvider
 import net.minecraft.item.Item
 import net.minecraft.item.ItemConvertible
-import net.minecraft.tag.Tag
+import net.minecraft.tag.TagKey
 import net.minecraft.util.Identifier
-import net.fabricmc.fabric.api.tag.TagFactory.ITEM as tag
+import net.minecraft.util.registry.Registry
 import net.minecraft.block.Blocks as McBlocks
-import net.minecraft.data.server.recipe.ShapedRecipeJsonFactory.create as shaped
-import net.minecraft.data.server.recipe.ShapelessRecipeJsonFactory.create as shapeless
+import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder.create as shaped
+import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder.create as shapeless
 import net.minecraft.item.Items as McItems
 
-class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider(dataGenerator) {
+class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(dataGenerator) {
 
     override fun generateRecipes(exporter: Consumer<RecipeJsonProvider>) {
         shaped(Blocks.CABLE, 8)
             .pattern("SSS")
             .pattern("I I")
             .pattern("SSS")
-            .input('I', tag.c("iron_ingots"))
+            .input('I', tag("c:iron_ingots"))
             .input('S', McBlocks.STONE_SLAB)
-            .criterion(McItems.IRON_INGOT, tag.c("iron_ingots"))
+            .criterion(McItems.IRON_INGOT, tag("c:iron_ingots"))
             .offerTo(exporter)
 
         shaped(Blocks.IMPORT_CABLE, 4)
             .pattern(" C ")
             .pattern("CHC")
             .pattern(" C ")
-            .input('H', tag.c("hoppers"))
+            .input('H', tag("c:hoppers"))
             .input('C', Blocks.CABLE)
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
@@ -56,7 +55,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .pattern(" C ")
             .pattern("CHC")
             .pattern(" C ")
-            .input('H', tag.c("wooden_chests"))
+            .input('H', tag("c:wooden_chests"))
             .input('C', Blocks.CABLE)
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
@@ -65,8 +64,8 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .pattern("QCQ")
             .pattern("CDC")
             .pattern("QCQ")
-            .input('D', tag.c("diamonds"))
-            .input('Q', tag.c("quartz_blocks"))
+            .input('D', tag("c:diamonds"))
+            .input('Q', tag("c:quartz_blocks"))
             .input('C', Blocks.CABLE)
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
@@ -75,7 +74,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .pattern("TCT")
             .pattern("CGC")
             .pattern("TCT")
-            .input('G', tag.c("gold_ingots"))
+            .input('G', tag("c:gold_ingots"))
             .input('T', McBlocks.CRAFTING_TABLE)
             .input('C', Blocks.LINK_CABLE)
             .criterion(Blocks.LINK_CABLE)
@@ -85,7 +84,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .pattern("SIS")
             .pattern("IRE")
             .pattern("SES")
-            .input('R', tag.c("iron_ingots"))
+            .input('R', tag("c:iron_ingots"))
             .input('S', McBlocks.SMOOTH_STONE)
             .input('I', Blocks.IMPORT_CABLE)
             .input('E', Blocks.EXPORT_CABLE)
@@ -97,9 +96,9 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .pattern("SDS")
             .pattern("GRG")
             .pattern("SDS")
-            .input('S', tag.c("redstone_dusts"))
-            .input('D', tag.c("diamonds"))
-            .input('G', tag.c("gold_ingots"))
+            .input('S', tag("c:redstone_dusts"))
+            .input('D', tag("c:diamonds"))
+            .input('G', tag("c:gold_ingots"))
             .input('R', Blocks.REQUEST)
             .criterion(Blocks.REQUEST)
             .offerTo(exporter)
@@ -125,16 +124,16 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipesProvider
             .offerTo(exporter)
     }
 
-    private fun <T> TagFactory<T>.c(path: String): Tag.Identified<T> {
-        return create(Identifier("c", path))
+    private fun tag(id: String): TagKey<Item> {
+        return TagKey.of(Registry.ITEM_KEY, Identifier(id))
     }
 
-    private fun <T : CraftingRecipeJsonFactory> T.criterion(item: ItemConvertible): T {
+    private fun <T : CraftingRecipeJsonBuilder> T.criterion(item: ItemConvertible): T {
         criterion(hasItem(item), conditionsFromItem(item))
         return this
     }
 
-    private fun <T : CraftingRecipeJsonFactory> T.criterion(item: ItemConvertible, tag: Tag.Identified<Item>): T {
+    private fun <T : CraftingRecipeJsonBuilder> T.criterion(item: ItemConvertible, tag: TagKey<Item>): T {
         criterion(hasItem(item), conditionsFromTag(tag))
         return this
     }

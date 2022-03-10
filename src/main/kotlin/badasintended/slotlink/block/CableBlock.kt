@@ -31,7 +31,6 @@ open class CableBlock(id: String = "cable", be: BlockEntityBuilder = ::CableBloc
 
         val SETTINGS: Settings = FabricBlockSettings
             .of(Material.GLASS)
-            .breakByHand(true)
             .hardness(3f)
 
         val PROPERTIES = mapOf(

@@ -6,7 +6,6 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.fabricmc.fabric.api.tag.TagFactory
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -16,11 +15,12 @@ import net.minecraft.item.ItemStack
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.tag.Tag
+import net.minecraft.tag.TagKey
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import net.minecraft.util.registry.Registry
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.apache.logging.log4j.LogManager
@@ -99,7 +99,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
     ServerPlayNetworking.getSender(player).sendPacket(packet)
 }
 
-val ignoredTag: Tag<Block> = TagFactory.BLOCK.create(modId("ignored"))
+val ignoredTag: TagKey<Block> = TagKey.of(Registry.BLOCK_KEY, modId("ignored"));
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
     return ItemStack.areItemsEqual(this, other) && ItemStack.areNbtEqual(this, other)

@@ -72,7 +72,7 @@ class MultiSlotWidget(
 
     override fun onKey(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (hovered) {
-            if (client.options.keyDrop.matchesKey(keyCode, scanCode)) {
+            if (client.options.dropKey.matchesKey(keyCode, scanCode)) {
                 c2s(MULTI_SLOT_ACTION) {
                     int(handler.syncId)
                     int(index)
@@ -81,7 +81,7 @@ class MultiSlotWidget(
                 }
                 return true
             }
-            val hotbar = client.options.keysHotbar.indexOfFirst { it.matchesKey(keyCode, scanCode) }
+            val hotbar = client.options.hotbarKeys.indexOfFirst { it.matchesKey(keyCode, scanCode) }
             if (hotbar >= 0) {
                 c2s(MULTI_SLOT_ACTION) {
                     int(handler.syncId)

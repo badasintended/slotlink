@@ -10,7 +10,7 @@ plugins {
     kotlin("jvm").version("1.6.0")
     kotlin("plugin.serialization").version("1.6.0")
 
-    id("fabric-loom").version("0.10.+")
+    id("fabric-loom").version("0.11.+")
     id("com.matthewprenger.cursegradle").version("1.4.0")
     id("com.modrinth.minotaur").version("1.1.0")
     id("maven-publish")

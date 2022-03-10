@@ -336,7 +336,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             } else {
                 searchBar.keyPressed(keyCode, scanCode, modifiers)
             }
-        } else if (client!!.options.keyChat.matchesKey(keyCode, scanCode)) {
+        } else if (client!!.options.chatKey.matchesKey(keyCode, scanCode)) {
             skipChar = true
             searchBar.grab = true
             true
@@ -366,9 +366,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         return super.mouseScrolled(mouseX, mouseY, amount)
     }
 
-    override fun onClose() {
+    override fun close() {
         config.save()
-        super.onClose()
+        super.close()
     }
 
 }

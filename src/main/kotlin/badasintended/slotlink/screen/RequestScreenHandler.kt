@@ -687,10 +687,9 @@ open class RequestScreenHandler(
 
         fun match(view: StorageView<ItemVariant>): Boolean = term.isBlank() || when (first) {
             '@' -> Registry.ITEM.getId(view.resource.item).toString().contains(term, true)
-            '#' -> player.world.tagManager
-                .getOrCreateTagGroup(Registry.ITEM_KEY)
-                .tags.filterValues { it.contains(view.resource.item) }.keys
-                .any { it.toString().contains(term, true) }
+            '#' -> Registry.ITEM
+                .streamTags()
+                .anyMatch { it.id.toString().contains(term, true) && view.resource.item.registryEntry.isIn(it) }
             else -> view.resource.toStack().name.string.contains(term, true)
         }
 

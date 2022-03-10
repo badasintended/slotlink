@@ -13,7 +13,6 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : BlockWithEn
 
         val SETTINGS: Settings = FabricBlockSettings
             .of(Material.STONE)
-            .breakByHand(true)
             .hardness(5f)
 
     }
