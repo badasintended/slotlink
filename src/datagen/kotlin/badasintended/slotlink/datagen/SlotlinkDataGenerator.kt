@@ -5,6 +5,7 @@ import badasintended.slotlink.datagen.provider.RecipeProvider
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
 
+@Suppress("unused")
 class SlotlinkDataGenerator : DataGeneratorEntrypoint {
 
     override fun onInitializeDataGenerator(generator: FabricDataGenerator) {

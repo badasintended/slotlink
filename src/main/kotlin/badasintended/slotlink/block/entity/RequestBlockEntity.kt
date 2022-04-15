@@ -28,7 +28,7 @@ class RequestBlockEntity(pos: BlockPos, state: BlockState) :
         val world = getWorld() ?: return null
         network?.also { network ->
             val master = network.master ?: return null
-            val storages = master.getStorages(RequestScreenHandler::class, world, FilterFlags.INSERT, true)
+            val storages = master.getStorages(world, FilterFlags.INSERT, true)
             val handler = RequestScreenHandler(syncId, inv, storages, this, master)
             watchers.add(handler)
             master.watchers.add(handler)

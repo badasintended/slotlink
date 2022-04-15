@@ -2,6 +2,8 @@ package badasintended.slotlink.config
 
 import badasintended.slotlink.screen.RequestScreenHandler.SortMode
 import badasintended.slotlink.util.log
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.memberProperties
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -28,7 +30,8 @@ class SlotlinkConfig(
     var showCraftingGrid: Boolean = true,
     var sort: SortMode = SortMode.COUNT_DESC,
     var syncReiSearch: Boolean = false,
-    var pauseTransferWhenOnScreen: Boolean = false
+    var pauseTransferWhenOnScreen: Boolean = false,
+    var tryMergeStack: Boolean = true
 ) {
 
     fun save() {
@@ -37,11 +40,9 @@ class SlotlinkConfig(
 
     fun invalidate() {
         json.decodeFromString<SlotlinkConfig>(configFile.readText()).also {
-            autoFocusSearchBar = it.autoFocusSearchBar
-            showCraftingGrid = it.showCraftingGrid
-            sort = it.sort
-            syncReiSearch = it.syncReiSearch
-            pauseTransferWhenOnScreen = it.pauseTransferWhenOnScreen
+            for (property in SlotlinkConfig::class.memberProperties) if (property is KMutableProperty<*>) {
+                property.setter.call(this, property.get(it))
+            }
         }
         log.info("slotlink config invalidated")
     }

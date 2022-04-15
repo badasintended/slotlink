@@ -28,6 +28,7 @@ class InterfaceBlock : ChildBlock("interface", ::InterfaceBlockEntity) {
         tooltip.add(TranslatableText("block.slotlink.interface.tooltip").formatted(Formatting.GRAY))
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onUse(
         state: BlockState,
         world: World,

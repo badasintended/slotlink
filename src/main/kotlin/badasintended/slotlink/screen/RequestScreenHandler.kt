@@ -1,5 +1,3 @@
-@file:Suppress("LeakingThis", "DEPRECATION", "UnstableApiUsage")
-
 package badasintended.slotlink.screen
 
 import badasintended.slotlink.block.entity.BlockEntityWatcher
@@ -15,6 +13,7 @@ import badasintended.slotlink.screen.slot.LockedSlot
 import badasintended.slotlink.screen.view.ItemView
 import badasintended.slotlink.screen.view.toView
 import badasintended.slotlink.storage.FilteredItemStorage
+import badasintended.slotlink.storage.NetworkStorage
 import badasintended.slotlink.util.actionBar
 import badasintended.slotlink.util.allEmpty
 import badasintended.slotlink.util.cursorStorage
@@ -63,10 +62,11 @@ import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.registry.Registry
 
+@Suppress("UnstableApiUsage")
 open class RequestScreenHandler(
     syncId: Int,
     val playerInventory: PlayerInventory,
-    private val storages: Set<FilteredItemStorage>,
+    private val storage: NetworkStorage,
 ) : CraftingScreenHandler(syncId, playerInventory),
     MasterBlockEntity.Watcher,
     BlockEntityWatcher<RequestBlockEntity>,
@@ -109,24 +109,25 @@ open class RequestScreenHandler(
 
     /** Client side **/
     constructor(syncId: Int, playerInventory: PlayerInventory) : this(
-        syncId, playerInventory, emptySet()
+        syncId, playerInventory, NetworkStorage(arrayListOf())
     )
 
     /** Server side **/
+    @Suppress("LeakingThis")
     constructor(
         syncId: Int,
         playerInventory: PlayerInventory,
-        storages: MutableSet<FilteredItemStorage>,
+        storage: NetworkStorage,
         request: RequestBlockEntity?,
         master: MasterBlockEntity
-    ) : this(syncId, playerInventory, storages) {
+    ) : this(syncId, playerInventory, storage) {
         this.request = request
         this.master = master
         Transaction.openOuter().use { transaction ->
             val uniqueDifferentiators = HashSet<Any>()
-            storages.forEach { storage ->
-                if (uniqueDifferentiators.add(storage.differentiator)) {
-                    visualStorages[storage] = storage
+            storage.parts.forEach { part ->
+                if (uniqueDifferentiators.add(part.differentiator)) {
+                    visualStorages[part] = part
                         .iterable(transaction)
                         .map { it.toView() }
                 }
@@ -174,13 +175,10 @@ open class RequestScreenHandler(
                 if (type == THROW) {
                     val all = data == 1
                     Transaction.openOuter().use { transaction ->
-                        for (storage in storages) {
-                            val extracted = storage
-                                .extract(variant, if (all) variant.item.maxCount.toLong() else 1, transaction)
-                            if (extracted > 0) {
-                                player.storage.drop(variant, extracted, transaction)
-                                break
-                            }
+                        val extracted = storage
+                            .extract(variant, if (all) variant.item.maxCount.toLong() else 1, transaction)
+                        if (extracted > 0) {
+                            player.storage.drop(variant, extracted, transaction)
                         }
                         transaction.commit()
                     }
@@ -188,34 +186,20 @@ open class RequestScreenHandler(
                     when (type) {
                         SWAP -> Transaction.openOuter().use { transaction ->
                             val slot = player.storage.getSlot(data)
-                            var available = slot.capacity - slot.amount
-                            for (storage in storages) {
-                                val extracted = storage.extract(variant, available, transaction)
-                                available -= slot.insert(variant, extracted, transaction)
-                                if (available <= 0) break
-                            }
+                            val extracted = storage.extract(variant, slot.capacity - slot.amount, transaction)
+                            slot.insert(variant, extracted, transaction)
                             transaction.commit()
                         }
                         QUICK_MOVE -> Transaction.openOuter().use { transaction ->
-                            var free = variant.item.maxCount.toLong()
-                            for (storage in storages) {
-                                val available = storage.simulateExtract(variant, free, transaction)
-                                if (available == 0L) continue
-                                val inserted = player.storage.offer(variant, available, transaction)
-                                val extracted = storage.extract(variant, inserted, transaction)
-                                free -= extracted
-                                if (free == 0L || inserted == 0L) break
-                            }
+                            val stock = storage.simulateExtract(variant, variant.item.maxCount.toLong(), transaction)
+                            val inserted = player.storage.offer(variant, stock, transaction)
+                            storage.extract(variant, inserted, transaction)
                             transaction.commit()
                         }
                         else -> if (!variant.isBlank) Transaction.openOuter().use { transaction ->
                             val max = min(view.count.toLong(), variant.item.maxCount.toLong())
                             val request = if (data == 1) (max + 1) / 2 else max
-                            var extracted = 0L
-                            for (storage in storages) {
-                                extracted += storage.extract(variant, request - extracted, transaction)
-                                if (extracted == request) break
-                            }
+                            val extracted = storage.extract(variant, request, transaction)
                             cursorStorage.insert(variant, extracted, transaction)
                             cursor = cursorStorage.resource.toStack(cursorStorage.amount.toInt())
                             transaction.commit()
@@ -263,11 +247,8 @@ open class RequestScreenHandler(
                             val variant = ItemVariant.of(inputStack)
                             var extracted = false
                             Transaction.openOuter().use { transaction ->
-                                for (storage in storages) {
-                                    if (storage.extract(variant, 1, transaction) == 1L) {
-                                        extracted = true
-                                        break
-                                    }
+                                if (storage.extract(variant, 1, transaction) == 1L) {
+                                    extracted = true
                                 }
                                 transaction.commit()
                             }
@@ -384,10 +365,7 @@ open class RequestScreenHandler(
         var count = stack.count.toLong()
 
         Transaction.openOuter().use { transaction ->
-            for (storage in storages) {
-                count -= storage.insert(variant, count, transaction)
-                if (count == 0L) break
-            }
+            count -= storage.insert(variant, count, transaction)
             transaction.commit()
         }
 
@@ -420,15 +398,11 @@ open class RequestScreenHandler(
 
         val stack = copy()
         val variant = ItemVariant.of(stack)
-        var free = min(stack.maxCount, max) - stack.count
+        val space = (min(stack.maxCount, max) - stack.count).toLong()
 
         Transaction.openOuter().use { transaction ->
-            for (storage in storages) {
-                val extracted = storage.extract(variant, free.toLong(), transaction).toInt()
-                stack.count += extracted
-                free -= extracted
-                if (free == 0) break
-            }
+            val extracted = storage.extract(variant, space, transaction).toInt()
+            stack.count += extracted
             transaction.commit()
         }
 
@@ -490,14 +464,12 @@ open class RequestScreenHandler(
         val matchingVariant = ingredient.matchingStacks.map { ItemVariant.of(it) }
 
         Transaction.openOuter().use { transaction ->
-            for (storage in storages) {
-                for (variant in matchingVariant) {
-                    val extracted = storage.extract(variant, 1L, transaction)
-                    if (extracted > 0L) {
-                        input.setStack(slot, variant.toStack())
-                        transaction.commit()
-                        return
-                    }
+            for (variant in matchingVariant) {
+                val extracted = storage.extract(variant, 1L, transaction)
+                if (extracted > 0L) {
+                    input.setStack(slot, variant.toStack())
+                    transaction.commit()
+                    return
                 }
             }
         }
@@ -685,6 +657,7 @@ open class RequestScreenHandler(
             else -> string
         }
 
+        @Suppress("DEPRECATION")
         fun match(view: StorageView<ItemVariant>): Boolean = term.isBlank() || when (first) {
             '@' -> Registry.ITEM.getId(view.resource.item).toString().contains(term, true)
             '#' -> Registry.ITEM

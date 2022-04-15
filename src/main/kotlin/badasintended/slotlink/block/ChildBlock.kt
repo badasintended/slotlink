@@ -22,6 +22,7 @@ abstract class ChildBlock(
     settings: Settings = SETTINGS
 ) : ModBlock(id, settings) {
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun neighborUpdate(
         selfState: BlockState,
         world: World,
@@ -47,7 +48,7 @@ abstract class ChildBlock(
         }
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun getStateForNeighborUpdate(
         state: BlockState,
         direction: Direction,
@@ -66,7 +67,7 @@ abstract class ChildBlock(
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = blockEntityBuilder(pos, state)
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onStateReplaced(state: BlockState, world: World, pos: BlockPos, newState: BlockState, moved: Boolean) {
         if (!state.isOf(newState.block)) {
             val blockEntity = world.getBlockEntity(pos)

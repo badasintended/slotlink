@@ -74,7 +74,7 @@ abstract class ConnectorCableBlockEntity(
         if (!block.isIgnored(linkedState)) {
             if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
             val storage = apiCache!!.find(side) ?: return FilteredItemStorage.EMPTY
-            return FilteredItemStorage(filter, blacklist, flag, storage, linkedPos!!)
+            return FilteredItemStorage(filter, blacklist, flag, storage, priority, linkedPos!!)
         } else {
             return FilteredItemStorage.EMPTY
         }
@@ -84,7 +84,7 @@ abstract class ConnectorCableBlockEntity(
         return if (adjacentNode is InterfaceBlockEntity) false else super.connect(adjacentNode)
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun setCachedState(state: BlockState) {
         super.setCachedState(state)
         linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)

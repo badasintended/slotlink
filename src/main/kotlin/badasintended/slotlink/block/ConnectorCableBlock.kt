@@ -123,7 +123,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         return state
     }
 
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun getStateForNeighborUpdate(
         state: BlockState,
         direction: Direction,
@@ -156,6 +156,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         tooltip.add(TranslatableText("block.slotlink.connector_cable.tooltip").formatted(Formatting.GRAY))
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onUse(
         state: BlockState,
         world: World,
@@ -171,6 +172,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         return ActionResult.PASS
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun getOutlineShape(state: BlockState, view: BlockView, pos: BlockPos, ctx: ShapeContext): VoxelShape {
         var key = 1
         sideShapes.keys.forEach { key = (key shl 1) + if (state[it]) 1 else 0 }

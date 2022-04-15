@@ -14,6 +14,7 @@ class ItemView(
 ) {
 
     companion object {
+
         val EMPTY = ItemView(Items.AIR, null, 0)
     }
 

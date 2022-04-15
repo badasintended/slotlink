@@ -19,7 +19,7 @@ public abstract class WallMountedBlockMixin {
 
     @Shadow
     protected static Direction getDirection(BlockState state) {
-        return null;
+        throw new AssertionError();
     }
 
     @Inject(at = @At("RETURN"), method = "canPlaceAt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;)Z", cancellable = true)

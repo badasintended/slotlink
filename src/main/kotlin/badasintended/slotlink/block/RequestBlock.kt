@@ -13,6 +13,7 @@ import net.minecraft.world.World
 
 class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onUse(
         state: BlockState,
         world: World,
@@ -34,6 +35,7 @@ class RequestBlock : ChildBlock("request", ::RequestBlockEntity) {
         return ActionResult.SUCCESS
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun createScreenHandlerFactory(
         state: BlockState,
         world: World,

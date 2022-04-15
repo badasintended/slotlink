@@ -50,6 +50,7 @@ class MasterBlock : ModBlock("master"), BlockAttackInteractionAware {
         blockEntity.markDirty()
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun neighborUpdate(
         state: BlockState,
         world: World,

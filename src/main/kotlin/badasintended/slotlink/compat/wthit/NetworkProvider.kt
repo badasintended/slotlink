@@ -5,13 +5,12 @@ import badasintended.slotlink.util.toArray
 import mcp.mobius.waila.api.IBlockAccessor
 import mcp.mobius.waila.api.IBlockComponentProvider
 import mcp.mobius.waila.api.IPluginConfig
+import mcp.mobius.waila.api.IServerAccessor
 import mcp.mobius.waila.api.IServerDataProvider
 import mcp.mobius.waila.api.ITooltip
+import mcp.mobius.waila.api.component.PairComponent
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.TranslatableText
-import net.minecraft.util.Formatting
-import net.minecraft.world.World
 
 private const val posKey = "pos"
 
@@ -20,15 +19,21 @@ object NetworkProvider : IBlockComponentProvider, IServerDataProvider<ChildBlock
     override fun appendBody(tooltip: ITooltip, accessor: IBlockAccessor, config: IPluginConfig) {
         if (config.getBoolean(showNetwork) && accessor.serverData.contains(posKey)) {
             val pos = accessor.serverData.getIntArray(posKey)
-            tooltip.addPair(
-                TranslatableText("waila.slotlink.network.key").formatted(Formatting.GRAY),
-                TranslatableText("waila.slotlink.network.value", pos[0], pos[1], pos[2]).formatted(Formatting.GRAY)
+            tooltip.addLine(
+                PairComponent(
+                    TranslatableText("waila.slotlink.network.key"),
+                    TranslatableText("waila.slotlink.network.value", pos[0], pos[1], pos[2])
+                )
             )
         }
     }
 
-    override fun appendServerData(data: NbtCompound, player: ServerPlayerEntity, world: World, node: ChildBlockEntity) {
-        node.network?.also { network ->
+    override fun appendServerData(
+        data: NbtCompound,
+        accessor: IServerAccessor<ChildBlockEntity>,
+        config: IPluginConfig
+    ) {
+        accessor.target.network?.also { network ->
             if (!network.deleted) data.putIntArray(posKey, network.masterPos.toArray())
         }
     }

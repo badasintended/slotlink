@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction
 import net.minecraft.util.registry.Registry
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
-import org.apache.logging.log4j.LogManager
+import org.slf4j.LoggerFactory
 
 typealias BlockEntityBuilder = (BlockPos, BlockState) -> BlockEntity
 
@@ -38,12 +38,6 @@ fun IntArray.toPos(): BlockPos {
 fun PlayerEntity.actionBar(key: String, vararg args: Any) {
     if (this is ServerPlayerEntity) sendMessage(
         TranslatableText(key, *args), true
-    )
-}
-
-fun PlayerEntity.chat(key: String, vararg args: Any) {
-    if (this is ServerPlayerEntity) sendMessage(
-        TranslatableText(key, *args), false
     )
 }
 
@@ -87,7 +81,7 @@ fun PacketByteBuf.readFilter(size: Int = 9): MutableList<ObjBoolPair<ItemStack>>
 fun modId(path: String) = Identifier(Slotlink.ID, path)
 
 @Suppress("unused")
-val log = LogManager.getLogger(Slotlink.ID)!!
+val log = LoggerFactory.getLogger(Slotlink.ID)!!
 
 inline fun s2c(player: PlayerEntity, id: Identifier, buf: PacketByteBuf.() -> Unit) {
     player as ServerPlayerEntity
@@ -99,7 +93,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
     ServerPlayNetworking.getSender(player).sendPacket(packet)
 }
 
-val ignoredTag: TagKey<Block> = TagKey.of(Registry.BLOCK_KEY, modId("ignored"));
+val ignoredTag: TagKey<Block> = TagKey.of(Registry.BLOCK_KEY, modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
     return ItemStack.areItemsEqual(this, other) && ItemStack.areNbtEqual(this, other)

@@ -8,7 +8,6 @@ import badasintended.slotlink.network.NodeType
 import badasintended.slotlink.screen.FilterScreenHandler
 import badasintended.slotlink.storage.FilterFlags
 import badasintended.slotlink.storage.FilteredItemStorage
-import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage
 import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
@@ -25,8 +24,8 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
     fun getStorage(unused: Direction): FilteredItemStorage {
         world?.also { world ->
             val master = network?.master ?: return FilteredItemStorage.EMPTY
-            val storages = master.getStorages(InterfaceBlockEntity::class, world, flag)
-            return FilteredItemStorage(filter, blacklist, flag, CombinedStorage(storages.toList()))
+            val storages = master.getStorages(world, flag)
+            return FilteredItemStorage(filter, blacklist, flag, storages, 0)
         }
         return FilteredItemStorage.EMPTY
     }
