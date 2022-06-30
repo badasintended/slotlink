@@ -8,7 +8,6 @@ import net.minecraft.block.BlockState
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -85,7 +84,7 @@ abstract class ChildBlock(
         options: TooltipContext
     ) {
         super.appendTooltip(stack, world, tooltip, options)
-        tooltip.add(TranslatableText("block.slotlink.child.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(Text.translatable("block.slotlink.child.tooltip").formatted(Formatting.GRAY))
     }
 
 }

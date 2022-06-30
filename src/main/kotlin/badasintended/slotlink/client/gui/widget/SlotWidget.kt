@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.text.LiteralText
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
@@ -16,7 +16,7 @@ abstract class SlotWidget<SH : ScreenHandler>(
     x: Int, y: Int, s: Int,
     protected val handler: SH,
     private val stackGetter: () -> ItemStack
-) : NoSoundWidget(x, y, s, s, LiteralText.EMPTY) {
+) : NoSoundWidget(x, y, s, s, ScreenTexts.EMPTY) {
 
     val stack get() = stackGetter.invoke()
 

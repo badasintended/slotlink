@@ -123,14 +123,12 @@ open class RequestScreenHandler(
     ) : this(syncId, playerInventory, storage) {
         this.request = request
         this.master = master
-        Transaction.openOuter().use { transaction ->
-            val uniqueDifferentiators = HashSet<Any>()
-            storage.parts.forEach { part ->
-                if (uniqueDifferentiators.add(part.differentiator)) {
-                    visualStorages[part] = part
-                        .iterable(transaction)
-                        .map { it.toView() }
-                }
+
+        val uniqueDifferentiators = HashSet<Any>()
+        storage.parts.forEach { part ->
+            if (uniqueDifferentiators.add(part.differentiator)) {
+                visualStorages[part] = part
+                    .map { it.toView() }
             }
         }
 
@@ -504,52 +502,48 @@ open class RequestScreenHandler(
 
         var resort = false
 
-        Transaction.openOuter().use { transaction ->
-            visualStorages.forEach { entry ->
-                val storage = entry.key
-                val caches = entry.value
+        visualStorages.forEach { entry ->
+            val storage = entry.key
+            val caches = entry.value
 
-                var i = 0
-                for (view in storage.iterator(transaction)) {
-                    val cacheView = caches[i]
-                    if (!cacheView.isItemAndTagEqual(view)) {
-                        if (cacheView.isEmpty && !view.isEmpty) {
-                            filledSlotSize++
-                        } else if (!cacheView.isEmpty && view.isEmpty) {
-                            filledSlotSize--
-                        }
+            for ((i, view) in storage.withIndex()) {
+                val cacheView = caches[i]
+                if (!cacheView.isItemAndTagEqual(view)) {
+                    if (cacheView.isEmpty && !view.isEmpty) {
+                        filledSlotSize++
+                    } else if (!cacheView.isEmpty && view.isEmpty) {
+                        filledSlotSize--
+                    }
 
-                        val beforeId = filledViews.indexOfFirst { cacheView.isItemAndTagEqual(it) }
-                        if (beforeId >= 0) {
-                            val beforeMatch = filledViews[beforeId]
-                            beforeMatch.count -= cacheView.count
-                            if (beforeMatch.isEmpty) {
-                                filledViews.removeAt(beforeId)
-                            }
-                        }
-
-                        if (!view.isEmpty && lastSortData.filters.all { it.match(view) }) {
-                            val afterMatch = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
-                            if (afterMatch == null) {
-                                filledViews.add(view.toView())
-                            } else {
-                                afterMatch.count += view.amount.toInt()
-                            }
-                        }
-
-                        resort = true
-                        cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
-                    } else if (cacheView.count != view.amount.toInt()) {
-                        val filled = filledViews.firstOrNull { cacheView.isItemAndTagEqual(it) }
-                        if (filled != null) {
-                            filled.count -= cacheView.count - view.amount.toInt()
-                            cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
-                            resort = true
+                    val beforeId = filledViews.indexOfFirst { cacheView.isItemAndTagEqual(it) }
+                    if (beforeId >= 0) {
+                        val beforeMatch = filledViews[beforeId]
+                        beforeMatch.count -= cacheView.count
+                        if (beforeMatch.isEmpty) {
+                            filledViews.removeAt(beforeId)
                         }
                     }
 
-                    i++
+                    if (!view.isEmpty && lastSortData.filters.all { it.match(view) }) {
+                        val afterMatch = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
+                        if (afterMatch == null) {
+                            filledViews.add(view.toView())
+                        } else {
+                            afterMatch.count += view.amount.toInt()
+                        }
+                    }
+
+                    resort = true
+                    cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                } else if (cacheView.count != view.amount.toInt()) {
+                    val filled = filledViews.firstOrNull { cacheView.isItemAndTagEqual(it) }
+                    if (filled != null) {
+                        filled.count -= cacheView.count - view.amount.toInt()
+                        cacheView.update(view.resource.item, view.resource.nbt?.copy(), view.amount.toInt())
+                        resort = true
+                    }
                 }
+
             }
         }
 
@@ -562,20 +556,18 @@ open class RequestScreenHandler(
             filledSlotSize = 0
             filledViews.clear()
 
-            Transaction.openOuter().use { transaction ->
-                visualStorages.keys.forEach { storage ->
-                    storage.iterator(transaction).forEach { view ->
-                        totalSlotSize++
-                        if (!view.isEmpty) {
-                            filledSlotSize++
+            visualStorages.keys.forEach { storage ->
+                storage.forEach { view ->
+                    totalSlotSize++
+                    if (!view.isEmpty) {
+                        filledSlotSize++
 
-                            if (sortData.filters.all { it.match(view) }) {
-                                val match = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
-                                if (match == null) {
-                                    filledViews.add(view.toView())
-                                } else {
-                                    match.count += view.amount.toInt()
-                                }
+                        if (sortData.filters.all { it.match(view) }) {
+                            val match = filledViews.firstOrNull { it.isItemAndTagEqual(view) }
+                            if (match == null) {
+                                filledViews.add(view.toView())
+                            } else {
+                                match.count += view.amount.toInt()
                             }
                         }
                     }

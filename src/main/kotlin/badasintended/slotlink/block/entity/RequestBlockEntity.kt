@@ -10,7 +10,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.screen.ScreenHandler
-import net.minecraft.text.TranslatableText
+import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 
 class RequestBlockEntity(pos: BlockPos, state: BlockState) :
@@ -38,6 +38,6 @@ class RequestBlockEntity(pos: BlockPos, state: BlockState) :
         return null
     }
 
-    override fun getDisplayName() = TranslatableText("container.slotlink.request")
+    override fun getDisplayName() = Text.translatable("container.slotlink.request")!!
 
 }

@@ -18,7 +18,6 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
@@ -101,7 +100,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
     override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {
         super.appendTooltip(stack, world, tooltip, context)
 
-        tooltip.add(TranslatableText("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
+        tooltip.add(Text.translatable("${baseTlKey}.useTooltip").formatted(Formatting.GRAY))
 
         val tag = stack.orCreateNbt
         if (tag.contains("network")) {
@@ -109,7 +108,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             val pos = network.getIntArray("pos")
             val dim = network.getString("dim")
             tooltip.add(
-                TranslatableText("${baseTlKey}.info", pos[0], pos[1], pos[2], dim).formatted(
+                Text.translatable("${baseTlKey}.info", pos[0], pos[1], pos[2], dim).formatted(
                     Formatting.DARK_PURPLE
                 )
             )
@@ -135,7 +134,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             buf.writeBoolean(offHand)
         }
 
-        override fun getDisplayName() = TranslatableText("container.slotlink.request")
+        override fun getDisplayName() = Text.translatable("container.slotlink.request")!!
 
     }
 

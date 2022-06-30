@@ -10,7 +10,7 @@ import mcp.mobius.waila.api.IServerDataProvider
 import mcp.mobius.waila.api.ITooltip
 import mcp.mobius.waila.api.component.PairComponent
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.TranslatableText
+import net.minecraft.text.Text
 
 private const val posKey = "pos"
 
@@ -21,8 +21,8 @@ object NetworkProvider : IBlockComponentProvider, IServerDataProvider<ChildBlock
             val pos = accessor.serverData.getIntArray(posKey)
             tooltip.addLine(
                 PairComponent(
-                    TranslatableText("waila.slotlink.network.key"),
-                    TranslatableText("waila.slotlink.network.value", pos[0], pos[1], pos[2])
+                    Text.translatable("waila.slotlink.network.key"),
+                    Text.translatable("waila.slotlink.network.value", pos[0], pos[1], pos[2])
                 )
             )
         }

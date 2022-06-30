@@ -16,7 +16,7 @@ import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.tag.TagKey
-import net.minecraft.text.TranslatableText
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -37,7 +37,7 @@ fun IntArray.toPos(): BlockPos {
 
 fun PlayerEntity.actionBar(key: String, vararg args: Any) {
     if (this is ServerPlayerEntity) sendMessage(
-        TranslatableText(key, *args), true
+        Text.translatable(key, *args), true
     )
 }
 

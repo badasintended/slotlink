@@ -31,7 +31,6 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import org.lwjgl.glfw.GLFW
 
 @Environment(EnvType.CLIENT)
@@ -50,7 +49,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
     private val viewedHeight by handler::viewedHeight
 
     private val titleWidth by lazy { textRenderer.getWidth(title) }
-    private val craftingText = TranslatableText("container.crafting")
+    private val craftingText = Text.translatable("container.crafting")
 
     private var sort by config::sort
     private var syncRei by config::syncReiSearch

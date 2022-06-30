@@ -15,7 +15,7 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtList
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.text.TranslatableText
+import net.minecraft.text.Text
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 
@@ -75,6 +75,6 @@ abstract class FilteredBlockEntity(
         }
     }
 
-    override fun getDisplayName() = TranslatableText("container.slotlink.filter", pos.x, pos.y, pos.z)
+    override fun getDisplayName() = Text.translatable("container.slotlink.filter", pos.x, pos.y, pos.z)!!
 
 }

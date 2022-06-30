@@ -19,7 +19,6 @@ import net.minecraft.screen.slot.SlotActionType.PICKUP
 import net.minecraft.screen.slot.SlotActionType.QUICK_MOVE
 import net.minecraft.screen.slot.SlotActionType.SWAP
 import net.minecraft.screen.slot.SlotActionType.THROW
-import net.minecraft.text.LiteralText
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
@@ -58,7 +57,7 @@ class MultiSlotWidget(
     }
 
     override fun appendTooltip(tooltip: MutableList<Text>) {
-        (tooltip[0] as MutableText).append(LiteralText(" (${count})").formatted(Formatting.GOLD))
+        (tooltip[0] as MutableText).append(Text.literal(" (${count})").formatted(Formatting.GOLD))
     }
 
     override fun onClick(button: Int) {

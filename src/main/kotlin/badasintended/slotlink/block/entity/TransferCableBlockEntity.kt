@@ -55,7 +55,7 @@ abstract class TransferCableBlockEntity(
         if (!target.supportsInsertion()) return false
 
         Transaction.openOuter().use { transaction ->
-            for (view in source.iterable(transaction)) {
+            for (view in source) {
                 if (view.isEmpty) continue
                 val variant = view.resource
                 val available = transaction.openNested().use { simulation ->

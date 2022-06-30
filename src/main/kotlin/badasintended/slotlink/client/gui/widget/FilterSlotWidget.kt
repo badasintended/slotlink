@@ -16,7 +16,6 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 
 @Environment(EnvType.CLIENT)
@@ -29,7 +28,7 @@ class FilterSlotWidget(
     private val nbt get() = handler.filter[index].second
 
     override fun appendTooltip(tooltip: MutableList<Text>) {
-        tooltip.add(1, TranslatableText("container.slotlink.filter.slot.nbt.${nbt}").formatted(Formatting.GRAY))
+        tooltip.add(1, Text.translatable("container.slotlink.filter.slot.nbt.${nbt}").formatted(Formatting.GRAY))
     }
 
     override fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
@@ -63,7 +62,7 @@ class FilterSlotWidget(
                 if (Screen.hasControlDown()) "pressed" else
                     if (MinecraftClient.IS_SYSTEM_MAC) "cmd"
                     else "ctrl"
-            client.currentScreen?.renderTooltip(matrices, TranslatableText(tlKey), mouseX, mouseY)
+            client.currentScreen?.renderTooltip(matrices, Text.translatable(tlKey), mouseX, mouseY)
         }
     }
 

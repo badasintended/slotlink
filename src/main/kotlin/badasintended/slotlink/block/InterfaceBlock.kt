@@ -6,7 +6,6 @@ import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
@@ -24,8 +23,8 @@ class InterfaceBlock : ChildBlock("interface", ::InterfaceBlockEntity) {
         options: TooltipContext
     ) {
         super.appendTooltip(stack, world, tooltip, options)
-        tooltip.add(TranslatableText("block.slotlink.filter.tooltip").formatted(Formatting.GRAY))
-        tooltip.add(TranslatableText("block.slotlink.interface.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(Text.translatable("block.slotlink.filter.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(Text.translatable("block.slotlink.interface.tooltip").formatted(Formatting.GRAY))
     }
 
     @Suppress("OVERRIDE_DEPRECATION")

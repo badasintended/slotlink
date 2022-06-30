@@ -8,10 +8,10 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.LiteralText
+import net.minecraft.screen.ScreenTexts
 
 @Environment(EnvType.CLIENT)
-class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w, h, LiteralText.EMPTY) {
+class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w, h, ScreenTexts.EMPTY) {
 
     var texture = GuiTextures.FILTER
     var onHovered: (MatrixStack, Int, Int) -> Unit = { _, _, _ -> }

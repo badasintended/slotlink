@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView
 import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
 import net.minecraft.item.ItemStack
 
 class FilteredItemStorage(
@@ -43,11 +42,11 @@ class FilteredItemStorage(
     override fun canInsert(resource: ItemVariant) = (flag and FilterFlags.INSERT) == 0 || isValid(resource)
     override fun canExtract(resource: ItemVariant) = (flag and FilterFlags.EXTRACT) == 0 || isValid(resource)
 
-    override fun iterator(transaction: TransactionContext): MutableIterator<StorageView<ItemVariant>> {
+    override fun iterator(): MutableIterator<StorageView<ItemVariant>> {
         return if (flag and FilterFlags.EXTRACT == 0) {
-            backingStorage.get().iterator(transaction)
+            backingStorage.get().iterator()
         } else {
-            super.iterator(transaction)
+            super.iterator()
         }
     }
 

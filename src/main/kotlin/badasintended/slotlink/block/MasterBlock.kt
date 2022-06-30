@@ -18,7 +18,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtList
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
@@ -88,7 +87,7 @@ class MasterBlock : ModBlock("master"), BlockAttackInteractionAware {
         options: TooltipContext
     ) {
         super.appendTooltip(stack, world, tooltip, options)
-        tooltip.add(TranslatableText("block.slotlink.master.tooltip").formatted(Formatting.GRAY))
+        tooltip.add(Text.translatable("block.slotlink.master.tooltip").formatted(Formatting.GRAY))
     }
 
     override fun onAttackInteraction(

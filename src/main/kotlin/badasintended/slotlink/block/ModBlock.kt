@@ -19,6 +19,7 @@ abstract class ModBlock(id: String, settings: Settings = SETTINGS) : BlockWithEn
 
     val id = modId(id)
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun getRenderType(state: BlockState?): BlockRenderType {
         return BlockRenderType.MODEL
     }

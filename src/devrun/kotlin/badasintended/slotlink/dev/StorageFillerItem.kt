@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
-import net.minecraft.text.LiteralText
+import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.math.Direction
 import net.minecraft.util.registry.Registry
@@ -36,7 +36,7 @@ object StorageFillerItem : Item(ModItem.SETTINGS) {
                 if (storage.insert(ItemVariant.of(item), item.maxCount.toLong(), transaction) == 0L) break
             }
             transaction.commit()
-            player.sendMessage(LiteralText("Filled (${pos.x}, ${pos.y}, ${pos.z})"), true)
+            player.sendMessage(Text.literal("Filled (${pos.x}, ${pos.y}, ${pos.z})"), true)
         }
 
         return ActionResult.SUCCESS

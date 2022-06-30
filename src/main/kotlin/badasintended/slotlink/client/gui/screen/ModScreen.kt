@@ -11,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 
 @Environment(EnvType.CLIENT)
 abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
@@ -22,7 +21,7 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
     private var clickedElement: ClickableWidget? = null
     var hoveredElement: ClickableWidget? = null
 
-    fun tl(key: String, vararg args: Any) = TranslatableText("$baseTlKey.$key", *args)
+    fun tl(key: String, vararg args: Any) = Text.translatable("$baseTlKey.$key", *args)!!
 
     protected inline fun <T : ClickableWidget> add(t: T, func: T.() -> Unit = {}): T {
         return addDrawableChild(t).apply(func)
