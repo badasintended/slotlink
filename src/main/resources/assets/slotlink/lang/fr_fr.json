@@ -22,7 +22,7 @@
   "container.slotlink.request.search.tip3"     : "Vous pouvez les combiner !",
   "container.slotlink.request.craft.clear"     : "Vider",
   "container.slotlink.request.move.all"        : "Tout déplacer dans le réseau",
-  "container.slotlink.request.move.type"       : "Déplacer ce type dans le réseau",
+  "container.slotlink.request.move.clazz"      : "Déplacer ce type dans le réseau",
   "container.slotlink.request.restock.all"     : "Compléter toutes les piles depuis le réseau",
   "container.slotlink.request.restock.cursor"  : "Compléter la pile en main depuis le réseau",
   "container.slotlink.request.sort.name"       : "Trier par nom (croissant)",
