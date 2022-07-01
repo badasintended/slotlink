@@ -19,7 +19,7 @@
   "container.slotlink.request.search.tip3"     : "你可以一起使用！",
   "container.slotlink.request.craft.clear"     : "清除",
   "container.slotlink.request.move.all"        : "将所有物品放入存储网络中",
-  "container.slotlink.request.move.type"       : "将该种类放入存储网络中",
+  "container.slotlink.request.move.clazz"       : "将该种类放入存储网络中",
   "container.slotlink.request.restock.all"     : "从存储网络中取出所有",
   "container.slotlink.request.restock.cursor"  : "从存储网络中取出",
   "container.slotlink.request.sort.name"       : "按名字排序（升序）",

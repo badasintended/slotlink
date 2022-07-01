@@ -24,7 +24,7 @@
   "container.slotlink.request.search.tip3"     : "You can combine it!",
   "container.slotlink.request.craft.clear"     : "Clear",
   "container.slotlink.request.move.all"        : "Move all to network",
-  "container.slotlink.request.move.type"       : "Move this type to network",
+  "container.slotlink.request.move.clazz"       : "Move this type to network",
   "container.slotlink.request.restock.all"     : "Restock all from network",
   "container.slotlink.request.restock.cursor"  : "Restock cursor from network",
   "container.slotlink.request.sort.name"       : "Sort by Name (Ascending)",
