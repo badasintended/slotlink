@@ -40,7 +40,10 @@ dependencies {
     modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
-    modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")
+    modRuntimeOnly("lol.bai:badpackets:fabric-${prop["badpackets"]}")
+    modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}") {
+        exclude(group = "lol.bai", module = "badpackets")
+    }
 }
 
 sourceSets {

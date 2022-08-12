@@ -73,6 +73,8 @@ abstract class ConnectorCableBlockEntity(
 
         if (!block.isIgnored(linkedState)) {
             if (apiCache == null) apiCache = BlockApiCache.create(ItemStorage.SIDED, world, linkedPos)
+            val blockEntity = apiCache!!.blockEntity
+            if (blockEntity is Node && blockEntity.network == this.network) return FilteredItemStorage.EMPTY
             val storage = apiCache!!.find(side) ?: return FilteredItemStorage.EMPTY
             return FilteredItemStorage(filter, blacklist, flag, storage, priority, linkedPos!!)
         } else {

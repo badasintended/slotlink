@@ -12,7 +12,7 @@ val showNetwork = modId("show_network")
 class WthitPlugin : IWailaPlugin {
 
     override fun register(registrar: IRegistrar) {
-        registrar.addSyncedConfig(showNetwork, true, false)
+        registrar.addMergedSyncedConfig(showNetwork, true, false)
         registrar.addComponent(NetworkProvider, TooltipPosition.BODY, ChildBlockEntity::class.java)
         registrar.addBlockData(NetworkProvider, ChildBlockEntity::class.java)
     }
