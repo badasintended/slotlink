@@ -38,12 +38,10 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
     modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+    modRuntimeOnly("dev.architectury:architectury-fabric:${prop["architectury"]}")
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
-    modRuntimeOnly("lol.bai:badpackets:fabric-${prop["badpackets"]}")
-    modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}") {
-        exclude(group = "lol.bai", module = "badpackets")
-    }
+    modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")
 }
 
 sourceSets {
