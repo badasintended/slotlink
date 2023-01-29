@@ -9,8 +9,10 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
 class SlotlinkDataGenerator : DataGeneratorEntrypoint {
 
     override fun onInitializeDataGenerator(generator: FabricDataGenerator) {
-        generator.addProvider(::LootTableProvider)
-        generator.addProvider(::RecipeProvider)
+        generator.createPack().apply {
+            addProvider(::LootTableProvider)
+            addProvider(::RecipeProvider)
+        }
     }
 
 }

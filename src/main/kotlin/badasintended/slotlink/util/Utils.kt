@@ -14,13 +14,13 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.registry.tag.TagKey
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.tag.TagKey
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
-import net.minecraft.util.registry.Registry
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import org.slf4j.LoggerFactory
@@ -93,7 +93,7 @@ fun s2c(player: PlayerEntity, packet: Packet<*>) {
     ServerPlayNetworking.getSender(player).sendPacket(packet)
 }
 
-val ignoredTag: TagKey<Block> = TagKey.of(Registry.BLOCK_KEY, modId("ignored"))
+val ignoredTag: TagKey<Block> = TagKey.of(RegistryKeys.BLOCK, modId("ignored"))
 
 fun ItemStack.isItemAndTagEqual(other: ItemStack): Boolean {
     return ItemStack.areItemsEqual(this, other) && ItemStack.areNbtEqual(this, other)
@@ -129,5 +129,3 @@ fun Int.toFormattedString(): String = when {
         String.format("%.1f%c", this / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
     }
 }
-
-

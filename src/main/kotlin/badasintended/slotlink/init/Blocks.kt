@@ -10,9 +10,12 @@ import badasintended.slotlink.block.ModBlock
 import badasintended.slotlink.block.RequestBlock
 import badasintended.slotlink.item.ModItem
 import net.minecraft.item.BlockItem
-import net.minecraft.util.registry.Registry
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 
 object Blocks : Initializer {
+
+    val BLOCKS = arrayListOf<ModBlock>()
 
     val MASTER = MasterBlock()
     val REQUEST = RequestBlock()
@@ -28,9 +31,10 @@ object Blocks : Initializer {
     }
 
     private fun r(vararg modBlocks: ModBlock) {
-        for (block in modBlocks) {
-            Registry.register(Registry.BLOCK, block.id, block)
-            Registry.register(Registry.ITEM, block.id, BlockItem(block, ModItem.SETTINGS))
+        modBlocks.forEach {
+            Registry.register(Registries.BLOCK, it.id, it)
+            Registry.register(Registries.ITEM, it.id, BlockItem(it, ModItem.SETTINGS))
+            BLOCKS.add(it)
         }
     }
 

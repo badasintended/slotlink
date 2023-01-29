@@ -13,8 +13,9 @@ import badasintended.slotlink.block.entity.RequestBlockEntity
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.registry.Registry
 import badasintended.slotlink.init.Blocks as B
 import net.minecraft.block.entity.BlockEntityType as T
 
@@ -44,7 +45,7 @@ object BlockEntityTypes : Initializer {
 
     private fun <BE : BlockEntity> r(block: ModBlock, function: (BlockPos, BlockState) -> BE): T<BE> {
         return Registry.register(
-            Registry.BLOCK_ENTITY_TYPE, block.id, T.Builder.create(function, block).build(null)
+            Registries.BLOCK_ENTITY_TYPE, block.id, T.Builder.create(function, block).build(null)
         )
     }
 

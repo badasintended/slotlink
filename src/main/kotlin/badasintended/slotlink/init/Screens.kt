@@ -13,9 +13,10 @@ import badasintended.slotlink.util.modId
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
-import net.minecraft.util.registry.Registry
 import net.minecraft.client.gui.screen.ingame.HandledScreens.register as r
 
 object Screens : Initializer {
@@ -44,7 +45,7 @@ object Screens : Initializer {
     }
 
     private fun <H : ScreenHandler> r(id: String, type: ScreenHandlerType<H>) {
-        Registry.register(Registry.SCREEN_HANDLER, modId(id), type)
+        Registry.register(Registries.SCREEN_HANDLER, modId(id), type)
     }
 
 }

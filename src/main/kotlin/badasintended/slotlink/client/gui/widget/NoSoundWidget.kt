@@ -14,6 +14,6 @@ abstract class NoSoundWidget(x: Int, y: Int, w: Int, h: Int, text: Text = Screen
 
     override fun playDownSound(soundManager: SoundManager) {}
 
-    override fun appendNarrations(builder: NarrationMessageBuilder) {}
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {}
 
 }

@@ -6,15 +6,16 @@ import badasintended.slotlink.client.util.client
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.screen.ScreenTexts
+import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
 class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w, h, ScreenTexts.EMPTY) {
 
     var texture = GuiTextures.FILTER
-    var onHovered: (MatrixStack, Int, Int) -> Unit = { _, _, _ -> }
     var onPressed = { }
     var bgU = 0
     var bgV = 0
@@ -22,7 +23,9 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
     var v = { 0 }
     var background = true
     var allowSpectator = false
+    var tooltip: () -> Text? = { null }
 
+    private var lastTooltip: Text? = null
     private var down = false
     private val padding = object {
         var l = 0
@@ -39,6 +42,12 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
     }
 
     override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
+        val tooltip = this.tooltip()
+        if (tooltip != lastTooltip) {
+            setTooltip(Tooltip.of(tooltip))
+            lastTooltip = tooltip
+        }
+
         if (!visible) return
         texture.bind()
 
@@ -70,10 +79,6 @@ class ButtonWidget(x: Int, y: Int, w: Int, h: Int = w) : ClickableWidget(x, y, w
         return super.mouseReleased(mouseX, mouseY, button)
     }
 
-    override fun appendNarrations(builder: NarrationMessageBuilder?) {}
-
-    override fun renderTooltip(matrices: MatrixStack, mouseX: Int, mouseY: Int) {
-        if (visible) onHovered.invoke(matrices, mouseX, mouseY)
-    }
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {}
 
 }

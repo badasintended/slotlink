@@ -1,13 +1,14 @@
 package badasintended.slotlink.dev
 
 import badasintended.slotlink.util.modId
-import net.minecraft.util.registry.Registry
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 
 @Suppress("unused")
 object SlotlinkDev {
 
     fun main() {
-        Registry.register(Registry.ITEM, modId("storage_filler"), StorageFillerItem)
+        Registry.register(Registries.ITEM, modId("storage_filler"), StorageFillerItem)
     }
 
 }

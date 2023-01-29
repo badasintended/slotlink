@@ -1,18 +1,19 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
 import com.matthewprenger.cursegradle.CurseRelation
-import com.modrinth.minotaur.TaskModrinthUpload
+import com.modrinth.minotaur.dependencies.DependencyType
+import com.modrinth.minotaur.dependencies.ModDependency
 import groovy.json.JsonGenerator
 import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.6.0")
-    kotlin("plugin.serialization").version("1.6.0")
+    kotlin("jvm").version("1.8.0")
+    kotlin("plugin.serialization").version("1.8.0")
 
-    id("fabric-loom").version("0.12.+")
+    id("fabric-loom").version("1.1.+")
     id("com.matthewprenger.cursegradle").version("1.4.0")
-    id("com.modrinth.minotaur").version("1.1.0")
+    id("com.modrinth.minotaur").version("2.4.5")
     id("maven-publish")
 }
 
@@ -42,6 +43,7 @@ dependencies {
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
     modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")
+    modRuntimeOnly("lol.bai:badpackets:fabric-${prop["badpackets"]}")
 }
 
 sourceSets {
@@ -180,20 +182,26 @@ curseforge {
     }
 }
 
-task<TaskModrinthUpload>("modrinth") {
-    group = "upload"
-    onlyIf { env.contains("MODRINTH_TOKEN") }
-    dependsOn("build")
+modrinth {
+    env["MODRINTH_TOKEN"]?.let { MODRINTH_TOKEN ->
+        token.set(MODRINTH_TOKEN)
 
-    token = env["MODRINTH_TOKEN"]
-    projectId = prop["mr.projectId"]
-    versionNumber = version.toString()
-    uploadFile = tasks["remapJar"]
-    releaseType = prop["mr.releaseType"]
-    addLoader("fabric")
+        projectId.set(prop["mr.projectId"])
+        versionNumber.set(version.toString())
+        versionType.set(prop["mr.releaseType"])
+        changelog.set("https://github.com/badasintended/slotlink/releases/tag/${project.version}")
 
-    prop["mr.gameVersion"].split(", ").forEach {
-        addGameVersion(it)
+        uploadFile.set(tasks["remapJar"])
+        loaders.addAll("fabric", "quilt")
+        gameVersions.addAll(prop["mr.gameVersion"].split(", "))
+
+        prop["mr.require"].split(", ").forEach {
+            dependencies.add(ModDependency(it, DependencyType.REQUIRED))
+        }
+
+        prop["mr.optional"].split(", ").forEach {
+            dependencies.add(ModDependency(it, DependencyType.OPTIONAL))
+        }
     }
 }
 

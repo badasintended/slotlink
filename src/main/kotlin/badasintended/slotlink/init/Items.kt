@@ -4,11 +4,24 @@ import badasintended.slotlink.item.LimitedRemoteItem
 import badasintended.slotlink.item.ModItem
 import badasintended.slotlink.item.MultiDimRemoteItem
 import badasintended.slotlink.item.UnlimitedRemoteItem
-import net.minecraft.util.registry.Registry
-import net.minecraft.util.registry.Registry.ITEM
+import badasintended.slotlink.util.modId
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
+import net.minecraft.item.ItemStack
+import net.minecraft.registry.Registries.ITEM
+import net.minecraft.registry.Registry
 
 @Suppress("MemberVisibilityCanBePrivate")
 object Items : Initializer {
+
+    val GROUP = FabricItemGroup.builder(modId("group"))
+        .icon { ItemStack(Blocks.MASTER) }
+        .entries { _, entries, _ ->
+            Blocks.BLOCKS.forEach { entries.add(ItemStack(it)) }
+            ITEMS.forEach { entries.add(ItemStack(it)) }
+        }
+        .build()
+
+    val ITEMS = arrayListOf<ModItem>()
 
     val MULTI_DIM_REMOTE = MultiDimRemoteItem()
     val UNLIMITED_REMOTE = UnlimitedRemoteItem()
@@ -19,7 +32,10 @@ object Items : Initializer {
     }
 
     private fun r(vararg items: ModItem) {
-        items.forEach { Registry.register(ITEM, it.id, it) }
+        items.forEach {
+            Registry.register(ITEM, it.id, it)
+            ITEMS.add(it)
+        }
     }
 
 }

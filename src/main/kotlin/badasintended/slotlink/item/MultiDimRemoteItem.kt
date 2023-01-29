@@ -15,6 +15,8 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ItemUsageContext
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.registry.RegistryKey
+import net.minecraft.registry.RegistryKeys
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
@@ -26,8 +28,6 @@ import net.minecraft.util.Hand.OFF_HAND
 import net.minecraft.util.Identifier
 import net.minecraft.util.TypedActionResult
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.registry.Registry
-import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.World
 
 open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SETTINGS.maxCount(1)) {
@@ -71,7 +71,7 @@ open class MultiDimRemoteItem(id: String = "multi_dim_remote") : ModItem(id, SET
             player.actionBar("${baseTlKey}.hasNoMaster")
         } else {
             val pos = network.getIntArray("pos").toPos()
-            val dim = RegistryKey.of(Registry.WORLD_KEY, Identifier(network.getString("dim")))
+            val dim = RegistryKey.of(RegistryKeys.WORLD, Identifier(network.getString("dim")))
             use(world, player, stack, hand, pos, dim)
         }
 

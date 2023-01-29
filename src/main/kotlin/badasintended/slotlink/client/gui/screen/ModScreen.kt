@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.client.compat.invsort.InventorySortButton
 import badasintended.slotlink.client.gui.widget.CharGrabber
 import badasintended.slotlink.client.gui.widget.KeyGrabber
+import badasintended.slotlink.client.gui.widget.TooltipRenderer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.ingame.HandledScreen
@@ -34,7 +34,7 @@ abstract class ModScreen<H : ScreenHandler>(h: H, inventory: PlayerInventory, ti
             this.renderTooltip(matrices, focusedSlot!!.stack, mouseX, mouseY)
         } else {
             hoveredElement = hoveredElement(mouseX.toDouble(), mouseY.toDouble()).orElse(null) as? ClickableWidget
-            if (hoveredElement !is InventorySortButton) hoveredElement?.renderTooltip(matrices, mouseX, mouseY)
+            (hoveredElement as? TooltipRenderer)?.renderTooltip(matrices, mouseX, mouseY)
         }
     }
 

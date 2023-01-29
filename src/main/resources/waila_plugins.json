@@ -1,0 +1,5 @@
+{
+  "slotlink:waila": {
+    "initializer": "badasintended.slotlink.compat.wthit.WthitPlugin"
+  }
+}

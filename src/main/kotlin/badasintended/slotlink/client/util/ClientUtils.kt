@@ -35,7 +35,7 @@ object GuiTextures {
 }
 
 fun Identifier.bind() {
-    RenderSystem.setShader(GameRenderer::getPositionTexShader)
+    RenderSystem.setShader(GameRenderer::getPositionTexColorProgram)
     RenderSystem.setShaderTexture(0, this)
 }
 

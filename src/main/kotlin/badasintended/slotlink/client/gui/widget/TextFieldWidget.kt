@@ -11,7 +11,8 @@ import net.minecraft.text.Text
 @Environment(EnvType.CLIENT)
 class TextFieldWidget(bgX: Int, bgY: Int, bgW: Int, bgH: Int, text: Text) :
     TextFieldWidget(client.textRenderer, bgX + 2, bgY + 2, bgW - 12, bgH - 3, text),
-    CharGrabber {
+    CharGrabber,
+    TooltipRenderer {
 
     var grab = false
         set(value) {

@@ -29,12 +29,10 @@ class TransferCableScreen(h: TransferCableScreenHandler, inventory: PlayerInvent
             bgV = 28
             u = { 214 }
             v = { redstone.ordinal * 14 }
+            tooltip = { tl("redstone.$redstone") }
             onPressed = {
                 redstone = redstone.next()
                 sync()
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("redstone.$redstone"), x, y)
             }
         }
 
@@ -43,12 +41,10 @@ class TransferCableScreen(h: TransferCableScreenHandler, inventory: PlayerInvent
             bgV = 28
             u = { 200 }
             v = { side.ordinal * 14 }
+            tooltip = { tl("side.$side") }
             onPressed = {
                 side = side.next()
                 sync()
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("side.$side"), x, y)
             }
         }
     }

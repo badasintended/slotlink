@@ -1,4 +1,4 @@
-@file:Suppress("DEPRECATION", "UnstableApiUsage")
+@file:Suppress("UnstableApiUsage")
 
 package badasintended.slotlink.storage
 

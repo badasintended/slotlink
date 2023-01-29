@@ -47,6 +47,7 @@ import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeGridAligner
 import net.minecraft.recipe.RecipeType
+import net.minecraft.registry.Registries
 import net.minecraft.screen.CraftingScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerListener
@@ -60,7 +61,6 @@ import net.minecraft.screen.slot.SlotActionType.QUICK_MOVE
 import net.minecraft.screen.slot.SlotActionType.SWAP
 import net.minecraft.screen.slot.SlotActionType.THROW
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.registry.Registry
 
 @Suppress("UnstableApiUsage")
 open class RequestScreenHandler(
@@ -188,12 +188,14 @@ open class RequestScreenHandler(
                             slot.insert(variant, extracted, transaction)
                             transaction.commit()
                         }
+
                         QUICK_MOVE -> Transaction.openOuter().use { transaction ->
                             val stock = storage.simulateExtract(variant, variant.item.maxCount.toLong(), transaction)
                             val inserted = player.storage.offer(variant, stock, transaction)
                             storage.extract(variant, inserted, transaction)
                             transaction.commit()
                         }
+
                         else -> if (!variant.isBlank) Transaction.openOuter().use { transaction ->
                             val max = min(view.count.toLong(), variant.item.maxCount.toLong())
                             val request = if (data == 1) (max + 1) / 2 else max
@@ -435,21 +437,23 @@ open class RequestScreenHandler(
         }
     }
 
-    override fun transferSlot(player: PlayerEntity, index: Int): ItemStack {
+    override fun quickMove(player: PlayerEntity, index: Int): ItemStack {
         val inventory = slots[index].inventory
         var stack = ItemStack.EMPTY
         when (inventory) {
             is CraftingResultInventory -> {
-                stack = super.transferSlot(player, index)
+                stack = super.quickMove(player, index)
             }
+
             is CraftingInventory -> {
-                super.transferSlot(player, index)
+                super.quickMove(player, index)
                 stack = moveStackToNetwork(slots[index].stack)
             }
+
             is PlayerInventory -> {
                 stack = moveStackToNetwork(slots[index].stack)
                 slots[index].stack = stack
-                stack = super.transferSlot(player, index)
+                stack = super.quickMove(player, index)
             }
         }
         return stack
@@ -651,10 +655,11 @@ open class RequestScreenHandler(
 
         @Suppress("DEPRECATION")
         fun match(view: StorageView<ItemVariant>): Boolean = term.isBlank() || when (first) {
-            '@' -> Registry.ITEM.getId(view.resource.item).toString().contains(term, true)
-            '#' -> Registry.ITEM
+            '@' -> Registries.ITEM.getId(view.resource.item).toString().contains(term, true)
+            '#' -> Registries.ITEM
                 .streamTags()
                 .anyMatch { it.id.toString().contains(term, true) && view.resource.item.registryEntry.isIn(it) }
+
             else -> view.resource.toStack().name.string.contains(term, true)
         }
 
@@ -669,8 +674,8 @@ open class RequestScreenHandler(
         NAME("name", { it -> it.sortBy { it.singleStack.name.string } }),
         NAME_DESC("name_desc", { it -> it.sortByDescending { it.singleStack.item.name.string } }),
 
-        ID("id", { it -> it.sortBy { Registry.ITEM.getId(it.item).toString() } }),
-        ID_DESC("id_desc", { it -> it.sortByDescending { Registry.ITEM.getId(it.item).toString() } }),
+        ID("id", { it -> it.sortBy { Registries.ITEM.getId(it.item).toString() } }),
+        ID_DESC("id_desc", { it -> it.sortByDescending { Registries.ITEM.getId(it.item).toString() } }),
 
         COUNT("count", { it -> it.sortBy { it.count } }),
         COUNT_DESC("count_desc", { it -> it.sortByDescending { it.count } });

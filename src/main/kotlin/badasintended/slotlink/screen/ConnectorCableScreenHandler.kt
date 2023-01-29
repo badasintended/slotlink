@@ -13,7 +13,6 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerType
 
-@Suppress("LeakingThis")
 open class ConnectorCableScreenHandler(
     syncId: Int,
     playerInv: PlayerInventory,

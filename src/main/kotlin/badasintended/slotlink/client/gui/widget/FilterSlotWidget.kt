@@ -58,7 +58,7 @@ class FilterSlotWidget(
 
         if (!handler.cursorStack.isEmpty || ReiAccess.isDraggingStack()) matrices.wrap {
             matrices.translate(0.0, 0.0, +256.0)
-            val tlKey = "container.slotlink.filter.slot.tip." +
+            val tlKey = "container.slotlink.filter.slot.tooltip." +
                 if (Screen.hasControlDown()) "pressed" else
                     if (MinecraftClient.IS_SYSTEM_MAC) "cmd"
                     else "ctrl"

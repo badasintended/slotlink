@@ -5,6 +5,8 @@ import badasintended.slotlink.client.util.client
 import badasintended.slotlink.client.util.wrap
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.item.TooltipContext
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
@@ -16,7 +18,8 @@ abstract class SlotWidget<SH : ScreenHandler>(
     x: Int, y: Int, s: Int,
     protected val handler: SH,
     private val stackGetter: () -> ItemStack
-) : NoSoundWidget(x, y, s, s, ScreenTexts.EMPTY) {
+) : NoSoundWidget(x, y, s, s, ScreenTexts.EMPTY),
+    TooltipRenderer {
 
     val stack get() = stackGetter.invoke()
 
@@ -40,7 +43,10 @@ abstract class SlotWidget<SH : ScreenHandler>(
             val y = stackY
             fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
             if (!stack.isEmpty && handler.cursorStack.isEmpty && !ReiAccess.isDraggingStack()) client.apply {
-                val tooltips = stack.getTooltip(player) { options.advancedItemTooltips }
+                val tooltips = stack.getTooltip(
+                    player,
+                    TooltipContext.Default(options.advancedItemTooltips, player?.isCreative ?: false)
+                )
                 appendTooltip(tooltips)
                 currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
             }
@@ -61,5 +67,7 @@ abstract class SlotWidget<SH : ScreenHandler>(
         }
         return false
     }
+
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {}
 
 }

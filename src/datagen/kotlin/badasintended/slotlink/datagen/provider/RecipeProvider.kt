@@ -4,24 +4,25 @@ import badasintended.slotlink.init.Blocks
 import badasintended.slotlink.init.Items
 import badasintended.slotlink.util.modId
 import java.util.function.Consumer
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider
 import net.minecraft.data.server.recipe.CraftingRecipeJsonBuilder
 import net.minecraft.data.server.recipe.RecipeJsonProvider
 import net.minecraft.item.Item
 import net.minecraft.item.ItemConvertible
-import net.minecraft.tag.TagKey
+import net.minecraft.recipe.book.RecipeCategory
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.registry.tag.TagKey
 import net.minecraft.util.Identifier
-import net.minecraft.util.registry.Registry
 import net.minecraft.block.Blocks as McBlocks
 import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder.create as shaped
 import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder.create as shapeless
 import net.minecraft.item.Items as McItems
 
-class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(dataGenerator) {
+class RecipeProvider(dataGenerator: FabricDataOutput) : FabricRecipeProvider(dataGenerator) {
 
-    override fun generateRecipes(exporter: Consumer<RecipeJsonProvider>) {
-        shaped(Blocks.CABLE, 8)
+    override fun generate(exporter: Consumer<RecipeJsonProvider>) {
+        shaped(RecipeCategory.MISC, Blocks.CABLE, 8)
             .pattern("SSS")
             .pattern("I I")
             .pattern("SSS")
@@ -30,7 +31,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(McItems.IRON_INGOT, tag("c:iron_ingots"))
             .offerTo(exporter)
 
-        shaped(Blocks.IMPORT_CABLE, 4)
+        shaped(RecipeCategory.MISC, Blocks.IMPORT_CABLE, 4)
             .pattern(" C ")
             .pattern("CHC")
             .pattern(" C ")
@@ -39,19 +40,19 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
 
-        shapeless(Blocks.IMPORT_CABLE)
+        shapeless(RecipeCategory.MISC, Blocks.IMPORT_CABLE)
             .input(Blocks.EXPORT_CABLE)
             .criterion(Blocks.CABLE)
             .criterion(Blocks.EXPORT_CABLE)
             .offerTo(exporter, modId("export_to_import_cable"))
 
-        shapeless(Blocks.EXPORT_CABLE)
+        shapeless(RecipeCategory.MISC, Blocks.EXPORT_CABLE)
             .input(Blocks.IMPORT_CABLE)
             .criterion(Blocks.CABLE)
             .criterion(Blocks.IMPORT_CABLE)
             .offerTo(exporter, modId("import_to_export_cable"))
 
-        shaped(Blocks.LINK_CABLE, 4)
+        shaped(RecipeCategory.MISC, Blocks.LINK_CABLE, 4)
             .pattern(" C ")
             .pattern("CHC")
             .pattern(" C ")
@@ -60,7 +61,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
 
-        shaped(Blocks.MASTER)
+        shaped(RecipeCategory.MISC, Blocks.MASTER)
             .pattern("QCQ")
             .pattern("CDC")
             .pattern("QCQ")
@@ -70,7 +71,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.CABLE)
             .offerTo(exporter)
 
-        shaped(Blocks.REQUEST)
+        shaped(RecipeCategory.MISC, Blocks.REQUEST)
             .pattern("TCT")
             .pattern("CGC")
             .pattern("TCT")
@@ -80,7 +81,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.LINK_CABLE)
             .offerTo(exporter)
 
-        shaped(Blocks.INTERFACE)
+        shaped(RecipeCategory.MISC, Blocks.INTERFACE)
             .pattern("SIS")
             .pattern("IRE")
             .pattern("SES")
@@ -92,7 +93,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.EXPORT_CABLE)
             .offerTo(exporter)
 
-        shaped(Items.LIMITED_REMOTE)
+        shaped(RecipeCategory.MISC, Items.LIMITED_REMOTE)
             .pattern("SDS")
             .pattern("GRG")
             .pattern("SDS")
@@ -103,7 +104,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Blocks.REQUEST)
             .offerTo(exporter)
 
-        shaped(Items.UNLIMITED_REMOTE)
+        shaped(RecipeCategory.MISC, Items.UNLIMITED_REMOTE)
             .pattern("GEC")
             .pattern("PRP")
             .pattern("CEG")
@@ -115,7 +116,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
             .criterion(Items.LIMITED_REMOTE)
             .offerTo(exporter)
 
-        shapeless(Items.MULTI_DIM_REMOTE)
+        shapeless(RecipeCategory.MISC, Items.MULTI_DIM_REMOTE)
             .input(McItems.DRAGON_BREATH)
             .input(McItems.TOTEM_OF_UNDYING)
             .input(McItems.NETHER_STAR)
@@ -125,7 +126,7 @@ class RecipeProvider(dataGenerator: FabricDataGenerator) : FabricRecipeProvider(
     }
 
     private fun tag(id: String): TagKey<Item> {
-        return TagKey.of(Registry.ITEM_KEY, Identifier(id))
+        return TagKey.of(RegistryKeys.ITEM, Identifier(id))
     }
 
     private fun <T : CraftingRecipeJsonBuilder> T.criterion(item: ItemConvertible): T {

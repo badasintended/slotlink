@@ -118,13 +118,11 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 228 }
             v = { sort.ordinal * 14 + 52 }
             padding(3)
+            tooltip = { tl("sort.${sort}") }
             onPressed = {
                 sort = sort.next()
                 scrollBar.knob = 0f
                 sort()
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("sort.${sort}"), x, y)
             }
         }
 
@@ -137,12 +135,10 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 200 }
             v = { if (craftingGrid) 52 else 66 }
             padding(3)
+            tooltip = { tl("craft.${craftingGrid}") }
             onPressed = {
                 craftingGrid = !craftingGrid
                 init(client!!, client!!.window.scaledWidth, client!!.window.scaledHeight)
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("craft.${craftingGrid}"), x, y)
             }
         }
 
@@ -151,18 +147,17 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             add(CraftingResultSlotWidget(handler, x + 108, y + viewedHeight * 18 + 27))
 
             // Clear crafting grid button
+            val clearText = tl("craft.clear")
             add(ButtonWidget(x + 13, y + 18 + viewedHeight * 18, 8)) {
                 texture = GuiTextures.REQUEST
                 background = false
                 u = { 210 }
                 v = { 16 }
+                tooltip = { clearText }
                 onPressed = {
                     c2s(CLEAR_CRAFTING_GRID) {
                         int(syncId)
                     }
-                }
-                onHovered = { matrices, x, y ->
-                    renderTooltip(matrices, tl("craft.clear"), x, y)
                 }
             }
 
@@ -183,12 +178,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                     int(syncId)
                 }
             }
-            onHovered = { matrices, x, y ->
-                if (handler.cursorStack.isEmpty) {
-                    renderTooltip(matrices, tl("move.all"), x, y)
-                } else {
-                    renderTooltip(matrices, tl("move.clazz"), x, y)
-                }
+            tooltip = {
+                if (handler.cursorStack.isEmpty) tl("move.all") else tl("move.clazz")
             }
         }
 
@@ -203,12 +194,8 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                     int(syncId)
                 }
             }
-            onHovered = { matrices, x, y ->
-                if (handler.cursorStack.isEmpty) {
-                    renderTooltip(matrices, tl("restock.all"), x, y)
-                } else {
-                    renderTooltip(matrices, tl("restock.cursor"), x, y)
-                }
+            tooltip = {
+                if (handler.cursorStack.isEmpty) tl("restock.all") else tl("restock.cursor")
             }
         }
 
@@ -221,11 +208,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 242 }
             v = { if (grabSearchBar) 52 else 66 }
             padding(3)
+            tooltip = { tl("autoFocus.${grabSearchBar}") }
             onPressed = {
                 grabSearchBar = !grabSearchBar
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("autoFocus.${grabSearchBar}"), x, y)
             }
         }
 
@@ -238,11 +223,9 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             u = { 214 }
             v = { if (syncRei) 52 else 66 }
             padding(3)
+            tooltip = { tl("rei.${syncRei}") }
             onPressed = {
                 syncRei = !syncRei
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("rei.${syncRei}"), x, y)
             }
         }
 

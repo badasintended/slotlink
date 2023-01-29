@@ -1,12 +1,12 @@
 package badasintended.slotlink.datagen.provider
 
 import badasintended.slotlink.init.Blocks
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider
 
-class LootTableProvider(dataGenerator: FabricDataGenerator) : FabricBlockLootTableProvider(dataGenerator) {
+class LootTableProvider(dataGenerator: FabricDataOutput) : FabricBlockLootTableProvider(dataGenerator) {
 
-    override fun generateBlockLootTables() {
+    override fun generate() {
         addDrop(Blocks.CABLE)
         addDrop(Blocks.EXPORT_CABLE)
         addDrop(Blocks.IMPORT_CABLE)

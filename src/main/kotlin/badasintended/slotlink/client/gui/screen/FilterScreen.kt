@@ -46,12 +46,10 @@ open class FilterScreen<H : FilterScreenHandler>(h: H, inventory: PlayerInventor
             bgV = 28
             u = { 228 }
             v = { if (blacklist) 14 else 0 }
+            tooltip = { tl("blacklist.$blacklist") }
             onPressed = {
                 blacklist = !blacklist
                 sync()
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("blacklist.$blacklist"), x, y)
             }
         }
     }
