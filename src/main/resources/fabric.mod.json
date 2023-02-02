@@ -18,9 +18,11 @@
   "license"      : "LGPL-3.0",
   "icon"         : "assets/slotlink/icon.png",
   "entrypoints"  : {
-    "main"      : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
-    "client"    : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
-    "rei_client": [{"adapter": "kotlin", "value": "badasintended.slotlink.client.compat.rei.ReiPlugin"}]
+    "main"          : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::main"}],
+    "client"        : [{"adapter": "kotlin", "value": "badasintended.slotlink.Slotlink::client"}],
+    "rei_client"    : [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.recipe.ReiRecipeViewer"}],
+    "jei_mod_plugin": [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.recipe.JeiRecipeViewer"}],
+    "emi"           : [{"adapter": "kotlin", "value": "badasintended.slotlink.compat.recipe.EmiRecipeViewer"}]
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {
@@ -28,11 +30,5 @@
     "minecraft"             : ">=1.19",
     "fabric"                : ">=0.57",
     "fabric-language-kotlin": ">=1.7"
-  },
-  "custom"       : {
-    "waila:plugins": {
-      "id"         : "slotlink:waila",
-      "initializer": "badasintended.slotlink.compat.wthit.WthitPlugin"
-    }
   }
 }

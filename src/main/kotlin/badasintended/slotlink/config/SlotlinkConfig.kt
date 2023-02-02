@@ -29,7 +29,7 @@ class SlotlinkConfig(
     var autoFocusSearchBar: Boolean = false,
     var showCraftingGrid: Boolean = true,
     var sort: SortMode = SortMode.COUNT_DESC,
-    var syncReiSearch: Boolean = false,
+    var syncRecipeViewerSearch: Boolean = false,
     var pauseTransferWhenOnScreen: Boolean = false,
     var tryMergeStack: Boolean = true
 ) {

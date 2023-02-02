@@ -25,6 +25,8 @@ version = env["MOD_VERSION"] ?: "local"
 repositories {
     maven("https://maven.bai.lol")
     maven("https://maven.shedaniel.me/")
+    maven("https://maven.terraformersmc.com/releases")
+    maven("https://maven.blamejared.com/")
 }
 
 dependencies {
@@ -36,14 +38,26 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop["fabricApi"]}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop["fabricKotlin"]}")
 
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
-    modRuntimeOnly("dev.architectury:architectury-fabric:${prop["architectury"]}")
-
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
     modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")
     modRuntimeOnly("lol.bai:badpackets:fabric-${prop["badpackets"]}")
+
+    modRuntimeOnly("dev.architectury:architectury-fabric:${prop["architectury"]}")
+
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${prop["rei"]}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${prop["rei"]}")
+    modCompileOnly("dev.emi:emi:${prop["emi"]}")
+    prop["jei"].split("-").also { (mc, jei) ->
+        modCompileOnly("mezz.jei:jei-${mc}-fabric:${jei}") { isTransitive = false }
+    }
+
+    when (prop["recipeViewer"]) {
+        "emi" -> modRuntimeOnly("dev.emi:emi:${prop["emi"]}")
+        "rei" -> modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${prop["rei"]}")
+        "jei" -> prop["jei"].split("-").also { (mc, jei) ->
+            modRuntimeOnly("mezz.jei:jei-${mc}-fabric:${jei}")
+        }
+    }
 }
 
 sourceSets {

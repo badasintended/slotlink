@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.widget
 
-import badasintended.slotlink.client.compat.rei.ReiAccess
 import badasintended.slotlink.client.util.client
 import badasintended.slotlink.client.util.wrap
+import badasintended.slotlink.compat.recipe.RecipeViewer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -42,14 +42,15 @@ abstract class SlotWidget<SH : ScreenHandler>(
             val x = stackX
             val y = stackY
             fill(matrices, x, y, x + 16, y + 16, -2130706433 /*0x80ffffff fuck*/)
-            if (!stack.isEmpty && handler.cursorStack.isEmpty && !ReiAccess.isDraggingStack()) client.apply {
-                val tooltips = stack.getTooltip(
-                    player,
-                    TooltipContext.Default(options.advancedItemTooltips, player?.isCreative ?: false)
-                )
-                appendTooltip(tooltips)
-                currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
-            }
+            if (!stack.isEmpty && handler.cursorStack.isEmpty && RecipeViewer.instance?.isDraggingStack != true)
+                client.apply {
+                    val tooltips = stack.getTooltip(
+                        player,
+                        TooltipContext.Default(options.advancedItemTooltips, player?.isCreative ?: false)
+                    )
+                    appendTooltip(tooltips)
+                    currentScreen?.renderTooltip(matrices, tooltips, mouseX, mouseY)
+                }
         }
     }
 
