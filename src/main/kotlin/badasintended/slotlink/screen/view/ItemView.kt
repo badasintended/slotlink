@@ -45,7 +45,7 @@ class ItemView(
         return false
     }
 
-    @Suppress("DEPRECATION", "UnstableApiUsage")
+    @Suppress("UnstableApiUsage")
     fun isItemAndTagEqual(view: StorageView<ItemVariant>): Boolean {
         if (isEmpty && (view.isResourceBlank || view.amount == 0L)) return true
         if (!view.resource.isOf(item)) return false
@@ -81,7 +81,7 @@ class ItemView(
         return ItemStack(item, count).also { it.nbt = nbt }
     }
 
-    @Suppress("DEPRECATION", "UnstableApiUsage")
+    @Suppress("UnstableApiUsage")
     fun toVariant(): ItemVariant {
         return ItemVariant.of(item, nbt)
     }
@@ -102,5 +102,5 @@ class ItemView(
 
 fun ItemStack.toView() = ItemView(item, nbt?.copy(), count)
 
-@Suppress("DEPRECATION", "UnstableApiUsage")
+@Suppress("UnstableApiUsage")
 fun StorageView<ItemVariant>.toView() = ItemView(resource.item, resource.nbt, amount.toInt())

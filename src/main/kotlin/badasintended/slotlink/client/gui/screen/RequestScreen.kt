@@ -199,7 +199,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             }
         }
 
-        // Search bar auto focus button
+        // Search bar autofocus button
         add(ButtonWidget(x - 29, y + 44, 20)) {
             allowSpectator = true
             texture = GuiTextures.REQUEST

@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries.ITEM
 import net.minecraft.registry.Registry
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 object Items : Initializer {
 
     val GROUP = FabricItemGroup.builder(modId("group"))
@@ -19,7 +19,7 @@ object Items : Initializer {
             Blocks.BLOCKS.forEach { entries.add(ItemStack(it)) }
             ITEMS.forEach { entries.add(ItemStack(it)) }
         }
-        .build()
+        .build()!!
 
     val ITEMS = arrayListOf<ModItem>()
 

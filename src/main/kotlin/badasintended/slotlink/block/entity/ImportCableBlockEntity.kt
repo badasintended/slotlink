@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 
-@Suppress("UnstableApiUsage", "DEPRECATION")
+@Suppress("UnstableApiUsage")
 class ImportCableBlockEntity(pos: BlockPos, state: BlockState) :
     TransferCableBlockEntity(Blocks.IMPORT_CABLE, BlockEntityTypes.IMPORT_CABLE, NodeType.IMPORT, pos, state) {
 

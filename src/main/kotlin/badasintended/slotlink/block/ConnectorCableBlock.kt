@@ -52,7 +52,7 @@ abstract class ConnectorCableBlock(id: String, builder: BlockEntityBuilder) : Ca
         defaultState = defaultState.with(CONNECTED, null)
     }
 
-    @Suppress("DEPRECATION", "UnstableApiUsage")
+    @Suppress("UnstableApiUsage")
     private fun checkLink(
         state: BlockState,
         direction: Direction,

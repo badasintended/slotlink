@@ -70,7 +70,7 @@ class Network internal constructor(
         markDirty()
     }
 
-    fun markDirty() {
+    private fun markDirty() {
         if (world.isClient) return
         state?.isDirty = true
     }
