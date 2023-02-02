@@ -21,7 +21,7 @@ open class FilterScreenHandler(
     playerInv: PlayerInventory,
     var blacklist: Boolean,
     val filter: MutableList<ObjBoolPair<ItemStack>>,
-    protected val context: ScreenHandlerContext
+    private val context: ScreenHandlerContext
 ) : ScreenHandler(null, syncId) {
 
     constructor(syncId: Int, playerInv: PlayerInventory, buf: PacketByteBuf) : this(
@@ -37,10 +37,9 @@ open class FilterScreenHandler(
         }
     }
 
-    fun filterSlotClick(i: Int, filterStack: ItemStack, ctrlPressed: Boolean) {
+    fun filterSlotClick(i: Int, filterStack: ItemStack, matchNbt: Boolean) {
         val stack = filterStack.copy().apply { count = 1 }
-        if (!ctrlPressed) stack.nbt = null
-        filter[i] = stack to (ctrlPressed && !filterStack.isEmpty)
+        filter[i] = stack to (matchNbt && !filterStack.isEmpty)
     }
 
     open fun onClose(blockEntity: FilteredBlockEntity) {

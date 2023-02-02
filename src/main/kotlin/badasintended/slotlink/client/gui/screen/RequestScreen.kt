@@ -1,7 +1,5 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.client.compat.invsort.InventorySortButton
-import badasintended.slotlink.client.compat.rei.ReiAccess
 import badasintended.slotlink.client.gui.widget.ButtonWidget
 import badasintended.slotlink.client.gui.widget.CraftingResultSlotWidget
 import badasintended.slotlink.client.gui.widget.MultiSlotWidget
@@ -10,6 +8,8 @@ import badasintended.slotlink.client.gui.widget.TextFieldWidget
 import badasintended.slotlink.client.util.GuiTextures
 import badasintended.slotlink.client.util.bind
 import badasintended.slotlink.client.util.c2s
+import badasintended.slotlink.compat.invsort.InventorySortButton
+import badasintended.slotlink.compat.recipe.RecipeViewer
 import badasintended.slotlink.config.config
 import badasintended.slotlink.init.Packets.CLEAR_CRAFTING_GRID
 import badasintended.slotlink.init.Packets.MOVE
@@ -33,6 +33,10 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import org.lwjgl.glfw.GLFW
+import badasintended.slotlink.util.backgroundHeight as utilBackgroundHeight
+import badasintended.slotlink.util.backgroundWidth as utilBackgroundWidth
+import badasintended.slotlink.util.x as utilX
+import badasintended.slotlink.util.y as utilY
 
 @Environment(EnvType.CLIENT)
 class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, title: Text) :
@@ -51,10 +55,6 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
 
     private val titleWidth by lazy { textRenderer.getWidth(title) }
     private val craftingText = TranslatableText("container.crafting")
-
-    private var sort by config::sort
-    private var syncRei by config::syncReiSearch
-    private var grabSearchBar by config::autoFocusSearchBar
 
     private lateinit var scrollBar: ScrollBarWidget
     private lateinit var searchBar: TextFieldWidget
@@ -117,15 +117,15 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             bgU = 216
             bgV = 32
             u = { 228 }
-            v = { sort.ordinal * 14 + 52 }
+            v = { config.sort.ordinal * 14 + 52 }
             padding(3)
             onPressed = {
-                sort = sort.next()
+                config.sort = config.sort.next()
                 scrollBar.knob = 0f
                 sort()
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("sort.${sort}"), x, y)
+                renderTooltip(matrices, tl("sort.${config.sort}"), x, y)
             }
         }
 
@@ -220,30 +220,32 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
             bgU = 216
             bgV = 32
             u = { 242 }
-            v = { if (grabSearchBar) 52 else 66 }
+            v = { if (config.autoFocusSearchBar) 52 else 66 }
             padding(3)
             onPressed = {
-                grabSearchBar = !grabSearchBar
+                config.autoFocusSearchBar = !config.autoFocusSearchBar
             }
             onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("autoFocus.${grabSearchBar}"), x, y)
+                renderTooltip(matrices, tl("autoFocus.${config.autoFocusSearchBar}"), x, y)
             }
         }
 
         // Sync to rei button
-        if (ReiAccess.exists) add(ButtonWidget(x - 29, y + 66, 20)) {
-            allowSpectator = true
-            texture = GuiTextures.REQUEST
-            bgU = 216
-            bgV = 32
-            u = { 214 }
-            v = { if (syncRei) 52 else 66 }
-            padding(3)
-            onPressed = {
-                syncRei = !syncRei
-            }
-            onHovered = { matrices, x, y ->
-                renderTooltip(matrices, tl("rei.${syncRei}"), x, y)
+        RecipeViewer.instance?.also { recipeViewer ->
+            add(ButtonWidget(x - 29, y + 66, 20)) {
+                allowSpectator = true
+                texture = GuiTextures.REQUEST
+                bgU = 216
+                bgV = 32
+                u = { 214 }
+                v = { recipeViewer.textureV + (if (config.syncRecipeViewerSearch) 0 else 14) }
+                padding(3)
+                onPressed = {
+                    config.syncRecipeViewerSearch = !config.syncRecipeViewerSearch
+                }
+                onHovered = { matrices, x, y ->
+                    renderTooltip(matrices, tl("searchSync.${config.syncRecipeViewerSearch}", recipeViewer.modName), x, y)
+                }
             }
         }
 
@@ -262,7 +264,7 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
                     scrollBar.knob = 0f
                     filter = it
                     sort()
-                    if (syncRei && ReiAccess.exists) ReiAccess.setSearch(filter)
+                    if (config.syncRecipeViewerSearch) RecipeViewer.instance?.search(filter)
                 }
             }
             if (config.autoFocusSearchBar) {
@@ -273,10 +275,14 @@ class RequestScreen<H : RequestScreenHandler>(handler: H, inv: PlayerInventory, 
         sort()
     }
 
+    inline fun <T> bounds(action: (Int, Int, Int, Int) -> T): T {
+        return action(utilX - 22, utilY, utilBackgroundWidth + 40, utilBackgroundHeight)
+    }
+
     private fun sort() {
         c2s(SORT) {
             int(syncId)
-            enum(sort)
+            enum(config.sort)
             string(filter)
         }
     }

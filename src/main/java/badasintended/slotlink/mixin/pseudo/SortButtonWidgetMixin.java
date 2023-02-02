@@ -1,6 +1,6 @@
 package badasintended.slotlink.mixin.pseudo;
 
-import badasintended.slotlink.client.compat.invsort.InventorySortButton;
+import badasintended.slotlink.compat.invsort.InventorySortButton;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

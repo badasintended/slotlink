@@ -1,4 +1,4 @@
-package badasintended.slotlink.client.compat.invsort
+package badasintended.slotlink.compat.invsort
 
 interface InventorySortButton {
 

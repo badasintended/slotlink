@@ -1,23 +1,10 @@
-package badasintended.slotlink.client.compat.rei
+package badasintended.slotlink.compat.recipe
 
 import badasintended.slotlink.client.gui.screen.FilterScreen
 import badasintended.slotlink.client.gui.screen.RequestScreen
 import badasintended.slotlink.client.gui.widget.FilterSlotWidget
-import badasintended.slotlink.client.gui.widget.MultiSlotWidget
-import badasintended.slotlink.client.util.c2s
-import badasintended.slotlink.init.Blocks
-import badasintended.slotlink.init.Items
-import badasintended.slotlink.init.Packets
-import badasintended.slotlink.init.Packets.APPLY_RECIPE
+import badasintended.slotlink.client.gui.widget.bounds
 import badasintended.slotlink.screen.RequestScreenHandler
-import badasintended.slotlink.util.backgroundHeight
-import badasintended.slotlink.util.backgroundWidth
-import badasintended.slotlink.util.bool
-import badasintended.slotlink.util.id
-import badasintended.slotlink.util.int
-import badasintended.slotlink.util.stack
-import badasintended.slotlink.util.x
-import badasintended.slotlink.util.y
 import dev.architectury.event.CompoundEventResult
 import java.util.stream.Stream
 import me.shedaniel.math.Rectangle
@@ -47,17 +34,25 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeType
 
 @Suppress("unused")
-class ReiPlugin : REIClientPlugin {
+class ReiRecipeViewer : RecipeViewer, REIClientPlugin {
+
+    override val modName = "REI"
+    override val textureV = 52
+
+    override fun search(query: String) {
+        REIRuntime.getInstance().searchTextField?.text = query
+    }
+
+    override val isDraggingStack: Boolean
+        get() {
+            val overlay = REIRuntime.getInstance().overlay.orElse(null) ?: return false
+            return overlay.draggingContext.isDraggingStack
+        }
 
     override fun registerCategories(registry: CategoryRegistry) {
-        registry.addWorkstations(BuiltinPlugin.CRAFTING, EntryStacks.of(Blocks.REQUEST))
-        registry.addWorkstations(
-            BuiltinPlugin.CRAFTING, EntryIngredient.of(
-                EntryStacks.of(Items.LIMITED_REMOTE),
-                EntryStacks.of(Items.UNLIMITED_REMOTE),
-                EntryStacks.of(Items.MULTI_DIM_REMOTE)
-            )
-        )
+        workstations { list ->
+            registry.addWorkstations(BuiltinPlugin.CRAFTING, EntryIngredient.of(list.map(EntryStacks::of)))
+        }
     }
 
     override fun registerTransferHandlers(registry: TransferHandlerRegistry) {
@@ -70,11 +65,7 @@ class ReiPlugin : REIClientPlugin {
 
                 if (!ctx.isActuallyCrafting) return@r createSuccessful()
 
-                ctx.minecraft.setScreen(ctx.containerScreen)
-                c2s(APPLY_RECIPE) {
-                    int(handler.syncId)
-                    id(recipe.id)
-                }
+                applyRecipe(ctx.containerScreen, handler, recipe.id)
                 return@r createSuccessful()
             }
             return@r createNotApplicable()
@@ -84,9 +75,8 @@ class ReiPlugin : REIClientPlugin {
     override fun registerScreens(registry: ScreenRegistry) {
         registry.registerFocusedStack r@{ screen, _ ->
             if (screen is RequestScreen<*>) {
-                val element = screen.hoveredElement
-                if (element is MultiSlotWidget) {
-                    return@r CompoundEventResult.interruptTrue(EntryStacks.of(element.stack))
+                hoveredStack(screen) {
+                    return@r CompoundEventResult.interruptTrue(EntryStacks.of(it.stack))
                 }
             }
             CompoundEventResult.pass()
@@ -97,9 +87,9 @@ class ReiPlugin : REIClientPlugin {
             val mouse = it.mousePosition
             if (screen.craftingGrid
                 && screen.arrowX < mouse.x
-                && mouse.x <= (screen.arrowX + 22)
+                && mouse.x <= (screen.arrowX + ARROW_WIDTH)
                 && screen.arrowY < mouse.y
-                && mouse.y <= (screen.arrowY + 15)
+                && mouse.y <= (screen.arrowY + ARROW_HEIGHT)
             ) {
                 success().category(BuiltinPlugin.CRAFTING)
             } else {
@@ -115,7 +105,7 @@ class ReiPlugin : REIClientPlugin {
             }
 
             override fun getScreenBounds(screen: RequestScreen<*>): Rectangle {
-                return Rectangle(screen.x - 22, screen.y, screen.backgroundWidth + 40, screen.backgroundHeight)
+                return screen.bounds(::Rectangle)
             }
         })
 
@@ -131,15 +121,7 @@ class ReiPlugin : REIClientPlugin {
                 val slot = context.screen.hoveredElement(pos.x.toDouble(), pos.y.toDouble()).orElse(null)
                     as? FilterSlotWidget ?: return DraggedAcceptorResult.PASS
 
-                val ctrlPressed = Screen.hasControlDown()
-                context.screen.screenHandler.filterSlotClick(slot.index, item, ctrlPressed)
-                c2s(Packets.FILTER_SLOT_CLICK) {
-                    int(context.screen.screenHandler.syncId)
-                    int(slot.index)
-                    stack(item)
-                    bool(ctrlPressed)
-                }
-
+                slot.setStack(item)
                 return DraggedAcceptorResult.CONSUMED
             }
 
@@ -147,26 +129,18 @@ class ReiPlugin : REIClientPlugin {
                 context: DraggingContext<FilterScreen<*>>,
                 stack: DraggableStack
             ): Stream<BoundsProvider> {
-                if (stack.stack.value !is ItemStack) return Stream.empty()
-
-                val screen = context.screen
-                val slotRect = Rectangle(screen.filterSlotX, screen.filterSlotY, 3 * 18, 3 * 18)
-                return Stream.of(BoundsProvider.ofRectangle(slotRect))
+                return if (stack.stack.value !is ItemStack) Stream.empty()
+                else Stream.of(BoundsProvider.ofRectangles(context.screen.filterSlots.map { it.bounds(::Rectangle) }))
             }
         })
     }
 
+    override fun preStage(manager: PluginManager<REIClientPlugin>?, stage: ReloadStage?) {
+        destroy()
+    }
+
     override fun postStage(manager: PluginManager<REIClientPlugin>?, stage: ReloadStage?) {
-        ReiAccess.exists = true
-
-        ReiAccess.setSearch = {
-            REIRuntime.getInstance().searchTextField?.text = it
-        }
-
-        ReiAccess.isDraggingStack = r@{
-            val overlay = REIRuntime.getInstance().overlay.orElse(null) ?: return@r false
-            return@r overlay.draggingContext.isDraggingStack
-        }
+        attach()
     }
 
 }

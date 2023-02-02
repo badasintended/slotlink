@@ -19,8 +19,7 @@ import net.minecraft.text.Text
 open class FilterScreen<H : FilterScreenHandler>(h: H, inventory: PlayerInventory, title: Text) :
     ModScreen<H>(h, inventory, title) {
 
-    var filterSlotX = 0
-    var filterSlotY = 0
+    val filterSlots = mutableListOf<FilterSlotWidget>()
 
     private var blacklist = handler.blacklist
 
@@ -34,11 +33,11 @@ open class FilterScreen<H : FilterScreenHandler>(h: H, inventory: PlayerInventor
         val x = x + 7
         val y = y + titleY + 11
 
-        filterSlotX = x + 3 * 18
-        filterSlotY = y
+        val filterSlotX = x + (3 * 18)
 
+        filterSlots.clear()
         for (i in 0 until 9) {
-            add(FilterSlotWidget(handler, i, filterSlotX + (i % 3) * 18, filterSlotY + (i / 3) * 18))
+            filterSlots += add(FilterSlotWidget(handler, i, filterSlotX + (i % 3) * 18, y + (i / 3) * 18))
         }
 
         add(ButtonWidget(x + 6 * 18 + 4, y + 20, 14, 14)) {
