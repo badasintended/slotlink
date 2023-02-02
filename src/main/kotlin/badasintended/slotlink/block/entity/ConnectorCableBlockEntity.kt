@@ -23,7 +23,7 @@ import net.minecraft.util.math.ChunkPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.WorldAccess
 
-@Suppress("DEPRECATION", "UnstableApiUsage")
+@Suppress("UnstableApiUsage")
 abstract class ConnectorCableBlockEntity(
     val block: ConnectorCableBlock,
     blockEntityType: BlockEntityType<out BlockEntity>,

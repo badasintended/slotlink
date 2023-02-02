@@ -5,7 +5,6 @@ import badasintended.slotlink.init.BlockEntityTypes
 import badasintended.slotlink.network.Network
 import badasintended.slotlink.network.Node
 import badasintended.slotlink.util.actionBar
-import net.fabricmc.fabric.api.block.BlockAttackInteractionAware
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -18,6 +17,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtList
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
+import net.minecraft.util.ActionResult
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
@@ -26,7 +26,7 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.world.WorldAccess
 
-class MasterBlock : ModBlock("master"), BlockAttackInteractionAware {
+class MasterBlock : ModBlock("master"), BlockAttackAware {
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = MasterBlockEntity(pos, state)
 
@@ -90,21 +90,21 @@ class MasterBlock : ModBlock("master"), BlockAttackInteractionAware {
         tooltip.add(Text.translatable("block.slotlink.master.tooltip").formatted(Formatting.GRAY))
     }
 
-    override fun onAttackInteraction(
+    override fun onBlockAttack(
         state: BlockState,
         world: World,
         pos: BlockPos,
         player: PlayerEntity,
         hand: Hand,
         direction: Direction
-    ): Boolean {
+    ): ActionResult {
         if (!player.isSpectator && player.isSneaking && player.getStackInHand(hand).isEmpty) {
             Network.get(world, pos)?.validate()
             if (!player.isCreative) player.playSound(SoundEvents.BLOCK_STONE_BREAK, 1.0f, 1.0f)
             player.actionBar("block.slotlink.master.revalidated")
-            return !world.isClient
+            return ActionResult.SUCCESS
         }
-        return false
+        return ActionResult.PASS
     }
 
 }
