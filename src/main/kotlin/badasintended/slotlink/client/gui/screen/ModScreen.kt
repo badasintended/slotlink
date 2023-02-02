@@ -1,8 +1,8 @@
 package badasintended.slotlink.client.gui.screen
 
-import badasintended.slotlink.client.compat.invsort.InventorySortButton
 import badasintended.slotlink.client.gui.widget.CharGrabber
 import badasintended.slotlink.client.gui.widget.KeyGrabber
+import badasintended.slotlink.compat.invsort.InventorySortButton
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.screen.ingame.HandledScreen
