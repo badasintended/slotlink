@@ -27,6 +27,7 @@ repositories {
     maven("https://maven.shedaniel.me/")
     maven("https://maven.terraformersmc.com/releases")
     maven("https://maven.blamejared.com/")
+    maven("https://ladysnake.jfrog.io/artifactory/mods")
 }
 
 dependencies {
@@ -37,6 +38,9 @@ dependencies {
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop["fabricApi"]}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop["fabricKotlin"]}")
+
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${prop["cca"]}")
+    modImplementation("dev.emi:trinkets:${prop["trinkets"]}")
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${prop["wthit"]}")
     modRuntimeOnly("mcp.mobius.waila:wthit:fabric-${prop["wthit"]}")

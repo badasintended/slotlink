@@ -75,6 +75,8 @@
   "item.slotlink.unlimited_remote.tooltip"     : "Remote that works on any distance on same dimension",
   "item.slotlink.multi_dim_remote"             : "Multi Dimensional Remote",
   "item.slotlink.multi_dim_remote.tooltip"     : "Remote that works on any distance on any dimension",
+  "key.slotlink.open_remote"                   : "Open Remote Storage",
+  "key.slotlink.open_remote.missing"           : "Couldn't find any remote in inventory",
   "waila.slotlink.network.key"                 : "Network",
   "waila.slotlink.network.value"               : "(%d, %d, %d)",
   "config.waila.plugin_slotlink"               : "Slotlink",
