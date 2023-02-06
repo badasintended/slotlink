@@ -6,6 +6,7 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.pow
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
@@ -36,9 +37,7 @@ fun IntArray.toPos(): BlockPos {
 }
 
 fun PlayerEntity.actionBar(key: String, vararg args: Any) {
-    if (this is ServerPlayerEntity) sendMessage(
-        Text.translatable(key, *args), true
-    )
+    sendMessage(Text.translatable(key, *args), true)
 }
 
 fun buf(): PacketByteBuf {
@@ -128,4 +127,8 @@ fun Int.toFormattedString(): String = when {
         val exp = (ln(this.toDouble()) / ln(1000.0)).toInt()
         String.format("%.1f%c", this / 1000.0.pow(exp.toDouble()), "KMGTPE"[exp - 1])
     }
+}
+
+inline fun modLoaded(modid: String, action: () -> Unit) {
+    if (FabricLoader.getInstance().isModLoaded(modid)) action()
 }

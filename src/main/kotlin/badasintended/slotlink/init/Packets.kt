@@ -1,6 +1,7 @@
 package badasintended.slotlink.init
 
 import badasintended.slotlink.block.entity.TransferCableBlockEntity
+import badasintended.slotlink.item.RemoteItem
 import badasintended.slotlink.recipe.fastRecipeManager
 import badasintended.slotlink.screen.ConnectorCableScreenHandler
 import badasintended.slotlink.screen.FilterScreenHandler
@@ -43,6 +44,7 @@ object Packets : Initializer {
     val FILTER_SETTINGS = modId("filter_settings")
     val PRIORITY_SETTINGS = modId("priority_settings")
     val TRANSFER_SETTINGS = modId("transfer_settings")
+    val OPEN_REMOTE = modId("open_remote")
 
     // S2C
     val UPDATE_SLOT_NUMBERS = modId("update_slot_numbers")
@@ -51,7 +53,7 @@ object Packets : Initializer {
     val UPDATE_CURSOR = modId("update_cursor")
 
     override fun main() {
-        s(SORT) { server, player, buf ->
+        registerServerReceiver(SORT) { server, player, buf ->
             val syncId = buf.int
             val sort = buf.enum<RequestScreenHandler.SortMode>()
             val filter = buf.string
@@ -64,7 +66,7 @@ object Packets : Initializer {
             }
         }
 
-        s(SCROLL) { server, player, buf ->
+        registerServerReceiver(SCROLL) { server, player, buf ->
             val syncId = buf.int
             val amount = buf.int
 
@@ -76,7 +78,7 @@ object Packets : Initializer {
             }
         }
 
-        s(MULTI_SLOT_ACTION) { server, player, buf ->
+        registerServerReceiver(MULTI_SLOT_ACTION) { server, player, buf ->
             val syncId = buf.int
             val index = buf.int
             val button = buf.int
@@ -90,7 +92,7 @@ object Packets : Initializer {
             }
         }
 
-        s(APPLY_RECIPE) { server, player, buf ->
+        registerServerReceiver(APPLY_RECIPE) { server, player, buf ->
             val syncId = buf.int
             val recipeId = buf.id
 
@@ -103,7 +105,7 @@ object Packets : Initializer {
             }
         }
 
-        s(CRAFTING_RESULT_SLOT_CLICK) { server, player, buf ->
+        registerServerReceiver(CRAFTING_RESULT_SLOT_CLICK) { server, player, buf ->
             val syncId = buf.int
             val button = buf.int
             val quickMove = buf.bool
@@ -116,7 +118,7 @@ object Packets : Initializer {
             }
         }
 
-        s(RESIZE) { server, player, buf ->
+        registerServerReceiver(RESIZE) { server, player, buf ->
             val syncId = buf.int
             val viewedHeight = buf.int
             val showCraftingGrid = buf.bool
@@ -129,7 +131,7 @@ object Packets : Initializer {
             }
         }
 
-        s(CLEAR_CRAFTING_GRID) { server, player, buf ->
+        registerServerReceiver(CLEAR_CRAFTING_GRID) { server, player, buf ->
             val syncId = buf.int
 
             server.execute {
@@ -140,7 +142,7 @@ object Packets : Initializer {
             }
         }
 
-        s(MOVE) { server, player, buf ->
+        registerServerReceiver(MOVE) { server, player, buf ->
             val syncId = buf.int
 
             server.execute {
@@ -151,7 +153,7 @@ object Packets : Initializer {
             }
         }
 
-        s(RESTOCK) { server, player, buf ->
+        registerServerReceiver(RESTOCK) { server, player, buf ->
             val syncId = buf.int
 
             server.execute {
@@ -162,7 +164,7 @@ object Packets : Initializer {
             }
         }
 
-        s(FILTER_SLOT_CLICK) { server, player, buf ->
+        registerServerReceiver(FILTER_SLOT_CLICK) { server, player, buf ->
             val syncId = buf.int
             val index = buf.int
             val stack = buf.stack
@@ -176,7 +178,7 @@ object Packets : Initializer {
             }
         }
 
-        s(FILTER_SETTINGS) { server, player, buf ->
+        registerServerReceiver(FILTER_SETTINGS) { server, player, buf ->
             val syncId = buf.int
             val blacklist = buf.bool
 
@@ -188,7 +190,7 @@ object Packets : Initializer {
             }
         }
 
-        s(PRIORITY_SETTINGS) { server, player, buf ->
+        registerServerReceiver(PRIORITY_SETTINGS) { server, player, buf ->
             val syncId = buf.int
             val priority = buf.int
 
@@ -200,7 +202,7 @@ object Packets : Initializer {
             }
         }
 
-        s(TRANSFER_SETTINGS) { server, player, buf ->
+        registerServerReceiver(TRANSFER_SETTINGS) { server, player, buf ->
             val syncId = buf.int
             val redstone = TransferCableBlockEntity.Mode.of(buf.int)
             val side = Direction.byId(buf.int)
@@ -213,11 +215,23 @@ object Packets : Initializer {
                 }
             }
         }
+
+        registerServerReceiver(OPEN_REMOTE) { server, player, buf ->
+            val slot = buf.int
+
+            server.execute {
+                val stack = player.inventory.getStack(slot)
+                val item = stack.item
+                if (item is RemoteItem) {
+                    item.use(player.world, player, stack, slot)
+                }
+            }
+        }
     }
 
     @Environment(EnvType.CLIENT)
     override fun client() {
-        c(UPDATE_SLOT_NUMBERS) { client, buf ->
+        registerClientReceiver(UPDATE_SLOT_NUMBERS) { client, buf ->
             val syncId = buf.int
             val total = buf.int
             val filled = buf.int
@@ -231,7 +245,7 @@ object Packets : Initializer {
             }
         }
 
-        c(UPDATE_CURSOR) { client, buf ->
+        registerClientReceiver(UPDATE_CURSOR) { client, buf ->
             val stack = buf.stack
 
             client.execute {
@@ -239,7 +253,7 @@ object Packets : Initializer {
             }
         }
 
-        c(UPDATE_MAX_SCROLL) { client, buf ->
+        registerClientReceiver(UPDATE_MAX_SCROLL) { client, buf ->
             val syncId = buf.int
             val maxScroll = buf.int
 
@@ -251,7 +265,7 @@ object Packets : Initializer {
             }
         }
 
-        c(UPDATE_VIEWED_STACK) { client, buf ->
+        registerClientReceiver(UPDATE_VIEWED_STACK) { client, buf ->
             val syncId = buf.int
             val index = buf.int
             val item = buf.item
@@ -267,7 +281,7 @@ object Packets : Initializer {
         }
     }
 
-    private inline fun s(
+    inline fun registerServerReceiver(
         id: Identifier,
         crossinline function: (MinecraftServer, ServerPlayerEntity, PacketByteBuf) -> Unit
     ) {
@@ -275,7 +289,7 @@ object Packets : Initializer {
     }
 
     @Environment(EnvType.CLIENT)
-    private inline fun c(id: Identifier, crossinline function: (MinecraftClient, PacketByteBuf) -> Unit) {
+    private inline fun registerClientReceiver(id: Identifier, crossinline function: (MinecraftClient, PacketByteBuf) -> Unit) {
         ClientPlayNetworking.registerGlobalReceiver(id) { client, _, buf, _ -> function(client, buf) }
     }
 
