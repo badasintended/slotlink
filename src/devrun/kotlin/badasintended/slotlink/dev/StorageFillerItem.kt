@@ -32,7 +32,10 @@ object StorageFillerItem : Item(ModItem.SETTINGS) {
         val storage = ItemStorage.SIDED.find(world, pos, Direction.UP)
         if (storage != null) Transaction.openOuter().use { transaction ->
             while (true) {
-                val item = Registries.ITEM.getRandom(world.random).get().value()
+                val item =
+                    if (!player.offHandStack.isEmpty) player.offHandStack.item
+                    else Registries.ITEM.getRandom(world.random).get().value()
+
                 if (storage.insert(ItemVariant.of(item), item.maxCount.toLong(), transaction) == 0L) break
             }
             transaction.commit()
