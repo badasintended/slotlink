@@ -4,9 +4,7 @@
   "package"           : "badasintended.slotlink.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins"            : [
-    "CraftingScreenHandlerAccessor",
-    "RecipeManagerAccessor",
-    "ServerWorldMixin",
+    "CraftingScreenHandlerAccessor", "PlayerEntityMixin", "RecipeManagerAccessor", "ServerWorldMixin",
     "WallMountedBlockMixin"
   ],
   "client"            : [
