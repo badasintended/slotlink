@@ -26,9 +26,9 @@
   },
   "mixins"       : ["slotlink.mixins.json"],
   "depends"      : {
-    "fabricloader"          : ">=0.13",
-    "minecraft"             : ">=1.19",
-    "fabric"                : ">=0.57",
+    "fabricloader"          : ">=0.14.11",
+    "minecraft"             : ">=1.19.3",
+    "fabric"                : ">=0.73",
     "fabric-language-kotlin": ">=1.7"
   }
 }
