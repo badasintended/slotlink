@@ -1,4 +1,4 @@
-package badasintended.slotlink.mixin.pseudo;
+package badasintended.slotlink.mixin.invsorter;
 
 import badasintended.slotlink.compat.invsort.InventorySortButton;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
