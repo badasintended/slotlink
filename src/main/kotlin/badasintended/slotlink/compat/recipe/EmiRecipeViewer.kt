@@ -49,7 +49,7 @@ class EmiRecipeViewer : RecipeViewer, EmiPlugin {
 
         registry.addStackProvider(RequestScreen::class.java) r@{ screen, _, _ ->
             hoveredStack(screen) {
-                return@r EmiStackInteraction(EmiStack.of(it.stack))
+                return@r EmiStackInteraction(EmiStack.of(it.stack), null, false)
             }
             EmiStackInteraction.EMPTY
         }
