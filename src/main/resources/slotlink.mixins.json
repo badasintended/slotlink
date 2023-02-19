@@ -4,17 +4,13 @@
   "package"           : "badasintended.slotlink.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins"            : [
-    "CraftingScreenHandlerAccessor",
-    "PlayerEntityMixin",
-    "RecipeManagerAccessor",
-    "ServerWorldMixin",
+    "CraftingScreenHandlerAccessor", "PlayerEntityMixin", "RecipeManagerAccessor", "ServerWorldMixin",
     "WallMountedBlockMixin"
   ],
   "client"            : [
     "HandledScreenAccessor",
     "TextFieldWidgetAccessor",
-    "emi.EmiRecipeFillerMixin",
-    "invsorter.SortButtonWidgetMixin"
+    "pseudo.SortButtonWidgetMixin"
   ],
   "injectors"         : {
     "defaultRequire": 1
