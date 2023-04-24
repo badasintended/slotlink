@@ -13,8 +13,8 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.network.Packet
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.network.packet.Packet
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.registry.tag.TagKey
 import net.minecraft.server.network.ServerPlayerEntity

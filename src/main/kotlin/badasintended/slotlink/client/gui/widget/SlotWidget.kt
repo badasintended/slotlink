@@ -32,7 +32,7 @@ abstract class SlotWidget<SH : ScreenHandler>(
 
     protected open fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
         client.apply {
-            itemRenderer.renderGuiItemOverlay(textRenderer, stack, stackX, stackY)
+            itemRenderer.renderGuiItemOverlay(matrices, textRenderer, stack, stackX, stackY)
         }
     }
 
@@ -56,7 +56,7 @@ abstract class SlotWidget<SH : ScreenHandler>(
 
     final override fun renderButton(matrices: MatrixStack, mouseX: Int, mouseY: Int, delta: Float) {
         if (!visible) return
-        client.itemRenderer.renderGuiItemIcon(stack, stackX, stackY)
+        client.itemRenderer.renderGuiItemIcon(matrices, stack, stackX, stackY)
         renderOverlay(matrices, stack)
     }
 

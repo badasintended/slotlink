@@ -80,5 +80,6 @@
   "waila.slotlink.network.key"                 : "Network",
   "waila.slotlink.network.value"               : "(%d, %d, %d)",
   "config.waila.plugin_slotlink"               : "Slotlink",
-  "config.waila.plugin_slotlink.show_network"  : "Show Network Details"
+  "config.waila.plugin_slotlink.show_network"  : "Show Network Details",
+  "trinkets.slot.chest.slotlink_remote"        : "slotlink remote"
 }

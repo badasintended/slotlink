@@ -15,7 +15,7 @@ object Items : Initializer {
 
     val GROUP = FabricItemGroup.builder(modId("group"))
         .icon { ItemStack(Blocks.MASTER) }
-        .entries { _, entries, _ ->
+        .entries { _, entries ->
             Blocks.BLOCKS.forEach { entries.add(ItemStack(it)) }
             ITEMS.forEach { entries.add(ItemStack(it)) }
         }

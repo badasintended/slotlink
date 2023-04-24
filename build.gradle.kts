@@ -8,8 +8,8 @@ import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.8.0")
-    kotlin("plugin.serialization").version("1.8.0")
+    kotlin("jvm").version("1.8.10")
+    kotlin("plugin.serialization").version("1.8.10")
 
     id("fabric-loom").version("1.1.+")
     id("com.matthewprenger.cursegradle").version("1.4.0")

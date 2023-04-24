@@ -2,8 +2,8 @@ package badasintended.slotlink.network
 
 import badasintended.slotlink.util.toArray
 import badasintended.slotlink.util.toPos
-import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtIntArray
 import net.minecraft.nbt.NbtList
 import net.minecraft.server.world.ServerWorld
@@ -23,12 +23,12 @@ class NetworkState : PersistentState() {
         fun create(world: ServerWorld, nbt: NbtCompound): NetworkState {
             return NetworkState().apply {
                 if (nbt.contains("networks")) {
-                    val networks = nbt.getList("networks", NbtType.COMPOUND)
+                    val networks = nbt.getList("networks", NbtElement.COMPOUND_TYPE.toInt())
                     networks.forEach { obj ->
                         obj as NbtCompound
                         val masterPos = obj.getIntArray("master").toPos()
                         map[masterPos] = Network(this, world, masterPos).also { network ->
-                            val posses = obj.getList("pos", NbtType.INT_ARRAY)
+                            val posses = obj.getList("pos", NbtElement.INT_ARRAY_TYPE.toInt())
                             posses.forEach { pos ->
                                 pos as NbtIntArray
                                 val arr = pos.intArray
