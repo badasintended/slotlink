@@ -46,10 +46,10 @@ class FilterSlotWidget(
         super.renderOverlay(matrices, stack)
 
         client.apply {
-            itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 1, y + 1, "")
+            itemRenderer.renderGuiItemOverlay(matrices, textRenderer, stack, x + 1, y + 1, "")
 
             matrices.wrap {
-                matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
+                matrices.translate(0.0, 0.0, 250.0)
                 fill(matrices, x + 1, y + 1, x + 17, y + 17, if (nbt) 0x70aa27ba else 0x408b8b8b)
                 if (nbt) {
                     textRenderer.drawWithShadow(

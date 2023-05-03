@@ -32,7 +32,7 @@ abstract class ConnectorCableBlockEntity(
     state: BlockState
 ) : FilteredBlockEntity(blockEntityType, nodeType, pos, state) {
 
-    private var apiCache: BlockApiCache<Storage<ItemVariant>, Direction>? = null
+    private var apiCache: BlockApiCache<Storage<ItemVariant>, Direction?>? = null
 
     private var linkedSide = state.getNull(ConnectorCableBlock.CONNECTED)
         set(value) {

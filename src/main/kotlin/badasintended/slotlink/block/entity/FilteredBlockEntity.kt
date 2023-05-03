@@ -6,12 +6,12 @@ import badasintended.slotlink.util.bool
 import badasintended.slotlink.util.to
 import badasintended.slotlink.util.writeFilter
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
-import net.fabricmc.fabric.api.util.NbtType
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
@@ -55,7 +55,7 @@ abstract class FilteredBlockEntity(
 
         blacklist = nbt.getBoolean("isBlacklist")
         val filterTag = nbt.getCompound("filter")
-        val list = filterTag.getList("Items", NbtType.COMPOUND)
+        val list = filterTag.getList("Items", NbtElement.COMPOUND_TYPE.toInt())
 
         list.forEach {
             it as NbtCompound

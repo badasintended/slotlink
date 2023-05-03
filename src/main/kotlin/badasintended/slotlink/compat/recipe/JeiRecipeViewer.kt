@@ -155,21 +155,21 @@ class JeiRecipeViewer : RecipeViewer, IModPlugin {
 
     private inner class FilterGhostIngredientHandler : IGhostIngredientHandler<FilterScreen<*>> {
 
-        override fun <I : Any?> getTargets(
+        override fun <I : Any?> getTargetsTyped(
             gui: FilterScreen<*>,
-            ingredient: I,
+            ingredient: ITypedIngredient<I>,
             doStart: Boolean
         ): MutableList<IGhostIngredientHandler.Target<I>> {
-            return if (ingredient is ItemStack)
+            return if (ingredient.itemStack.isPresent)
                 gui.filterSlots.mapTo(mutableListOf()) { slot ->
                     object : IGhostIngredientHandler.Target<I> {
                         override fun getArea(): Rect2i {
                             return slot.bounds(::Rect2i)
                         }
 
-                        override fun accept(ingredient: I) {
-                            if (ingredient is ItemStack) {
-                                slot.setStack(ingredient)
+                        override fun accept(ingredient2: I) {
+                            if (ingredient2 is ItemStack) {
+                                slot.setStack(ingredient2)
                             }
                         }
                     }

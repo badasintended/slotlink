@@ -491,7 +491,7 @@ open class RequestScreenHandler(
             if (optional.isPresent) {
                 val craftingRecipe = optional.get()
                 if (result.shouldCraftRecipe(player.world, player, craftingRecipe)) {
-                    stack = craftingRecipe.craft(input)
+                    stack = craftingRecipe.craft(input, player.world.registryManager)
                 }
             }
             result.setStack(0, stack)
@@ -610,7 +610,7 @@ open class RequestScreenHandler(
 
     override fun getType(): ScreenHandlerType<*> = Screens.REQUEST
 
-    override fun close(player: PlayerEntity) {
+    override fun onClosed(player: PlayerEntity?) {
         if (player !is ServerPlayerEntity) return
 
         if (!cursorStack.isEmpty) if (player.isAlive && !player.isDisconnected) {

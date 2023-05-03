@@ -38,7 +38,7 @@ class MultiSlotWidget(
 
     override fun renderOverlay(matrices: MatrixStack, stack: ItemStack) {
         client.apply {
-            itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 1, y + 1, "")
+            itemRenderer.renderGuiItemOverlay(matrices, textRenderer, stack, x + 1, y + 1, "")
 
             val factor = window.scaleFactor.toFloat()
             val scale = (1 / factor) * ceil(factor / 2)
@@ -46,7 +46,7 @@ class MultiSlotWidget(
             val countText = if (count <= 1) "" else count.toFormattedString()
 
             matrices.wrap {
-                matrices.translate(0.0, 0.0, itemRenderer.zOffset + 200.0)
+                matrices.translate(0.0, 0.0, 250.0)
                 matrices.scale(scale, scale, 1f)
                 textRenderer.drawWithShadow(
                     matrices, countText, ((x + 17 - (textRenderer.getWidth(countText) * scale)) / scale),

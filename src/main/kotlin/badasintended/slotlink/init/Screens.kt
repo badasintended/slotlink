@@ -15,13 +15,14 @@ import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
+import net.minecraft.resource.featuretoggle.FeatureSet
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.client.gui.screen.ingame.HandledScreens.register as r
 
 object Screens : Initializer {
 
-    val REQUEST = ScreenHandlerType(::RequestScreenHandler)
+    val REQUEST = ScreenHandlerType(::RequestScreenHandler, FeatureSet.empty())
     val REMOTE = ExtendedScreenHandlerType(::RemoteScreenHandler)
     val FILTER = ExtendedScreenHandlerType(::FilterScreenHandler)
     val CONNECTOR_CABLE = ExtendedScreenHandlerType(::ConnectorCableScreenHandler)

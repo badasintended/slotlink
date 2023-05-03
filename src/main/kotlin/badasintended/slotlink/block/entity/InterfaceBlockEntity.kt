@@ -21,7 +21,7 @@ class InterfaceBlockEntity(pos: BlockPos, state: BlockState) :
     FilteredBlockEntity(BlockEntityTypes.INTERFACE, NodeType.INTERFACE, pos, state) {
 
     @Suppress("UNUSED_PARAMETER")
-    fun getStorage(unused: Direction): FilteredItemStorage {
+    fun getStorage(unused: Direction?): FilteredItemStorage {
         world?.also { world ->
             val master = network?.master ?: return FilteredItemStorage.EMPTY
             val storages = master.getStorages(world, flag)
