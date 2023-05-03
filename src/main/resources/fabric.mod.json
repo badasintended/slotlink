@@ -8,6 +8,7 @@
   "contributors" : [
     "Adirelle",
     "Imbarainbow",
+    "qixils",
     "StarskyXIII"
   ],
   "contact"      : {
@@ -28,7 +29,7 @@
   "depends"      : {
     "fabricloader"          : ">=0.14.19",
     "minecraft"             : ">=1.19.4",
-    "fabric"                : ">=0.75.3",
+    "fabric-api"            : ">=0.75.3",
     "fabric-language-kotlin": ">=1.9.2"
   }
 }

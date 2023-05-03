@@ -559,7 +559,7 @@ ij_kotlin_wrap_elvis_expressions                                                
 ij_kotlin_wrap_expression_body_functions                                             = 1
 ij_kotlin_wrap_first_method_in_call_chain                                            = false
 
-[{*.har, *.json, mcmod.info, pack.mcmeta}]
+[{*.json, mcmod.info, pack.mcmeta}]
 indent_size                         = 2
 tab_width                           = 2
 ij_continuation_indent_size         = 2
